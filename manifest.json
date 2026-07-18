@@ -1,7 +1,7 @@
 {
   "name": "門市電子核銷系統",
   "short_name": "門市核銷",
-  "start_url": "./index.html",
+  "start_url": "/pos-system/index.html",
   "display": "standalone",
   "background_color": "#f3f4f6",
   "theme_color": "#3b82f6",
