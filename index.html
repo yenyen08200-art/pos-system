@@ -24,6 +24,12 @@
     button { background-color: #2563eb; color: white; border: none; font-weight: bold; cursor: pointer; transition: 0.2s; }
     button:active { background-color: #1d4ed8; }
     button:disabled { background-color: #9ca3af; cursor: not-allowed; border: none; }
+    
+    /* 🌟 新增：iOS 專屬防呆教學彈窗樣式 */
+    #ios-prompt { display: none; position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background-color: white; padding: 16px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); width: 85%; max-width: 350px; text-align: center; z-index: 1000; border: 2px solid #3b82f6; }
+    .ios-prompt-text { font-size: 15px; color: #1f2937; margin-bottom: 10px; line-height: 1.5; }
+    .ios-close-btn { background: #e5e7eb; color: #4b5563; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: bold; width: auto; margin: 0;}
+    .arrow-down { position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 10px solid transparent; border-right: 10px solid transparent; border-top: 10px solid #3b82f6; }
   </style>
 </head>
 <body>
@@ -65,9 +71,31 @@
   </div>
 </div>
 
+<!-- 🌟 新增：iOS 專屬防呆教學彈窗 -->
+<div id="ios-prompt">
+  <div class="ios-prompt-text">
+    💡 <strong>店員第一次使用請注意：</strong><br>
+    請點擊螢幕下方的 <span style="font-size: 1.2em;">⬆️</span> (分享)<br>
+    並選擇 <strong>「加入主畫面」</strong><br>
+    即可變成全螢幕核銷 App 喔！
+  </div>
+  <button class="ios-close-btn" onclick="document.getElementById('ios-prompt').style.display='none'">我知道了</button>
+  <div class="arrow-down"></div>
+</div>
+
 <script>
-  // 🌟 將這裡替換成你剛剛複製的最新 Google Apps Script 發布網址！
   var API_URL = "https://script.google.com/macros/s/AKfycbyteRoiXgX3h9dpU325M0mg--jNEy1ayfpRPGmXebEEn3Q2Tq37yGNmXiShcrOQqyCm/exec"; 
+
+  // 🌟 新增：自動偵測手機型號與狀態
+  window.onload = function() {
+    var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    var isStandalone = window.navigator.standalone === true;
+    
+    // 如果是蘋果手機，而且「還沒加到桌面」，就顯示提示框
+    if (isIOS && !isStandalone) {
+      document.getElementById('ios-prompt').style.display = 'block';
+    }
+  };
 
   function searchCoupon() {
     var phone = document.getElementById('search-input').value.trim();
