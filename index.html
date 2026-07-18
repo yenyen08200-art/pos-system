@@ -1,17 +1,18 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-TW">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
   <title>門市電子核銷系統</title>
-  <!-- 啟動 PWA 支援 -->
-  <link rel="manifest" href="manifest.json">
   
-  <!-- 針對 Apple iOS 系統的專屬設定 -->
+  <!-- 🌟 PWA 與蘋果 iOS 強制全螢幕標籤 (這裡絕對不能少) -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="門市核銷">
   <link rel="apple-touch-icon" href="icon.png">
+
   <style>
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: #f3f4f6; margin: 0; padding: 20px; display: flex; justify-content: center; }
     .card { background: white; padding: 24px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%; max-width: 400px; text-align: center; }
@@ -25,7 +26,7 @@
     button:active { background-color: #1d4ed8; }
     button:disabled { background-color: #9ca3af; cursor: not-allowed; border: none; }
     
-    /* 🌟 新增：iOS 專屬防呆教學彈窗樣式 */
+    /* iOS 專屬防呆教學彈窗樣式 */
     #ios-prompt { display: none; position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background-color: white; padding: 16px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); width: 85%; max-width: 350px; text-align: center; z-index: 1000; border: 2px solid #3b82f6; }
     .ios-prompt-text { font-size: 15px; color: #1f2937; margin-bottom: 10px; line-height: 1.5; }
     .ios-close-btn { background: #e5e7eb; color: #4b5563; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: bold; width: auto; margin: 0;}
@@ -71,7 +72,6 @@
   </div>
 </div>
 
-<!-- 🌟 新增：iOS 專屬防呆教學彈窗 -->
 <div id="ios-prompt">
   <div class="ios-prompt-text">
     💡 <strong>店員第一次使用請注意：</strong><br>
@@ -84,14 +84,13 @@
 </div>
 
 <script>
+  // 已經幫你保留原本的 API_URL
   var API_URL = "https://script.google.com/macros/s/AKfycbyteRoiXgX3h9dpU325M0mg--jNEy1ayfpRPGmXebEEn3Q2Tq37yGNmXiShcrOQqyCm/exec"; 
 
-  // 🌟 新增：自動偵測手機型號與狀態
   window.onload = function() {
     var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-    var isStandalone = window.navigator.standalone === true;
+    var isStandalone = window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
     
-    // 如果是蘋果手機，而且「還沒加到桌面」，就顯示提示框
     if (isIOS && !isStandalone) {
       document.getElementById('ios-prompt').style.display = 'block';
     }
