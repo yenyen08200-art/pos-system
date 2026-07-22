@@ -187,8 +187,8 @@
       { facingMode: "environment" }, 
       { fps: 10, qrbox: { width: 250, height: 250 } },
       (decodedText, decodedResult) => {
-        // 🌟 核心防呆：不管掃到什麼，把 tel: 、空白鍵跟橫線通通拔掉
-        var cleanPhone = decodedText.replace(/^tel:/i, '').replace(/[\s-]/g, '').trim();
+        // 🌟 核心防呆：終極過濾，只保留「數字」，其他所有英文字母和符號通通砍掉！
+        var cleanPhone = decodedText.replace(/\D/g, '');
         
         document.getElementById('search-input').value = cleanPhone;
         stopScanner();
