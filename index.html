@@ -12,6 +12,9 @@
   <meta name="apple-mobile-web-app-title" content="門市核銷">
   <link rel="apple-touch-icon" href="icon.png">
 
+  <!-- 🌟 匯入業界最強大的 HTML5 條碼掃描套件 -->
+  <script src="https://unpkg.com/html5-qrcode"></script>
+
   <style>
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: #f3f4f6; margin: 0; padding: 20px; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; }
     .container { width: 100%; max-width: 400px; }
@@ -28,9 +31,13 @@
     button:active { background-color: #1d4ed8; }
     button:disabled { background-color: #9ca3af; cursor: not-allowed; border: none; }
     
-    /* 反悔按鈕樣式 */
     .undo-btn { background-color: #f59e0b; color: white; margin-top: 10px; font-size: 15px; }
     .undo-btn:active { background-color: #d97706; }
+
+    /* 掃描器專屬樣式 */
+    #reader-container { display: none; margin-bottom: 20px; border: 2px solid #3b82f6; border-radius: 8px; overflow: hidden; background: #000; }
+    #reader { width: 100%; }
+    .scan-cancel-btn { background-color: #ef4444; border-radius: 0; margin-bottom: 0; font-size: 14px; padding: 10px; }
 
     #ios-prompt { display: none; position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background-color: white; padding: 16px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); width: 85%; max-width: 350px; text-align: center; z-index: 1000; border: 2px solid #3b82f6; }
     .ios-prompt-text { font-size: 15px; color: #1f2937; margin-bottom: 10px; line-height: 1.5; }
@@ -67,9 +74,17 @@
       </select>
     </div>
 
+    <!-- 🌟 更新：搜尋列加入「相機掃描」按鈕 -->
     <div style="display: flex; gap: 8px; margin-bottom: 20px;">
       <input type="tel" id="search-input" placeholder="請輸入顧客手機" style="flex: 1; margin-bottom: 0; border: 2px solid #d1d5db;">
+      <button onclick="startScanner()" style="width: auto; background-color: #374151; padding: 0 16px; margin-bottom: 0; font-size: 18px;" title="開啟相機掃描">📷</button>
       <button onclick="searchCoupon()" style="width: auto; margin-bottom: 0; background-color: #10b981;">查詢</button>
+    </div>
+
+    <!-- 🌟 新增：相機畫面顯示區塊 -->
+    <div id="reader-container">
+      <div id="reader"></div>
+      <button class="scan-cancel-btn" onclick="stopScanner()">取消掃描</button>
     </div>
 
     <div id="loading" style="color: #6b7280; display: none; margin-bottom: 20px;">資料連線中，請稍候...</div>
@@ -87,7 +102,6 @@
         <button id="redeem-btn" onclick="submitRedeem()">確認核銷 (點擊後即失效)</button>
       </div>
       
-      <!-- 🌟 新增：撤銷反悔區塊 -->
       <div id="undo-area" style="display:none;">
         <button id="undo-btn" class="undo-btn" onclick="undoRedeem()">
           Oops! 按錯了，撤銷核銷 (<span id="undo-timer">5</span>s)
@@ -109,7 +123,7 @@
 </div>
 
 <script>
-  // ⚠️ 請保留原本正確的 API_URL
+  // ⚠️ 請填入你自己的 API_URL 
   var API_URL = "https://script.google.com/macros/s/AKfycbyteRoiXgX3h9dpU325M0mg--jNEy1ayfpRPGmXebEEn3Q2Tq37yGNmXiShcrOQqyCm/exec"; 
 
   const storeEventMap = {
@@ -124,7 +138,8 @@
     "屏車門市": ["父親節社群活動", "社群抽獎"]
   };
 
-  var undoInterval = null; // 控制倒數計時的變數
+  var undoInterval = null; 
+  let html5QrCode; // 宣告掃描器變數
 
   window.onload = function() {
     var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
@@ -164,6 +179,51 @@
     localStorage.setItem("pos_store", store);
   }
 
+  // 🌟 新增：開啟相機掃描
+  function startScanner() {
+    document.getElementById('reader-container').style.display = 'block';
+    
+    // 如果還沒初始化掃描器，就建立一個
+    if (!html5QrCode) {
+      html5QrCode = new Html5Qrcode("reader");
+    }
+    
+    // 開啟後置鏡頭
+    html5QrCode.start(
+      { facingMode: "environment" }, 
+      { fps: 10, qrbox: { width: 250, height: 250 } },
+      (decodedText, decodedResult) => {
+        // 🎉 掃描成功時執行：
+        // 1. 把掃到的文字(電話)填入輸入框
+        document.getElementById('search-input').value = decodedText.trim();
+        // 2. 關閉相機
+        stopScanner();
+        // 3. 自動幫店員按下「查詢」按鈕
+        searchCoupon(); 
+      },
+      (errorMessage) => {
+        // 掃描中會一直觸發錯誤(沒對到焦時)，直接忽略不處理
+      }
+    ).catch((err) => {
+      alert("無法開啟相機！請確認手機是否已允許瀏覽器使用相機權限。");
+      document.getElementById('reader-container').style.display = 'none';
+    });
+  }
+
+  // 🌟 新增：關閉相機掃描
+  function stopScanner() {
+    if (html5QrCode && html5QrCode.isScanning) {
+      html5QrCode.stop().then(ignore => {
+        document.getElementById('reader-container').style.display = 'none';
+      }).catch(err => {
+        console.log("關閉相機失敗", err);
+      });
+    } else {
+      document.getElementById('reader-container').style.display = 'none';
+    }
+  }
+
+  // ================= 查詢與核銷邏輯 =================
   function searchCoupon() {
     var phone = document.getElementById('search-input').value.trim();
     var store = document.getElementById('global-store-select').value;
@@ -173,10 +233,8 @@
     if (!activity) return alert("⚠️ 請選擇要核銷的活動！");
     if (!phone) return alert("⚠️ 請輸入顧客手機號碼！");
 
-    // 清除可能還在跑的計時器跟反悔按鈕
     clearInterval(undoInterval);
     document.getElementById('undo-area').style.display = 'none';
-
     document.getElementById('content').style.display = 'none';
     document.getElementById('loading').style.display = 'block';
 
@@ -243,7 +301,7 @@
       .then(result => {
         if (result.status === "success") {
           updateUI({ status: "已兌換", time: new Date().getTime(), store: store });
-          startUndoTimer(); // 🌟 啟動反悔倒數
+          startUndoTimer(); 
         } else if (result.status === "error_already_redeemed") {
           alert("⚠️ 錯誤：這張券剛剛已被兌換過！");
           searchCoupon(); 
@@ -260,7 +318,6 @@
       });
   }
 
-  // 🌟 新增：開始倒數計時與顯示反悔按鈕
   function startUndoTimer() {
     var undoArea = document.getElementById('undo-area');
     var undoTimer = document.getElementById('undo-timer');
@@ -278,18 +335,17 @@
       
       if (timeLeft <= 0) {
         clearInterval(undoInterval);
-        undoArea.style.display = 'none'; // 時間到，隱藏按鈕
+        undoArea.style.display = 'none'; 
       }
     }, 1000);
   }
 
-  // 🌟 新增：執行撤銷動作
   function undoRedeem() {
     var activity = document.getElementById('activity-select').value;
     var id = document.getElementById('id-text').innerText; 
     var undoBtn = document.getElementById('undo-btn');
     
-    clearInterval(undoInterval); // 停止倒數
+    clearInterval(undoInterval); 
     undoBtn.disabled = true;
     undoBtn.innerText = "資料復原中...";
 
@@ -301,7 +357,7 @@
         if (result.status === "success") {
           document.getElementById('undo-area').style.display = 'none';
           alert("✅ 已成功撤銷核銷！");
-          searchCoupon(); // 復原成功後，自動重新查詢一次該號碼
+          searchCoupon(); 
         } else {
           alert("撤銷失敗，請聯絡總部處理。");
           document.getElementById('undo-area').style.display = 'none';
