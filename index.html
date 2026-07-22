@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
   <title>門市電子核銷系統</title>
   
-  <!-- 🌟 PWA 與蘋果 iOS 強制全螢幕標籤 (這裡絕對不能少) -->
+  <!-- PWA 與蘋果 iOS 強制全螢幕標籤 -->
   <link rel="manifest" href="manifest.json">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -14,14 +14,17 @@
   <link rel="apple-touch-icon" href="icon.png">
 
   <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: #f3f4f6; margin: 0; padding: 20px; display: flex; justify-content: center; }
-    .card { background: white; padding: 24px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%; max-width: 400px; text-align: center; }
-    h2 { color: #1f2937; margin-bottom: 16px; font-size: 22px; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: #f3f4f6; margin: 0; padding: 20px; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; }
+    .container { width: 100%; max-width: 400px; }
+    .store-header { background: #374151; color: white; padding: 15px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+    .card { background: white; padding: 24px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-align: center; }
+    h2 { color: #1f2937; margin-top: 0; margin-bottom: 16px; font-size: 22px; }
     .status-box { padding: 12px; border-radius: 8px; font-weight: bold; margin: 16px 0; font-size: 18px; }
     .unclaimed { background-color: #d1fae5; color: #065f46; border: 2px solid #34d399; }
     .claimed { background-color: #fee2e2; color: #991b1b; border: 2px solid #f87171; }
     .info { text-align: left; background: #f9fafb; padding: 12px; border-radius: 6px; font-size: 15px; color: #4b5563; margin-bottom: 20px; line-height: 1.6; border: 1px solid #e5e7eb; }
     select, button, input { width: 100%; padding: 14px; border-radius: 6px; border: 1px solid #d1d5db; font-size: 16px; margin-bottom: 12px; box-sizing: border-box; }
+    select { background-color: white; }
     button { background-color: #2563eb; color: white; border: none; font-weight: bold; cursor: pointer; transition: 0.2s; }
     button:active { background-color: #1d4ed8; }
     button:disabled { background-color: #9ca3af; cursor: not-allowed; border: none; }
@@ -35,43 +38,61 @@
 </head>
 <body>
 
-<div class="card">
-  <h2>🎁 專屬電子兌換券</h2>
-  
-  <div style="display: flex; gap: 8px; margin-bottom: 20px;">
-    <input type="tel" id="search-input" placeholder="請輸入顧客手機" style="flex: 1; margin-bottom: 0; border: 2px solid #3b82f6;">
-    <button onclick="searchCoupon()" style="width: auto; margin-bottom: 0; background-color: #10b981;">查詢</button>
+<div class="container">
+  <!-- 🌟 新增：全域門市設定 (獨立於主卡片之外) -->
+  <div class="store-header">
+    <label style="display:block; font-weight:bold; margin-bottom: 8px;">📍 今日值班門市設定：</label>
+    <select id="global-store-select" onchange="updateActivities(); saveStore();" style="margin-bottom: 0; border: none;">
+      <option value="">請選擇您所在的門市...</option>
+      <option value="嘉義門市">嘉義門市</option>
+      <option value="台南門市">台南門市</option>
+      <option value="高雄門市">高雄門市</option>
+      <option value="成功門市">成功門市</option>
+      <option value="安醫門市">安醫門市</option>
+      <option value="三井門市">三井門市</option>
+      <option value="三多門市">三多門市</option>
+      <option value="台鋁門市">台鋁門市</option>
+      <option value="義享門市">義享門市</option>
+      <option value="左車門市">左車門市</option>
+      <option value="屏車門市">屏車門市</option>
+    </select>
   </div>
 
-  <div id="loading" style="color: #6b7280; display: none; margin-bottom: 20px;">資料連線中，請稍候...</div>
-  
-  <div id="content" style="display:none;">
-    <div class="info">
-      <strong>📱 兌換手機：</strong> <span id="id-text" style="color: #111827; font-weight: bold;"></span><br>
-      <strong>👤 顧客姓名：</strong> <span id="name-text" style="color: #111827; font-weight: bold;"></span>
+  <div class="card">
+    <h2>🎁 電子兌換券核銷</h2>
+    
+    <!-- 🌟 新增：智能連動活動選單 -->
+    <div style="text-align: left; margin-bottom: 15px;">
+      <label style="font-weight: bold; color: #374151; font-size: 14px;">🎯 選擇顧客要兌換的活動：</label>
+      <select id="activity-select" style="border: 2px solid #3b82f6; margin-top: 6px; background-color: #eff6ff;">
+        <option value="">請先在上方選擇門市</option>
+      </select>
     </div>
 
-    <div id="status-badge" class="status-box"></div>
-    <div id="redeem-details" class="info" style="display:none; background: #fef2f2; border-color: #fecaca;"></div>
+    <div style="display: flex; gap: 8px; margin-bottom: 20px;">
+      <input type="tel" id="search-input" placeholder="請輸入顧客手機" style="flex: 1; margin-bottom: 0; border: 2px solid #d1d5db;">
+      <button onclick="searchCoupon()" style="width: auto; margin-bottom: 0; background-color: #10b981;">查詢</button>
+    </div>
 
-    <div id="action-area">
-      <label style="display:block; text-align:left; margin-bottom: 6px; font-weight:bold; font-size:14px; color:#374151;">店員核銷專區 (請選擇所在門市)：</label>
-      <select id="store-select">
-        <option value="嘉義門市">嘉義門市</option>
-        <option value="成功門市">成功門市</option>
-        <option value="安醫門市">安醫門市</option>
-        <option value="三井門市">三井門市</option>
-        <option value="三多門市">三多門市</option>
-        <option value="台鋁門市">台鋁門市</option>
-        <option value="義享門市">義享門市</option>
-        <option value="左車門市">左車門市</option>
-        <option value="屏車門市">屏車門市</option>
-      </select>
-      <button id="redeem-btn" onclick="submitRedeem()">確認核銷 (點擊後即失效)</button>
+    <div id="loading" style="color: #6b7280; display: none; margin-bottom: 20px;">資料連線中，請稍候...</div>
+    
+    <div id="content" style="display:none;">
+      <div class="info">
+        <strong>📱 兌換手機：</strong> <span id="id-text" style="color: #111827; font-weight: bold;"></span><br>
+        <strong>👤 顧客姓名：</strong> <span id="name-text" style="color: #111827; font-weight: bold;"></span>
+      </div>
+
+      <div id="status-badge" class="status-box"></div>
+      <div id="redeem-details" class="info" style="display:none; background: #fef2f2; border-color: #fecaca;"></div>
+
+      <div id="action-area">
+        <button id="redeem-btn" onclick="submitRedeem()">確認核銷 (點擊後即失效)</button>
+      </div>
     </div>
   </div>
 </div>
 
+<!-- iOS 專屬防呆教學彈窗 -->
 <div id="ios-prompt">
   <div class="ios-prompt-text">
     💡 <strong>店員第一次使用請注意：</strong><br>
@@ -84,30 +105,88 @@
 </div>
 
 <script>
-  // 已經幫你保留原本的 API_URL
+  // ⚠️ 請保留你原本正確的 API_URL，不要去動它
   var API_URL = "https://script.google.com/macros/s/AKfycbyteRoiXgX3h9dpU325M0mg--jNEy1ayfpRPGmXebEEn3Q2Tq37yGNmXiShcrOQqyCm/exec"; 
+
+  // 🌟 核心防呆大絕招：門市與活動的對照表
+  // 你可以隨時在這邊手動新增、修改或刪除各門市的專屬活動名稱！
+  const storeEventMap = {
+    "高雄門市": ["名單", "父親節社群活動"],
+    "台南門市": ["名單", "父親節社群活動"],
+    "嘉義門市": ["名單", "父親節社群活動"],
+    "成功門市": ["名單", "父親節社群活動"],
+    "安醫門市": ["名單", "父親節社群活動"],
+    "三井門市": ["名單", "父親節社群活動"],
+    "三多門市": ["名單", "父親節社群活動"],
+    "台鋁門市": ["名單", "父親節社群活動"],
+    "義享門市": ["名單", "父親節社群活動"],
+    "左車門市": ["名單", "父親節社群活動"],
+    "屏車門市": ["名單", "父親節社群活動"]
+  };
 
   window.onload = function() {
     var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
     var isStandalone = window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
-    
     if (isIOS && !isStandalone) {
       document.getElementById('ios-prompt').style.display = 'block';
     }
+
+    // 🌟 貼心功能：自動讀取上次選擇的門市
+    var savedStore = localStorage.getItem("pos_store");
+    if(savedStore) {
+      document.getElementById('global-store-select').value = savedStore;
+    }
+    updateActivities(); // 初始化活動選單
   };
+
+  // 當切換門市時，自動更新下方的活動選單
+  function updateActivities() {
+    var store = document.getElementById('global-store-select').value;
+    var activitySelect = document.getElementById('activity-select');
+    activitySelect.innerHTML = ""; 
+    
+    if(!store || !storeEventMap[store]) {
+      activitySelect.innerHTML = "<option value=''>請先在上方選擇門市</option>";
+      return;
+    }
+    
+    var activities = storeEventMap[store];
+    activities.forEach(function(act) {
+      var opt = document.createElement('option');
+      opt.value = act;
+      opt.innerHTML = act;
+      activitySelect.appendChild(opt);
+    });
+  }
+
+  // 把店員選擇的門市存進手機記憶體
+  function saveStore() {
+    var store = document.getElementById('global-store-select').value;
+    localStorage.setItem("pos_store", store);
+  }
 
   function searchCoupon() {
     var phone = document.getElementById('search-input').value.trim();
-    if (!phone) return alert("請先輸入手機號碼！");
+    var store = document.getElementById('global-store-select').value;
+    var activity = document.getElementById('activity-select').value;
+
+    if (!store) return alert("⚠️ 請先在最上方選擇「今日值班門市」！");
+    if (!activity) return alert("⚠️ 請選擇要核銷的活動！");
+    if (!phone) return alert("⚠️ 請輸入顧客手機號碼！");
 
     document.getElementById('content').style.display = 'none';
     document.getElementById('loading').style.display = 'block';
 
-    fetch(API_URL + "?action=check&id=" + phone)
+    // 🌟 關鍵：把活動名稱 (sheet) 參數一起傳給後端
+    var url = API_URL + "?action=check&id=" + phone + "&sheet=" + encodeURIComponent(activity);
+
+    fetch(url)
       .then(response => response.json())
       .then(result => {
         document.getElementById('loading').style.display = 'none';
-        if (!result.exists) return alert("❌ 找不到此手機號碼！");
+        if (!result.exists) {
+          return alert(result.error || "❌ 在【" + activity + "】名單中找不到此手機號碼！");
+        }
         
         document.getElementById('content').style.display = 'block';
         document.getElementById('id-text').innerText = phone;
@@ -145,16 +224,19 @@
   }
 
   function submitRedeem() {
-    var store = document.getElementById('store-select').value;
-    var btn = document.getElementById('redeem-btn');
+    var store = document.getElementById('global-store-select').value;
+    var activity = document.getElementById('activity-select').value;
     var id = document.getElementById('id-text').innerText; 
+    var btn = document.getElementById('redeem-btn');
     
-    if(!confirm("確定要在「" + store + "」進行核銷嗎？")) return;
+    if(!confirm("確定要在「" + store + "」核銷【" + activity + "】的優惠嗎？")) return;
     
     btn.disabled = true;
     btn.innerText = "核銷處理中...";
     
-    fetch(API_URL + "?action=redeem&id=" + id + "&store=" + store)
+    var url = API_URL + "?action=redeem&id=" + id + "&store=" + encodeURIComponent(store) + "&sheet=" + encodeURIComponent(activity);
+
+    fetch(url)
       .then(response => response.json())
       .then(result => {
         if (result.status === "success") {
