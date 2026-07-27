@@ -75,6 +75,23 @@
   // ⚠️ 已經幫你保留你的 API 網址
   var API_URL = "https://script.google.com/macros/s/AKfycbyteRoiXgX3h9dpU325M0mg--jNEy1ayfpRPGmXebEEn3Q2Tq37yGNmXiShcrOQqyCm/exec";
 
+  // 🌟 網頁一打開，立刻檢查瀏覽器是否已經有領券紀錄！
+  window.onload = function() {
+    var savedPhone = localStorage.getItem("pos_saved_phone");
+    var savedAct = localStorage.getItem("pos_saved_act");
+    // 如果曾經領過，而且活動名稱相同，直接鎖死表單，跳出舊憑證！
+    if (savedPhone && savedAct === document.getElementById('activity').value) {
+      alert("💡 系統偵測到此瀏覽器已經領取過「" + savedAct + "」囉！為您顯示專屬憑證。");
+      document.getElementById('form-section').style.display = 'none';
+      document.getElementById('ticket-card').style.display = 'block';
+      document.getElementById('res-act').innerText = savedAct;
+      document.getElementById('res-name').innerText = localStorage.getItem("pos_saved_name") || "忠實顧客";
+      document.getElementById('res-social').innerText = localStorage.getItem("pos_saved_social") || "";
+      document.getElementById('res-phone').innerText = savedPhone;
+      document.getElementById('qr-code-img').src = "https://quickchart.io/qr?text=" + savedPhone + "&size=200&margin=1&dark=92400e";
+    }
+  };
+
   function register() {
     var act = document.getElementById('activity').value;
     var name = document.getElementById('name').value.trim();
@@ -108,6 +125,13 @@
           if (result.status === "already_registered") {
             alert("💡 系統偵測到此手機號碼之前已經登記過囉！為您顯示原本的領券條碼。");
           }
+          
+          // 🌟 成功寫入後，立刻把記憶刻入瀏覽器底層，按 F5 永久鎖定！
+          localStorage.setItem("pos_saved_phone", phone);
+          localStorage.setItem("pos_saved_act", act);
+          localStorage.setItem("pos_saved_name", result.name || name);
+          localStorage.setItem("pos_saved_social", result.social_id || socialId);
+
           document.getElementById('form-section').style.display = 'none';
           document.getElementById('ticket-card').style.display = 'block';
           
