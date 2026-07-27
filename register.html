@@ -70,7 +70,7 @@
 </div>
 
 <script>
-  // ⚠️ 請務必換成你自己的後端 API_URL！
+  // ⚠️ 已經幫你保留你原本的 API_URL
   var API_URL = "https://script.google.com/macros/s/AKfycbyteRoiXgX3h9dpU325M0mg--jNEy1ayfpRPGmXebEEn3Q2Tq37yGNmXiShcrOQqyCm/exec";
 
   function register() {
@@ -79,17 +79,23 @@
     var phone = document.getElementById('phone').value.trim();
     var btn = document.getElementById('btn');
 
-    // 簡單的防呆審查
     if (!name) return alert("⚠️ 請輸入您的姓名！");
     if (!phone || phone.length < 8) return alert("⚠️ 請輸入正確的手機號碼！");
     
-    // 把非數字的文字過濾掉
     phone = phone.replace(/\D/g, '');
 
     btn.disabled = true;
     btn.innerText = "資料寫入與生成條碼中...";
 
-    var url = API_URL + "?action=register&id=" + phone + "&name=" + encodeURIComponent(name) + "&sheet=" + encodeURIComponent(act);
+    // 🌟 終極防護：採用標準 URLSearchParams，絕對保證 action=register 指令 100% 送達！
+    var baseUrl = API_URL.split('?')[0]; 
+    var params = new URLSearchParams({
+      "action": "register",
+      "id": phone,
+      "name": name,
+      "sheet": act
+    });
+    var url = baseUrl + "?" + params.toString();
 
     fetch(url)
       .then(response => response.json())
@@ -98,26 +104,23 @@
           if (result.status === "already_registered") {
             alert("💡 系統偵測到此手機號碼之前已經登記過囉！為您顯示原本的領券條碼。");
           }
-          // 成功後：隱藏表單，顯示專屬憑證卡！
           document.getElementById('form-section').style.display = 'none';
           document.getElementById('ticket-card').style.display = 'block';
           
-          // 填入憑證卡資料
           document.getElementById('res-act').innerText = act;
           document.getElementById('res-name').innerText = result.name || name;
           document.getElementById('res-phone').innerText = phone;
           
-          // 呼叫免費 API 自動畫出 QR Code
           var qrUrl = "https://quickchart.io/qr?text=" + phone + "&size=200&margin=1&dark=92400e";
           document.getElementById('qr-code-img').src = qrUrl;
         } else {
-          alert(result.error || "登記失敗，請稍後再試！");
+          alert("登記提示：系統回傳異常 (" + JSON.stringify(result) + ")");
           btn.disabled = false;
           btn.innerText = "立即生成領券條碼";
         }
       })
       .catch(error => {
-        alert("連線發生問題，請檢查網路狀態！");
+        alert("連線發生問題，請檢查網路狀態！錯誤描述：" + error);
         btn.disabled = false;
         btn.innerText = "立即生成領券條碼";
       });
