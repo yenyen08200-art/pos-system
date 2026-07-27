@@ -46,8 +46,9 @@
     <label>📱 手機號碼 (核對與防重複)：</label>
     <input type="tel" id="phone" placeholder="例：0912345678" maxlength="10" required>
 
-    <label>🔑 活動通關密語 (請見官方訊息)：</label>
-    <input type="text" id="secret_code" placeholder="例：TFC55" required style="text-transform: uppercase;">
+    <!-- 🌟 新增：鑰匙孔！讓客人填寫活動密語 -->
+    <label>🔑 活動通關密語 (請見官方貼文)：</label>
+    <input type="text" id="secret_code" placeholder="例：DAD88" required style="text-transform: uppercase;">
 
     <button id="btn" class="submit-btn" onclick="register()">立即生成領券條碼</button>
   </div>
@@ -78,11 +79,10 @@
   // ⚠️ 已經幫你保留你的 API 網址
   var API_URL = "https://script.google.com/macros/s/AKfycbyteRoiXgX3h9dpU325M0mg--jNEy1ayfpRPGmXebEEn3Q2Tq37yGNmXiShcrOQqyCm/exec";
 
-  // 🌟 網頁一打開，立刻檢查瀏覽器是否已經有領券紀錄！
+  // 🌟 F5 指紋鎖：網頁一打開，立刻檢查瀏覽器是否已經有領券紀錄！
   window.onload = function() {
     var savedPhone = localStorage.getItem("pos_saved_phone");
     var savedAct = localStorage.getItem("pos_saved_act");
-    // 如果曾經領過，而且活動名稱相同，直接鎖死表單，跳出舊憑證！
     if (savedPhone && savedAct === document.getElementById('activity').value) {
       alert("💡 系統偵測到此瀏覽器已經領取過「" + savedAct + "」囉！為您顯示專屬憑證。");
       document.getElementById('form-section').style.display = 'none';
@@ -95,28 +95,34 @@
     }
   };
 
+  // 🌟 主管點擊送出的核心大函數
   function register() {
     var act = document.getElementById('activity').value;
     var name = document.getElementById('name').value.trim();
     var socialId = document.getElementById('social_id').value.trim();
     var phone = document.getElementById('phone').value.trim();
-    var btn = document.getElementById('btn');
+    var secretCode = document.getElementById('secret_code').value.trim(); // 👉 你問的第一段：在這裡抓取密語！
 
+    // 👉 你問的第一段：在這裡檢查密語有沒有填！
     if (!name) return alert("⚠️ 請輸入您的社群名字！");
     if (!socialId) return alert("⚠️ 請輸入您的社群帳號 ID！");
+    if (!secretCode) return alert("⚠️ 請輸入活動通關密語！"); 
     if (!phone || phone.length < 8) return alert("⚠️ 請輸入正確的手機號碼！");
     
     phone = phone.replace(/\D/g, '');
 
+    var btn = document.getElementById('btn');
     btn.disabled = true;
     btn.innerText = "資料寫入與生成條碼中...";
 
     var baseUrl = API_URL.split('?')[0]; 
+    // 👉 你問的第二段：在這裡把 "code": secretCode 一起打包送出去！
     var params = new URLSearchParams({
       "action": "register",
       "id": phone,
       "name": name,
-      "social_id": socialId, // 🌟 新增把「社群帳號 ID」一起打包送過來
+      "social_id": socialId, 
+      "code": secretCode, 
       "sheet": act
     });
     var url = baseUrl + "?" + params.toString();
@@ -126,10 +132,9 @@
       .then(result => {
         if (result.status === "success" || result.status === "already_registered") {
           if (result.status === "already_registered") {
-            alert("💡 系統偵測到此手機號碼之前已經登記過囉！為您顯示原本的領券條碼。");
+            alert("💡 系統偵測到此手機號碼或社群帳號之前已經登記過囉！為您顯示原本的領券條碼。");
           }
           
-          // 🌟 成功寫入後，立刻把記憶刻入瀏覽器底層，按 F5 永久鎖定！
           localStorage.setItem("pos_saved_phone", phone);
           localStorage.setItem("pos_saved_act", act);
           localStorage.setItem("pos_saved_name", result.name || name);
@@ -146,7 +151,8 @@
           var qrUrl = "https://quickchart.io/qr?text=" + phone + "&size=200&margin=1&dark=92400e";
           document.getElementById('qr-code-img').src = qrUrl;
         } else {
-          alert("登記提示：系統回傳異常 (" + JSON.stringify(result) + ")");
+          // 如果後端發現通關密語錯了，就會在這裡跳出警告提示！
+          alert(result.error || "登記提示：系統回傳異常 (" + JSON.stringify(result) + ")");
           btn.disabled = false;
           btn.innerText = "立即生成領券條碼";
         }
