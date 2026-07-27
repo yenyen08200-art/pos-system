@@ -24,7 +24,7 @@
     .status-box { padding: 12px; border-radius: 8px; font-weight: bold; margin: 16px 0; font-size: 18px; }
     .unclaimed { background-color: #d1fae5; color: #065f46; border: 2px solid #34d399; }
     .claimed { background-color: #fee2e2; color: #991b1b; border: 2px solid #f87171; }
-    .info { text-align: left; background: #f9fafb; padding: 12px; border-radius: 6px; font-size: 15px; color: #4b5563; margin-bottom: 20px; line-height: 1.6; border: 1px solid #e5e7eb; }
+    .info { text-align: left; background: #f9fafb; padding: 12px; border-radius: 6px; font-size: 15px; color: #4b5563; margin-bottom: 20px; line-height: 1.8; border: 1px solid #e5e7eb; }
     select, button, input { width: 100%; padding: 14px; border-radius: 6px; border: 1px solid #d1d5db; font-size: 16px; margin-bottom: 12px; box-sizing: border-box; }
     select { background-color: white; }
     button { background-color: #2563eb; color: white; border: none; font-weight: bold; cursor: pointer; transition: 0.2s; }
@@ -89,7 +89,9 @@
     <div id="content" style="display:none;">
       <div class="info">
         <strong>📱 兌換手機：</strong> <span id="id-text" style="color: #111827; font-weight: bold;"></span><br>
-        <strong>👤 顧客姓名：</strong> <span id="name-text" style="color: #111827; font-weight: bold;"></span>
+        <strong>👤 顧客姓名：</strong> <span id="name-text" style="color: #111827; font-weight: bold;"></span><br>
+        <!-- 🌟 新增：讓店員能一秒看見客人的社群帳號！ -->
+        <strong>🔗 社群帳號：</strong> <span id="social-text" style="color: #2563eb; font-weight: bold;"></span>
       </div>
 
       <div id="status-badge" class="status-box"></div>
@@ -120,7 +122,7 @@
 </div>
 
 <script>
-  // ⚠️ 請填入你自己的 API_URL 
+  // ⚠️ 已保留你的 API 網址 
   var API_URL = "https://script.google.com/macros/s/AKfycbyteRoiXgX3h9dpU325M0mg--jNEy1ayfpRPGmXebEEn3Q2Tq37yGNmXiShcrOQqyCm/exec"; 
 
   const storeEventMap = {
@@ -187,9 +189,7 @@
       { facingMode: "environment" }, 
       { fps: 10, qrbox: { width: 250, height: 250 } },
       (decodedText, decodedResult) => {
-        // 🌟 核心防呆：終極過濾，只保留「數字」，其他所有英文字母和符號通通砍掉！
         var cleanPhone = decodedText.replace(/\D/g, '');
-        
         document.getElementById('search-input').value = cleanPhone;
         stopScanner();
         searchCoupon(); 
@@ -239,7 +239,9 @@
         
         document.getElementById('content').style.display = 'block';
         document.getElementById('id-text').innerText = phone;
-        document.getElementById('name-text').innerText = result.name;
+        document.getElementById('name-text').innerText = result.name || "未提供";
+        // 🌟 新增：把大腦抓回來的社群帳號印在畫面上！
+        document.getElementById('social-text').innerText = result.social_id || "未提供";
         updateUI(result);
       })
       .catch(error => {
