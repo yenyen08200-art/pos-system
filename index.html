@@ -12,7 +12,6 @@
   <meta name="apple-mobile-web-app-title" content="門市核銷">
   <link rel="apple-touch-icon" href="icon.png">
 
-  <!-- HTML5 條碼掃描套件 -->
   <script src="https://unpkg.com/html5-qrcode"></script>
 
   <style>
@@ -84,13 +83,12 @@
       <button class="scan-cancel-btn" onclick="stopScanner()">取消掃描</button>
     </div>
 
-    <div id="loading" style="color: #6b7280; display: none; margin-bottom: 20px;">資料連線中，請稍候...</div>
+    <div id="loading" style="color: #6b7280; display: none; margin-bottom: 20px;">🚀 資料連線中，請稍候...</div>
     
     <div id="content" style="display:none;">
       <div class="info">
         <strong>📱 兌換手機：</strong> <span id="id-text" style="color: #111827; font-weight: bold;"></span><br>
         <strong>👤 顧客姓名：</strong> <span id="name-text" style="color: #111827; font-weight: bold;"></span><br>
-        <!-- 🌟 新增：讓店員能一秒看見客人的社群帳號！ -->
         <strong>🔗 社群帳號：</strong> <span id="social-text" style="color: #2563eb; font-weight: bold;"></span>
       </div>
 
@@ -110,19 +108,8 @@
   </div>
 </div>
 
-<div id="ios-prompt">
-  <div class="ios-prompt-text">
-    💡 <strong>店員第一次使用請注意：</strong><br>
-    請點擊螢幕下方的 <span style="font-size: 1.2em;">⬆️</span> (分享)<br>
-    並選擇 <strong>「加入主畫面」</strong><br>
-    即可變成全螢幕核銷 App 喔！
-  </div>
-  <button class="ios-close-btn" onclick="document.getElementById('ios-prompt').style.display='none'">我知道了</button>
-  <div class="arrow-down"></div>
-</div>
-
 <script>
-  // ⚠️ 已保留你的 API 網址 
+  // ⚠️ 已經保留你的 API 網址 
   var API_URL = "https://script.google.com/macros/s/AKfycbyteRoiXgX3h9dpU325M0mg--jNEy1ayfpRPGmXebEEn3Q2Tq37yGNmXiShcrOQqyCm/exec"; 
 
   const storeEventMap = {
@@ -141,12 +128,6 @@
   let html5QrCode; 
 
   window.onload = function() {
-    var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-    var isStandalone = window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
-    if (isIOS && !isStandalone) {
-      document.getElementById('ios-prompt').style.display = 'block';
-    }
-
     var savedStore = localStorage.getItem("pos_store");
     if(savedStore) {
       document.getElementById('global-store-select').value = savedStore;
@@ -158,12 +139,10 @@
     var store = document.getElementById('global-store-select').value;
     var activitySelect = document.getElementById('activity-select');
     activitySelect.innerHTML = ""; 
-    
     if(!store || !storeEventMap[store]) {
       activitySelect.innerHTML = "<option value=''>請先在上方選擇門市</option>";
       return;
     }
-    
     var activities = storeEventMap[store];
     activities.forEach(function(act) {
       var opt = document.createElement('option');
@@ -180,11 +159,7 @@
 
   function startScanner() {
     document.getElementById('reader-container').style.display = 'block';
-    
-    if (!html5QrCode) {
-      html5QrCode = new Html5Qrcode("reader");
-    }
-    
+    if (!html5QrCode) html5QrCode = new Html5Qrcode("reader");
     html5QrCode.start(
       { facingMode: "environment" }, 
       { fps: 10, qrbox: { width: 250, height: 250 } },
@@ -196,18 +171,14 @@
       },
       (errorMessage) => {}
     ).catch((err) => {
-      alert("無法開啟相機！請確認手機是否已允許瀏覽器使用相機權限。");
+      alert("無法開啟相機！請確認手機權限。");
       document.getElementById('reader-container').style.display = 'none';
     });
   }
 
   function stopScanner() {
     if (html5QrCode && html5QrCode.isScanning) {
-      html5QrCode.stop().then(ignore => {
-        document.getElementById('reader-container').style.display = 'none';
-      }).catch(err => {
-        console.log("關閉相機失敗", err);
-      });
+      html5QrCode.stop().then(ignore => { document.getElementById('reader-container').style.display = 'none'; });
     } else {
       document.getElementById('reader-container').style.display = 'none';
     }
@@ -227,25 +198,24 @@
     document.getElementById('content').style.display = 'none';
     document.getElementById('loading').style.display = 'block';
 
-    var url = API_URL + "?action=check&id=" + phone + "&sheet=" + encodeURIComponent(activity);
+    // 🌟 關鍵修復 1：加入 &t=時間戳記，打破 iOS 快取詛咒！
+    var url = API_URL + "?action=check&id=" + phone + "&sheet=" + encodeURIComponent(activity) + "&t=" + new Date().getTime();
 
-    fetch(url)
+    fetch(url, { method: 'GET', redirect: 'follow' })
       .then(response => response.json())
       .then(result => {
         document.getElementById('loading').style.display = 'none';
-        if (!result.exists) {
-          return alert(result.error || "❌ 在【" + activity + "】名單中找不到此手機號碼！");
-        }
+        if (!result.exists) return alert(result.error || "❌ 在名單中找不到此手機號碼！");
         
         document.getElementById('content').style.display = 'block';
         document.getElementById('id-text').innerText = phone;
         document.getElementById('name-text').innerText = result.name || "未提供";
-        // 🌟 新增：把大腦抓回來的社群帳號印在畫面上！
         document.getElementById('social-text').innerText = result.social_id || "未提供";
         updateUI(result);
       })
       .catch(error => {
-        alert("資料庫連線失敗，請檢查網路狀態。");
+        // 🌟 把錯誤印出來，不再死的不明不白
+        alert("查詢逾時！請確認網路狀態，或直接重整頁面試試。\n(錯誤代碼：" + error.message + ")");
         document.getElementById('loading').style.display = 'none';
       });
   }
@@ -255,9 +225,8 @@
     var actionArea = document.getElementById('action-area');
     var details = document.getElementById('redeem-details');
     var btn = document.getElementById('redeem-btn');
-    var currentStatus = result.status || "";
 
-    if (currentStatus === "已兌換") {
+    if (result.status === "已兌換") {
       badge.className = "status-box claimed";
       badge.innerText = "❌ 此券已被兌換";
       actionArea.style.display = 'none'; 
@@ -285,9 +254,10 @@
     btn.disabled = true;
     btn.innerText = "核銷處理中...";
     
-    var url = API_URL + "?action=redeem&id=" + id + "&store=" + encodeURIComponent(store) + "&sheet=" + encodeURIComponent(activity);
+    // 🌟 關鍵修復 2：加入 &t=時間戳記，確保 iOS 每次都發送新的核銷指令！
+    var url = API_URL + "?action=redeem&id=" + id + "&store=" + encodeURIComponent(store) + "&sheet=" + encodeURIComponent(activity) + "&t=" + new Date().getTime();
 
-    fetch(url)
+    fetch(url, { method: 'GET', redirect: 'follow' })
       .then(response => response.json())
       .then(result => {
         if (result.status === "success") {
@@ -303,7 +273,8 @@
         }
       })
       .catch(error => {
-        alert("寫入失敗，請檢查網路狀態。");
+        // 🌟 針對 iOS 的保護機制：如果依然逾時，但大腦可能已經寫入了
+        alert("⚠️ 網路回傳似乎卡住了，但資料可能已核銷成功！請點擊上方綠色「查詢」按鈕重新整理狀態。");
         btn.disabled = false;
         btn.innerText = "確認核銷 (點擊後即失效)";
       });
@@ -313,21 +284,14 @@
     var undoArea = document.getElementById('undo-area');
     var undoTimer = document.getElementById('undo-timer');
     var undoBtn = document.getElementById('undo-btn');
-    
     undoArea.style.display = 'block';
     undoBtn.disabled = false;
     undoBtn.innerHTML = 'Oops! 按錯了，撤銷核銷 (<span id="undo-timer">5</span>s)';
-    
     var timeLeft = 5;
-    
     undoInterval = setInterval(function() {
       timeLeft--;
       document.getElementById('undo-timer').innerText = timeLeft;
-      
-      if (timeLeft <= 0) {
-        clearInterval(undoInterval);
-        undoArea.style.display = 'none'; 
-      }
+      if (timeLeft <= 0) { clearInterval(undoInterval); undoArea.style.display = 'none'; }
     }, 1000);
   }
 
@@ -335,14 +299,14 @@
     var activity = document.getElementById('activity-select').value;
     var id = document.getElementById('id-text').innerText; 
     var undoBtn = document.getElementById('undo-btn');
-    
     clearInterval(undoInterval); 
     undoBtn.disabled = true;
     undoBtn.innerText = "資料復原中...";
 
-    var url = API_URL + "?action=undo&id=" + id + "&sheet=" + encodeURIComponent(activity);
+    // 🌟 關鍵修復 3：加入 &t=時間戳記
+    var url = API_URL + "?action=undo&id=" + id + "&sheet=" + encodeURIComponent(activity) + "&t=" + new Date().getTime();
 
-    fetch(url)
+    fetch(url, { method: 'GET', redirect: 'follow' })
       .then(response => response.json())
       .then(result => {
         if (result.status === "success") {
@@ -355,7 +319,7 @@
         }
       })
       .catch(error => {
-        alert("連線失敗，請檢查網路狀態。");
+        alert("連線逾時，請按查詢重整狀態。");
         document.getElementById('undo-area').style.display = 'none';
       });
   }
