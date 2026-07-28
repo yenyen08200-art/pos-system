@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-  <title>VIP 專屬領券系統</title>
+  <title>VIP 輕奢專屬領券系統</title>
   
   <link rel="manifest" href="manifest.json">
   <meta name="mobile-web-app-capable" content="yes">
@@ -17,23 +17,23 @@
 
   <style>
     :root {
-      --neon-blue: #00f2fe;
-      --neon-green: #00ff87;
-      --neon-gold: #ffcc00;
-      --neon-red: #ff0844;
-      --bg-dark: #0b0f19;
-      --card-dark: #131b2e;
-      --ticket-dark: #1c263f;
-      --text-main: #f8fafc;
-      --text-sub: #94a3b8;
+      --bg-main: #f5f0eb;       /* 溫柔燕麥奶茶底色 */
+      --card-bg: #ffffff;       /* 溫潤純白厚卡質地 */
+      --ticket-bg: #faf7f2;     /* 奶油米白憑證底色 */
+      --text-main: #4a3b32;     /* 深焙濃縮咖啡黑 (極致清晰) */
+      --text-sub: #8c7a6b;      /* 溫柔伯爵茶灰 */
+      --accent: #c48b71;        /* 玫瑰焦糖泰奶色 (高質感 CTA) */
+      --accent-dark: #a86f56;   /* 按壓深焦糖色 */
+      --border-color: #e6dfd5;  /* 柔和邊框色 */
+      --alert-red: #d9777f;     /* 溫柔玫瑰紅 (警示專用) */
     }
 
     body { 
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
-      background-color: var(--bg-dark); 
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif; 
+      background-color: var(--bg-main); 
       background-image: 
-        radial-gradient(at 15% 15%, rgba(255, 204, 0, 0.08) 0px, transparent 50%),
-        radial-gradient(at 85% 85%, rgba(0, 242, 254, 0.08) 0px, transparent 50%);
+        radial-gradient(at 10% 10%, rgba(196, 139, 113, 0.08) 0px, transparent 60%),
+        radial-gradient(at 90% 90%, rgba(140, 122, 107, 0.08) 0px, transparent 60%);
       color: var(--text-main);
       margin: 0; 
       padding: 16px; 
@@ -46,85 +46,84 @@
     
     .container { width: 100%; max-width: 420px; }
 
-    /* 🌌 頂部迎賓導航列 */
+    /* 🌿 韓系簡約精品導航橫幅 */
     .header-banner {
-      background: rgba(19, 27, 46, 0.8);
-      backdrop-filter: blur(12px);
-      padding: 18px;
-      border-radius: 18px;
+      background: var(--card-bg);
+      padding: 22px 18px;
+      border-radius: 20px;
       text-align: center;
       margin-bottom: 20px;
-      border: 1px solid rgba(255, 204, 0, 0.3);
-      box-shadow: 0 10px 30px -10px rgba(255, 204, 0, 0.2);
+      border: 1px solid var(--border-color);
+      box-shadow: 0 10px 25px -5px rgba(74, 59, 50, 0.05);
     }
-    h1 { color: var(--neon-gold); font-size: 22px; margin: 0 0 6px 0; font-weight: 900; letter-spacing: 1px; text-shadow: 0 0 15px rgba(255, 204, 0, 0.3); }
-    .subtitle { color: var(--text-sub); font-size: 14px; margin: 0; line-height: 1.5; }
+    h1 { color: var(--text-main); font-size: 22px; margin: 0 0 6px 0; font-weight: 850; letter-spacing: 1px; }
+    .subtitle { color: var(--text-sub); font-size: 14px; margin: 0; line-height: 1.5; font-weight: 500; }
 
-    /* 🛡️ 主卡片視覺 */
+    /* 🛡️ 主卡片視覺 (法式厚卡紙感) */
     .card { 
-      background: var(--card-dark); 
-      padding: 24px 20px; 
+      background: var(--card-bg); 
+      padding: 26px 22px; 
       border-radius: 24px; 
-      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.6); 
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 20px 40px -10px rgba(74, 59, 50, 0.08); 
+      border: 1px solid var(--border-color);
       position: relative;
     }
 
-    label { display: block; text-align: left; font-weight: 800; color: var(--text-sub); margin-bottom: 6px; font-size: 14px; letter-spacing: 0.5px; }
+    label { display: block; text-align: left; font-weight: 750; color: var(--text-main); margin-bottom: 8px; font-size: 14px; letter-spacing: 0.5px; }
     
     input, select { 
-      width: 100%; padding: 16px; border-radius: 14px; border: 2px solid rgba(255, 255, 255, 0.1); 
-      background: rgba(11, 15, 25, 0.9); color: white; font-size: 16px; font-weight: bold;
+      width: 100%; padding: 16px; border-radius: 14px; border: 2px solid var(--border-color); 
+      background: #fcfbf9; color: var(--text-main); font-size: 16px; font-weight: 700;
       margin-bottom: 18px; box-sizing: border-box; transition: all 0.25s ease; outline: none;
     }
-    input::placeholder { color: #475569; font-weight: normal; }
-    input:focus { border-color: var(--neon-blue); box-shadow: 0 0 15px rgba(0, 242, 254, 0.2); }
+    input::placeholder { color: #bcaaa0; font-weight: 400; }
+    input:focus, select:focus { border-color: var(--accent); background: #ffffff; box-shadow: 0 0 0 4px rgba(196, 139, 113, 0.15); }
     
-    #activity { background: rgba(19, 27, 46, 0.9); border-color: var(--neon-gold); color: var(--neon-gold); }
-    #activity option { background: white; color: #0f172a; }
+    #activity { background-color: #faf7f2; border-color: #d8cca6; color: var(--text-main); }
+    #activity option { background: white; color: var(--text-main); }
 
-    /* 🔑 獨立高亮通關密語框 */
-    .secret-box { background: rgba(255, 204, 0, 0.05); padding: 12px; border-radius: 16px; border: 1px dashed rgba(255, 204, 0, 0.4); margin-bottom: 20px; }
-    .secret-box label { color: var(--neon-gold); }
-    #secret_code { border-color: var(--neon-gold); margin-bottom: 0; text-transform: uppercase; letter-spacing: 2px; text-align: center; font-size: 18px; color: var(--neon-gold); }
+    /* 🔑 玫瑰焦糖通關密語框 */
+    .secret-box { background: #faf7f2; padding: 14px; border-radius: 16px; border: 1.5px dashed #d8cca6; margin-bottom: 22px; }
+    .secret-box label { color: var(--accent-dark); }
+    #secret_code { border-color: #d8cca6; background: white; margin-bottom: 0; text-transform: uppercase; letter-spacing: 3px; text-align: center; font-size: 18px; color: var(--accent-dark); }
 
-    /* ⚡ 霓虹送出按鈕 */
+    /* 🧋 玫瑰焦糖送出按鈕 */
     .submit-btn { 
-      background: linear-gradient(135deg, var(--neon-gold), #ff9900); 
-      color: #000; border: none; padding: 18px; width: 100%; border-radius: 14px; 
-      font-size: 18px; font-weight: 900; cursor: pointer; letter-spacing: 1px;
-      box-shadow: 0 0 25px rgba(255, 204, 0, 0.4); transition: all 0.2s ease;
+      background: linear-gradient(135deg, var(--accent), var(--accent-dark)); 
+      color: white; border: none; padding: 18px; width: 100%; border-radius: 16px; 
+      font-size: 17px; font-weight: 800; cursor: pointer; letter-spacing: 1px;
+      box-shadow: 0 8px 20px -4px rgba(196, 139, 113, 0.4); transition: all 0.2s ease;
     }
-    .submit-btn:active { transform: scale(0.97); }
-    .submit-btn:disabled { background: #334155 !important; color: #64748b !important; box-shadow: none !important; cursor: not-allowed; transform: none; }
+    .submit-btn:active { transform: scale(0.98); box-shadow: 0 4px 10px -2px rgba(196, 139, 113, 0.3); }
+    .submit-btn:disabled { background: #dcd5cd !important; color: #8c7a6b !important; box-shadow: none !important; cursor: not-allowed; transform: none; }
     
-    /* 🎟️ 尊榮曜石黑「電子憑證卡」設計 */
+    /* 🎟️ 輕奢精品「電子憑證卡」設計 */
     #ticket-card { display: none; text-align: center; }
     
     .ticket-box {
-      background: var(--ticket-dark); border: 1px solid rgba(255, 204, 0, 0.4); border-radius: 20px;
-      padding: 24px 18px; margin: 15px 0; position: relative;
-      box-shadow: 0 15px 35px rgba(0,0,0,0.5), inset 0 0 20px rgba(255, 204, 0, 0.05);
+      background: var(--ticket-bg); border: 1.5px solid #e3d8c8; border-radius: 20px;
+      padding: 26px 18px; margin: 15px 0; position: relative;
+      box-shadow: 0 10px 25px -5px rgba(74, 59, 50, 0.06);
     }
-    /* 打孔切角 */
+    /* 左右打孔切角 (完美對齊燕麥底色) */
     .ticket-box::before, .ticket-box::after {
-      content: ""; position: absolute; top: 62%; width: 24px; height: 24px;
-      background-color: var(--card-dark); border: 1px solid rgba(255, 204, 0, 0.4); border-radius: 50%;
+      content: ""; position: absolute; top: 60%; width: 24px; height: 24px;
+      background-color: var(--card-bg); border: 1.5px solid #e3d8c8; border-radius: 50%;
     }
     .ticket-box::before { left: -14px; border-left-color: transparent; border-top-color: transparent; transform: rotate(45deg); }
     .ticket-box::after { right: -14px; border-right-color: transparent; border-bottom-color: transparent; transform: rotate(45deg); }
 
-    .qr-img { width: 190px; height: 190px; margin: 15px auto; border: 8px solid white; border-radius: 16px; box-shadow: 0 0 25px rgba(255, 204, 0, 0.3); display: block; }
-    .highlight-text { font-size: 17px; font-weight: 900; color: var(--neon-gold); letter-spacing: 1px; margin: 10px 0 15px 0; text-shadow: 0 0 10px rgba(255, 204, 0, 0.3); }
+    .qr-img { width: 190px; height: 190px; margin: 15px auto; border: 8px solid white; border-radius: 16px; box-shadow: 0 8px 20px rgba(74, 59, 50, 0.08); display: block; }
+    .highlight-text { font-size: 16px; font-weight: 850; color: var(--accent-dark); letter-spacing: 1px; margin: 12px 0 18px 0; }
     
-    .info-list { text-align: left; border-top: 2px dashed rgba(255, 255, 255, 0.15); padding-top: 18px; display: flex; flex-direction: column; gap: 12px; }
+    .info-list { text-align: left; border-top: 1.5px dashed #d8cca6; padding-top: 18px; display: flex; flex-direction: column; gap: 12px; }
     .info-row { display: flex; justify-content: space-between; font-size: 15px; }
-    .info-row strong { color: var(--text-sub); width: 90px; }
-    .info-row span { color: white; font-weight: 800; text-align: right; word-break: break-all; }
-    #res-phone { color: var(--neon-gold); font-family: monospace; font-size: 18px !important; }
+    .info-row strong { color: var(--text-sub); width: 90px; font-weight: 600; }
+    .info-row span { color: var(--text-main); font-weight: 800; text-align: right; word-break: break-all; }
+    #res-phone { color: var(--accent-dark); font-family: monospace; font-size: 18px !important; }
 
-    .screenshot-notice { background: rgba(255, 8, 68, 0.2); border: 1px solid var(--neon-red); color: #ff8f9c; padding: 12px; border-radius: 12px; font-weight: 900; font-size: 15px; margin-bottom: 15px; animation: pulse 1.5s infinite; letter-spacing: 0.5px; }
-    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+    .screenshot-notice { background: #fdf2f2; border: 1px solid var(--alert-red); color: var(--alert-red); padding: 12px; border-radius: 14px; font-weight: 800; font-size: 15px; margin-bottom: 18px; animation: pulse 2s infinite; letter-spacing: 0.5px; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
   </style>
 </head>
 <body>
@@ -132,8 +131,8 @@
 <div class="container">
   <!-- 👉 頂部橫幅 -->
   <div class="header-banner">
-    <h1>👑 VIP 專屬終端領券系統</h1>
-    <p class="subtitle">完成活動通關驗證，立即生成「雷射加密領獎憑證」</p>
+    <h1>✨ VIP 輕奢專屬禮遇</h1>
+    <p class="subtitle">完成活動通關驗證，立即領取您的限時專屬憑證</p>
   </div>
 
   <div class="card">
@@ -154,35 +153,35 @@
       <label>📱 聯絡手機號碼 (防重複驗證)</label>
       <input type="tel" id="phone" placeholder="例：0912345678" maxlength="10" required>
 
-      <!-- 🌟 專屬霓虹黃金鑰匙孔！ -->
+      <!-- 🌟 專屬玫瑰焦糖鑰匙孔！ -->
       <div class="secret-box">
         <label>🔑 活動專屬通關密語</label>
         <input type="text" id="secret_code" placeholder="請填入官方公告密語" required>
       </div>
 
-      <button id="btn" class="submit-btn" onclick="register()">⚡ 立即驗證並生成憑證</button>
+      <button id="btn" class="submit-btn" onclick="register()">✨ 立即驗證並生成憑證</button>
     </div>
 
-    <!-- 👉 步驟二：科幻數位憑證卡區塊 -->
+    <!-- 👉 步驟二：輕奢厚卡紙憑證卡區塊 -->
     <div id="ticket-card">
-      <div class="screenshot-notice">📸 警告：請立即「截圖」保存此加密憑證！</div>
+      <div class="screenshot-notice">📸 溫馨提醒：請立即「截圖」保存此兌換憑證</div>
       
       <div class="ticket-box">
-        <div style="font-size: 18px; font-weight: 900; color: white; letter-spacing: 1px;">🎉 驗證通過！專屬數位憑證</div>
+        <div style="font-size: 18px; font-weight: 850; color: var(--text-main); letter-spacing: 1px;">🎉 驗證通過！專屬憑證</div>
         
         <img id="qr-code-img" class="qr-img" src="" alt="核銷條碼">
-        <div class="highlight-text">★ 憑此雷射條碼至全台門市核銷 ★</div>
+        <div class="highlight-text">★ 憑此條碼至全台門市享專屬禮遇 ★</div>
 
         <div class="info-list">
-          <div class="info-row"><strong>🎯 兌換項目</strong> <span id="res-act" style="color: var(--neon-blue);"></span></div>
+          <div class="info-row"><strong>🎯 兌換項目</strong> <span id="res-act" style="color: var(--accent-dark);"></span></div>
           <div class="info-row"><strong>💬 顧客姓名</strong> <span id="res-name"></span></div>
           <div class="info-row"><strong>🔗 社群帳號</strong> <span id="res-social"></span></div>
           <div class="info-row"><strong>📱 綁定手機</strong> <span id="res-phone"></span></div>
         </div>
       </div>
       
-      <p style="font-size: 13px; color: var(--text-sub); margin-top: 15px; margin-bottom: 0; line-height: 1.6;">
-        💡 <strong>終端提示：</strong>若無法截圖，直接至櫃檯向門市人員「報手機號碼」亦可完成連線核銷。
+      <p style="font-size: 13px; color: var(--text-sub); margin-top: 16px; margin-bottom: 0; line-height: 1.6; font-weight: 500;">
+        💡 <strong>兌換須知：</strong>若無法截圖，直接至櫃檯向門市人員「報手機號碼」亦可完成連線核銷。
       </p>
     </div>
   </div>
@@ -197,13 +196,14 @@
     if ("vibrate" in navigator) { try { navigator.vibrate(pattern); } catch(e) {} }
   }
 
-  // 🎉 勝利灑幣煙火大慶祝
+  // 🎉 勝利灑幣煙火大慶祝 (調配成溫柔玫瑰金與焦糖紙花)
   function triggerConfetti() {
     if (typeof confetti === 'function') {
-      confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 } });
+      var morandiColors = ['#c48b71', '#a86f56', '#d8cca6', '#8c7a6b', '#f5f0eb'];
+      confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 }, colors: morandiColors });
       setTimeout(() => {
-        confetti({ particleCount: 50, angle: 60, spread: 55, origin: { x: 0 } });
-        confetti({ particleCount: 50, angle: 120, spread: 55, origin: { x: 1 } });
+        confetti({ particleCount: 50, angle: 60, spread: 55, origin: { x: 0 }, colors: morandiColors });
+        confetti({ particleCount: 50, angle: 120, spread: 55, origin: { x: 1 }, colors: morandiColors });
       }, 250);
     }
   }
@@ -213,7 +213,7 @@
     var savedPhone = localStorage.getItem("pos_saved_phone");
     var savedAct = localStorage.getItem("pos_saved_act");
     if (savedPhone && savedAct === document.getElementById('activity').value) {
-      alert("💡 終端偵測：此瀏覽器已經領取過「" + savedAct + "」囉！自動載入專屬加密憑證。");
+      alert("💡 系統偵測：此瀏覽器已經領取過「" + savedAct + "」囉！自動載入專屬禮遇憑證。");
       showTicket(savedAct, localStorage.getItem("pos_saved_name") || "VIP 顧客", localStorage.getItem("pos_saved_social") || "", savedPhone);
     }
   };
@@ -236,7 +236,7 @@
 
     var btn = document.getElementById('btn');
     btn.disabled = true;
-    btn.innerText = "⏳ 終端連線加密驗證中...";
+    btn.innerText = "⏳ 系統連線驗證中...";
 
     var baseUrl = API_URL.split('?')[0]; 
     var params = new URLSearchParams({
@@ -256,7 +256,7 @@
           if (result.status === "already_registered") {
             alert("💡 系統偵測到此手機號碼或社群帳號之前已經登記過囉！為您顯示原本的專屬憑證。");
           } else {
-            // 新登記成功！狂發震動 + 煙火彩帶！
+            // 新登記成功！狂發震動 + 莫蘭迪煙火彩帶！
             triggerVibe([80, 50, 80, 50, 150]);
             triggerConfetti();
           }
@@ -272,14 +272,14 @@
           triggerVibe([100, 50, 100]);
           alert(result.error || "驗證失敗：系統回傳異常 (" + JSON.stringify(result) + ")");
           btn.disabled = false;
-          btn.innerText = "⚡ 立即驗證並生成憑證";
+          btn.innerText = "✨ 立即驗證並生成憑證";
         }
       })
       .catch(error => {
         triggerVibe([100, 50, 100]);
         alert("連線發生問題，請檢查網路狀態！錯誤描述：" + error);
         btn.disabled = false;
-        btn.innerText = "⚡ 立即驗證並生成憑證";
+        btn.innerText = "✨ 立即驗證並生成憑證";
       });
   }
 
@@ -293,8 +293,8 @@
     document.getElementById('res-social').innerText = social;
     document.getElementById('res-phone').innerText = phone;
     
-    // ✅ 修正為：標準極黑點點 + 純白底色 + 兩倍安全留白 (margin=2)
-    var qrUrl = "https://quickchart.io/qr?text=" + phone + "&size=250&margin=2&dark=0b0f19&light=ffffff";
+    // ✅ 生成濃縮咖啡棕色條碼 (dark=4a3b32) 搭配純白底色，優雅又秒刷！
+    var qrUrl = "https://quickchart.io/qr?text=" + phone + "&size=250&margin=2&dark=4a3b32&light=ffffff";
     document.getElementById('qr-code-img').src = qrUrl;
   }
 </script>
