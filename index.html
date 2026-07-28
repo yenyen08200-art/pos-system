@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title>門市電子核銷系統 PRO</title>
+  
+  <link rel="manifest" href="manifest.json">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="門市核銷">
+  <link rel="apple-touch-icon" href="icon.png">
+
+  <script src="https://unpkg.com/html5-qrcode"></script>
+
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --success: #10b981;
+      --success-dark: #059669;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --bg-main: #f8fafc;
+      --text-main: #0f172a;
+      --text-sub: #64748b;
+    }
+
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif; 
+      background-color: var(--bg-main); 
+      color: var(--text-main);
+      margin: 0; 
+      padding: 16px; 
+      display: flex; 
+      justify-content: center; 
+      align-items: flex-start; 
+      min-height: 100vh; 
+      box-sizing: border-box;
+    }
+    
+    .container { width: 100%; max-width: 420px; }
+
+    /* 🌟 頂部門市設定列：高質感導航列風格 */
+    .store-header { 
+      background: linear-gradient(135deg, #1e293b, #334155); 
+      color: white; 
+      padding: 16px 20px; 
+      border-radius: 16px; 
+      margin-bottom: 20px; 
+      box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05); 
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .store-header label { font-size: 14px; font-weight: 600; color: #94a3b8; margin-bottom: 6px; display: block; letter-spacing: 0.5px; }
+    .store-header select { 
+      background-color: rgba(255,255,255,0.1); 
+      color: white; 
+      border: 1px solid rgba(255,255,255,0.2); 
+      font-weight: bold; 
+      font-size: 16px;
+      margin-bottom: 0;
+    }
+    .store-header select option { color: #0f172a; background: white; }
+
+    /* 🌟 主卡片視覺 */
+    .card { 
+      background: white; 
+      padding: 24px 20px; 
+      border-radius: 20px; 
+      box-shadow: 0 20px 25px -5px rgba(0,0,0,0.05), 0 10px 10px -5px rgba(0,0,0,0.02); 
+      text-align: center; 
+      border: 1px solid #f1f5f9;
+    }
+    h2 { color: var(--text-main); margin-top: 0; margin-bottom: 20px; font-size: 22px; font-weight: 800; letter-spacing: -0.5px; }
+    
+    /* 🌟 標籤與表單控制元件 */
+    .section-label { font-weight: 700; color: var(--text-main); font-size: 15px; display: block; margin-bottom: 8px; text-align: left; }
+    select, input, button { 
+      width: 100%; 
+      padding: 16px; 
+      border-radius: 12px; 
+      border: 2px solid #e2e8f0; 
+      font-size: 16px; 
+      box-sizing: border-box; 
+      transition: all 0.2s ease; 
+      outline: none;
+    }
+    input:focus, select:focus { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1); }
+    
+    /* 🌟 專屬活動下拉框：醒目品牌藍背景 */
+    #activity-select { background-color: #f0fdf4; border-color: #86efac; color: #166534; font-weight: bold; }
+
+    /* 🌟 按鈕視覺回饋強化 (友善長輩大觸控區) */
+    button { 
+      background-color: var(--primary); 
+      color: white; 
+      border: none; 
+      font-weight: 700; 
+      cursor: pointer; 
+      box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2); 
+      display: flex; 
+      justify-content: center; 
+      align-items: center; 
+      gap: 8px;
+    }
+    button:active { transform: scale(0.97); box-shadow: none; }
+    button:disabled { background-color: #cbd5e1 !important; color: #64748b; cursor: not-allowed; transform: none; box-shadow: none; }
+    
+    .btn-green { background-color: var(--success); box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.2); }
+    .btn-green:active { background-color: var(--success-dark); }
+    .btn-dark { background-color: #334155; box-shadow: 0 4px 6px -1px rgba(51, 65, 85, 0.2); }
+    .btn-danger { background-color: var(--danger); }
+    .undo-btn { background-color: var(--warning); color: white; margin-top: 12px; font-size: 15px; box-shadow: 0 4px 6px -1px rgba(245, 158, 11, 0.2); }
+
+    /* 🌟 條碼掃描區 */
+    #reader-container { display: none; margin: 15px 0; border: 3px solid var(--text-main); border-radius: 16px; overflow: hidden; background: #000; }
+    #reader { width: 100%; }
+    .scan-cancel-btn { border-radius: 0; margin-bottom: 0; padding: 14px; background-color: var(--danger); font-size: 15px; }
+
+    /* 🌟 專業轉圈圈 Loading 動畫 */
+    #loading { display: none; margin: 30px 0; color: var(--text-sub); font-size: 15px; font-weight: 600; }
+    .spinner {
+      width: 40px; height: 40px; margin: 0 auto 12px auto;
+      border: 4px solid #e2e8f0; border-top: 4px solid var(--primary);
+      border-radius: 50%; animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+    /* 🎟️ 核心亮點：高質感「優惠券存根聯」卡片設計 */
+    .ticket-card {
+      background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 16px;
+      padding: 20px; margin: 20px 0; position: relative; text-align: left;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+    }
+    /* 製作左右兩側的半圓形打孔切角 */
+    .ticket-card::before, .ticket-card::after {
+      content: ""; position: absolute; top: 55%; width: 24px; height: 24px;
+      background-color: white; border: 2px solid #e2e8f0; border-radius: 50%;
+    }
+    .ticket-card::before { left: -14px; border-left-color: transparent; border-top-color: transparent; transform: rotate(45deg); }
+    .ticket-card::after { right: -14px; border-right-color: transparent; border-bottom-color: transparent; transform: rotate(45deg); }
+
+    .ticket-info { font-size: 15px; color: var(--text-sub); line-height: 2; border-bottom: 2px dashed #cbd5e1; padding-bottom: 16px; margin-bottom: 16px; }
+    .ticket-info strong { color: var(--text-main); }
+    .ticket-info span { font-weight: 700; color: var(--text-main); font-size: 16px; float: right; }
+    
+    .status-box { padding: 14px; border-radius: 12px; font-weight: 800; font-size: 18px; text-align: center; letter-spacing: 0.5px; }
+    .unclaimed { background-color: #d1fae5; color: #065f46; border: 2px solid #34d399; }
+    .claimed { background-color: #fee2e2; color: #991b1b; border: 2px solid #f87171; }
+    
+    .redeem-details { background: #fff1f2; border: 1px solid #fecdd3; padding: 12px; border-radius: 10px; font-size: 14px; color: #9f1239; margin-top: 12px; text-align: center; line-height: 1.6; }
+
+    /* 🌟 iOS 下方提示框 */
+    #ios-prompt { display: none; position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(10px); color: white; padding: 18px; border-radius: 16px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3); width: 85%; max-width: 350px; text-align: center; z-index: 1000; border: 1px solid rgba(255,255,255,0.1); }
+    .ios-prompt-text { font-size: 14px; margin-bottom: 12px; line-height: 1.6; }
+    .ios-close-btn { background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: bold; width: 100%; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <!-- 📍 頂部導航列：設定門市 -->
+  <div class="store-header">
+    <label>📍 今日值班門市設定</label>
+    <select id="global-store-select" onchange="updateActivities(); saveStore();">
+      <option value="">請選擇您所在的門市...</option>
+      <option value="嘉義門市">嘉義門市</option>
+      <option value="成功門市">成功門市</option>
+      <option value="安醫門市">安醫門市</option>
+      <option value="三井門市">三井門市</option>
+      <option value="三多門市">三多門市</option>
+      <option value="台鋁門市">台鋁門市</option>
+      <option value="義享門市">義享門市</option>
+      <option value="左車門市">左車門市</option>
+      <option value="屏車門市">屏車門市</option>
+    </select>
+  </div>
+
+  <!-- 🎁 核心核銷卡片 -->
+  <div class="card">
+    <h2>🎁 電子兌換券終端核銷</h2>
+    
+    <div style="margin-bottom: 18px;">
+      <span class="section-label">🎯 顧客兌換活動項目：</span>
+      <select id="activity-select">
+        <option value="">請先在上方選擇門市</option>
+      </select>
+    </div>
+
+    <!-- 🔍 搜尋與相機按鈕區 -->
+    <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+      <input type="tel" id="search-input" placeholder="輸入顧客手機" style="flex: 1; margin-bottom: 0;">
+      <button onclick="startScanner()" class="btn-dark" style="width: 56px; padding: 0; font-size: 20px;" title="開啟相機掃描">📷</button>
+      <button id="search-btn" onclick="searchCoupon()" class="btn-green" style="width: 90px; margin-bottom: 0;">查詢</button>
+    </div>
+
+    <!-- 📷 條碼掃描區 -->
+    <div id="reader-container">
+      <div id="reader"></div>
+      <button class="scan-cancel-btn" onclick="stopScanner()">✖ 關閉相機</button>
+    </div>
+
+    <!-- ⏳ 轉圈圈 Loading -->
+    <div id="loading">
+      <div class="spinner"></div>
+      正在連線至總部資料庫...
+    </div>
+    
+    <!-- 🎟️ 存根聯卡片結果顯示區 -->
+    <div id="content" style="display:none;">
+      <div class="ticket-card">
+        <div class="ticket-info">
+          <strong>📱 兌換手機</strong> <span id="id-text" style="color: var(--primary);"></span><br>
+          <strong>👤 顧客姓名</strong> <span id="name-text"></span><br>
+          <strong>🔗 社群帳號</strong> <span id="social-text" style="color: var(--success-dark);"></span>
+        </div>
+
+        <div id="status-badge" class="status-box"></div>
+        <div id="redeem-details" class="redeem-details" style="display:none;"></div>
+      </div>
+
+      <div id="action-area" style="margin-top: 16px;">
+        <button id="redeem-btn" onclick="submitRedeem()" style="font-size: 18px; padding: 18px;">
+          ✔ 確認核銷優惠 (點擊即失效)
+        </button>
+      </div>
+      
+      <div id="undo-area" style="display:none;">
+        <button id="undo-btn" class="undo-btn" onclick="undoRedeem()">
+          ⚡ Oops! 剛才按錯了，立即撤銷 (<span id="undo-timer">5</span>s)
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- iOS 桌面安裝提示 -->
+<div id="ios-prompt">
+  <div class="ios-prompt-text">
+    💡 <strong>店員專屬 POS 下載教學：</strong><br>
+    點擊 Safari 底部 <span style="font-size: 1.2em;">⬆️</span> (分享)<br>
+    選擇 <strong>「加入主畫面」</strong><br>
+    即可轉為全螢幕專櫃 POS 系統！
+  </div>
+  <button class="ios-close-btn" onclick="document.getElementById('ios-prompt').style.display='none'">我知道了</button>
+</div>
+
+<script>
+  // ⚠️ 已經保留你專屬的 API 網址 
+  var API_URL = "https://script.google.com/macros/s/AKfycbyteRoiXgX3h9dpU325M0mg--jNEy1ayfpRPGmXebEEn3Q2Tq37yGNmXiShcrOQqyCm/exec"; 
+
+  const storeEventMap = {
+    "嘉義門市": ["父親節社群活動", "社群抽獎"],
+    "成功門市": ["父親節社群活動", "社群抽獎", "百貨抽獎"],
+    "安醫門市": ["父親節社群活動", "社群抽獎"],
+    "三井門市": ["父親節社群活動", "社群抽獎", "百貨抽獎"],
+    "三多門市": ["父親節社群活動", "社群抽獎", "百貨抽獎"],
+    "台鋁門市": ["父親節社群活動", "社群抽獎", "百貨抽獎"],
+    "義享門市": ["父親節社群活動", "社群抽獎", "百貨抽獎"],
+    "左車門市": ["父親節社群活動", "社群抽獎", "百貨抽獎"],
+    "屏車門市": ["父親節社群活動", "社群抽獎"]
+  };
+
+  var undoInterval = null; 
+  let html5QrCode; 
+
+  window.onload = function() {
+    var savedStore = localStorage.getItem("pos_store");
+    if(savedStore) {
+      document.getElementById('global-store-select').value = savedStore;
+    }
+    updateActivities(); 
+  };
+
+  function updateActivities() {
+    var store = document.getElementById('global-store-select').value;
+    var activitySelect = document.getElementById('activity-select');
+    activitySelect.innerHTML = ""; 
+    if(!store || !storeEventMap[store]) {
+      activitySelect.innerHTML = "<option value=''>請先在上方選擇門市</option>";
+      return;
+    }
+    var activities = storeEventMap[store];
+    activities.forEach(function(act) {
+      var opt = document.createElement('option');
+      opt.value = act;
+      opt.innerHTML = act;
+      activitySelect.appendChild(opt);
+    });
+  }
+
+  function saveStore() {
+    var store = document.getElementById('global-store-select').value;
+    localStorage.setItem("pos_store", store);
+  }
+
+  function startScanner() {
+    document.getElementById('reader-container').style.display = 'block';
+    if (!html5QrCode) html5QrCode = new Html5Qrcode("reader");
+    html5QrCode.start(
+      { facingMode: "environment" }, 
+      { fps: 10, qrbox: { width: 250, height: 250 } },
+      (decodedText, decodedResult) => {
+        var cleanPhone = decodedText.replace(/\D/g, '');
+        document.getElementById('search-input').value = cleanPhone;
+        stopScanner();
+        searchCoupon(); 
+      },
+      (errorMessage) => {}
+    ).catch((err) => {
+      alert("無法開啟相機！請確認手機相機權限是否已開啟。");
+      document.getElementById('reader-container').style.display = 'none';
+    });
+  }
+
+  function stopScanner() {
+    if (html5QrCode && html5QrCode.isScanning) {
+      html5QrCode.stop().then(ignore => { document.getElementById('reader-container').style.display = 'none'; });
+    } else {
+      document.getElementById('reader-container').style.display = 'none';
+    }
+  }
+
+  function searchCoupon() {
+    var phone = document.getElementById('search-input').value.trim();
+    var store = document.getElementById('global-store-select').value;
+    var activity = document.getElementById('activity-select').value;
+
+    if (!store) return alert("⚠️ 請先在最上方選擇「今日值班門市」！");
+    if (!activity) return alert("⚠️ 請選擇要核銷的活動！");
+    if (!phone) return alert("⚠️ 請輸入顧客手機號碼！");
+
+    // 🌟 防連點鎖：立刻變灰停用
+    var searchBtn = document.getElementById('search-btn');
+    searchBtn.disabled = true;
+    searchBtn.innerText = "查詢中";
+    searchBtn.style.backgroundColor = "#94a3b8";
+
+    clearInterval(undoInterval);
+    document.getElementById('undo-area').style.display = 'none';
+    document.getElementById('content').style.display = 'none';
+    document.getElementById('loading').style.display = 'block';
+
+    var url = API_URL + "?action=check&id=" + phone + "&sheet=" + encodeURIComponent(activity) + "&t=" + new Date().getTime();
+
+    fetch(url, { method: 'GET', redirect: 'follow' })
+      .then(response => response.json())
+      .then(result => {
+        // 解除按鈕鎖
+        searchBtn.disabled = false;
+        searchBtn.innerText = "查詢";
+        searchBtn.style.backgroundColor = "";
+        
+        document.getElementById('loading').style.display = 'none';
+        if (!result.exists) return alert(result.error || "❌ 在活動名單中找不到此手機號碼！");
+        
+        document.getElementById('content').style.display = 'block';
+        document.getElementById('id-text').innerText = phone;
+        document.getElementById('name-text').innerText = result.name || "未提供";
+        document.getElementById('social-text').innerText = result.social_id || "未提供";
+        updateUI(result);
+      })
+      .catch(error => {
+        searchBtn.disabled = false;
+        searchBtn.innerText = "查詢";
+        searchBtn.style.backgroundColor = "";
+        
+        alert("查詢逾時！請確認網路狀態，或直接重整頁面試試。\n(錯誤描述：" + error.message + ")");
+        document.getElementById('loading').style.display = 'none';
+      });
+  }
+
+  function updateUI(result) {
+    var badge = document.getElementById('status-badge');
+    var actionArea = document.getElementById('action-area');
+    var details = document.getElementById('redeem-details');
+    var btn = document.getElementById('redeem-btn');
+
+    if (result.status === "已兌換") {
+      badge.className = "status-box claimed";
+      badge.innerText = "❌ 此兌換券已失效 / 已領取";
+      actionArea.style.display = 'none'; 
+      var timeStr = result.time ? new Date(result.time).toLocaleString('zh-TW') : "未知時間";
+      details.style.display = 'block';
+      details.innerHTML = "<strong>⏱ 兌換紀錄追蹤：</strong><br>已於 " + timeStr + "<br>在 <strong>【" + (result.store || "未知門市") + "】</strong> 完成核銷";
+    } else {
+      badge.className = "status-box unclaimed";
+      badge.innerText = "✅ 有效優惠券（尚未兌換）";
+      actionArea.style.display = 'block';
+      details.style.display = 'none';
+      btn.disabled = false;
+      btn.innerText = "✔ 確認核銷優惠 (點擊即失效)";
+    }
+  }
+
+  function submitRedeem() {
+    var store = document.getElementById('global-store-select').value;
+    var activity = document.getElementById('activity-select').value;
+    var id = document.getElementById('id-text').innerText; 
+    var btn = document.getElementById('redeem-btn');
+    
+    if(!confirm("確定要在「" + store + "」核銷【" + activity + "】的優惠嗎？\n\n⚠️ 核銷後憑證立即失效！")) return;
+    
+    btn.disabled = true;
+    btn.innerText = "⏳ 總部系統連線寫入中...";
+    
+    var url = API_URL + "?action=redeem&id=" + id + "&store=" + encodeURIComponent(store) + "&sheet=" + encodeURIComponent(activity) + "&t=" + new Date().getTime();
+
+    fetch(url, { method: 'GET', redirect: 'follow' })
+      .then(response => response.json())
+      .then(result => {
+        if (result.status === "success") {
+          updateUI({ status: "已兌換", time: new Date().getTime(), store: store });
+          startUndoTimer(); 
+        } else if (result.status === "error_already_redeemed") {
+          alert("⚠️ 錯誤：這張券剛剛已被兌換過！");
+          searchCoupon(); 
+        } else {
+          alert("核銷失敗，請重試。");
+          btn.disabled = false;
+          btn.innerText = "✔ 確認核銷優惠 (點擊即失效)";
+        }
+      })
+      .catch(error => {
+        alert("⚠️ 網路回傳似乎卡住了，但資料可能已核銷成功！請點擊上方綠色「查詢」按鈕重新整理狀態。");
+        btn.disabled = false;
+        btn.innerText = "✔ 確認核銷優惠 (點擊即失效)";
+      });
+  }
+
+  function startUndoTimer() {
+    var undoArea = document.getElementById('undo-area');
+    var undoTimer = document.getElementById('undo-timer');
+    var undoBtn = document.getElementById('undo-btn');
+    undoArea.style.display = 'block';
+    undoBtn.disabled = false;
+    undoBtn.innerHTML = '⚡ Oops! 剛才按錯了，立即撤銷 (<span id="undo-timer">5</span>s)';
+    var timeLeft = 5;
+    undoInterval = setInterval(function() {
+      timeLeft--;
+      document.getElementById('undo-timer').innerText = timeLeft;
+      if (timeLeft <= 0) { clearInterval(undoInterval); undoArea.style.display = 'none'; }
+    }, 1000);
+  }
+
+  function undoRedeem() {
+    var activity = document.getElementById('activity-select').value;
+    var id = document.getElementById('id-text').innerText; 
+    var undoBtn = document.getElementById('undo-btn');
+    clearInterval(undoInterval); 
+    undoBtn.disabled = true;
+    undoBtn.innerText = "⏳ 正在復原總部資料...";
+
+    var url = API_URL + "?action=undo&id=" + id + "&sheet=" + encodeURIComponent(activity) + "&t=" + new Date().getTime();
+
+    fetch(url, { method: 'GET', redirect: 'follow' })
+      .then(response => response.json())
+      .then(result => {
+        if (result.status === "success") {
+          document.getElementById('undo-area').style.display = 'none';
+          alert("✅ 已成功撤銷核銷！");
+          searchCoupon(); 
+        } else {
+          alert("撤銷失敗，請聯絡總部處理。");
+          document.getElementById('undo-area').style.display = 'none';
+        }
+      })
+      .catch(error => {
+        alert("連線逾時，請按查詢重整狀態。");
+        document.getElementById('undo-area').style.display = 'none';
+      });
+  }
+</script>
+</body>
+</html>
