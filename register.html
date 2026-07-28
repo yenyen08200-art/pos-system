@@ -25,221 +25,104 @@
       --ink-black: #27272a;        /* 經典打字機炭黑 */
       --ink-muted: #71717a;        /* 褪色鉛筆灰 */
       --border-ink: 1.5px solid #27272a; /* 藝術細致墨線 */
-      /* 🌟 核心魔法：純程式碼產生的真實紙質纖維紋路 */
       --paper-texture: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.06'/%3E%3C/svg%3E");
     }
 
     body { 
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif; 
       background-color: var(--bg-parchment); 
-      /* 背景疊加真實紙質紋路與微細網格 */
-      background-image: 
-        var(--paper-texture),
-        radial-gradient(rgba(153, 27, 27, 0.04) 1px, transparent 0),
-        radial-gradient(rgba(39, 39, 42, 0.04) 1px, transparent 0);
+      background-image: var(--paper-texture), radial-gradient(rgba(153, 27, 27, 0.04) 1px, transparent 0), radial-gradient(rgba(39, 39, 42, 0.04) 1px, transparent 0);
       background-size: 150px 150px, 24px 24px, 24px 24px;
       background-position: 0 0, 0 0, 12px 12px;
-      color: var(--ink-black);
-      margin: 0; 
-      padding: 20px 16px; 
-      display: flex; 
-      justify-content: center; 
-      align-items: center; 
-      min-height: 95vh; 
-      box-sizing: border-box;
+      color: var(--ink-black); margin: 0; padding: 20px 16px; display: flex; justify-content: center; align-items: center; min-height: 95vh; box-sizing: border-box;
     }
     
     .container { width: 100%; max-width: 400px; }
 
-    /* 📜 復古點餐單造型卡片 (疊加牛皮紙纖維質感) */
     .guest-check {
-      background-color: var(--paper-cream);
-      background-image: var(--paper-texture);
-      background-size: 150px 150px;
-      border: var(--border-ink);
-      border-radius: 4px;
-      box-shadow: 0 15px 35px -5px rgba(39, 39, 42, 0.18), 0 5px 15px -5px rgba(0,0,0,0.1);
-      position: relative;
-      overflow: hidden;
-      padding: 0;
+      background-color: var(--paper-cream); background-image: var(--paper-texture); background-size: 150px 150px;
+      border: var(--border-ink); border-radius: 4px; box-shadow: 0 15px 35px -5px rgba(39, 39, 42, 0.18), 0 5px 15px -5px rgba(0,0,0,0.1);
+      position: relative; overflow: hidden; padding: 0;
     }
 
-    /* 頂部點餐單標頭 */
-    .check-header {
-      background-color: var(--paper-warm);
-      background-image: var(--paper-texture);
-      border-bottom: 2px double var(--ink-black);
-      padding: 22px 22px 16px 22px;
-      text-align: center;
-      position: relative;
-    }
-    .check-no {
-      font-family: "Courier New", monospace;
-      font-size: 13px; font-weight: 800; color: var(--cherry-red);
-      letter-spacing: 1px; margin-bottom: 8px; display: block;
-    }
-    h1 {
-      font-size: 24px; font-weight: 900; color: var(--ink-black);
-      margin: 0 0 6px 0; letter-spacing: 1.5px;
-    }
+    .check-header { background-color: var(--paper-warm); background-image: var(--paper-texture); border-bottom: 2px double var(--ink-black); padding: 22px 22px 16px 22px; text-align: center; position: relative; }
+    .check-no { font-family: "Courier New", monospace; font-size: 13px; font-weight: 800; color: var(--cherry-red); letter-spacing: 1px; margin-bottom: 8px; display: block; }
+    h1 { font-size: 24px; font-weight: 900; color: var(--ink-black); margin: 0 0 6px 0; letter-spacing: 1.5px; }
     .subtitle { font-size: 13px; color: var(--ink-muted); margin: 0; font-weight: 700; letter-spacing: 0.5px; }
 
-    /* 點餐單親民服務資訊欄 */
-    .server-meta {
-      display: flex; justify-content: space-between;
-      border-bottom: var(--border-ink);
-      background: var(--paper-cream);
-      padding: 10px 22px; font-size: 13px; font-weight: 700; color: var(--ink-muted);
-      letter-spacing: 0.5px;
-    }
+    .server-meta { display: flex; justify-content: space-between; border-bottom: var(--border-ink); background: var(--paper-cream); padding: 10px 22px; font-size: 13px; font-weight: 700; color: var(--ink-muted); letter-spacing: 0.5px; }
     .server-meta span strong { color: var(--ink-black); }
 
-    /* 表單區塊 */
     .check-body { padding: 24px 22px 28px 22px; }
 
-    label { 
-      display: block; text-align: left; font-weight: 800; color: var(--ink-black); 
-      margin-bottom: 8px; font-size: 14px; letter-spacing: 0.5px;
-    }
+    label { display: block; text-align: left; font-weight: 800; color: var(--ink-black); margin-bottom: 8px; font-size: 14px; letter-spacing: 0.5px; }
     
-    input, select { 
-      width: 100%; padding: 14px 16px; border-radius: 2px; border: var(--border-ink); 
-      background: var(--paper-warm); color: var(--ink-black); font-size: 16px; font-weight: 700;
-      margin-bottom: 18px; box-sizing: border-box; transition: all 0.2s ease; outline: none;
-      font-family: inherit;
-    }
+    input, select { width: 100%; padding: 14px 16px; border-radius: 2px; border: var(--border-ink); background: var(--paper-warm); color: var(--ink-black); font-size: 16px; font-weight: 700; margin-bottom: 18px; box-sizing: border-box; transition: all 0.2s ease; outline: none; font-family: inherit; }
     input::placeholder { color: #a1a1aa; font-weight: 400; font-size: 15px; }
-    input:focus, select:focus { 
-      background: #ffffff; border-color: var(--cherry-red); 
-      box-shadow: inset 3px 0 0 var(--cherry-red); 
-    }
+    input:focus, select:focus { background: #ffffff; border-color: var(--cherry-red); box-shadow: inset 3px 0 0 var(--cherry-red); }
     
     #activity { background-color: #fff9ed; border-color: var(--mustard-gold); color: var(--ink-black); cursor: pointer; }
     #activity option { background: white; color: var(--ink-black); font-weight: bold; }
 
-    /* 🔑 復古票券密語框 */
-    .secret-box { 
-      background: #fffdf9; padding: 14px 16px; border-radius: 2px; 
-      border: 1.5px dashed var(--cherry-red); margin-bottom: 24px; text-align: center;
-    }
+    .secret-box { background: #fffdf9; padding: 14px 16px; border-radius: 2px; border: 1.5px dashed var(--cherry-red); margin-bottom: 24px; text-align: center; }
     .secret-box label { color: var(--cherry-red); text-align: center; margin-bottom: 8px; font-size: 15px; }
-    #secret_code { 
-      border: 1px solid #fca5a5; background: #fffafa; margin-bottom: 0; 
-      text-transform: uppercase; letter-spacing: 4px; text-align: center; 
-      font-size: 20px; font-weight: 900; color: var(--cherry-red); 
-    }
+    #secret_code { border: 1px solid #fca5a5; background: #fffafa; margin-bottom: 0; text-transform: uppercase; letter-spacing: 4px; text-align: center; font-size: 20px; font-weight: 900; color: var(--cherry-red); }
     #secret_code:focus { box-shadow: none; border-color: var(--cherry-red); background: white; }
 
-    /* 🍷 經典點餐單送出按鈕 */
-    .submit-btn { 
-      background: var(--cherry-red); color: white; border: 1.5px solid var(--cherry-red); 
-      padding: 16px; width: 100%; border-radius: 2px; font-size: 17px; font-weight: 800; 
-      cursor: pointer; letter-spacing: 1.5px;
-      transition: all 0.2s ease; box-shadow: 0 4px 12px rgba(153, 27, 27, 0.25);
-      font-family: inherit;
-    }
+    .submit-btn { background: var(--cherry-red); color: white; border: 1.5px solid var(--cherry-red); padding: 16px; width: 100%; border-radius: 2px; font-size: 17px; font-weight: 800; cursor: pointer; letter-spacing: 1.5px; transition: all 0.2s ease; box-shadow: 0 4px 12px rgba(153, 27, 27, 0.25); font-family: inherit; }
     .submit-btn:hover { background: #7f1d1d; border-color: #7f1d1d; }
     .submit-btn:active { transform: translateY(2px); box-shadow: none; }
     .submit-btn:disabled { background: #e4e4e7 !important; color: #a1a1aa !important; border-color: #d4d4d8 !important; box-shadow: none !important; cursor: not-allowed; transform: none; }
     
-    /* 🔄 雜誌風切換活動副按鈕 */
-    .switch-btn {
-      background: transparent; color: var(--ink-black); border: 1.5px dashed var(--ink-black);
-      padding: 14px; width: 100%; border-radius: 2px; font-size: 15px; font-weight: 800;
-      cursor: pointer; margin-top: 20px; transition: all 0.2s ease; letter-spacing: 0.5px;
-      font-family: inherit;
-    }
+    .switch-btn { background: transparent; color: var(--ink-black); border: 1.5px dashed var(--ink-black); padding: 14px; width: 100%; border-radius: 2px; font-size: 15px; font-weight: 800; cursor: pointer; margin-top: 20px; transition: all 0.2s ease; letter-spacing: 0.5px; font-family: inherit; }
     .switch-btn:hover { background: var(--paper-warm); }
     .switch-btn:active { transform: translateY(1px); }
 
-    /* 👨‍🍳 復古莫蘭迪色系 Q版漢堡小廚師 動畫區 */
     #loading { display: none; padding: 40px 22px; text-align: center; }
     .chibi-loader-box { display: flex; flex-direction: column; align-items: center; justify-content: center; }
     .chibi-svg { width: 135px; height: 105px; overflow: visible; margin-bottom: 20px; filter: drop-shadow(0 8px 12px rgba(39, 39, 42, 0.12)); }
-    
     .chibi-boy { animation: chibi-bounce 0.45s infinite alternate cubic-bezier(0.4, 0, 0.6, 1); transform-origin: center bottom; }
     .shadow { animation: shadow-scale 0.45s infinite alternate cubic-bezier(0.4, 0, 0.6, 1); transform-origin: center; }
     .burger-holding { animation: burger-wobble 0.45s infinite alternate ease-in-out; transform-origin: center; }
     .star-fly { animation: star-pop 0.8s infinite linear; }
-    
     @keyframes chibi-bounce { 0% { transform: translateY(0) scaleY(0.96); } 100% { transform: translateY(-12px) scaleY(1.04); } }
     @keyframes shadow-scale { 0% { transform: scale(1); opacity: 0.8; } 100% { transform: scale(0.5); opacity: 0.2; } }
     @keyframes burger-wobble { 0% { transform: rotate(-5deg) translateY(0); } 100% { transform: rotate(5deg) translateY(-3px); } }
     @keyframes star-pop { 0% { transform: translate(0, 0) scale(0.3); opacity: 0; } 50% { opacity: 1; } 100% { transform: translate(22px, -18px) scale(1.3) rotate(180deg); opacity: 0; } }
-    
-    .loading-text {
-      color: var(--cherry-red); font-weight: 800; font-size: 16px; letter-spacing: 1px;
-      animation: pulse-text 1.5s infinite;
-    }
+    .loading-text { color: var(--cherry-red); font-weight: 800; font-size: 16px; letter-spacing: 1px; animation: pulse-text 1.5s infinite; }
     @keyframes pulse-text { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
 
-    /* 🎟️ 復古結帳聯憑證卡 */
     #ticket-card { display: none; padding: 24px 22px 28px 22px; text-align: center; }
-    
-    /* 復古郵戳章 */
-    .stamp-badge {
-      display: inline-block; border: 2px solid var(--cherry-red); color: var(--cherry-red);
-      font-size: 13px; font-weight: 900; letter-spacing: 2px; padding: 4px 14px;
-      border-radius: 2px; transform: rotate(-4deg);
-      margin-bottom: 14px; background: rgba(153, 27, 27, 0.03); transition: all 0.3s ease;
-    }
-    
-    .qr-box {
-      background: white; padding: 12px; border: var(--border-ink); border-radius: 2px;
-      display: inline-block; margin: 10px 0; box-shadow: 0 8px 20px rgba(0,0,0,0.06);
-    }
+    .stamp-badge { display: inline-block; border: 2px solid var(--cherry-red); color: var(--cherry-red); font-size: 13px; font-weight: 900; letter-spacing: 2px; padding: 4px 14px; border-radius: 2px; transform: rotate(-4deg); margin-bottom: 14px; background: rgba(153, 27, 27, 0.03); transition: all 0.3s ease; }
+    .qr-box { background: white; padding: 12px; border: var(--border-ink); border-radius: 2px; display: inline-block; margin: 10px 0; box-shadow: 0 8px 20px rgba(0,0,0,0.06); }
     .qr-img { width: 180px; height: 180px; display: block; transition: opacity 0.3s ease; }
-    
-    .highlight-text { 
-      font-size: 16px; font-weight: 850; color: var(--ink-black); letter-spacing: 1px; 
-      margin: 12px 0 20px 0; border-bottom: 1px solid var(--ink-black);
-      padding-bottom: 12px; display: block; transition: all 0.3s ease;
-    }
-    
+    .highlight-text { font-size: 16px; font-weight: 850; color: var(--ink-black); letter-spacing: 1px; margin: 12px 0 20px 0; border-bottom: 1px solid var(--ink-black); padding-bottom: 12px; display: block; transition: all 0.3s ease; }
     .info-list { text-align: left; display: flex; flex-direction: column; gap: 10px; font-size: 15px; }
     .info-row { display: flex; justify-content: space-between; border-bottom: 1px dotted #d4d4d8; padding-bottom: 8px; }
     .info-row strong { color: var(--ink-muted); font-weight: 700; }
     .info-row span { color: var(--ink-black); font-weight: 850; text-align: right; word-break: break-all; }
     #res-phone { color: var(--cherry-red); font-family: "Courier New", monospace; font-size: 18px !important; font-weight: 900; }
-
-    .screenshot-notice { 
-      background: #fef2f2; border: 1.5px solid var(--cherry-red); color: var(--cherry-red); 
-      padding: 12px; border-radius: 2px; font-weight: 800; font-size: 15px; margin-bottom: 18px; 
-      letter-spacing: 0.5px;
-    }
-    
-    /* 點餐單底部鋸齒撕線造型 */
-    .check-footer {
-      height: 16px; background: var(--bg-parchment); position: relative;
-    }
-    .check-footer::before {
-      content: ""; position: absolute; top: -8px; left: 0; width: 100%; height: 16px;
-      background-image: radial-gradient(circle, var(--bg-parchment) 6px, transparent 7px);
-      background-size: 18px 18px;
-    }
+    .screenshot-notice { background: #fef2f2; border: 1.5px solid var(--cherry-red); color: var(--cherry-red); padding: 12px; border-radius: 2px; font-weight: 800; font-size: 15px; margin-bottom: 18px; letter-spacing: 0.5px; }
+    .check-footer { height: 16px; background: var(--bg-parchment); position: relative; }
+    .check-footer::before { content: ""; position: absolute; top: -8px; left: 0; width: 100%; height: 16px; background-image: radial-gradient(circle, var(--bg-parchment) 6px, transparent 7px); background-size: 18px 18px; }
   </style>
 </head>
 <body>
 
 <div class="container">
-  <!-- 📜 復古點餐結帳單卡片 (疊加真實紙質紋路) -->
   <div class="guest-check">
-    
-    <!-- 頂部點餐單標頭 -->
     <div class="check-header">
       <span class="check-no">【 德州小騎士 】</span>
       <h1>電子領卷系統</h1>
       <p class="subtitle">限時活動專屬兌換券</p>
     </div>
 
-    <!-- 服務生／桌號親民資訊列 -->
     <div class="server-meta">
       <span>服務生：<strong>小戰熊</strong></span>
       <span>桌號：<strong>VIP 貴賓席</strong></span>
       <span>人數：<strong>1 位</strong></span>
     </div>
 
-    <!-- 👉 步驟一：點餐表單區塊 (100% 全中文親民標籤) -->
     <div id="form-section" class="check-body">
       <label>🎯 選擇兌換活動項目 (切換自動確認權益)</label>
       <select id="activity" onchange="checkSavedTicket()">
@@ -256,7 +139,6 @@
       <label>📱 手機號碼 (防重複驗證)</label>
       <input type="tel" id="phone" placeholder="例：0958585888" maxlength="10" required>
 
-      <!-- 🌟 復古票券通關密語框 -->
       <div class="secret-box">
         <label>🔑 活動通關密語</label>
         <input type="text" id="secret_code" placeholder="請填入官方提供密語" required>
@@ -265,38 +147,25 @@
       <button id="btn" class="submit-btn" onclick="register()">🍔 領取專屬兌換卷</button>
     </div>
 
-    <!-- 👨‍🍳 復古莫蘭迪色系 Q版漢堡小廚師 動畫區 -->
     <div id="loading">
       <div class="chibi-loader-box">
         <svg viewBox="0 0 130 110" class="chibi-svg">
-          <!-- 地面炭黑陰影 -->
           <ellipse cx="65" cy="100" rx="28" ry="6" fill="#27272a" class="shadow"/>
-          <!-- 溫潤炙烤黃星星 -->
           <path d="M 100 40 L 103 48 L 111 50 L 105 56 L 107 64 L 100 59 L 93 64 L 95 56 L 89 50 L 97 48 Z" fill="#d97706" stroke="#27272a" stroke-width="1.5" class="star-fly"/>
-          
           <g class="chibi-boy">
-            <!-- 雙腳 -->
             <ellipse cx="53" cy="94" rx="7" ry="6" fill="#27272a"/>
             <ellipse cx="77" cy="94" rx="7" ry="6" fill="#27272a"/>
-            <!-- 身體與復古櫻桃紅圍裙 -->
             <rect x="48" y="64" width="34" height="26" rx="8" fill="#fdfbf7" stroke="#27272a" stroke-width="2.5"/>
             <rect x="54" y="68" width="22" height="22" rx="4" fill="#991b1b"/>
-            <!-- 大頭 -->
             <circle cx="65" cy="45" r="25" fill="#fff5eb" stroke="#27272a" stroke-width="2.5"/>
-            <!-- 腮紅 -->
             <ellipse cx="46" cy="50" rx="5" ry="3.5" fill="#e11d48" opacity="0.75"/>
             <ellipse cx="84" cy="50" rx="5" ry="3.5" fill="#e11d48" opacity="0.75"/>
-            <!-- 眼神 (^ ^) -->
             <path d="M 48 44 Q 52 38 56 44" stroke="#27272a" stroke-width="3" fill="none" stroke-linecap="round"/>
             <path d="M 74 44 Q 78 38 82 44" stroke="#27272a" stroke-width="3" fill="none" stroke-linecap="round"/>
-            <!-- 嘴巴 -->
             <path d="M 60 53 Q 65 60 70 53 Z" fill="#991b1b" stroke="#27272a" stroke-width="2"/>
-            <!-- 廚師帽 -->
             <path d="M 38 38 C 40 18, 90 18, 92 38 Z" fill="#fdfbf7" stroke="#27272a" stroke-width="2.5"/>
             <path d="M 45 26 L 55 38 M 60 22 L 65 38 M 75 24 L 75 38 M 85 28 L 82 38" stroke="#991b1b" stroke-width="3"/>
             <rect x="36" y="36" width="58" height="8" rx="4" fill="#991b1b" stroke="#27272a" stroke-width="2"/>
-            
-            <!-- 巨無霸漢堡 🍔 -->
             <g class="burger-holding">
               <path d="M 36 78 Q 65 85 94 78 L 90 86 Q 65 90 40 86 Z" fill="#b45309" stroke="#27272a" stroke-width="2"/>
               <rect x="38" y="72" width="54" height="8" rx="4" fill="#451a03" stroke="#27272a" stroke-width="2"/>
@@ -317,7 +186,6 @@
       </div>
     </div>
 
-    <!-- 👉 步驟二：復古點餐結帳聯憑證區塊 -->
     <div id="ticket-card">
       <div class="screenshot-notice">📸 溫馨提醒：請立即「截圖」保存此兌換券！</div>
       
@@ -336,7 +204,6 @@
         <div class="info-row"><strong>綁定手機</strong> <span id="res-phone"></span></div>
       </div>
       
-      <!-- 🌟 智慧防洗單：切換時自動尋找「還沒領過的活動」！ -->
       <button class="switch-btn" onclick="resetToForm()">🔄 我要切換／領取其他活動專區</button>
 
       <p style="font-size: 13px; color: var(--ink-muted); margin-top: 18px; margin-bottom: 0; line-height: 1.6; font-weight: 700;">
@@ -344,7 +211,6 @@
       </p>
     </div>
 
-    <!-- 點餐單底部鋸齒撕線 -->
     <div class="check-footer"></div>
   </div>
 </div>
@@ -353,7 +219,7 @@
   // ⚠️ 已經幫你保留你的 API 網址
   var API_URL = "https://script.google.com/macros/s/AKfycbyteRoiXgX3h9dpU325M0mg--jNEy1ayfpRPGmXebEEn3Q2Tq37yGNmXiShcrOQqyCm/exec";
   
-  var syncTimer = null; // 🌟 總部心跳連線計時器
+  var syncTimer = null; // 總部心跳連線計時器
 
   function triggerVibe(pattern) {
     if ("vibrate" in navigator) { try { navigator.vibrate(pattern); } catch(e) {} }
@@ -374,7 +240,6 @@
     checkSavedTicket(true);
   };
 
-  // 🌟 智慧防洗單一：只要選單變動，立刻檢查有無領過！領過就秒秀條碼！
   function checkSavedTicket(isFirstLoad) {
     var act = document.getElementById('activity').value;
     var savedPhone = localStorage.getItem("pos_" + act + "_phone");
@@ -391,16 +256,15 @@
         savedPhone
       );
     } else {
-      if (syncTimer) clearInterval(syncTimer); // 🌟 沒領過券，停止背景通訊
+      if (syncTimer) clearInterval(syncTimer); 
       document.getElementById('ticket-card').style.display = 'none';
       document.getElementById('loading').style.display = 'none';
       document.getElementById('form-section').style.display = 'block';
     }
   }
 
-  // 🌟 智慧防洗單二：按下切換按鈕時，自動尋找「他還沒領過的活動」！
   function resetToForm() {
-    if (syncTimer) clearInterval(syncTimer); // 🌟 切換畫面時，立刻停止背景通訊！
+    if (syncTimer) clearInterval(syncTimer); 
     var select = document.getElementById('activity');
     var nextUnclaimed = "";
     var allClaimed = true;
@@ -443,6 +307,7 @@
     triggerVibe(40);
 
     document.getElementById('form-section').style.display = 'none';
+    document.getElementById('loading').style.display = 'none';
     document.getElementById('loading').style.display = 'block';
 
     var baseUrl = API_URL.split('?')[0]; 
@@ -468,6 +333,8 @@
             triggerConfetti();
           }
           
+          // 🌟 登記新券時，清除舊的核銷記憶
+          localStorage.removeItem("pos_" + act + "_status");
           localStorage.setItem("pos_" + act + "_phone", phone);
           localStorage.setItem("pos_" + act + "_name", result.name || name);
           localStorage.setItem("pos_" + act + "_social", result.social_id || socialId);
@@ -498,54 +365,72 @@
     document.getElementById('res-social').innerText = social;
     document.getElementById('res-phone').innerText = phone;
     
-    // ✅ 生成老式打字機炭黑條碼 (dark=27272a) 搭配純白底色
     var qrUrl = "https://quickchart.io/qr?text=" + phone + "&size=250&margin=2&dark=27272a&light=ffffff";
     var qrImg = document.getElementById('qr-code-img');
     qrImg.src = qrUrl;
-    qrImg.style.opacity = "1"; // 🌟 初始化重置條碼透明度
 
-    // 🌟🌟🌟 免費版專屬：智慧節流心跳偵測 (每 10 秒自動查一次核銷狀態) 🌟🌟🌟
+    // 🌟🌟🌟 核心防護一：檢查 localStorage 是否有「已核銷」記憶！ 🌟🌟🌟
+    var cachedStatus = localStorage.getItem("pos_" + act + "_status");
+    if (cachedStatus === "已兌換") {
+      renderRedeemedState("門市", false); // 🌟 如果快取是已兌換，不管 F5 怎麼刷都「永遠保持灰色」！
+      return; // 已經核銷過了，不用再啟動定時器浪費流量！
+    } else {
+      qrImg.style.opacity = "1"; // 未核銷才保持清晰
+    }
+
+    // 🌟 核心防護二：打開憑證時，立刻在背景先秒查一次！(不用傻等 10 秒)
+    checkStatusFromServer(act, phone, false);
+
+    // 啟動心跳偵測計時器
     if (syncTimer) clearInterval(syncTimer);
     var pollCount = 0;
 
     syncTimer = setInterval(function() {
       pollCount++;
-      
-      // 🛡️ 防禦一：沒停留在網頁上 (切換到 IG 或鎖屏)，暫停查詢，節省 Google 免費流量！
       if (document.hidden) return;
+      if (pollCount > 30) { clearInterval(syncTimer); return; }
+      checkStatusFromServer(act, phone, true);
+    }, 10000);
+  }
 
-      // 🛡️ 防禦二：停在畫面上超過 5 分鐘 (30 次) 沒動靜，自動休眠煞車！
-      if (pollCount > 30) {
-        clearInterval(syncTimer);
-        return;
-      }
+  // 獨立抽出的總部查詢專用函數
+  function checkStatusFromServer(act, phone, isFromTimer) {
+    var baseUrl = API_URL.split('?')[0];
+    var url = baseUrl + "?action=check&id=" + phone + "&sheet=" + encodeURIComponent(act) + "&t=" + new Date().getTime();
+    
+    fetch(url, { method: 'GET', redirect: 'follow' })
+      .then(response => response.json())
+      .then(res => {
+        if (res.exists && res.status === "已兌換") {
+          if (syncTimer) clearInterval(syncTimer);
+          
+          // 🌟 永遠寫入手機終身記憶體！
+          localStorage.setItem("pos_" + act + "_status", "已兌換");
+          
+          renderRedeemedState(res.store || "門市", isFromTimer);
+        }
+      })
+      .catch(e => {});
+  }
 
-      var baseUrl = API_URL.split('?')[0];
-      var url = baseUrl + "?action=check&id=" + phone + "&sheet=" + encodeURIComponent(act) + "&t=" + new Date().getTime();
-      
-      fetch(url, { method: 'GET', redirect: 'follow' })
-        .then(response => response.json())
-        .then(res => {
-          if (res.exists && res.status === "已兌換") {
-            clearInterval(syncTimer); // 成功核銷，停止查詢
-            triggerVibe([100, 50, 100, 50, 200]); // 慶祝三連震
-            
-            // 畫面同步變身：蓋上完食郵戳、條碼退色
-            var stamp = document.querySelector(".stamp-badge");
-            stamp.innerHTML = "【 廚房已核銷確認 · 感謝完食 】";
-            stamp.style.borderColor = "#71717a";
-            stamp.style.color = "#71717a";
-            
-            var highlight = document.querySelector(".highlight-text");
-            highlight.innerHTML = "★ 本餐券已使用完畢 · 期待您再次光臨 ★";
-            highlight.style.color = "#71717a";
-            
-            qrImg.style.opacity = "0.15"; // 條碼變暗退色，防止二次使用
-            alert("🎉 恭喜！門市人員已完成核銷，您的餐券已成功兌換！");
-          }
-        })
-        .catch(e => {}); // 網路稍微不穩時靜默忽略，等下一個 10 秒
-    }, 10000); // 10 秒一次，絕對安全不過載！
+  // 獨立抽出的完食變身UI專用函數
+  function renderRedeemedState(storeName, triggerSoundAndAlert) {
+    var qrImg = document.getElementById('qr-code-img');
+    qrImg.style.opacity = "0.15"; // 條碼永遠變灰退色！
+    
+    var stamp = document.querySelector(".stamp-badge");
+    stamp.innerHTML = "【 廚房已核銷確認 · 感謝完食 】";
+    stamp.style.borderColor = "#71717a";
+    stamp.style.color = "#71717a";
+    
+    var highlight = document.querySelector(".highlight-text");
+    highlight.innerHTML = "★ 本餐券已使用完畢 · 期待您再次光臨 ★";
+    highlight.style.color = "#71717a";
+    
+    if (triggerSoundAndAlert) {
+      triggerVibe([100, 50, 100, 50, 200]);
+      alert("🎉 恭喜！門市人員已於【" + storeName + "】完成核銷，您的餐券已成功兌換！");
+    }
   }
   
   function newSearchParams(obj) {
