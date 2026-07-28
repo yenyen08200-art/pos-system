@@ -293,8 +293,8 @@
     document.getElementById('res-social').innerText = social;
     document.getElementById('res-phone').innerText = phone;
     
-    // 生成雷射黃金條碼
-    var qrUrl = "https://quickchart.io/qr?text=" + phone + "&size=220&margin=1&dark=ffcc00&light=131b2e";
+    // ✅ 修正為：標準極黑點點 + 純白底色 + 兩倍安全留白 (margin=2)
+    var qrUrl = "https://quickchart.io/qr?text=" + phone + "&size=250&margin=2&dark=0b0f19&light=ffffff";
     document.getElementById('qr-code-img').src = qrUrl;
   }
 </script>
