@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-  <title>美式餐館 - VIP 專屬領券系統</title>
+  <title>電子領卷系統</title>
   
   <link rel="manifest" href="manifest.json">
   <meta name="mobile-web-app-capable" content="yes">
@@ -227,14 +227,14 @@
     
     <!-- 頂部點餐單標頭 -->
     <div class="check-header">
-      <span class="check-no">【 貴賓專屬點餐結帳單 】</span>
-      <h1>★ 美式餐館 VIP 禮遇 ★</h1>
-      <p class="subtitle">經典美式風味 · 限時活動專屬兌換券</p>
+      <span class="check-no">【 德州小騎士 】</span>
+      <h1>電子領卷系統</h1>
+      <p class="subtitle">限時活動專屬兌換券</p>
     </div>
 
     <!-- 服務生／桌號親民資訊列 -->
     <div class="server-meta">
-      <span>服務生：<strong>主廚專送</strong></span>
+      <span>服務生：<strong>小戰熊</strong></span>
       <span>桌號：<strong>VIP 貴賓席</strong></span>
       <span>人數：<strong>1 位</strong></span>
     </div>
@@ -248,21 +248,21 @@
       </select>
 
       <label>💬 社群暱稱 (IG/FB 顯示名稱)</label>
-      <input type="text" id="name" placeholder="例：小新 / Amy" required>
+      <input type="text" id="name" placeholder="例：小戰熊" required>
 
-      <label>🔗 社群帳號 ID (供核對使用)</label>
-      <input type="text" id="social_id" placeholder="例：@shin_123 / LINE ID" required>
+      <label>🔗 社群帳號 (供核對使用)</label>
+      <input type="text" id="social_id" placeholder="例：tfc.1986" required>
 
-      <label>📱 聯絡手機號碼 (防重複驗證)</label>
-      <input type="tel" id="phone" placeholder="例：0912345678" maxlength="10" required>
+      <label>📱 手機號碼 (防重複驗證)</label>
+      <input type="tel" id="phone" placeholder="例：0958585888" maxlength="10" required>
 
       <!-- 🌟 復古票券通關密語框 -->
       <div class="secret-box">
         <label>🔑 活動通關密語</label>
-        <input type="text" id="secret_code" placeholder="請填入官方公告密語" required>
+        <input type="text" id="secret_code" placeholder="請填入官方提供密語" required>
       </div>
 
-      <button id="btn" class="submit-btn" onclick="register()">🔥 立即驗證 · 領取專屬餐券</button>
+      <button id="btn" class="submit-btn" onclick="register()">🍔 領取專屬兌換卷</button>
     </div>
 
     <!-- 👨‍🍳 復古莫蘭迪色系 Q版漢堡小廚師 動畫區 -->
@@ -312,22 +312,22 @@
           </g>
         </svg>
         <div class="loading-text">
-          🍔 廚房正火速為您製作專屬餐券... 🍟
+          🍔 廚房正火速為您製作專屬兌換卷... 🍟
         </div>
       </div>
     </div>
 
     <!-- 👉 步驟二：復古點餐結帳聯憑證區塊 -->
     <div id="ticket-card">
-      <div class="screenshot-notice">📸 溫馨提醒：請立即「截圖」保存此兌換餐券！</div>
+      <div class="screenshot-notice">📸 溫馨提醒：請立即「截圖」保存此兌換券！</div>
       
-      <div class="stamp-badge">★ 廚房已核銷確認 · 專屬餐券 ★</div>
-      <div style="font-size: 19px; font-weight: 900; color: var(--ink-black); letter-spacing: 1px;">VIP 貴賓專屬餐券</div>
+      <div class="stamp-badge">【 小編已核銷確認 · 專屬兌換券 】</div>
+      <div style="font-size: 19px; font-weight: 900; color: var(--ink-black); letter-spacing: 1px;">活動兌換卷</div>
       
       <div class="qr-box">
         <img id="qr-code-img" class="qr-img" src="" alt="核銷條碼">
       </div>
-      <span class="highlight-text">至全台門市出示此條碼即可核銷</span>
+      <span class="highlight-text">至德州小騎士門市,出示此條碼即可核銷</span>
 
       <div class="info-list">
         <div class="info-row"><strong>兌換項目</strong> <span id="res-act" style="color: var(--cherry-red);"></span></div>
@@ -340,7 +340,7 @@
       <button class="switch-btn" onclick="resetToForm()">🔄 我要切換／領取其他活動專區</button>
 
       <p style="font-size: 13px; color: var(--ink-muted); margin-top: 18px; margin-bottom: 0; line-height: 1.6; font-weight: 700;">
-        💡 <strong>用餐須知：</strong>若不會截圖，直接至櫃檯向門市人員「報手機號碼」亦可完成核銷。
+        💡 <strong>用餐須知：</strong>若不便截圖，直接至櫃檯向門市人員「報手機號碼」亦可完成核銷。
       </p>
     </div>
 
