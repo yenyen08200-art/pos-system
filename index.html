@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-  <title>門市電子核銷系統</title>
+  <title>門市電子核銷系統 PRO</title>
   
   <link rel="manifest" href="manifest.json">
   <meta name="mobile-web-app-capable" content="yes">
@@ -139,7 +139,7 @@
     .ticket-card::before { left: -14px; border-left-color: transparent; border-top-color: transparent; transform: rotate(45deg); }
     .ticket-card::after { right: -14px; border-right-color: transparent; border-bottom-color: transparent; transform: rotate(45deg); }
 
-    /* 🛠️ 關鍵修復：使用 Flexbox 強制左右對齊，絕對不會掉下去！ */
+    /* 🛠️ 置中且上下對齊的完美排版 */
     .ticket-info { 
       border-bottom: 2px dashed #cbd5e1; 
       padding-bottom: 16px; 
@@ -150,20 +150,24 @@
     }
     .info-row { 
       display: flex; 
-      justify-content: space-between; 
+      justify-content: center; /* 讓整行內容在卡片正中間 */
       align-items: center; 
       font-size: 15px; 
     }
     .info-row strong { 
       color: var(--text-main); 
-      white-space: nowrap; /* 強制標題不斷行 */
+      white-space: nowrap; 
+      width: 100px; /* 固定標題寬度，確保三個圖示上下完全對齊 */
+      text-align: left; 
     }
     .info-row span { 
       font-weight: 700; 
       color: var(--text-main); 
       font-size: 16px; 
-      text-align: right; 
-      word-break: break-all; /* 如果帳號超級長，自動換行不跑版 */
+      text-align: left; /* 讓顧客資料緊貼在標題右邊 */
+      width: 140px; /* 固定資料寬度 */
+      padding-left: 10px; /* 給標題跟資料之間一點呼吸空間 */
+      word-break: break-all; /* 帳號太長會自動換行，絕不跑版 */
     }
     
     .status-box { padding: 14px; border-radius: 12px; font-weight: 800; font-size: 18px; text-align: center; letter-spacing: 0.5px; }
@@ -231,7 +235,7 @@
     <div id="content" style="display:none;">
       <div class="ticket-card">
         
-        <!-- 🛠️ 關鍵修復區域：改為行列 Flex 結構 -->
+        <!-- 🛠️ 置中完美排版區塊 -->
         <div class="ticket-info">
           <div class="info-row">
             <strong>📱 兌換手機</strong> 
