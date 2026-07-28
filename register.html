@@ -20,12 +20,12 @@
       --bg-main: #f5f0eb;       /* 溫柔燕麥奶茶底色 */
       --card-bg: #ffffff;       /* 溫潤純白厚卡質地 */
       --ticket-bg: #faf7f2;     /* 奶油米白憑證底色 */
-      --text-main: #4a3b32;     /* 深焙濃縮咖啡黑 (極致清晰) */
+      --text-main: #4a3b32;     /* 深焙濃縮咖啡黑 */
       --text-sub: #8c7a6b;      /* 溫柔伯爵茶灰 */
-      --accent: #c48b71;        /* 玫瑰焦糖泰奶色 (高質感 CTA) */
+      --accent: #c48b71;        /* 玫瑰焦糖泰奶色 */
       --accent-dark: #a86f56;   /* 按壓深焦糖色 */
       --border-color: #e6dfd5;  /* 柔和邊框色 */
-      --alert-red: #d9777f;     /* 溫柔玫瑰紅 (警示專用) */
+      --alert-red: #d9777f;     /* 溫柔玫瑰紅 */
     }
 
     body { 
@@ -59,7 +59,7 @@
     h1 { color: var(--text-main); font-size: 22px; margin: 0 0 6px 0; font-weight: 850; letter-spacing: 1px; }
     .subtitle { color: var(--text-sub); font-size: 14px; margin: 0; line-height: 1.5; font-weight: 500; }
 
-    /* 🛡️ 主卡片視覺 (法式厚卡紙感) */
+    /* 🛡️ 主卡片視覺 */
     .card { 
       background: var(--card-bg); 
       padding: 26px 22px; 
@@ -79,7 +79,7 @@
     input::placeholder { color: #bcaaa0; font-weight: 400; }
     input:focus, select:focus { border-color: var(--accent); background: #ffffff; box-shadow: 0 0 0 4px rgba(196, 139, 113, 0.15); }
     
-    #activity { background-color: #faf7f2; border-color: #d8cca6; color: var(--text-main); }
+    #activity { background-color: #faf7f2; border-color: #d8cca6; color: var(--text-main); cursor: pointer; }
     #activity option { background: white; color: var(--text-main); }
 
     /* 🔑 玫瑰焦糖通關密語框 */
@@ -97,6 +97,14 @@
     .submit-btn:active { transform: scale(0.98); box-shadow: 0 4px 10px -2px rgba(196, 139, 113, 0.3); }
     .submit-btn:disabled { background: #dcd5cd !important; color: #8c7a6b !important; box-shadow: none !important; cursor: not-allowed; transform: none; }
     
+    /* 🔄 切換活動按鈕 (奶茶副按鈕風) */
+    .switch-btn {
+      background: #faf7f2; color: var(--accent-dark); border: 1.5px solid #d8cca6;
+      padding: 14px; width: 100%; border-radius: 14px; font-size: 15px; font-weight: 750;
+      cursor: pointer; margin-top: 14px; transition: all 0.2s ease;
+    }
+    .switch-btn:active { background: #f0eae1; transform: scale(0.98); }
+
     /* 🎟️ 輕奢精品「電子憑證卡」設計 */
     #ticket-card { display: none; text-align: center; }
     
@@ -105,7 +113,6 @@
       padding: 26px 18px; margin: 15px 0; position: relative;
       box-shadow: 0 10px 25px -5px rgba(74, 59, 50, 0.06);
     }
-    /* 左右打孔切角 (完美對齊燕麥底色) */
     .ticket-box::before, .ticket-box::after {
       content: ""; position: absolute; top: 60%; width: 24px; height: 24px;
       background-color: var(--card-bg); border: 1.5px solid #e3d8c8; border-radius: 50%;
@@ -138,8 +145,9 @@
   <div class="card">
     <!-- 👉 步驟一：登記表單區塊 -->
     <div id="form-section">
-      <label>🎯 選擇兌換活動項目</label>
-      <select id="activity">
+      <label>🎯 選擇兌換活動項目 (切換自動確認權益)</label>
+      <!-- 🌟 關鍵優化：加上 onchange 一切換活動就自動檢查是否有該活動的憑證！ -->
+      <select id="activity" onchange="checkSavedTicket()">
         <option value="父親節社群活動">父親節社群活動</option>
         <option value="中秋節活動">中秋節活動</option>
       </select>
@@ -180,6 +188,9 @@
         </div>
       </div>
       
+      <!-- 🌟 終極解藥：讓客人一鍵切換回表單選其他活動！ -->
+      <button class="switch-btn" onclick="resetToForm()">🔄 我要領取／切換其他活動</button>
+
       <p style="font-size: 13px; color: var(--text-sub); margin-top: 16px; margin-bottom: 0; line-height: 1.6; font-weight: 500;">
         💡 <strong>兌換須知：</strong>若無法截圖，直接至櫃檯向門市人員「報手機號碼」亦可完成連線核銷。
       </p>
@@ -191,12 +202,10 @@
   // ⚠️ 已經幫你保留你的 API 網址
   var API_URL = "https://script.google.com/macros/s/AKfycbyteRoiXgX3h9dpU325M0mg--jNEy1ayfpRPGmXebEEn3Q2Tq37yGNmXiShcrOQqyCm/exec";
 
-  // 📳 觸覺震動觸發器
   function triggerVibe(pattern) {
     if ("vibrate" in navigator) { try { navigator.vibrate(pattern); } catch(e) {} }
   }
 
-  // 🎉 勝利灑幣煙火大慶祝 (調配成溫柔玫瑰金與焦糖紙花)
   function triggerConfetti() {
     if (typeof confetti === 'function') {
       var morandiColors = ['#c48b71', '#a86f56', '#d8cca6', '#8c7a6b', '#f5f0eb'];
@@ -208,15 +217,38 @@
     }
   }
 
-  // 🌟 F5 指紋鎖：網頁一打開，立刻檢查瀏覽器是否已經有領券紀錄！
+  // 🌟 網頁載入時，立即檢查「預設選取的活動」是否有紀錄
   window.onload = function() {
-    var savedPhone = localStorage.getItem("pos_saved_phone");
-    var savedAct = localStorage.getItem("pos_saved_act");
-    if (savedPhone && savedAct === document.getElementById('activity').value) {
-      alert("💡 系統偵測：此瀏覽器已經領取過「" + savedAct + "」囉！自動載入專屬禮遇憑證。");
-      showTicket(savedAct, localStorage.getItem("pos_saved_name") || "VIP 顧客", localStorage.getItem("pos_saved_social") || "", savedPhone);
-    }
+    checkSavedTicket(true);
   };
+
+  // 🌟🌟🌟 核心解藥：檢查指定活動的獨立置物櫃！ 🌟🌟🌟
+  function checkSavedTicket(isFirstLoad) {
+    var act = document.getElementById('activity').value;
+    // 使用 binding 活動名稱的專屬 Key！
+    var savedPhone = localStorage.getItem("pos_" + act + "_phone");
+    
+    if (savedPhone) {
+      if (!isFirstLoad) alert("💡 系統偵測：您之前已經領取過「" + act + "」的憑證囉！為您載入條碼。");
+      showTicket(
+        act, 
+        localStorage.getItem("pos_" + act + "_name") || "VIP 顧客", 
+        localStorage.getItem("pos_" + act + "_social") || "", 
+        savedPhone
+      );
+    } else {
+      // 該活動如果沒領過，乾乾淨淨還原成填表單狀態！
+      document.getElementById('ticket-card').style.display = 'none';
+      document.getElementById('form-section').style.display = 'block';
+    }
+  }
+
+  // 🌟 按下「切換其他活動」按鈕，回到表單畫面
+  function resetToForm() {
+    document.getElementById('ticket-card').style.display = 'none';
+    document.getElementById('form-section').style.display = 'block';
+    triggerVibe(30);
+  }
 
   // 🌟 主管點擊送出的核心大函數
   function register() {
@@ -256,19 +288,17 @@
           if (result.status === "already_registered") {
             alert("💡 系統偵測到此手機號碼或社群帳號之前已經登記過囉！為您顯示原本的專屬憑證。");
           } else {
-            // 新登記成功！狂發震動 + 莫蘭迪煙火彩帶！
             triggerVibe([80, 50, 80, 50, 150]);
             triggerConfetti();
           }
           
-          localStorage.setItem("pos_saved_phone", phone);
-          localStorage.setItem("pos_saved_act", act);
-          localStorage.setItem("pos_saved_name", result.name || name);
-          localStorage.setItem("pos_saved_social", result.social_id || socialId);
+          // 🌟 寫入專屬該活動的置物櫃！不會再互相覆蓋或卡死了！
+          localStorage.setItem("pos_" + act + "_phone", phone);
+          localStorage.setItem("pos_" + act + "_name", result.name || name);
+          localStorage.setItem("pos_" + act + "_social", result.social_id || socialId);
 
           showTicket(act, result.name || name, result.social_id || socialId, phone);
         } else {
-          // 密語錯誤或系統異常警告
           triggerVibe([100, 50, 100]);
           alert(result.error || "驗證失敗：系統回傳異常 (" + JSON.stringify(result) + ")");
           btn.disabled = false;
@@ -283,7 +313,6 @@
       });
   }
 
-  // 顯示數位卡片專用函數
   function showTicket(act, name, social, phone) {
     document.getElementById('form-section').style.display = 'none';
     document.getElementById('ticket-card').style.display = 'block';
@@ -293,7 +322,6 @@
     document.getElementById('res-social').innerText = social;
     document.getElementById('res-phone').innerText = phone;
     
-    // ✅ 生成濃縮咖啡棕色條碼 (dark=4a3b32) 搭配純白底色，優雅又秒刷！
     var qrUrl = "https://quickchart.io/qr?text=" + phone + "&size=250&margin=2&dark=4a3b32&light=ffffff";
     document.getElementById('qr-code-img').src = qrUrl;
   }
