@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-  <title>門市終端核銷系統</title>
+  <title>門市終端核銷系統 PRO MAX</title>
   
   <link rel="manifest" href="manifest.json">
   <meta name="mobile-web-app-capable" content="yes">
@@ -12,7 +12,10 @@
   <meta name="apple-mobile-web-app-title" content="門市核銷">
   <link rel="apple-touch-icon" href="icon.png">
 
+  <!-- 引入 QR Code 掃描庫 -->
   <script src="https://unpkg.com/html5-qrcode"></script>
+  <!-- 引入全螢幕彩帶特效庫 -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 
   <style>
     :root {
@@ -47,7 +50,7 @@
     
     .container { width: 100%; max-width: 420px; }
 
-    /* 🌌 頂部科幻導航列 (毛玻璃與呼吸燈) */
+    /* 🌌 頂部科幻導航列 */
     .store-header { 
       background: rgba(19, 27, 46, 0.8);
       backdrop-filter: blur(12px);
@@ -79,7 +82,7 @@
     }
     .store-header select option { color: #0f172a; background: white; font-weight: bold; }
 
-    /* 🛡️ 主卡片視覺 (科技深邃黑) */
+    /* 🛡️ 主卡片視覺 */
     .card { 
       background: var(--card-dark); 
       padding: 24px 20px; 
@@ -170,18 +173,14 @@
     #reader { width: 100%; }
     .scan-cancel-btn { border-radius: 0; margin-bottom: 0; padding: 14px; background: var(--neon-red); color: white; font-size: 15px; }
 
-    /* 👷‍♂️ 核心亮點：Q版搬磚小男孩動畫專區 */
+    /* 👷‍♂️ Q版搬磚小男孩 動畫專區 */
     #loading { display: none; margin: 25px 0; text-align: center; }
     .chibi-loader-box { display: flex; flex-direction: column; align-items: center; justify-content: center; }
     .chibi-svg { width: 130px; height: 100px; overflow: visible; margin-bottom: 10px; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.5)); }
     
-    /* 身體跳躍動畫 */
     .chibi-boy { animation: chibi-bounce 0.45s infinite alternate cubic-bezier(0.4, 0, 0.6, 1); transform-origin: center bottom; }
-    /* 地面陰影縮放 */
     .shadow { animation: shadow-scale 0.45s infinite alternate cubic-bezier(0.4, 0, 0.6, 1); transform-origin: center; }
-    /* 磚頭奮力微晃 */
     .brick-holding { animation: brick-wobble 0.45s infinite alternate ease-in-out; transform-origin: center; }
-    /* 飛濺的藍綠色汗珠 */
     .drop-1 { animation: sweat-fly-right 0.9s infinite linear; }
     .drop-2 { animation: sweat-fly-left 0.9s 0.45s infinite linear; }
     
@@ -334,42 +333,29 @@
     <div id="loading">
       <div class="chibi-loader-box">
         <svg viewBox="0 0 120 100" class="chibi-svg">
-          <!-- 地面科技藍陰影 -->
           <ellipse cx="60" cy="92" rx="26" ry="5" fill="rgba(0, 242, 254, 0.3)" class="shadow"/>
-          <!-- 飛濺的霓虹藍綠汗珠 -->
           <path d="M 86 42 Q 93 36 91 50 Z" fill="#00f2fe" class="drop-1"/>
           <path d="M 34 46 Q 27 40 29 54 Z" fill="#00ff87" class="drop-2"/>
-          <!-- Q版搬磚小男孩 -->
           <g class="chibi-boy">
-            <!-- 雙腳 -->
             <ellipse cx="50" cy="86" rx="6" ry="5" fill="#ffb199"/>
             <ellipse cx="70" cy="86" rx="6" ry="5" fill="#ffb199"/>
-            <!-- 身體與工作服 (靛藍科技制服) -->
             <rect x="46" y="58" width="28" height="26" rx="8" fill="#1d4ed8"/>
             <rect x="50" y="68" width="20" height="16" rx="4" fill="#0b0f19"/>
-            <!-- 大頭 -->
             <circle cx="60" cy="42" r="23" fill="#ffe0d2"/>
-            <!-- 腮紅 -->
             <ellipse cx="43" cy="46" rx="5" ry="3.5" fill="#ff8f9c" opacity="0.75"/>
             <ellipse cx="77" cy="46" rx="5" ry="3.5" fill="#ff8f9c" opacity="0.75"/>
-            <!-- 堅毅認真的眼神 (^ ^) -->
             <path d="M 45 40 Q 49 35 53 40" stroke="#0b0f19" stroke-width="3" fill="none" stroke-linecap="round"/>
             <path d="M 67 40 Q 71 35 75 40" stroke="#0b0f19" stroke-width="3" fill="none" stroke-linecap="round"/>
-            <!-- 努力奮鬥的嘴巴 (w) -->
             <path d="M 56 50 Q 58.5 53 60 50 Q 61.5 53 64 50" stroke="#0b0f19" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-            <!-- 黃色工程安全帽 -->
             <path d="M 35 38 A 25 25 0 0 1 85 38 Z" fill="#ffdb4d"/>
             <rect x="33" y="36" width="54" height="6" rx="3" fill="#ffcc00"/>
             <circle cx="60" cy="24" r="5" fill="#ff9900"/>
-            <!-- 雙手奮力搬著紅磚頭 -->
             <g class="brick-holding">
               <rect x="32" y="54" width="56" height="20" rx="4" fill="#ff0844" stroke="#ff8f9c" stroke-width="1.5"/>
-              <!-- 磚頭縱橫紋路 -->
               <line x1="60" y1="54" x2="60" y2="74" stroke="#ffb199" stroke-width="1.5"/>
               <line x1="32" y1="64" x2="88" y2="64" stroke="#ffb199" stroke-width="1.5"/>
               <line x1="46" y1="54" x2="46" y2="64" stroke="#ffb199" stroke-width="1.5"/>
               <line x1="74" y1="64" x2="74" y2="74" stroke="#ffb199" stroke-width="1.5"/>
-              <!-- 小手手扣在磚頭前方 -->
               <circle cx="42" cy="64" r="6" fill="#ffe0d2" stroke="#ffb199" stroke-width="1"/>
               <circle cx="78" cy="64" r="6" fill="#ffe0d2" stroke="#ffb199" stroke-width="1"/>
             </g>
@@ -449,6 +435,70 @@
   var undoInterval = null; 
   let html5QrCode; 
 
+  /* 🌟🌟🌟 核心魔法：Web Audio API 音效合成引擎 + 4D 震動 🌟🌟🌟 */
+  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+  function playArcadeSound(type) {
+    // 確保瀏覽器解鎖音效權限
+    if (audioCtx.state === 'suspended') { audioCtx.resume(); }
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    
+    if (type === 'beep') {
+      // 科技嗶聲 (查詢成功/掃描到條碼)
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(1400, audioCtx.currentTime + 0.08);
+      gain.gain.setValueAtTime(0.25, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.08);
+      osc.start(); osc.stop(audioCtx.currentTime + 0.08);
+      triggerVibe(40); // 輕震動手感
+    } else if (type === 'win') {
+      // 金幣勝利灑幣爽感音效 (Super Mario 風格)
+      const now = audioCtx.currentTime;
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(523.25, now);       // C5
+      osc.frequency.setValueAtTime(659.25, now + 0.08);// E5
+      osc.frequency.setValueAtTime(783.99, now + 0.16);// G5
+      osc.frequency.setValueAtTime(1046.50, now + 0.24);// C6 高音！
+      gain.gain.setValueAtTime(0.35, now);
+      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.55);
+      osc.start(now); osc.stop(now + 0.55);
+      triggerVibe([80, 50, 80, 50, 150]); // 三連發勝利震動！
+    } else if (type === 'error') {
+      // 警告低音
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(250, audioCtx.currentTime);
+      osc.frequency.setValueAtTime(130, audioCtx.currentTime + 0.15);
+      gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+      osc.start(); osc.stop(audioCtx.currentTime + 0.3);
+      triggerVibe([100, 50, 100]); // 警告震動
+    }
+  }
+
+  // 觸覺脈衝震動觸發器
+  function triggerVibe(pattern) {
+    if ("vibrate" in navigator) {
+      try { navigator.vibrate(pattern); } catch(e) {}
+    }
+  }
+
+  // 🎉 金幣派對彩帶大噴發！
+  function triggerConfetti() {
+    if (typeof confetti === 'function') {
+      // 中間噴發
+      confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 } });
+      // 左右加碼煙火噴發
+      setTimeout(() => {
+        confetti({ particleCount: 50, angle: 60, spread: 55, origin: { x: 0 } });
+        confetti({ particleCount: 50, angle: 120, spread: 55, origin: { x: 1 } });
+      }, 200);
+    }
+  }
+
   window.onload = function() {
     var savedStore = localStorage.getItem("pos_store");
     if(savedStore) {
@@ -489,6 +539,7 @@
         var cleanPhone = decodedText.replace(/\D/g, '');
         document.getElementById('search-input').value = cleanPhone;
         stopScanner();
+        playArcadeSound('beep'); // 掃描成功發出嗶聲！
         searchCoupon(); 
       },
       (errorMessage) => {}
@@ -520,6 +571,7 @@
     searchBtn.disabled = true;
     searchBtn.innerText = "查詢中";
     searchBtn.style.background = "#334155";
+    triggerVibe(30); // 按鈕按壓震動
 
     clearInterval(undoInterval);
     document.getElementById('undo-area').style.display = 'none';
@@ -537,8 +589,12 @@
         searchBtn.style.background = "";
         
         document.getElementById('loading').style.display = 'none';
-        if (!result.exists) return alert(result.error || "❌ 在活動名單中找不到此手機號碼！");
+        if (!result.exists) {
+          playArcadeSound('error');
+          return alert(result.error || "❌ 在活動名單中找不到此手機號碼！");
+        }
         
+        playArcadeSound('beep'); // 查詢成功發出嗶聲與輕震動
         document.getElementById('content').style.display = 'block';
         document.getElementById('id-text').innerText = phone;
         document.getElementById('name-text').innerText = result.name || "未提供";
@@ -550,6 +606,7 @@
         searchBtn.innerText = "查詢";
         searchBtn.style.background = "";
         
+        playArcadeSound('error');
         alert("查詢逾時！請確認網路狀態，或直接重整頁面試試。\n(錯誤描述：" + error.message + ")");
         document.getElementById('loading').style.display = 'none';
       });
@@ -588,6 +645,7 @@
     
     btn.disabled = true;
     btn.innerText = "⏳ 總部系統連線寫入中...";
+    triggerVibe(40);
     
     var url = API_URL + "?action=redeem&id=" + id + "&store=" + encodeURIComponent(store) + "&sheet=" + encodeURIComponent(activity) + "&t=" + new Date().getTime();
 
@@ -596,17 +654,25 @@
       .then(result => {
         if (result.status === "success") {
           updateUI({ status: "已兌換", time: new Date().getTime(), store: store });
+          
+          /* 🎉 慶祝大決招：金幣爽感音效 + 彩帶煙火大噴發 + 三連震！ */
+          playArcadeSound('win');
+          triggerConfetti();
+          
           startUndoTimer(); 
         } else if (result.status === "error_already_redeemed") {
+          playArcadeSound('error');
           alert("⚠️ 錯誤：這張券剛剛已被兌換過！");
           searchCoupon(); 
         } else {
+          playArcadeSound('error');
           alert("核銷失敗，請重試。");
           btn.disabled = false;
           btn.innerText = "✔ 確認核銷優惠 (點擊即失效)";
         }
       })
       .catch(error => {
+        playArcadeSound('error');
         alert("⚠️ 網路回傳似乎卡住了，但資料可能已核銷成功！請點擊上方綠色「查詢」按鈕重新整理狀態。");
         btn.disabled = false;
         btn.innerText = "✔ 確認核銷優惠 (點擊即失效)";
@@ -635,6 +701,7 @@
     clearInterval(undoInterval); 
     undoBtn.disabled = true;
     undoBtn.innerText = "⏳ 正在復原總部資料...";
+    triggerVibe(40);
 
     var url = API_URL + "?action=undo&id=" + id + "&sheet=" + encodeURIComponent(activity) + "&t=" + new Date().getTime();
 
@@ -643,14 +710,17 @@
       .then(result => {
         if (result.status === "success") {
           document.getElementById('undo-area').style.display = 'none';
+          playArcadeSound('beep');
           alert("✅ 已成功撤銷核銷！");
           searchCoupon(); 
         } else {
+          playArcadeSound('error');
           alert("撤銷失敗，請聯絡總部處理。");
           document.getElementById('undo-area').style.display = 'none';
         }
       })
       .catch(error => {
+        playArcadeSound('error');
         alert("連線逾時，請按查詢重整狀態。");
         document.getElementById('undo-area').style.display = 'none';
       });
