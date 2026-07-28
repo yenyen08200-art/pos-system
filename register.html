@@ -32,52 +32,36 @@
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif; 
       background-color: var(--bg-parchment); 
       background-image: var(--paper-texture), radial-gradient(rgba(153, 27, 27, 0.04) 1px, transparent 0), radial-gradient(rgba(39, 39, 42, 0.04) 1px, transparent 0);
-      background-size: 150px 150px, 24px 24px, 24px 24px;
-      background-position: 0 0, 0 0, 12px 12px;
+      background-size: 150px 150px, 24px 24px, 24px 24px; background-position: 0 0, 0 0, 12px 12px;
       color: var(--ink-black); margin: 0; padding: 20px 16px; display: flex; justify-content: center; align-items: center; min-height: 95vh; box-sizing: border-box;
     }
     
     .container { width: 100%; max-width: 400px; }
-
-    .guest-check {
-      background-color: var(--paper-cream); background-image: var(--paper-texture); background-size: 150px 150px;
-      border: var(--border-ink); border-radius: 4px; box-shadow: 0 15px 35px -5px rgba(39, 39, 42, 0.18), 0 5px 15px -5px rgba(0,0,0,0.1);
-      position: relative; overflow: hidden; padding: 0;
-    }
-
+    .guest-check { background-color: var(--paper-cream); background-image: var(--paper-texture); background-size: 150px 150px; border: var(--border-ink); border-radius: 4px; box-shadow: 0 15px 35px -5px rgba(39, 39, 42, 0.18), 0 5px 15px -5px rgba(0,0,0,0.1); position: relative; overflow: hidden; padding: 0; }
     .check-header { background-color: var(--paper-warm); background-image: var(--paper-texture); border-bottom: 2px double var(--ink-black); padding: 22px 22px 16px 22px; text-align: center; position: relative; }
     .check-no { font-family: "Courier New", monospace; font-size: 13px; font-weight: 800; color: var(--cherry-red); letter-spacing: 1px; margin-bottom: 8px; display: block; }
     h1 { font-size: 24px; font-weight: 900; color: var(--ink-black); margin: 0 0 6px 0; letter-spacing: 1.5px; }
     .subtitle { font-size: 13px; color: var(--ink-muted); margin: 0; font-weight: 700; letter-spacing: 0.5px; }
-
     .server-meta { display: flex; justify-content: space-between; border-bottom: var(--border-ink); background: var(--paper-cream); padding: 10px 22px; font-size: 13px; font-weight: 700; color: var(--ink-muted); letter-spacing: 0.5px; }
     .server-meta span strong { color: var(--ink-black); }
-
     .check-body { padding: 24px 22px 28px 22px; }
-
     label { display: block; text-align: left; font-weight: 800; color: var(--ink-black); margin-bottom: 8px; font-size: 14px; letter-spacing: 0.5px; }
-    
     input, select { width: 100%; padding: 14px 16px; border-radius: 2px; border: var(--border-ink); background: var(--paper-warm); color: var(--ink-black); font-size: 16px; font-weight: 700; margin-bottom: 18px; box-sizing: border-box; transition: all 0.2s ease; outline: none; font-family: inherit; }
     input::placeholder { color: #a1a1aa; font-weight: 400; font-size: 15px; }
     input:focus, select:focus { background: #ffffff; border-color: var(--cherry-red); box-shadow: inset 3px 0 0 var(--cherry-red); }
-    
     #activity { background-color: #fff9ed; border-color: var(--mustard-gold); color: var(--ink-black); cursor: pointer; }
     #activity option { background: white; color: var(--ink-black); font-weight: bold; }
-
     .secret-box { background: #fffdf9; padding: 14px 16px; border-radius: 2px; border: 1.5px dashed var(--cherry-red); margin-bottom: 24px; text-align: center; }
     .secret-box label { color: var(--cherry-red); text-align: center; margin-bottom: 8px; font-size: 15px; }
     #secret_code { border: 1px solid #fca5a5; background: #fffafa; margin-bottom: 0; text-transform: uppercase; letter-spacing: 4px; text-align: center; font-size: 20px; font-weight: 900; color: var(--cherry-red); }
     #secret_code:focus { box-shadow: none; border-color: var(--cherry-red); background: white; }
-
     .submit-btn { background: var(--cherry-red); color: white; border: 1.5px solid var(--cherry-red); padding: 16px; width: 100%; border-radius: 2px; font-size: 17px; font-weight: 800; cursor: pointer; letter-spacing: 1.5px; transition: all 0.2s ease; box-shadow: 0 4px 12px rgba(153, 27, 27, 0.25); font-family: inherit; }
     .submit-btn:hover { background: #7f1d1d; border-color: #7f1d1d; }
     .submit-btn:active { transform: translateY(2px); box-shadow: none; }
     .submit-btn:disabled { background: #e4e4e7 !important; color: #a1a1aa !important; border-color: #d4d4d8 !important; box-shadow: none !important; cursor: not-allowed; transform: none; }
-    
     .switch-btn { background: transparent; color: var(--ink-black); border: 1.5px dashed var(--ink-black); padding: 14px; width: 100%; border-radius: 2px; font-size: 15px; font-weight: 800; cursor: pointer; margin-top: 20px; transition: all 0.2s ease; letter-spacing: 0.5px; font-family: inherit; }
     .switch-btn:hover { background: var(--paper-warm); }
     .switch-btn:active { transform: translateY(1px); }
-
     #loading { display: none; padding: 40px 22px; text-align: center; }
     .chibi-loader-box { display: flex; flex-direction: column; align-items: center; justify-content: center; }
     .chibi-svg { width: 135px; height: 105px; overflow: visible; margin-bottom: 20px; filter: drop-shadow(0 8px 12px rgba(39, 39, 42, 0.12)); }
@@ -91,7 +75,6 @@
     @keyframes star-pop { 0% { transform: translate(0, 0) scale(0.3); opacity: 0; } 50% { opacity: 1; } 100% { transform: translate(22px, -18px) scale(1.3) rotate(180deg); opacity: 0; } }
     .loading-text { color: var(--cherry-red); font-weight: 800; font-size: 16px; letter-spacing: 1px; animation: pulse-text 1.5s infinite; }
     @keyframes pulse-text { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
-
     #ticket-card { display: none; padding: 24px 22px 28px 22px; text-align: center; }
     .stamp-badge { display: inline-block; border: 2px solid var(--cherry-red); color: var(--cherry-red); font-size: 13px; font-weight: 900; letter-spacing: 2px; padding: 4px 14px; border-radius: 2px; transform: rotate(-4deg); margin-bottom: 14px; background: rgba(153, 27, 27, 0.03); transition: all 0.3s ease; }
     .qr-box { background: white; padding: 12px; border: var(--border-ink); border-radius: 2px; display: inline-block; margin: 10px 0; box-shadow: 0 8px 20px rgba(0,0,0,0.06); }
@@ -188,24 +171,19 @@
 
     <div id="ticket-card">
       <div class="screenshot-notice">📸 溫馨提醒：請立即「截圖」保存此兌換券！</div>
-      
       <div class="stamp-badge">【 小編已核銷確認 · 專屬兌換券 】</div>
       <div style="font-size: 19px; font-weight: 900; color: var(--ink-black); letter-spacing: 1px;">活動兌換卷</div>
-      
       <div class="qr-box">
         <img id="qr-code-img" class="qr-img" src="" alt="核銷條碼">
       </div>
       <span class="highlight-text">至德州小騎士門市,出示此條碼即可核銷</span>
-
       <div class="info-list">
         <div class="info-row"><strong>兌換項目</strong> <span id="res-act" style="color: var(--cherry-red);"></span></div>
         <div class="info-row"><strong>顧客姓名</strong> <span id="res-name"></span></div>
         <div class="info-row"><strong>社群帳號</strong> <span id="res-social"></span></div>
         <div class="info-row"><strong>綁定手機</strong> <span id="res-phone"></span></div>
       </div>
-      
       <button class="switch-btn" onclick="resetToForm()">🔄 我要切換／領取其他活動專區</button>
-
       <p style="font-size: 13px; color: var(--ink-muted); margin-top: 18px; margin-bottom: 0; line-height: 1.6; font-weight: 700;">
         💡 <strong>用餐須知：</strong>若不便截圖，直接至櫃檯向門市人員「報手機號碼」亦可完成核銷。
       </p>
@@ -216,10 +194,8 @@
 </div>
 
 <script>
-  // ⚠️ 已經幫你保留你的 API 網址
   var API_URL = "https://script.google.com/macros/s/AKfycbyteRoiXgX3h9dpU325M0mg--jNEy1ayfpRPGmXebEEn3Q2Tq37yGNmXiShcrOQqyCm/exec";
-  
-  var syncTimer = null; // 總部心跳連線計時器
+  var syncTimer = null; 
 
   function triggerVibe(pattern) {
     if ("vibrate" in navigator) { try { navigator.vibrate(pattern); } catch(e) {} }
@@ -307,7 +283,6 @@
     triggerVibe(40);
 
     document.getElementById('form-section').style.display = 'none';
-    document.getElementById('loading').style.display = 'none';
     document.getElementById('loading').style.display = 'block';
 
     var baseUrl = API_URL.split('?')[0]; 
@@ -325,15 +300,15 @@
     fetch(url, { method: 'GET', redirect: 'follow' })
       .then(response => response.json())
       .then(result => {
+        // 🌟 革命性升級：不管是成功，還是「剛才已經登記過」，一律視為成功！絕不跳錯誤！
         if (result.status === "success" || result.status === "already_registered") {
           if (result.status === "already_registered") {
-            alert("💡 系統偵測到此手機號碼或社群帳號之前已經登記過囉！為您顯示原本的專屬餐券。");
+            alert("💡 歡迎回來！系統偵測到您之前已經成功登記過此活動，自動為您載入專屬餐券！");
           } else {
             triggerVibe([80, 50, 80, 50, 150]);
             triggerConfetti();
           }
           
-          // 🌟 登記新券時，清除舊的核銷記憶
           localStorage.removeItem("pos_" + act + "_status");
           localStorage.setItem("pos_" + act + "_phone", phone);
           localStorage.setItem("pos_" + act + "_name", result.name || name);
@@ -348,10 +323,30 @@
         }
       })
       .catch(error => {
-        triggerVibe([100, 50, 100]);
-        alert("連線發生問題，請檢查網路狀態！錯誤描述：" + error);
-        document.getElementById('loading').style.display = 'none';
-        document.getElementById('form-section').style.display = 'block';
+        // 🌟 斷線自癒機制：如果網路稍微延遲卡住，不馬上跳錯，主動去後台確認一次到底成功了沒！
+        var checkUrl = baseUrl + "?action=check&id=" + phone + "&sheet=" + encodeURIComponent(act) + "&t=" + new Date().getTime();
+        fetch(checkUrl, { method: 'GET', redirect: 'follow' })
+          .then(r => r.json())
+          .then(checkRes => {
+            if (checkRes.exists) {
+              // 其實後台已經成功寫入了！直接帶入餐券！
+              localStorage.setItem("pos_" + act + "_phone", phone);
+              localStorage.setItem("pos_" + act + "_name", checkRes.name || name);
+              localStorage.setItem("pos_" + act + "_social", checkRes.social_id || socialId);
+              showTicket(act, checkRes.name || name, checkRes.social_id || socialId, phone);
+            } else {
+              triggerVibe([100, 50, 100]);
+              alert("⚠️ 網路連線延遲，請檢查網路狀態或重新點擊領取！");
+              document.getElementById('loading').style.display = 'none';
+              document.getElementById('form-section').style.display = 'block';
+            }
+          })
+          .catch(e => {
+            triggerVibe([100, 50, 100]);
+            alert("⚠️ 網路連線不穩，請重新點擊領取！");
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('form-section').style.display = 'block';
+          });
       });
   }
 
@@ -369,19 +364,16 @@
     var qrImg = document.getElementById('qr-code-img');
     qrImg.src = qrUrl;
 
-    // 🌟🌟🌟 核心防護一：檢查 localStorage 是否有「已核銷」記憶！ 🌟🌟🌟
     var cachedStatus = localStorage.getItem("pos_" + act + "_status");
     if (cachedStatus === "已兌換") {
-      renderRedeemedState("門市", false); // 🌟 如果快取是已兌換，不管 F5 怎麼刷都「永遠保持灰色」！
-      return; // 已經核銷過了，不用再啟動定時器浪費流量！
+      renderRedeemedState("門市", false); 
+      return; 
     } else {
-      qrImg.style.opacity = "1"; // 未核銷才保持清晰
+      qrImg.style.opacity = "1"; 
     }
 
-    // 🌟 核心防護二：打開憑證時，立刻在背景先秒查一次！(不用傻等 10 秒)
     checkStatusFromServer(act, phone, false);
 
-    // 啟動心跳偵測計時器
     if (syncTimer) clearInterval(syncTimer);
     var pollCount = 0;
 
@@ -393,7 +385,6 @@
     }, 10000);
   }
 
-  // 獨立抽出的總部查詢專用函數
   function checkStatusFromServer(act, phone, isFromTimer) {
     var baseUrl = API_URL.split('?')[0];
     var url = baseUrl + "?action=check&id=" + phone + "&sheet=" + encodeURIComponent(act) + "&t=" + new Date().getTime();
@@ -403,20 +394,16 @@
       .then(res => {
         if (res.exists && res.status === "已兌換") {
           if (syncTimer) clearInterval(syncTimer);
-          
-          // 🌟 永遠寫入手機終身記憶體！
           localStorage.setItem("pos_" + act + "_status", "已兌換");
-          
           renderRedeemedState(res.store || "門市", isFromTimer);
         }
       })
       .catch(e => {});
   }
 
-  // 獨立抽出的完食變身UI專用函數
   function renderRedeemedState(storeName, triggerSoundAndAlert) {
     var qrImg = document.getElementById('qr-code-img');
-    qrImg.style.opacity = "0.15"; // 條碼永遠變灰退色！
+    qrImg.style.opacity = "0.15"; 
     
     var stamp = document.querySelector(".stamp-badge");
     stamp.innerHTML = "【 廚房已核銷確認 · 感謝完食 】";
