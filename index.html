@@ -35,7 +35,9 @@
     body { 
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif; 
       background-color: var(--bg-dark); 
-      background-image: radial-gradient(at 10% 10%, rgba(0, 242, 254, 0.08) 0px, transparent 50%), radial-gradient(at 90% 90%, rgba(0, 255, 135, 0.05) 0px, transparent 50%);
+      background-image: 
+        radial-gradient(at 10% 10%, rgba(0, 242, 254, 0.08) 0px, transparent 50%),
+        radial-gradient(at 90% 90%, rgba(0, 255, 135, 0.05) 0px, transparent 50%);
       color: var(--text-main); margin: 0; padding: 16px; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; box-sizing: border-box;
     }
     
@@ -239,6 +241,7 @@
 </div>
 
 <script>
+  // ⚠️ 已經保留你專屬的 API 網址 
   var API_URL = "https://script.google.com/macros/s/AKfycbyteRoiXgX3h9dpU325M0mg--jNEy1ayfpRPGmXebEEn3Q2Tq37yGNmXiShcrOQqyCm/exec"; 
 
   const storeEventMap = {
@@ -472,8 +475,8 @@
     fetch(url, { method: 'GET', redirect: 'follow' })
       .then(response => response.json())
       .then(result => {
-        // 🌟 終極黑科技：不管是新核銷成功，還是「剛剛 3 秒前已經兌換過」，一律視為核銷成功！
-        // 徹底根除因為現場網路延遲、員工手抖多按幾下導致的「假報錯」！
+        // 🌟 革命性優化：不管是剛成功核銷，還是「剛剛 3 秒前已被兌換」，一律判定為兌換成功！
+        // 徹底根除現場網路延遲、員工重複按壓導致的假報錯，直接噴發勝利彩帶！
         if (result.status === "success" || result.status === "error_already_redeemed") {
           updateUI({ status: "已兌換", time: new Date().getTime(), store: store });
           
@@ -489,9 +492,9 @@
         }
       })
       .catch(error => {
-        // 🌟 斷線友善處理：不要發出難聽的錯誤音效！
+        // 🌟 友善靜默處理：遇到網路不穩回傳卡住，不再發出刺耳音效與報錯
         playArcadeSound('beep');
-        alert("⚠️ 網路連線延遲，但您的核銷指令「極可能已寫入後台」！\n請點擊上方綠色「查詢」按鈕重整最新狀態，勿重複按核銷！");
+        alert("⚠️ 網路回傳似乎卡住了，但資料「極度可能已經核銷成功」！\n請點擊上方綠色「查詢」按鈕重整最新狀態，切勿重複點擊核銷！");
         btn.disabled = false;
         btn.innerText = "✔ 確認核銷優惠 (點擊即失效)";
       });
