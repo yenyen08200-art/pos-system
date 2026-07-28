@@ -35,239 +35,69 @@
     body { 
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif; 
       background-color: var(--bg-dark); 
-      background-image: 
-        radial-gradient(at 10% 10%, rgba(0, 242, 254, 0.08) 0px, transparent 50%),
-        radial-gradient(at 90% 90%, rgba(0, 255, 135, 0.05) 0px, transparent 50%);
-      color: var(--text-main);
-      margin: 0; 
-      padding: 16px; 
-      display: flex; 
-      justify-content: center; 
-      align-items: flex-start; 
-      min-height: 100vh; 
-      box-sizing: border-box;
+      background-image: radial-gradient(at 10% 10%, rgba(0, 242, 254, 0.08) 0px, transparent 50%), radial-gradient(at 90% 90%, rgba(0, 255, 135, 0.05) 0px, transparent 50%);
+      color: var(--text-main); margin: 0; padding: 16px; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; box-sizing: border-box;
     }
     
     .container { width: 100%; max-width: 420px; }
-
-    /* 🌌 頂部科幻導航列 */
-    .store-header { 
-      background: rgba(19, 27, 46, 0.8);
-      backdrop-filter: blur(12px);
-      color: white; 
-      padding: 16px 20px; 
-      border-radius: 18px; 
-      margin-bottom: 20px; 
-      box-shadow: 0 10px 30px -10px rgba(0, 242, 254, 0.2);
-      border: 1px solid rgba(0, 242, 254, 0.3);
-      position: relative;
-      overflow: hidden;
-    }
-    .store-header::before {
-      content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 3px;
-      background: linear-gradient(90deg, var(--neon-blue), var(--neon-green));
-    }
+    .store-header { background: rgba(19, 27, 46, 0.8); backdrop-filter: blur(12px); color: white; padding: 16px 20px; border-radius: 18px; margin-bottom: 20px; box-shadow: 0 10px 30px -10px rgba(0, 242, 254, 0.2); border: 1px solid rgba(0, 242, 254, 0.3); position: relative; overflow: hidden; }
+    .store-header::before { content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 3px; background: linear-gradient(90deg, var(--neon-blue), var(--neon-green)); }
     .store-header label { font-size: 13px; font-weight: 700; color: var(--neon-blue); margin-bottom: 6px; display: flex; align-items: center; gap: 6px; letter-spacing: 1px; text-transform: uppercase; }
     .store-header label::before { content: "●"; color: var(--neon-green); animation: pulse 1.5s infinite; }
-    
-    .store-header select { 
-      background-color: rgba(11, 15, 25, 0.8); 
-      color: white; 
-      border: 1px solid rgba(255, 255, 255, 0.15); 
-      font-weight: 800; 
-      font-size: 16px;
-      margin-bottom: 0;
-      padding: 12px;
-      border-radius: 10px;
-    }
+    .store-header select { background-color: rgba(11, 15, 25, 0.8); color: white; border: 1px solid rgba(255, 255, 255, 0.15); font-weight: 800; font-size: 16px; margin-bottom: 0; padding: 12px; border-radius: 10px; }
     .store-header select option { color: #0f172a; background: white; font-weight: bold; }
 
-    /* 🛡️ 主卡片視覺 */
-    .card { 
-      background: var(--card-dark); 
-      padding: 24px 20px; 
-      border-radius: 24px; 
-      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); 
-      text-align: center; 
-      border: 1px solid rgba(255, 255, 255, 0.08);
-    }
+    .card { background: var(--card-dark); padding: 24px 20px; border-radius: 24px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); text-align: center; border: 1px solid rgba(255, 255, 255, 0.08); }
     h2 { color: white; margin-top: 0; margin-bottom: 20px; font-size: 22px; font-weight: 900; letter-spacing: 0.5px; text-shadow: 0 0 15px rgba(0, 242, 254, 0.3); }
     
-    /* 🎯 活動選項區 */
     .section-label { font-weight: 700; color: var(--text-sub); font-size: 14px; display: block; margin-bottom: 8px; text-align: left; letter-spacing: 0.5px; }
-    select, input, button { 
-      width: 100%; 
-      padding: 16px; 
-      border-radius: 14px; 
-      font-size: 16px; 
-      box-sizing: border-box; 
-      transition: all 0.25s ease; 
-      outline: none;
-    }
-    
-    #activity-select { 
-      background: linear-gradient(135deg, rgba(0, 255, 135, 0.1), rgba(96, 239, 255, 0.1)); 
-      border: 1px solid rgba(0, 255, 135, 0.4); 
-      color: var(--neon-green); 
-      font-weight: 800; 
-    }
+    select, input, button { width: 100%; padding: 16px; border-radius: 14px; font-size: 16px; box-sizing: border-box; transition: all 0.25s ease; outline: none; }
+    #activity-select { background: linear-gradient(135deg, rgba(0, 255, 135, 0.1), rgba(96, 239, 255, 0.1)); border: 1px solid rgba(0, 255, 135, 0.4); color: var(--neon-green); font-weight: 800; }
     #activity-select option { color: #0f172a; background: white; }
 
-    /* 🔍 搜尋與輸入框 */
-    input {
-      background: rgba(11, 15, 25, 0.9);
-      border: 2px solid rgba(255, 255, 255, 0.1);
-      color: white;
-      font-weight: bold;
-      letter-spacing: 1px;
-    }
+    input { background: rgba(11, 15, 25, 0.9); border: 2px solid rgba(255, 255, 255, 0.1); color: white; font-weight: bold; letter-spacing: 1px; }
     input::placeholder { color: #475569; }
     input:focus { border-color: var(--neon-blue); box-shadow: 0 0 15px rgba(0, 242, 254, 0.2); }
 
-    /* ⚡ 霓虹科技按鈕 */
-    button { 
-      border: none; 
-      font-weight: 800; 
-      cursor: pointer; 
-      display: flex; 
-      justify-content: center; 
-      align-items: center; 
-      gap: 8px;
-      letter-spacing: 0.5px;
-    }
+    button { border: none; font-weight: 800; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; letter-spacing: 0.5px; }
     button:active { transform: scale(0.96); }
     button:disabled { background: #334155 !important; color: #64748b !important; cursor: not-allowed; transform: none; box-shadow: none !important; border: none !important; }
     
-    .btn-green { 
-      background: linear-gradient(135deg, #00b09b, #96c93d); 
-      color: #000; 
-      box-shadow: 0 0 20px rgba(0, 255, 135, 0.4); 
-    }
+    .btn-green { background: linear-gradient(135deg, #00b09b, #96c93d); color: #000; box-shadow: 0 0 20px rgba(0, 255, 135, 0.4); }
     .btn-green:active { box-shadow: 0 0 10px rgba(0, 255, 135, 0.6); }
-    
-    .btn-dark { 
-      background: #1e293b; 
-      color: white; 
-      border: 1px solid rgba(255,255,255,0.1); 
-      box-shadow: 0 4px 10px rgba(0,0,0,0.3); 
-    }
-    
-    .btn-redeem {
-      background: linear-gradient(135deg, var(--neon-blue), var(--neon-indigo));
-      color: #000;
-      box-shadow: 0 0 25px rgba(0, 242, 254, 0.5);
-      font-size: 18px; 
-      padding: 18px;
-    }
-    
-    .undo-btn { 
-      background: linear-gradient(135deg, #ff0844, #ffb199); 
-      color: white; 
-      margin-top: 14px; 
-      font-size: 15px; 
-      box-shadow: 0 0 20px rgba(255, 8, 68, 0.4); 
-    }
+    .btn-dark { background: #1e293b; color: white; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+    .btn-redeem { background: linear-gradient(135deg, var(--neon-blue), var(--neon-indigo)); color: #000; box-shadow: 0 0 25px rgba(0, 242, 254, 0.5); font-size: 18px; padding: 18px; }
+    .undo-btn { background: linear-gradient(135deg, #ff0844, #ffb199); color: white; margin-top: 14px; font-size: 15px; box-shadow: 0 0 20px rgba(255, 8, 68, 0.4); }
 
-    /* 📷 HUD 戰術掃描框 */
     #reader-container { display: none; margin: 15px 0; border: 2px solid var(--neon-blue); border-radius: 18px; overflow: hidden; background: #000; box-shadow: 0 0 20px rgba(0, 242, 254, 0.3); }
     #reader { width: 100%; }
     .scan-cancel-btn { border-radius: 0; margin-bottom: 0; padding: 14px; background: var(--neon-red); color: white; font-size: 15px; }
 
-    /* 👷‍♂️ Q版搬磚小男孩 動畫專區 */
     #loading { display: none; margin: 25px 0; text-align: center; }
     .chibi-loader-box { display: flex; flex-direction: column; align-items: center; justify-content: center; }
     .chibi-svg { width: 130px; height: 100px; overflow: visible; margin-bottom: 10px; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.5)); }
-    
     .chibi-boy { animation: chibi-bounce 0.45s infinite alternate cubic-bezier(0.4, 0, 0.6, 1); transform-origin: center bottom; }
     .shadow { animation: shadow-scale 0.45s infinite alternate cubic-bezier(0.4, 0, 0.6, 1); transform-origin: center; }
     .brick-holding { animation: brick-wobble 0.45s infinite alternate ease-in-out; transform-origin: center; }
     .drop-1 { animation: sweat-fly-right 0.9s infinite linear; }
     .drop-2 { animation: sweat-fly-left 0.9s 0.45s infinite linear; }
-    
-    @keyframes chibi-bounce {
-      0% { transform: translateY(0) scaleY(0.96); }
-      100% { transform: translateY(-12px) scaleY(1.04); }
-    }
-    @keyframes shadow-scale {
-      0% { transform: scale(1); opacity: 0.8; }
-      100% { transform: scale(0.55); opacity: 0.2; }
-    }
-    @keyframes brick-wobble {
-      0% { transform: rotate(-4deg) translateY(0); }
-      100% { transform: rotate(4deg) translateY(-3px); }
-    }
-    @keyframes sweat-fly-right {
-      0% { transform: translate(0, 0) scale(0.4); opacity: 0; }
-      40% { opacity: 1; }
-      100% { transform: translate(18px, -18px) scale(1.3); opacity: 0; }
-    }
-    @keyframes sweat-fly-left {
-      0% { transform: translate(0, 0) scale(0.4); opacity: 0; }
-      40% { opacity: 1; }
-      100% { transform: translate(-18px, -12px) scale(1.3); opacity: 0; }
-    }
-    
-    .loading-text {
-      background: linear-gradient(90deg, var(--neon-blue), var(--neon-green));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      font-weight: 800;
-      font-size: 16px;
-      letter-spacing: 0.5px;
-      text-shadow: 0 0 20px rgba(0, 242, 254, 0.3);
-      animation: pulse 1.5s infinite;
-    }
+    @keyframes chibi-bounce { 0% { transform: translateY(0) scaleY(0.96); } 100% { transform: translateY(-12px) scaleY(1.04); } }
+    @keyframes shadow-scale { 0% { transform: scale(1); opacity: 0.8; } 100% { transform: scale(0.55); opacity: 0.2; } }
+    @keyframes brick-wobble { 0% { transform: rotate(-4deg) translateY(0); } 100% { transform: rotate(4deg) translateY(-3px); } }
+    @keyframes sweat-fly-right { 0% { transform: translate(0, 0) scale(0.4); opacity: 0; } 40% { opacity: 1; } 100% { transform: translate(18px, -18px) scale(1.3); opacity: 0; } }
+    @keyframes sweat-fly-left { 0% { transform: translate(0, 0) scale(0.4); opacity: 0; } 40% { opacity: 1; } 100% { transform: translate(-18px, -12px) scale(1.3); opacity: 0; } }
+    .loading-text { background: linear-gradient(90deg, var(--neon-blue), var(--neon-green)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800; font-size: 16px; letter-spacing: 0.5px; text-shadow: 0 0 20px rgba(0, 242, 254, 0.3); animation: pulse 1.5s infinite; }
     @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
 
-    /* 💳 尊榮黑卡「霓虹電子憑證」設計 */
-    .ticket-card {
-      background: var(--ticket-dark); 
-      border: 1px solid rgba(0, 242, 254, 0.3); 
-      border-radius: 20px;
-      padding: 22px 18px; 
-      margin: 20px 0; 
-      position: relative; 
-      box-shadow: 0 15px 35px rgba(0,0,0,0.4), inset 0 0 20px rgba(0, 242, 254, 0.05);
-    }
-    .ticket-card::before, .ticket-card::after {
-      content: ""; position: absolute; top: 58%; width: 24px; height: 24px;
-      background-color: var(--card-dark); border: 1px solid rgba(0, 242, 254, 0.3); border-radius: 50%;
-    }
+    .ticket-card { background: var(--ticket-dark); border: 1px solid rgba(0, 242, 254, 0.3); border-radius: 20px; padding: 22px 18px; margin: 20px 0; position: relative; box-shadow: 0 15px 35px rgba(0,0,0,0.4), inset 0 0 20px rgba(0, 242, 254, 0.05); }
+    .ticket-card::before, .ticket-card::after { content: ""; position: absolute; top: 58%; width: 24px; height: 24px; background-color: var(--card-dark); border: 1px solid rgba(0, 242, 254, 0.3); border-radius: 50%; }
     .ticket-card::before { left: -14px; border-left-color: transparent; border-top-color: transparent; transform: rotate(45deg); }
     .ticket-card::after { right: -14px; border-right-color: transparent; border-bottom-color: transparent; transform: rotate(45deg); }
 
-    /* 🛠️ 置中且垂直對齊的完美排版 */
-    .ticket-info { 
-      border-bottom: 2px dashed rgba(255, 255, 255, 0.15); 
-      padding-bottom: 18px; 
-      margin-bottom: 18px; 
-      display: flex; 
-      flex-direction: column; 
-      gap: 14px;
-    }
-    .info-row { 
-      display: flex; 
-      justify-content: center;
-      align-items: center; 
-      font-size: 15px; 
-    }
-    .info-row strong { 
-      color: var(--text-sub); 
-      white-space: nowrap; 
-      width: 95px; 
-      text-align: left;
-      font-weight: 600; 
-    }
-    .info-row span { 
-      font-weight: 800; 
-      color: white; 
-      font-size: 17px; 
-      text-align: left; 
-      width: 145px; 
-      padding-left: 10px; 
-      word-break: break-all;
-      letter-spacing: 0.5px;
-    }
+    .ticket-info { border-bottom: 2px dashed rgba(255, 255, 255, 0.15); padding-bottom: 18px; margin-bottom: 18px; display: flex; flex-direction: column; gap: 14px; }
+    .info-row { display: flex; justify-content: center; align-items: center; font-size: 15px; }
+    .info-row strong { color: var(--text-sub); white-space: nowrap; width: 95px; text-align: left; font-weight: 600; }
+    .info-row span { font-weight: 800; color: white; font-size: 17px; text-align: left; width: 145px; padding-left: 10px; word-break: break-all; letter-spacing: 0.5px; }
     
     #id-text { color: var(--neon-blue); font-family: monospace; font-size: 19px !important; text-shadow: 0 0 10px rgba(0, 242, 254, 0.4); }
     #social-text { color: var(--neon-green); }
@@ -288,7 +118,6 @@
 <body>
 
 <div class="container">
-  <!-- 📍 頂部科幻導航列：設定門市 -->
   <div class="store-header">
     <label>今日值班門市設定</label>
     <select id="global-store-select" onchange="updateActivities(); saveStore();">
@@ -305,7 +134,6 @@
     </select>
   </div>
 
-  <!-- 🎁 核心核銷卡片 -->
   <div class="card">
     <h2>⚡ 抽獎核銷系統</h2>
     
@@ -316,20 +144,17 @@
       </select>
     </div>
 
-    <!-- 🔍 搜尋與相機按鈕區 -->
     <div style="display: flex; gap: 8px; margin-bottom: 12px;">
       <input type="tel" id="search-input" placeholder="輸入顧客手機" style="flex: 1; margin-bottom: 0;">
       <button onclick="startScanner()" class="btn-dark" style="width: 56px; padding: 0; font-size: 20px;" title="開啟相機掃描">📷</button>
       <button id="search-btn" onclick="searchCoupon()" class="btn-green" style="width: 95px; margin-bottom: 0;">查詢</button>
     </div>
 
-    <!-- 📷 HUD 戰術掃描區 -->
     <div id="reader-container">
       <div id="reader"></div>
       <button class="scan-cancel-btn" onclick="stopScanner()">✖ 關閉掃描儀</button>
     </div>
 
-    <!-- 👷‍♂️ Q版搬磚小男孩 動畫區 -->
     <div id="loading">
       <div class="chibi-loader-box">
         <svg viewBox="0 0 120 100" class="chibi-svg">
@@ -367,11 +192,8 @@
       </div>
     </div>
     
-    <!-- 🎟️ 尊榮黑卡結果顯示區 -->
     <div id="content" style="display:none;">
       <div class="ticket-card">
-        
-        <!-- 🛠️ 置中完美排版區塊 -->
         <div class="ticket-info">
           <div class="info-row">
             <strong>📱 兌換手機</strong> 
@@ -417,7 +239,6 @@
 </div>
 
 <script>
-  // ⚠️ 已經保留你專屬的 API 網址 
   var API_URL = "https://script.google.com/macros/s/AKfycbyteRoiXgX3h9dpU325M0mg--jNEy1ayfpRPGmXebEEn3Q2Tq37yGNmXiShcrOQqyCm/exec"; 
 
   const storeEventMap = {
@@ -435,7 +256,6 @@
   var undoInterval = null; 
   let html5QrCode; 
 
-  /* 🌟🌟🌟 核心魔法：Web Audio API 音效合成引擎 + 4D 震動 🌟🌟🌟 */
   const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
   function playArcadeSound(type) {
@@ -456,10 +276,10 @@
     } else if (type === 'win') {
       const now = audioCtx.currentTime;
       osc.type = 'triangle';
-      osc.frequency.setValueAtTime(523.25, now);       // C5
-      osc.frequency.setValueAtTime(659.25, now + 0.08);// E5
-      osc.frequency.setValueAtTime(783.99, now + 0.16);// G5
-      osc.frequency.setValueAtTime(1046.50, now + 0.24);// C6 高音！
+      osc.frequency.setValueAtTime(523.25, now);       
+      osc.frequency.setValueAtTime(659.25, now + 0.08);
+      osc.frequency.setValueAtTime(783.99, now + 0.16);
+      osc.frequency.setValueAtTime(1046.50, now + 0.24);
       gain.gain.setValueAtTime(0.35, now);
       gain.gain.exponentialRampToValueAtTime(0.01, now + 0.55);
       osc.start(now); osc.stop(now + 0.55);
@@ -476,9 +296,7 @@
   }
 
   function triggerVibe(pattern) {
-    if ("vibrate" in navigator) {
-      try { navigator.vibrate(pattern); } catch(e) {}
-    }
+    if ("vibrate" in navigator) { try { navigator.vibrate(pattern); } catch(e) {} }
   }
 
   function triggerConfetti() {
@@ -579,7 +397,6 @@
         searchBtn.style.background = "";
         document.getElementById('loading').style.display = 'none';
 
-        // 🌟🌟🌟 接收跨區情報並智慧幫員工切換活動！ 🌟🌟🌟
         if (!result.exists) {
           if (result.found_in_other_sheet) {
             playArcadeSound('error');
@@ -587,7 +404,6 @@
               "⚠️ 跨活動雷達偵測：\n\n此號碼不在目前的【" + activity + "】！\n而是登記在【" + result.actual_sheet + "】。\n\n是否直接為您「自動切換至該活動」並調出資料？"
             );
             if (confirmSwitch) {
-              // 員工按確定，自動把選單切過去並重新查詢！
               document.getElementById('activity-select').value = result.actual_sheet;
               searchCoupon();
             }
@@ -656,17 +472,15 @@
     fetch(url, { method: 'GET', redirect: 'follow' })
       .then(response => response.json())
       .then(result => {
-        if (result.status === "success") {
+        // 🌟 終極黑科技：不管是新核銷成功，還是「剛剛 3 秒前已經兌換過」，一律視為核銷成功！
+        // 徹底根除因為現場網路延遲、員工手抖多按幾下導致的「假報錯」！
+        if (result.status === "success" || result.status === "error_already_redeemed") {
           updateUI({ status: "已兌換", time: new Date().getTime(), store: store });
           
           playArcadeSound('win');
           triggerConfetti();
           
           startUndoTimer(); 
-        } else if (result.status === "error_already_redeemed") {
-          playArcadeSound('error');
-          alert("⚠️ 錯誤：這張券剛剛已被兌換過！");
-          searchCoupon(); 
         } else {
           playArcadeSound('error');
           alert("核銷失敗，請重試。");
@@ -675,8 +489,9 @@
         }
       })
       .catch(error => {
-        playArcadeSound('error');
-        alert("⚠️ 網路回傳似乎卡住了，但資料可能已核銷成功！請點擊上方綠色「查詢」按鈕重新整理狀態。");
+        // 🌟 斷線友善處理：不要發出難聽的錯誤音效！
+        playArcadeSound('beep');
+        alert("⚠️ 網路連線延遲，但您的核銷指令「極可能已寫入後台」！\n請點擊上方綠色「查詢」按鈕重整最新狀態，勿重複按核銷！");
         btn.disabled = false;
         btn.innerText = "✔ 確認核銷優惠 (點擊即失效)";
       });
