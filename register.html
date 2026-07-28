@@ -105,6 +105,51 @@
     }
     .switch-btn:active { background: #f0eae1; transform: scale(0.98); }
 
+    /* 👷‍♂️ 奶茶系 Q版搬磚小男孩 動畫專區 */
+    #loading { display: none; margin: 25px 0; text-align: center; }
+    .chibi-loader-box { display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    .chibi-svg { width: 130px; height: 100px; overflow: visible; margin-bottom: 15px; filter: drop-shadow(0 10px 15px rgba(74, 59, 50, 0.15)); }
+    
+    .chibi-boy { animation: chibi-bounce 0.45s infinite alternate cubic-bezier(0.4, 0, 0.6, 1); transform-origin: center bottom; }
+    .shadow { animation: shadow-scale 0.45s infinite alternate cubic-bezier(0.4, 0, 0.6, 1); transform-origin: center; }
+    .brick-holding { animation: brick-wobble 0.45s infinite alternate ease-in-out; transform-origin: center; }
+    .drop-1 { animation: sweat-fly-right 0.9s infinite linear; }
+    .drop-2 { animation: sweat-fly-left 0.9s 0.45s infinite linear; }
+    
+    @keyframes chibi-bounce {
+      0% { transform: translateY(0) scaleY(0.96); }
+      100% { transform: translateY(-12px) scaleY(1.04); }
+    }
+    @keyframes shadow-scale {
+      0% { transform: scale(1); opacity: 0.8; }
+      100% { transform: scale(0.55); opacity: 0.2; }
+    }
+    @keyframes brick-wobble {
+      0% { transform: rotate(-4deg) translateY(0); }
+      100% { transform: rotate(4deg) translateY(-3px); }
+    }
+    @keyframes sweat-fly-right {
+      0% { transform: translate(0, 0) scale(0.4); opacity: 0; }
+      40% { opacity: 1; }
+      100% { transform: translate(18px, -18px) scale(1.3); opacity: 0; }
+    }
+    @keyframes sweat-fly-left {
+      0% { transform: translate(0, 0) scale(0.4); opacity: 0; }
+      40% { opacity: 1; }
+      100% { transform: translate(-18px, -12px) scale(1.3); opacity: 0; }
+    }
+    
+    .loading-text {
+      background: linear-gradient(90deg, var(--accent), var(--accent-dark));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-weight: 800;
+      font-size: 16px;
+      letter-spacing: 0.5px;
+      animation: pulse-text 1.5s infinite;
+    }
+    @keyframes pulse-text { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+
     /* 🎟️ 輕奢精品「電子憑證卡」設計 */
     #ticket-card { display: none; text-align: center; }
     
@@ -146,7 +191,6 @@
     <!-- 👉 步驟一：登記表單區塊 -->
     <div id="form-section">
       <label>🎯 選擇兌換活動項目 (切換自動確認權益)</label>
-      <!-- 🌟 關鍵優化：加上 onchange 一切換活動就自動檢查是否有該活動的憑證！ -->
       <select id="activity" onchange="checkSavedTicket()">
         <option value="父親節社群活動">父親節社群活動</option>
         <option value="中秋節活動">中秋節活動</option>
@@ -168,6 +212,55 @@
       </div>
 
       <button id="btn" class="submit-btn" onclick="register()">✨ 立即驗證並生成憑證</button>
+    </div>
+
+    <!-- 👷‍♂️ 奶茶系 Q版搬磚小男孩 動畫區 -->
+    <div id="loading">
+      <div class="chibi-loader-box">
+        <svg viewBox="0 0 120 100" class="chibi-svg">
+          <!-- 地面陰影 -->
+          <ellipse cx="60" cy="92" rx="26" ry="5" fill="rgba(196, 139, 113, 0.2)" class="shadow"/>
+          <!-- 飛濺的玫瑰焦糖汗珠 -->
+          <path d="M 86 42 Q 93 36 91 50 Z" fill="#c48b71" class="drop-1"/>
+          <path d="M 34 46 Q 27 40 29 54 Z" fill="#a86f56" class="drop-2"/>
+          
+          <g class="chibi-boy">
+            <!-- 雙腳 -->
+            <ellipse cx="50" cy="86" rx="6" ry="5" fill="#a86f56"/>
+            <ellipse cx="70" cy="86" rx="6" ry="5" fill="#a86f56"/>
+            <!-- 身體與工作服 (伯爵茶灰) -->
+            <rect x="46" y="58" width="28" height="26" rx="8" fill="#8c7a6b"/>
+            <rect x="50" y="68" width="20" height="16" rx="4" fill="#4a3b32"/>
+            <!-- 大頭 -->
+            <circle cx="60" cy="42" r="23" fill="#fff0e6"/>
+            <!-- 腮紅 -->
+            <ellipse cx="43" cy="46" rx="5" ry="3.5" fill="#d9777f" opacity="0.6"/>
+            <ellipse cx="77" cy="46" rx="5" ry="3.5" fill="#d9777f" opacity="0.6"/>
+            <!-- 堅毅認真的眼神 (^ ^) -->
+            <path d="M 45 40 Q 49 35 53 40" stroke="#4a3b32" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <path d="M 67 40 Q 71 35 75 40" stroke="#4a3b32" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <!-- 努力奮鬥的嘴巴 (w) -->
+            <path d="M 56 50 Q 58.5 53 60 50 Q 61.5 53 64 50" stroke="#4a3b32" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+            <!-- 燕麥色工程安全帽 -->
+            <path d="M 35 38 A 25 25 0 0 1 85 38 Z" fill="#e6dfd5"/>
+            <rect x="33" y="36" width="54" height="6" rx="3" fill="#d8cca6"/>
+            <circle cx="60" cy="24" r="5" fill="#c48b71"/>
+            <!-- 雙手奮力搬著厚磚頭 (玫瑰焦糖色) -->
+            <g class="brick-holding">
+              <rect x="32" y="54" width="56" height="20" rx="4" fill="#c48b71" stroke="#a86f56" stroke-width="1.5"/>
+              <line x1="60" y1="54" x2="60" y2="74" stroke="#f5f0eb" stroke-width="1.5" opacity="0.5"/>
+              <line x1="32" y1="64" x2="88" y2="64" stroke="#f5f0eb" stroke-width="1.5" opacity="0.5"/>
+              <line x1="46" y1="54" x2="46" y2="64" stroke="#f5f0eb" stroke-width="1.5" opacity="0.5"/>
+              <line x1="74" y1="64" x2="74" y2="74" stroke="#f5f0eb" stroke-width="1.5" opacity="0.5"/>
+              <circle cx="42" cy="64" r="6" fill="#fff0e6" stroke="#a86f56" stroke-width="1"/>
+              <circle cx="78" cy="64" r="6" fill="#fff0e6" stroke="#a86f56" stroke-width="1"/>
+            </g>
+          </g>
+        </svg>
+        <div class="loading-text">
+          🧱 正在為您生成專屬憑證... 💦
+        </div>
+      </div>
     </div>
 
     <!-- 👉 步驟二：輕奢厚卡紙憑證卡區塊 -->
@@ -225,7 +318,6 @@
   // 🌟🌟🌟 核心解藥：檢查指定活動的獨立置物櫃！ 🌟🌟🌟
   function checkSavedTicket(isFirstLoad) {
     var act = document.getElementById('activity').value;
-    // 使用 binding 活動名稱的專屬 Key！
     var savedPhone = localStorage.getItem("pos_" + act + "_phone");
     
     if (savedPhone) {
@@ -237,15 +329,15 @@
         savedPhone
       );
     } else {
-      // 該活動如果沒領過，乾乾淨淨還原成填表單狀態！
       document.getElementById('ticket-card').style.display = 'none';
+      document.getElementById('loading').style.display = 'none';
       document.getElementById('form-section').style.display = 'block';
     }
   }
 
-  // 🌟 按下「切換其他活動」按鈕，回到表單畫面
   function resetToForm() {
     document.getElementById('ticket-card').style.display = 'none';
+    document.getElementById('loading').style.display = 'none';
     document.getElementById('form-section').style.display = 'block';
     triggerVibe(30);
   }
@@ -266,22 +358,26 @@
     phone = phone.replace(/\D/g, '');
     triggerVibe(40);
 
-    var btn = document.getElementById('btn');
-    btn.disabled = true;
-    btn.innerText = "⏳ 系統連線驗證中...";
+    // 🌟 切換畫面：隱藏表單，顯示搬磚小男孩動畫！
+    document.getElementById('form-section').style.display = 'none';
+    document.getElementById('loading').style.display = 'block';
 
     var baseUrl = API_URL.split('?')[0]; 
-    var params = new URLSearchParams({
+    
+    // 🌟 終極防卡死：加入時間戳記 (t) 破除快取
+    var params = newSearchParams({
       "action": "register",
       "id": phone,
       "name": name,
       "social_id": socialId, 
       "code": secretCode, 
-      "sheet": act
+      "sheet": act,
+      "t": new Date().getTime() 
     });
     var url = baseUrl + "?" + params.toString();
 
-    fetch(url)
+    // 🌟 終極防卡死：加入 redirect: 'follow' 確保 iOS 順利收到 Google 回傳！
+    fetch(url, { method: 'GET', redirect: 'follow' })
       .then(response => response.json())
       .then(result => {
         if (result.status === "success" || result.status === "already_registered") {
@@ -292,7 +388,6 @@
             triggerConfetti();
           }
           
-          // 🌟 寫入專屬該活動的置物櫃！不會再互相覆蓋或卡死了！
           localStorage.setItem("pos_" + act + "_phone", phone);
           localStorage.setItem("pos_" + act + "_name", result.name || name);
           localStorage.setItem("pos_" + act + "_social", result.social_id || socialId);
@@ -301,20 +396,25 @@
         } else {
           triggerVibe([100, 50, 100]);
           alert(result.error || "驗證失敗：系統回傳異常 (" + JSON.stringify(result) + ")");
-          btn.disabled = false;
-          btn.innerText = "✨ 立即驗證並生成憑證";
+          
+          // 若失敗，隱藏動畫，把表單變回來
+          document.getElementById('loading').style.display = 'none';
+          document.getElementById('form-section').style.display = 'block';
         }
       })
       .catch(error => {
         triggerVibe([100, 50, 100]);
         alert("連線發生問題，請檢查網路狀態！錯誤描述：" + error);
-        btn.disabled = false;
-        btn.innerText = "✨ 立即驗證並生成憑證";
+        
+        // 若斷線，隱藏動畫，把表單變回來
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('form-section').style.display = 'block';
       });
   }
 
   function showTicket(act, name, social, phone) {
     document.getElementById('form-section').style.display = 'none';
+    document.getElementById('loading').style.display = 'none';
     document.getElementById('ticket-card').style.display = 'block';
     
     document.getElementById('res-act').innerText = act;
@@ -322,8 +422,18 @@
     document.getElementById('res-social').innerText = social;
     document.getElementById('res-phone').innerText = phone;
     
+    // ✅ 生成濃縮咖啡棕色條碼 (dark=4a3b32) 搭配純白底色，優雅又秒刷！
     var qrUrl = "https://quickchart.io/qr?text=" + phone + "&size=250&margin=2&dark=4a3b32&light=ffffff";
     document.getElementById('qr-code-img').src = qrUrl;
+  }
+  
+  // 提供給舊版瀏覽器的備用支援
+  function newSearchParams(obj) {
+    var params = [];
+    for (var key in obj) {
+      params.push(encodeURIComponent(key) + "=" + encodeURIComponent(obj[key]));
+    }
+    return params.join("&");
   }
 </script>
 </body>
