@@ -75,7 +75,8 @@
     <div style="display: flex; gap: 8px; margin-bottom: 20px;">
       <input type="tel" id="search-input" placeholder="請輸入顧客手機" style="flex: 1; margin-bottom: 0; border: 2px solid #d1d5db;">
       <button onclick="startScanner()" style="width: auto; background-color: #374151; padding: 0 16px; margin-bottom: 0; font-size: 18px;" title="開啟相機掃描">📷</button>
-      <button onclick="searchCoupon()" style="width: auto; margin-bottom: 0; background-color: #10b981;">查詢</button>
+      <!-- 🌟 新增 ID：讓程式能抓到這個按鈕進行上鎖 -->
+      <button id="search-btn" onclick="searchCoupon()" style="width: auto; margin-bottom: 0; background-color: #10b981;">查詢</button>
     </div>
 
     <div id="reader-container">
@@ -193,17 +194,27 @@
     if (!activity) return alert("⚠️ 請選擇要核銷的活動！");
     if (!phone) return alert("⚠️ 請輸入顧客手機號碼！");
 
+    // 🌟 防連點鎖：按下立刻變灰色停用，絕對不給按第二下！
+    var searchBtn = document.getElementById('search-btn');
+    searchBtn.disabled = true;
+    searchBtn.innerText = "查...";
+    searchBtn.style.backgroundColor = "#9ca3af";
+
     clearInterval(undoInterval);
     document.getElementById('undo-area').style.display = 'none';
     document.getElementById('content').style.display = 'none';
     document.getElementById('loading').style.display = 'block';
 
-    // 🌟 關鍵修復 1：加入 &t=時間戳記，打破 iOS 快取詛咒！
     var url = API_URL + "?action=check&id=" + phone + "&sheet=" + encodeURIComponent(activity) + "&t=" + new Date().getTime();
 
     fetch(url, { method: 'GET', redirect: 'follow' })
       .then(response => response.json())
       .then(result => {
+        // 🌟 解除安全鎖：查詢完成，按鈕恢復綠色
+        searchBtn.disabled = false;
+        searchBtn.innerText = "查詢";
+        searchBtn.style.backgroundColor = "#10b981";
+        
         document.getElementById('loading').style.display = 'none';
         if (!result.exists) return alert(result.error || "❌ 在名單中找不到此手機號碼！");
         
@@ -214,8 +225,12 @@
         updateUI(result);
       })
       .catch(error => {
-        // 🌟 把錯誤印出來，不再死的不明不白
-        alert("查詢逾時！請確認網路狀態，或直接重整頁面試試。\n(錯誤代碼：" + error.message + ")");
+        // 🌟 解除安全鎖：就算網路逾時報錯，依然幫按鈕解鎖，讓店員能再試一次
+        searchBtn.disabled = false;
+        searchBtn.innerText = "查詢";
+        searchBtn.style.backgroundColor = "#10b981";
+        
+        alert("查詢逾時！請確認網路狀態，或直接重整頁面試試。\n(錯誤描述：" + error.message + ")");
         document.getElementById('loading').style.display = 'none';
       });
   }
@@ -254,7 +269,6 @@
     btn.disabled = true;
     btn.innerText = "核銷處理中...";
     
-    // 🌟 關鍵修復 2：加入 &t=時間戳記，確保 iOS 每次都發送新的核銷指令！
     var url = API_URL + "?action=redeem&id=" + id + "&store=" + encodeURIComponent(store) + "&sheet=" + encodeURIComponent(activity) + "&t=" + new Date().getTime();
 
     fetch(url, { method: 'GET', redirect: 'follow' })
@@ -273,7 +287,6 @@
         }
       })
       .catch(error => {
-        // 🌟 針對 iOS 的保護機制：如果依然逾時，但大腦可能已經寫入了
         alert("⚠️ 網路回傳似乎卡住了，但資料可能已核銷成功！請點擊上方綠色「查詢」按鈕重新整理狀態。");
         btn.disabled = false;
         btn.innerText = "確認核銷 (點擊後即失效)";
@@ -303,7 +316,6 @@
     undoBtn.disabled = true;
     undoBtn.innerText = "資料復原中...";
 
-    // 🌟 關鍵修復 3：加入 &t=時間戳記
     var url = API_URL + "?action=undo&id=" + id + "&sheet=" + encodeURIComponent(activity) + "&t=" + new Date().getTime();
 
     fetch(url, { method: 'GET', redirect: 'follow' })
