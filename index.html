@@ -75,7 +75,6 @@
     <div style="display: flex; gap: 8px; margin-bottom: 20px;">
       <input type="tel" id="search-input" placeholder="請輸入顧客手機" style="flex: 1; margin-bottom: 0; border: 2px solid #d1d5db;">
       <button onclick="startScanner()" style="width: auto; background-color: #374151; padding: 0 16px; margin-bottom: 0; font-size: 18px;" title="開啟相機掃描">📷</button>
-      <!-- 🌟 新增 ID：讓程式能抓到這個按鈕進行上鎖 -->
       <button id="search-btn" onclick="searchCoupon()" style="width: auto; margin-bottom: 0; background-color: #10b981;">查詢</button>
     </div>
 
@@ -186,15 +185,21 @@
   }
 
   function searchCoupon() {
-    var phone = document.getElementById('search-input').value.trim();
+    var rawInput = document.getElementById('search-input').value;
     var store = document.getElementById('global-store-select').value;
     var activity = document.getElementById('activity-select').value;
 
     if (!store) return alert("⚠️ 請先在最上方選擇「今日值班門市」！");
     if (!activity) return alert("⚠️ 請選擇要核銷的活動！");
-    if (!phone) return alert("⚠️ 請輸入顧客手機號碼！");
 
-    // 🌟 防連點鎖：按下立刻變灰色停用，絕對不給按第二下！
+    // 🌟 核心防護 1：自動過濾！把空白、減號、文字通通去除，只保留純數字
+    var phone = rawInput.replace(/\D/g, '');
+    document.getElementById('search-input').value = phone; // 順便幫輸入框校正成乾淨數字
+
+    if (!phone || phone.length < 8) {
+      return alert("⚠️ 請輸入正確的顧客手機號碼（純數字）！");
+    }
+
     var searchBtn = document.getElementById('search-btn');
     searchBtn.disabled = true;
     searchBtn.innerText = "查...";
@@ -205,18 +210,18 @@
     document.getElementById('content').style.display = 'none';
     document.getElementById('loading').style.display = 'block';
 
-    var url = API_URL + "?action=check&id=" + phone + "&sheet=" + encodeURIComponent(activity) + "&t=" + new Date().getTime();
+    // 🌟 核心防護 2：幫所有參數穿上 encodeURIComponent 防護衣，徹底消滅 pattern 報錯！
+    var url = API_URL + "?action=check&id=" + encodeURIComponent(phone) + "&sheet=" + encodeURIComponent(activity) + "&t=" + new Date().getTime();
 
     fetch(url, { method: 'GET', redirect: 'follow' })
       .then(response => response.json())
       .then(result => {
-        // 🌟 解除安全鎖：查詢完成，按鈕恢復綠色
         searchBtn.disabled = false;
         searchBtn.innerText = "查詢";
         searchBtn.style.backgroundColor = "#10b981";
         
         document.getElementById('loading').style.display = 'none';
-        if (!result.exists) return alert(result.error || "❌ 在名單中找不到此手機號碼！");
+        if (!result.exists) return alert(result.error || "❌ 在名單中找不到此手機號碼： " + phone);
         
         document.getElementById('content').style.display = 'block';
         document.getElementById('id-text').innerText = phone;
@@ -225,12 +230,11 @@
         updateUI(result);
       })
       .catch(error => {
-        // 🌟 解除安全鎖：就算網路逾時報錯，依然幫按鈕解鎖，讓店員能再試一次
         searchBtn.disabled = false;
         searchBtn.innerText = "查詢";
         searchBtn.style.backgroundColor = "#10b981";
         
-        alert("查詢逾時！請確認網路狀態，或直接重整頁面試試。\n(錯誤描述：" + error.message + ")");
+        alert("查詢連線失敗！請確認網路是否正常。\n(錯誤原因：" + error.message + ")");
         document.getElementById('loading').style.display = 'none';
       });
   }
@@ -261,7 +265,7 @@
   function submitRedeem() {
     var store = document.getElementById('global-store-select').value;
     var activity = document.getElementById('activity-select').value;
-    var id = document.getElementById('id-text').innerText; 
+    var id = document.getElementById('id-text').innerText.trim(); 
     var btn = document.getElementById('redeem-btn');
     
     if(!confirm("確定要在「" + store + "」核銷【" + activity + "】的優惠嗎？")) return;
@@ -269,7 +273,8 @@
     btn.disabled = true;
     btn.innerText = "核銷處理中...";
     
-    var url = API_URL + "?action=redeem&id=" + id + "&store=" + encodeURIComponent(store) + "&sheet=" + encodeURIComponent(activity) + "&t=" + new Date().getTime();
+    // 🌟 核心防護：一樣加上 encodeURIComponent
+    var url = API_URL + "?action=redeem&id=" + encodeURIComponent(id) + "&store=" + encodeURIComponent(store) + "&sheet=" + encodeURIComponent(activity) + "&t=" + new Date().getTime();
 
     fetch(url, { method: 'GET', redirect: 'follow' })
       .then(response => response.json())
@@ -310,13 +315,13 @@
 
   function undoRedeem() {
     var activity = document.getElementById('activity-select').value;
-    var id = document.getElementById('id-text').innerText; 
+    var id = document.getElementById('id-text').innerText.trim(); 
     var undoBtn = document.getElementById('undo-btn');
     clearInterval(undoInterval); 
     undoBtn.disabled = true;
     undoBtn.innerText = "資料復原中...";
 
-    var url = API_URL + "?action=undo&id=" + id + "&sheet=" + encodeURIComponent(activity) + "&t=" + new Date().getTime();
+    var url = API_URL + "?action=undo&id=" + encodeURIComponent(id) + "&sheet=" + encodeURIComponent(activity) + "&t=" + new Date().getTime();
 
     fetch(url, { method: 'GET', redirect: 'follow' })
       .then(response => response.json())
