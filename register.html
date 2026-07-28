@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-  <title>AMERICAN DINER VIP PASS</title>
+  <title>GUEST CHECK - VIP DINER PASS</title>
   
   <link rel="manifest" href="manifest.json">
   <meta name="mobile-web-app-capable" content="yes">
@@ -17,27 +17,27 @@
 
   <style>
     :root {
-      --bg-diner: #fef3c7;      /* 美式奶油奶昔底色 */
-      --card-bg: #ffffff;       /* 濃郁純白 */
-      --diner-red: #dc2626;     /* 經典番茄醬紅 */
-      --diner-yellow: #fbbf24;  /* 美式芥末起司黃 */
-      --diner-blue: #2563eb;    /* 復古霓虹藍 */
-      --text-black: #18181b;    /* 硬派黑安格斯深黑 */
-      --border-thick: 3px solid #18181b; /* 潮流美式厚黑邊 */
-      --shadow-pop: 5px 5px 0px #18181b; /* 復古硬派陰影 */
+      --bg-parchment: #f4ece1;     /* 溫潤羊皮紙背景 */
+      --paper-cream: #fdfbf7;      /* 老式點餐單奶油紙色 */
+      --paper-warm: #f7f2e8;       /* 表單填寫微深奶油色 */
+      --cherry-red: #991b1b;       /* 復古波本櫻桃紅 */
+      --mustard-gold: #d97706;     /* 溫潤炙烤芥末黃 */
+      --ink-black: #27272a;        /* 經典打字機炭黑 */
+      --ink-muted: #71717a;        /* 褪色鉛筆灰 */
+      --border-ink: 1.5px solid #27272a; /* 藝術細致墨線 */
     }
 
     body { 
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif; 
-      background-color: var(--bg-diner); 
+      font-family: "Courier New", Courier, "Lucida Sans Typewriter", "Lucida Typewriter", monospace, -apple-system, BlinkMacSystemFont, sans-serif; 
+      background-color: var(--bg-parchment); 
       background-image: 
-        radial-gradient(var(--diner-yellow) 15%, transparent 16%),
-        radial-gradient(var(--diner-red) 15%, transparent 16%);
-      background-size: 60px 60px;
-      background-position: 0 0, 30px 30px;
-      color: var(--text-black);
+        radial-gradient(rgba(153, 27, 27, 0.05) 1px, transparent 0),
+        radial-gradient(rgba(39, 39, 42, 0.05) 1px, transparent 0);
+      background-size: 24px 24px;
+      background-position: 0 0, 12px 12px;
+      color: var(--ink-black);
       margin: 0; 
-      padding: 16px; 
+      padding: 20px 16px; 
       display: flex; 
       justify-content: center; 
       align-items: center; 
@@ -45,244 +45,301 @@
       box-sizing: border-box;
     }
     
-    .container { width: 100%; max-width: 420px; }
+    .container { width: 100%; max-width: 400px; }
 
-    /* 🍔 潮流美式餐館招牌橫幅 */
-    .header-banner {
-      background: var(--diner-red);
-      color: white;
-      padding: 20px 15px;
-      border-radius: 20px;
-      text-align: center;
-      margin-bottom: 22px;
-      border: var(--border-thick);
-      box-shadow: var(--shadow-pop);
+    /* 📜 復古點餐單造型卡片 (Guest Check Design) */
+    .guest-check {
+      background: var(--paper-cream);
+      border: var(--border-ink);
+      border-radius: 4px;
+      box-shadow: 0 15px 35px -5px rgba(39, 39, 42, 0.15), 0 5px 15px -5px rgba(0,0,0,0.08);
       position: relative;
       overflow: hidden;
+      padding: 0;
     }
-    .header-banner::after {
-      content: "★ ★ ★"; position: absolute; bottom: 4px; left: 0; width: 100%;
-      color: var(--diner-yellow); font-size: 12px; letter-spacing: 6px;
-    }
-    h1 { font-size: 24px; margin: 0 0 6px 0; font-weight: 900; letter-spacing: 1.5px; text-transform: uppercase; text-shadow: 2px 2px 0px #18181b; }
-    .subtitle { color: #fef08a; font-size: 14px; margin: 0; font-weight: 700; letter-spacing: 0.5px; }
 
-    /* 🛡️ 主卡片視覺 */
-    .card { 
-      background: var(--card-bg); 
-      padding: 26px 22px; 
-      border-radius: 24px; 
-      border: var(--border-thick);
-      box-shadow: 8px 8px 0px #18181b; 
+    /* 頂部流水點餐單標頭 */
+    .check-header {
+      background: var(--paper-warm);
+      border-bottom: 2px double var(--ink-black);
+      padding: 20px 22px 14px 22px;
+      text-align: center;
       position: relative;
     }
+    .check-no {
+      font-family: "Courier New", monospace;
+      font-size: 13px; font-weight: 800; color: var(--cherry-red);
+      letter-spacing: 2px; margin-bottom: 8px; display: block;
+    }
+    h1 {
+      font-family: "Times New Roman", Times, serif;
+      font-size: 26px; font-weight: 900; color: var(--ink-black);
+      margin: 0 0 6px 0; letter-spacing: 1px; text-transform: uppercase;
+    }
+    .subtitle { font-size: 13px; color: var(--ink-muted); margin: 0; font-weight: 600; letter-spacing: 0.5px; }
 
-    label { display: block; text-align: left; font-weight: 850; color: var(--text-black); margin-bottom: 8px; font-size: 15px; }
+    /* 點餐單服務資訊欄 */
+    .server-meta {
+      display: flex; justify-content: space-between;
+      border-bottom: var(--border-ink);
+      background: var(--paper-cream);
+      padding: 8px 22px; font-size: 12px; font-weight: 700; color: var(--ink-muted);
+      text-transform: uppercase; letter-spacing: 1px;
+    }
+    .server-meta span strong { color: var(--ink-black); }
+
+    /* 表單區塊 */
+    .check-body { padding: 24px 22px 28px 22px; }
+
+    label { 
+      display: block; text-align: left; font-weight: 800; color: var(--ink-black); 
+      margin-bottom: 6px; font-size: 13px; letter-spacing: 0.5px; text-transform: uppercase;
+    }
     
     input, select { 
-      width: 100%; padding: 16px; border-radius: 14px; border: var(--border-thick); 
-      background: #fffbeb; color: var(--text-black); font-size: 16px; font-weight: 800;
-      margin-bottom: 18px; box-sizing: border-box; transition: all 0.15s ease; outline: none;
-      box-shadow: 3px 3px 0px #18181b;
+      width: 100%; padding: 14px 16px; border-radius: 2px; border: var(--border-ink); 
+      background: var(--paper-warm); color: var(--ink-black); font-size: 16px; font-weight: 700;
+      margin-bottom: 18px; box-sizing: border-box; transition: all 0.2s ease; outline: none;
+      font-family: inherit;
     }
-    input::placeholder { color: #a1a1aa; font-weight: 500; }
-    input:focus, select:focus { background: #ffffff; transform: translate(-2px, -2px); box-shadow: 5px 5px 0px var(--diner-red); }
+    input::placeholder { color: #a1a1aa; font-weight: 400; font-size: 15px; }
+    input:focus, select:focus { 
+      background: #ffffff; border-color: var(--cherry-red); 
+      box-shadow: inset 3px 0 0 var(--cherry-red); 
+    }
     
-    #activity { background-color: #fef08a; cursor: pointer; }
-    #activity option { background: white; color: var(--text-black); font-weight: bold; }
+    #activity { background-color: #fff9ed; border-color: var(--mustard-gold); color: var(--ink-black); cursor: pointer; }
+    #activity option { background: white; color: var(--ink-black); font-weight: bold; }
 
-    /* 🔑 芥末起司通關密語框 */
-    .secret-box { background: #fef9c3; padding: 14px; border-radius: 16px; border: 3px dashed var(--diner-red); margin-bottom: 22px; }
-    .secret-box label { color: var(--diner-red); text-transform: uppercase; }
-    #secret_code { border-color: var(--diner-red); background: white; margin-bottom: 0; text-transform: uppercase; letter-spacing: 3px; text-align: center; font-size: 20px; color: var(--diner-red); box-shadow: 3px 3px 0px var(--diner-red); }
+    /* 🔑 復古票券密語框 */
+    .secret-box { 
+      background: #fffdf9; padding: 14px 16px; border-radius: 2px; 
+      border: 1.5px dashed var(--cherry-red); margin-bottom: 24px; text-align: center;
+    }
+    .secret-box label { color: var(--cherry-red); text-align: center; margin-bottom: 8px; }
+    #secret_code { 
+      border: 1px solid #fca5a5; background: #fffafa; margin-bottom: 0; 
+      text-transform: uppercase; letter-spacing: 4px; text-align: center; 
+      font-size: 19px; font-weight: 900; color: var(--cherry-red); 
+    }
+    #secret_code:focus { box-shadow: none; border-color: var(--cherry-red); background: white; }
 
-    /* 🍔 美式硬派送出按鈕 */
+    /* 🍷 經典點餐單送出按鈕 */
     .submit-btn { 
-      background: var(--diner-yellow); color: var(--text-black); border: var(--border-thick); 
-      padding: 18px; width: 100%; border-radius: 16px; font-size: 18px; font-weight: 900; 
-      cursor: pointer; letter-spacing: 1px; text-transform: uppercase;
-      box-shadow: var(--shadow-pop); transition: all 0.15s ease;
+      background: var(--cherry-red); color: white; border: 1.5px solid var(--cherry-red); 
+      padding: 16px; width: 100%; border-radius: 2px; font-size: 16px; font-weight: 800; 
+      cursor: pointer; letter-spacing: 2px; text-transform: uppercase;
+      transition: all 0.2s ease; box-shadow: 0 4px 12px rgba(153, 27, 27, 0.25);
+      font-family: inherit;
     }
-    .submit-btn:active { transform: translate(3px, 3px); box-shadow: 2px 2px 0px #18181b; }
-    .submit-btn:disabled { background: #e4e4e7 !important; color: #a1a1aa !important; box-shadow: none !important; cursor: not-allowed; transform: none; border-color: #a1a1aa; }
+    .submit-btn:hover { background: #7f1d1d; border-color: #7f1d1d; }
+    .submit-btn:active { transform: translateY(2px); box-shadow: none; }
+    .submit-btn:disabled { background: #e4e4e7 !important; color: #a1a1aa !important; border-color: #d4d4d8 !important; box-shadow: none !important; cursor: not-allowed; transform: none; }
     
-    /* 🔄 切換活動按鈕 (潮流副按鈕風) */
+    /* 🔄 雜誌風切換活動副按鈕 */
     .switch-btn {
-      background: #ffffff; color: var(--text-black); border: var(--border-thick);
-      padding: 15px; width: 100%; border-radius: 14px; font-size: 16px; font-weight: 850;
-      cursor: pointer; margin-top: 16px; transition: all 0.15s ease; box-shadow: 4px 4px 0px var(--diner-blue);
+      background: transparent; color: var(--ink-black); border: 1.5px dashed var(--ink-black);
+      padding: 14px; width: 100%; border-radius: 2px; font-size: 14px; font-weight: 800;
+      cursor: pointer; margin-top: 20px; transition: all 0.2s ease; letter-spacing: 1px;
+      text-transform: uppercase; font-family: inherit;
     }
-    .switch-btn:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0px var(--diner-blue); }
+    .switch-btn:hover { background: var(--paper-warm); }
+    .switch-btn:active { transform: translateY(1px); }
 
-    /* 👨‍🍳 美式餐館 Q版漢堡小廚師 動畫區 */
-    #loading { display: none; margin: 25px 0; text-align: center; }
+    /* 👨‍🍳 復古色系 Q版漢堡小廚師 動畫區 */
+    #loading { display: none; padding: 40px 22px; text-align: center; }
     .chibi-loader-box { display: flex; flex-direction: column; align-items: center; justify-content: center; }
-    .chibi-svg { width: 140px; height: 110px; overflow: visible; margin-bottom: 15px; filter: drop-shadow(4px 6px 0px rgba(0,0,0,0.15)); }
+    .chibi-svg { width: 135px; height: 105px; overflow: visible; margin-bottom: 20px; filter: drop-shadow(0 8px 12px rgba(39, 39, 42, 0.12)); }
     
-    .chibi-boy { animation: chibi-bounce 0.4s infinite alternate cubic-bezier(0.4, 0, 0.6, 1); transform-origin: center bottom; }
-    .shadow { animation: shadow-scale 0.4s infinite alternate cubic-bezier(0.4, 0, 0.6, 1); transform-origin: center; }
-    .burger-holding { animation: burger-wobble 0.4s infinite alternate ease-in-out; transform-origin: center; }
+    .chibi-boy { animation: chibi-bounce 0.45s infinite alternate cubic-bezier(0.4, 0, 0.6, 1); transform-origin: center bottom; }
+    .shadow { animation: shadow-scale 0.45s infinite alternate cubic-bezier(0.4, 0, 0.6, 1); transform-origin: center; }
+    .burger-holding { animation: burger-wobble 0.45s infinite alternate ease-in-out; transform-origin: center; }
     .star-fly { animation: star-pop 0.8s infinite linear; }
     
-    @keyframes chibi-bounce { 0% { transform: translateY(0) scaleY(0.95); } 100% { transform: translateY(-14px) scaleY(1.05); } }
+    @keyframes chibi-bounce { 0% { transform: translateY(0) scaleY(0.96); } 100% { transform: translateY(-12px) scaleY(1.04); } }
     @keyframes shadow-scale { 0% { transform: scale(1); opacity: 0.8; } 100% { transform: scale(0.5); opacity: 0.2; } }
-    @keyframes burger-wobble { 0% { transform: rotate(-6deg) translateY(0); } 100% { transform: rotate(6deg) translateY(-4px); } }
-    @keyframes star-pop { 0% { transform: translate(0, 0) scale(0.3); opacity: 0; } 50% { opacity: 1; } 100% { transform: translate(24px, -20px) scale(1.4) rotate(180deg); opacity: 0; } }
+    @keyframes burger-wobble { 0% { transform: rotate(-5deg) translateY(0); } 100% { transform: rotate(5deg) translateY(-3px); } }
+    @keyframes star-pop { 0% { transform: translate(0, 0) scale(0.3); opacity: 0; } 50% { opacity: 1; } 100% { transform: translate(22px, -18px) scale(1.3) rotate(180deg); opacity: 0; } }
     
     .loading-text {
-      background: var(--diner-red); color: white; padding: 8px 16px; border-radius: 10px;
-      font-weight: 900; font-size: 16px; border: 2px solid #18181b; box-shadow: 3px 3px 0px #18181b;
-      animation: pulse-text 1.5s infinite;
+      color: var(--cherry-red); font-weight: 800; font-size: 15px; letter-spacing: 1px;
+      animation: pulse-text 1.5s infinite; text-transform: uppercase;
     }
-    @keyframes pulse-text { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.03); } }
+    @keyframes pulse-text { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
 
-    /* 🎟️ 復古餐館「餐券憑證卡」設計 */
-    #ticket-card { display: none; text-align: center; }
+    /* 🎟️ 復古結帳聯憑證卡 (Voucher Receipt Design) */
+    #ticket-card { display: none; padding: 24px 22px 28px 22px; text-align: center; }
     
-    .ticket-box {
-      background: #fffbeb; border: var(--border-thick); border-radius: 20px;
-      padding: 26px 18px; margin: 15px 0; position: relative;
-      box-shadow: var(--shadow-pop);
+    /* 復古郵戳章 */
+    .stamp-badge {
+      display: inline-block; border: 2px solid var(--cherry-red); color: var(--cherry-red);
+      font-size: 12px; font-weight: 900; letter-spacing: 2px; padding: 4px 12px;
+      border-radius: 2px; text-transform: uppercase; transform: rotate(-4deg);
+      margin-bottom: 14px; background: rgba(153, 27, 27, 0.03);
     }
-    .ticket-box::before, .ticket-box::after {
-      content: ""; position: absolute; top: 58%; width: 26px; height: 26px;
-      background-color: var(--card-bg); border: var(--border-thick); border-radius: 50%;
-    }
-    .ticket-box::before { left: -15px; border-left-color: transparent; border-top-color: transparent; transform: rotate(45deg); }
-    .ticket-box::after { right: -15px; border-right-color: transparent; border-bottom-color: transparent; transform: rotate(45deg); }
-
-    .qr-img { width: 190px; height: 190px; margin: 15px auto; border: 4px solid #18181b; border-radius: 16px; box-shadow: 4px 4px 0px var(--diner-red); display: block; background: white; }
-    .highlight-text { font-size: 16px; font-weight: 900; color: var(--diner-red); letter-spacing: 1px; margin: 14px 0 18px 0; background: #fef08a; padding: 6px; border-radius: 8px; border: 2px solid #18181b; }
     
-    .info-list { text-align: left; border-top: 3px dashed #18181b; padding-top: 18px; display: flex; flex-direction: column; gap: 12px; }
-    .info-row { display: flex; justify-content: space-between; font-size: 15px; }
-    .info-row strong { color: #52525b; width: 90px; font-weight: 800; }
-    .info-row span { color: var(--text-black); font-weight: 900; text-align: right; word-break: break-all; }
-    #res-phone { color: var(--diner-red); font-family: monospace; font-size: 19px !important; }
+    .qr-box {
+      background: white; padding: 12px; border: var(--border-ink); border-radius: 2px;
+      display: inline-block; margin: 10px 0; box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+    }
+    .qr-img { width: 180px; height: 180px; display: block; }
+    
+    .highlight-text { 
+      font-size: 15px; font-weight: 800; color: var(--ink-black); letter-spacing: 1px; 
+      margin: 12px 0 20px 0; text-transform: uppercase; border-bottom: 1px solid var(--ink-black);
+      padding-bottom: 12px; display: block;
+    }
+    
+    .info-list { text-align: left; display: flex; flex-direction: column; gap: 10px; font-size: 14px; }
+    .info-row { display: flex; justify-content: space-between; border-bottom: 1px dotted #d4d4d8; padding-bottom: 8px; }
+    .info-row strong { color: var(--ink-muted); font-weight: 700; text-transform: uppercase; }
+    .info-row span { color: var(--ink-black); font-weight: 800; text-align: right; word-break: break-all; }
+    #res-phone { color: var(--cherry-red); font-family: "Courier New", monospace; font-size: 17px !important; font-weight: 900; }
 
-    .screenshot-notice { background: var(--diner-red); color: white; border: var(--border-thick); padding: 12px; border-radius: 14px; font-weight: 900; font-size: 16px; margin-bottom: 18px; box-shadow: 4px 4px 0px #18181b; animation: bounce-notice 2s infinite; }
-    @keyframes bounce-notice { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+    .screenshot-notice { 
+      background: #fef2f2; border: 1.5px solid var(--cherry-red); color: var(--cherry-red); 
+      padding: 10px; border-radius: 2px; font-weight: 800; font-size: 14px; margin-bottom: 18px; 
+      letter-spacing: 0.5px; text-transform: uppercase;
+    }
+    
+    /* 點餐單底部鋸齒撕線造型 */
+    .check-footer {
+      height: 16px; background: var(--bg-parchment); position: relative;
+    }
+    .check-footer::before {
+      content: ""; position: absolute; top: -8px; left: 0; width: 100%; height: 16px;
+      background-image: radial-gradient(circle, var(--bg-parchment) 6px, transparent 7px);
+      background-size: 18px 18px;
+    }
   </style>
 </head>
 <body>
 
 <div class="container">
-  <!-- 👉 潮流美式招牌橫幅 -->
-  <div class="header-banner">
-    <h1>🍔 DINER VIP PASS 🍟</h1>
-    <p class="subtitle">輸入通關密語 · 領取限時美式專屬禮遇</p>
-  </div>
-
-  <div class="card">
-    <!-- 👉 步驟一：登記表單區塊 -->
-    <div id="form-section">
-      <label>🎯 選擇兌換活動項目 (切換自動確認權益)</label>
-      <select id="activity" onchange="checkSavedTicket()">
-        <option value="父親節社群活動">父親節社群活動</option>
-        <option value="中秋節活動">中秋節活動</option>
-      </select>
-
-      <label>💬 社群暱稱 (IG/FB 顯示名稱)</label>
-      <input type="text" id="name" placeholder="例：小新 / Amy" required>
-
-      <label>🔗 社群帳號 ID (供核對使用)</label>
-      <input type="text" id="social_id" placeholder="例：@shin_123 / LINE ID" required>
-
-      <label>📱 聯絡手機號碼 (防重複驗證)</label>
-      <input type="tel" id="phone" placeholder="例：0912345678" maxlength="10" required>
-
-      <!-- 🌟 美式芥末起司鑰匙孔！ -->
-      <div class="secret-box">
-        <label>🔑 活動專屬通關密語</label>
-        <input type="text" id="secret_code" placeholder="請填入官方公告密語" required>
-      </div>
-
-      <button id="btn" class="submit-btn" onclick="register()">🔥 立即驗證 · 生成專屬餐券</button>
+  <!-- 📜 復古點餐結帳單卡片 (Guest Check) -->
+  <div class="guest-check">
+    
+    <!-- 頂部點餐單標頭 -->
+    <div class="check-header">
+      <span class="check-no">[ GUEST CHECK NO. 2026-VIP ]</span>
+      <h1>★ DINER MEAL PASS ★</h1>
+      <p class="subtitle">AUTHENTIC AMERICAN DINER · SPECIAL VOUCHER</p>
     </div>
 
-    <!-- 👨‍🍳 美式餐館 Q版漢堡小廚師 動畫區 -->
+    <!-- 服務生／桌號資訊列 -->
+    <div class="server-meta">
+      <span>SERVER: <strong>CHEF VIP</strong></span>
+      <span>TABLE: <strong>SPECIAL</strong></span>
+      <span>GUEST: <strong>1</strong></span>
+    </div>
+
+    <!-- 👉 步驟一：點餐表單區塊 -->
+    <div id="form-section" class="check-body">
+      <label>🎯 SELECT EVENT / 選擇兌換活動項目</label>
+      <select id="activity" onchange="checkSavedTicket()">
+        <option value="父親節社群活動">父親節社群活動 (Father's Day)</option>
+        <option value="中秋節活動">中秋節活動 (Mid-Autumn)</option>
+      </select>
+
+      <label>💬 GUEST NAME / 社群暱稱</label>
+      <input type="text" id="name" placeholder="例：小新 / Amy" required>
+
+      <label>🔗 SOCIAL ID / 社群帳號 ID</label>
+      <input type="text" id="social_id" placeholder="例：@shin_123 / LINE ID" required>
+
+      <label>📱 MOBILE / 聯絡手機號碼</label>
+      <input type="tel" id="phone" placeholder="例：0912345678" maxlength="10" required>
+
+      <!-- 🌟 復古票券通關密語框 -->
+      <div class="secret-box">
+        <label>🔑 PASSCODE / 活動通關密語</label>
+        <input type="text" id="secret_code" placeholder="請填入公告密語" required>
+      </div>
+
+      <button id="btn" class="submit-btn" onclick="register()">CLAIM VOUCHER · 驗證領取餐券</button>
+    </div>
+
+    <!-- 👨‍🍳 復古莫蘭迪色系 Q版漢堡小廚師 動畫區 -->
     <div id="loading">
       <div class="chibi-loader-box">
         <svg viewBox="0 0 130 110" class="chibi-svg">
-          <!-- 地面陰影 -->
-          <ellipse cx="65" cy="100" rx="28" ry="6" fill="#18181b" class="shadow"/>
-          <!-- 噴發的小星星 -->
-          <path d="M 100 40 L 103 48 L 111 50 L 105 56 L 107 64 L 100 59 L 93 64 L 95 56 L 89 50 L 97 48 Z" fill="#fbbf24" stroke="#18181b" stroke-width="1.5" class="star-fly"/>
+          <!-- 地面炭黑陰影 -->
+          <ellipse cx="65" cy="100" rx="28" ry="6" fill="#27272a" class="shadow"/>
+          <!-- 溫潤炙烤黃星星 -->
+          <path d="M 100 40 L 103 48 L 111 50 L 105 56 L 107 64 L 100 59 L 93 64 L 95 56 L 89 50 L 97 48 Z" fill="#d97706" stroke="#27272a" stroke-width="1.5" class="star-fly"/>
           
           <g class="chibi-boy">
             <!-- 雙腳 -->
-            <ellipse cx="53" cy="94" rx="7" ry="6" fill="#18181b"/>
-            <ellipse cx="77" cy="94" rx="7" ry="6" fill="#18181b"/>
-            <!-- 身體與紅白圍裙 -->
-            <rect x="48" y="64" width="34" height="26" rx="8" fill="#ffffff" stroke="#18181b" stroke-width="2.5"/>
-            <rect x="54" y="68" width="22" height="22" rx="4" fill="#dc2626"/>
-            <!-- 大頭 -->
-            <circle cx="65" cy="45" r="25" fill="#ffedd5" stroke="#18181b" stroke-width="2.5"/>
+            <ellipse cx="53" cy="94" rx="7" ry="6" fill="#27272a"/>
+            <ellipse cx="77" cy="94" rx="7" ry="6" fill="#27272a"/>
+            <!-- 身體與復古櫻桃紅圍裙 -->
+            <rect x="48" y="64" width="34" height="26" rx="8" fill="#fdfbf7" stroke="#27272a" stroke-width="2.5"/>
+            <rect x="54" y="68" width="22" height="22" rx="4" fill="#991b1b"/>
+            <!-- 大頭 (羊皮奶油膚色) -->
+            <circle cx="65" cy="45" r="25" fill="#fff5eb" stroke="#27272a" stroke-width="2.5"/>
             <!-- 腮紅 -->
-            <ellipse cx="46" cy="50" rx="5" ry="3.5" fill="#f87171"/>
-            <ellipse cx="84" cy="50" rx="5" ry="3.5" fill="#f87171"/>
-            <!-- 快樂眼睛 (^ ^) -->
-            <path d="M 48 44 Q 52 38 56 44" stroke="#18181b" stroke-width="3" fill="none" stroke-linecap="round"/>
-            <path d="M 74 44 Q 78 38 82 44" stroke="#18181b" stroke-width="3" fill="none" stroke-linecap="round"/>
-            <!-- 張大嘴巴 (D) -->
-            <path d="M 60 53 Q 65 60 70 53 Z" fill="#dc2626" stroke="#18181b" stroke-width="2"/>
-            <!-- 美式紅白餐館紙帽 -->
-            <path d="M 38 38 C 40 18, 90 18, 92 38 Z" fill="#ffffff" stroke="#18181b" stroke-width="2.5"/>
-            <path d="M 45 26 L 55 38 M 60 22 L 65 38 M 75 24 L 75 38 M 85 28 L 82 38" stroke="#dc2626" stroke-width="3"/>
-            <rect x="36" y="36" width="58" height="8" rx="4" fill="#dc2626" stroke="#18181b" stroke-width="2"/>
+            <ellipse cx="46" cy="50" rx="5" ry="3.5" fill="#e11d48" opacity="0.75"/>
+            <ellipse cx="84" cy="50" rx="5" ry="3.5" fill="#e11d48" opacity="0.75"/>
+            <!-- 眼神 (^ ^) -->
+            <path d="M 48 44 Q 52 38 56 44" stroke="#27272a" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <path d="M 74 44 Q 78 38 82 44" stroke="#27272a" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <!-- 嘴巴 -->
+            <path d="M 60 53 Q 65 60 70 53 Z" fill="#991b1b" stroke="#27272a" stroke-width="2"/>
+            <!-- 廚師帽 -->
+            <path d="M 38 38 C 40 18, 90 18, 92 38 Z" fill="#fdfbf7" stroke="#27272a" stroke-width="2.5"/>
+            <path d="M 45 26 L 55 38 M 60 22 L 65 38 M 75 24 L 75 38 M 85 28 L 82 38" stroke="#991b1b" stroke-width="3"/>
+            <rect x="36" y="36" width="58" height="8" rx="4" fill="#991b1b" stroke="#27272a" stroke-width="2"/>
             
-            <!-- 雙手搬著巨無霸美式漢堡 🍔 -->
+            <!-- 巨無霸漢堡 🍔 -->
             <g class="burger-holding">
-              <!-- 漢堡下麵包 -->
-              <path d="M 36 78 Q 65 85 94 78 L 90 86 Q 65 90 40 86 Z" fill="#d97706" stroke="#18181b" stroke-width="2"/>
-              <!-- 漢堡排 -->
-              <rect x="38" y="72" width="54" height="8" rx="4" fill="#78350f" stroke="#18181b" stroke-width="2"/>
-              <!-- 起司與生菜 -->
-              <path d="M 36 72 L 45 76 L 55 70 L 65 77 L 75 70 L 85 76 L 94 72 L 90 68 L 40 68 Z" fill="#fbbf24" stroke="#18181b" stroke-width="1.5"/>
-              <path d="M 38 68 Q 48 64 58 68 Q 68 72 78 66 Q 88 64 92 68 stroke="#22c55e" stroke-width="4" fill="none"/>
-              <!-- 漢堡上麵包 -->
-              <path d="M 36 66 C 38 52, 92 52, 94 66 Z" fill="#f59e0b" stroke="#18181b" stroke-width="2.5"/>
-              <!-- 白芝麻 -->
-              <circle cx="50" cy="60" r="1.5" fill="#ffffff"/>
-              <circle cx="65" cy="57" r="1.5" fill="#ffffff"/>
-              <circle cx="80" cy="61" r="1.5" fill="#ffffff"/>
-              <!-- 廚師小手 -->
-              <circle cx="42" cy="74" r="6" fill="#ffedd5" stroke="#18181b" stroke-width="2"/>
-              <circle cx="88" cy="74" r="6" fill="#ffedd5" stroke="#18181b" stroke-width="2"/>
+              <path d="M 36 78 Q 65 85 94 78 L 90 86 Q 65 90 40 86 Z" fill="#b45309" stroke="#27272a" stroke-width="2"/>
+              <rect x="38" y="72" width="54" height="8" rx="4" fill="#451a03" stroke="#27272a" stroke-width="2"/>
+              <path d="M 36 72 L 45 76 L 55 70 L 65 77 L 75 70 L 85 76 L 94 72 L 90 68 L 40 68 Z" fill="#d97706" stroke="#27272a" stroke-width="1.5"/>
+              <path d="M 38 68 Q 48 64 58 68 Q 68 72 78 66 Q 88 64 92 68" stroke="#15803d" stroke-width="4" fill="none"/>
+              <path d="M 36 66 C 38 52, 92 52, 94 66 Z" fill="#d97706" stroke="#27272a" stroke-width="2.5"/>
+              <circle cx="50" cy="60" r="1.5" fill="#fdfbf7"/>
+              <circle cx="65" cy="57" r="1.5" fill="#fdfbf7"/>
+              <circle cx="80" cy="61" r="1.5" fill="#fdfbf7"/>
+              <circle cx="42" cy="74" r="6" fill="#fff5eb" stroke="#27272a" stroke-width="2"/>
+              <circle cx="88" cy="74" r="6" fill="#fff5eb" stroke="#27272a" stroke-width="2"/>
             </g>
           </g>
         </svg>
         <div class="loading-text">
-          🍔 廚房正火速為您製作專屬憑證... 🍟
+          🍔 KITCHEN IS PREPARING YOUR VOUCHER...
         </div>
       </div>
     </div>
 
-    <!-- 👉 步驟二：復古餐券憑證卡區塊 -->
+    <!-- 👉 步驟二：復古點餐結帳聯憑證區塊 -->
     <div id="ticket-card">
-      <div class="screenshot-notice">📸 警告：請立即「截圖」保存此兌換餐券！</div>
+      <div class="screenshot-notice">📸 PLEASE SCREENSHOT / 請截圖保存此兌換券</div>
       
-      <div class="ticket-box">
-        <div style="font-size: 20px; font-weight: 900; color: var(--text-black); letter-spacing: 1px; text-transform: uppercase;">🎉 VIP MEAL VOUCHER 🎉</div>
-        
+      <div class="stamp-badge">★ VERIFIED MEAL VOUCHER ★</div>
+      <div style="font-size: 18px; font-weight: 900; color: var(--ink-black); letter-spacing: 1px;">專屬兌換餐券</div>
+      
+      <div class="qr-box">
         <img id="qr-code-img" class="qr-img" src="" alt="核銷條碼">
-        <div class="highlight-text">★ 憑此雷射條碼至門市享專屬禮遇 ★</div>
+      </div>
+      <span class="highlight-text">至全台門市出示此條碼核銷</span>
 
-        <div class="info-list">
-          <div class="info-row"><strong>🎯 兌換項目</strong> <span id="res-act" style="color: var(--diner-red);"></span></div>
-          <div class="info-row"><strong>💬 顧客姓名</strong> <span id="res-name"></span></div>
-          <div class="info-row"><strong>🔗 社群帳號</strong> <span id="res-social"></span></div>
-          <div class="info-row"><strong>📱 綁定手機</strong> <span id="res-phone"></span></div>
-        </div>
+      <div class="info-list">
+        <div class="info-row"><strong>EVENT / 活動</strong> <span id="res-act" style="color: var(--cherry-red);"></span></div>
+        <div class="info-row"><strong>GUEST / 姓名</strong> <span id="res-name"></span></div>
+        <div class="info-row"><strong>SOCIAL / 帳號</strong> <span id="res-social"></span></div>
+        <div class="info-row"><strong>MOBILE / 手機</strong> <span id="res-phone"></span></div>
       </div>
       
       <!-- 🌟 智慧防洗單解藥：切換時自動尋找「還沒領過的活動」！ -->
-      <button class="switch-btn" onclick="resetToForm()">🔄 我要切換／領取其他活動專區</button>
+      <button class="switch-btn" onclick="resetToForm()">[ + ] SWITCH EVENT / 切換或領取其他活動</button>
 
-      <p style="font-size: 13px; color: #71717a; margin-top: 16px; margin-bottom: 0; line-height: 1.6; font-weight: 700;">
-        💡 <strong>兌換須知：</strong>若無法截圖，直接至櫃檯向門市人員「報手機號碼」亦可完成核銷。
+      <p style="font-size: 12px; color: var(--ink-muted); margin-top: 18px; margin-bottom: 0; line-height: 1.6; font-weight: 700;">
+        💡 <strong>用餐須知：</strong>若無法截圖，直接至櫃檯向服務人員「報手機號碼」亦可完成核銷。
       </p>
     </div>
+
+    <!-- 點餐單底部鋸齒撕線 -->
+    <div class="check-footer"></div>
   </div>
 </div>
 
@@ -296,12 +353,12 @@
 
   function triggerConfetti() {
     if (typeof confetti === 'function') {
-      // 搭配美式餐館風格的經典慶祝配色 (番茄紅、芥末黃、霓虹藍、奶油白)
-      var dinerColors = ['#dc2626', '#fbbf24', '#2563eb', '#ffffff', '#f97316'];
-      confetti({ particleCount: 85, spread: 75, origin: { y: 0.6 }, colors: dinerColors });
+      // 搭配復古老美式配色 (波本櫻桃紅、溫潤芥末黃、炭黑、奶油白)
+      var vintageColors = ['#991b1b', '#d97706', '#27272a', '#fdfbf7', '#b45309'];
+      confetti({ particleCount: 85, spread: 75, origin: { y: 0.6 }, colors: vintageColors });
       setTimeout(() => {
-        confetti({ particleCount: 50, angle: 60, spread: 55, origin: { x: 0 }, colors: dinerColors });
-        confetti({ particleCount: 50, angle: 120, spread: 55, origin: { x: 1 }, colors: dinerColors });
+        confetti({ particleCount: 50, angle: 60, spread: 55, origin: { x: 0 }, colors: vintageColors });
+        confetti({ particleCount: 50, angle: 120, spread: 55, origin: { x: 1 }, colors: vintageColors });
       }, 250);
     }
   }
@@ -310,7 +367,7 @@
     checkSavedTicket(true);
   };
 
-  // 🌟🌟🌟 核心防護一：只要選單變動，立刻檢查有沒有領過！領過就秒秀條碼，絕不給重複輸入！ 🌟🌟🌟
+  // 🌟 智慧防洗單一：只要選單變動，立刻檢查有無領過！領過就秒秀條碼！
   function checkSavedTicket(isFirstLoad) {
     var act = document.getElementById('activity').value;
     var savedPhone = localStorage.getItem("pos_" + act + "_phone");
@@ -318,11 +375,11 @@
     if (savedPhone) {
       if (!isFirstLoad) {
         triggerVibe([50, 50]);
-        alert("💡 系統偵測：您已經領過「" + act + "」的憑證囉！自動為您顯示條碼。");
+        alert("💡 系統提示：您已經領過「" + act + "」的餐券囉！自動為您顯示條碼。");
       }
       showTicket(
         act, 
-        localStorage.getItem("pos_" + act + "_name") || "VIP 顧客", 
+        localStorage.getItem("pos_" + act + "_name") || "VIP GUEST", 
         localStorage.getItem("pos_" + act + "_social") || "", 
         savedPhone
       );
@@ -333,13 +390,12 @@
     }
   }
 
-  // 🌟🌟🌟 核心防護二：按下切換按鈕時，自動尋找「他還沒領過的活動」！ 🌟🌟🌟
+  // 🌟 智慧防洗單二：按下切換按鈕時，自動尋找「他還沒領過的活動」！
   function resetToForm() {
     var select = document.getElementById('activity');
     var nextUnclaimed = "";
     var allClaimed = true;
 
-    // 迴圈檢查哪一個選項是「還沒領過的」
     for (var i = 0; i < select.options.length; i++) {
       var val = select.options[i].value;
       if (!localStorage.getItem("pos_" + val + "_phone")) {
@@ -349,14 +405,12 @@
       }
     }
 
-    // 如果全部都領過了，直接擋下來，不給打開表單！
     if (allClaimed) {
       triggerVibe([80, 50, 80]);
-      alert("💡 讚啦！您目前「所有開放的活動」都已經領取過專屬憑證囉！為您保留目前的兌換券。");
+      alert("💡 讚啦！您目前「所有開放的活動」都已經領取過專屬餐券囉！為您保留目前的憑證。");
       return;
     }
 
-    // 自動幫他把選單切換到「尚未領取」的那個活動，並打開空白表單！
     select.value = nextUnclaimed;
     document.getElementById('ticket-card').style.display = 'none';
     document.getElementById('loading').style.display = 'none';
@@ -399,7 +453,7 @@
       .then(result => {
         if (result.status === "success" || result.status === "already_registered") {
           if (result.status === "already_registered") {
-            alert("💡 系統偵測到此手機號碼或社群帳號之前已經登記過囉！為您顯示原本的專屬憑證。");
+            alert("💡 系統偵測到此手機號碼或社群帳號之前已經登記過囉！為您顯示原本的專屬餐券。");
           } else {
             triggerVibe([80, 50, 80, 50, 150]);
             triggerConfetti();
@@ -435,8 +489,8 @@
     document.getElementById('res-social').innerText = social;
     document.getElementById('res-phone').innerText = phone;
     
-    // ✅ 生成標準美式深黑條碼 (dark=18181b) 搭配純白底色，1000% 瞬秒極速通關！
-    var qrUrl = "https://quickchart.io/qr?text=" + phone + "&size=250&margin=2&dark=18181b&light=ffffff";
+    // ✅ 生成老式打字機炭黑條碼 (dark=27272a) 搭配純白底色，極致藝術又順秒！
+    var qrUrl = "https://quickchart.io/qr?text=" + phone + "&size=250&margin=2&dark=27272a&light=ffffff";
     document.getElementById('qr-code-img').src = qrUrl;
   }
   
