@@ -439,7 +439,6 @@
   const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
   function playArcadeSound(type) {
-    // 確保瀏覽器解鎖音效權限
     if (audioCtx.state === 'suspended') { audioCtx.resume(); }
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
@@ -447,16 +446,14 @@
     gain.connect(audioCtx.destination);
     
     if (type === 'beep') {
-      // 科技嗶聲 (查詢成功/掃描到條碼)
       osc.type = 'sine';
       osc.frequency.setValueAtTime(800, audioCtx.currentTime);
       osc.frequency.exponentialRampToValueAtTime(1400, audioCtx.currentTime + 0.08);
       gain.gain.setValueAtTime(0.25, audioCtx.currentTime);
       gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.08);
       osc.start(); osc.stop(audioCtx.currentTime + 0.08);
-      triggerVibe(40); // 輕震動手感
+      triggerVibe(40);
     } else if (type === 'win') {
-      // 金幣勝利灑幣爽感音效 (Super Mario 風格)
       const now = audioCtx.currentTime;
       osc.type = 'triangle';
       osc.frequency.setValueAtTime(523.25, now);       // C5
@@ -466,32 +463,27 @@
       gain.gain.setValueAtTime(0.35, now);
       gain.gain.exponentialRampToValueAtTime(0.01, now + 0.55);
       osc.start(now); osc.stop(now + 0.55);
-      triggerVibe([80, 50, 80, 50, 150]); // 三連發勝利震動！
+      triggerVibe([80, 50, 80, 50, 150]);
     } else if (type === 'error') {
-      // 警告低音
       osc.type = 'sawtooth';
       osc.frequency.setValueAtTime(250, audioCtx.currentTime);
       osc.frequency.setValueAtTime(130, audioCtx.currentTime + 0.15);
       gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
       gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
       osc.start(); osc.stop(audioCtx.currentTime + 0.3);
-      triggerVibe([100, 50, 100]); // 警告震動
+      triggerVibe([100, 50, 100]);
     }
   }
 
-  // 觸覺脈衝震動觸發器
   function triggerVibe(pattern) {
     if ("vibrate" in navigator) {
       try { navigator.vibrate(pattern); } catch(e) {}
     }
   }
 
-  // 🎉 金幣派對彩帶大噴發！
   function triggerConfetti() {
     if (typeof confetti === 'function') {
-      // 中間噴發
       confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 } });
-      // 左右加碼煙火噴發
       setTimeout(() => {
         confetti({ particleCount: 50, angle: 60, spread: 55, origin: { x: 0 } });
         confetti({ particleCount: 50, angle: 120, spread: 55, origin: { x: 1 } });
@@ -539,7 +531,7 @@
         var cleanPhone = decodedText.replace(/\D/g, '');
         document.getElementById('search-input').value = cleanPhone;
         stopScanner();
-        playArcadeSound('beep'); // 掃描成功發出嗶聲！
+        playArcadeSound('beep');
         searchCoupon(); 
       },
       (errorMessage) => {}
@@ -566,12 +558,11 @@
     if (!activity) return alert("⚠️ 請選擇要核銷的活動！");
     if (!phone) return alert("⚠️ 請輸入顧客手機號碼！");
 
-    // 🌟 防連點鎖
     var searchBtn = document.getElementById('search-btn');
     searchBtn.disabled = true;
     searchBtn.innerText = "查詢中";
     searchBtn.style.background = "#334155";
-    triggerVibe(30); // 按鈕按壓震動
+    triggerVibe(30);
 
     clearInterval(undoInterval);
     document.getElementById('undo-area').style.display = 'none';
@@ -583,18 +574,31 @@
     fetch(url, { method: 'GET', redirect: 'follow' })
       .then(response => response.json())
       .then(result => {
-        // 解除按鈕鎖
         searchBtn.disabled = false;
         searchBtn.innerText = "查詢";
         searchBtn.style.background = "";
-        
         document.getElementById('loading').style.display = 'none';
+
+        // 🌟🌟🌟 接收跨區情報並智慧幫員工切換活動！ 🌟🌟🌟
         if (!result.exists) {
+          if (result.found_in_other_sheet) {
+            playArcadeSound('error');
+            var confirmSwitch = confirm(
+              "⚠️ 跨活動雷達偵測：\n\n此號碼不在目前的【" + activity + "】！\n而是登記在【" + result.actual_sheet + "】。\n\n是否直接為您「自動切換至該活動」並調出資料？"
+            );
+            if (confirmSwitch) {
+              // 員工按確定，自動把選單切過去並重新查詢！
+              document.getElementById('activity-select').value = result.actual_sheet;
+              searchCoupon();
+            }
+            return;
+          }
+          
           playArcadeSound('error');
-          return alert(result.error || "❌ 在活動名單中找不到此手機號碼！");
+          return alert(result.error || "❌ 在全店所有活動名單中，都找不到此手機號碼！");
         }
         
-        playArcadeSound('beep'); // 查詢成功發出嗶聲與輕震動
+        playArcadeSound('beep');
         document.getElementById('content').style.display = 'block';
         document.getElementById('id-text').innerText = phone;
         document.getElementById('name-text').innerText = result.name || "未提供";
@@ -655,7 +659,6 @@
         if (result.status === "success") {
           updateUI({ status: "已兌換", time: new Date().getTime(), store: store });
           
-          /* 🎉 慶祝大決招：金幣爽感音效 + 彩帶煙火大噴發 + 三連震！ */
           playArcadeSound('win');
           triggerConfetti();
           
