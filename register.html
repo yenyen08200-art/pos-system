@@ -3,76 +3,188 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-  <title>活動兌換登記</title>
+  <title>VIP 專屬領券系統</title>
+  
+  <link rel="manifest" href="manifest.json">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="活動領券">
+  <link rel="apple-touch-icon" href="icon.png">
+
+  <!-- 引入慶祝彩帶引擎 -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+
   <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: #fef3c7; margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 90vh; }
-    .card { background: white; width: 100%; max-width: 400px; padding: 24px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; border-top: 8px solid #f59e0b; }
-    h1 { color: #92400e; font-size: 24px; margin-top: 0; margin-bottom: 8px; }
-    p { color: #6b7280; font-size: 15px; margin-bottom: 20px; line-height: 1.5; }
-    label { display: block; text-align: left; font-weight: bold; color: #374151; margin-bottom: 6px; font-size: 15px; }
-    input, select { width: 100%; padding: 14px; border-radius: 8px; border: 2px solid #d1d5db; font-size: 16px; margin-bottom: 16px; box-sizing: border-box; }
-    input:focus { border-color: #f59e0b; outline: none; }
-    .submit-btn { background-color: #f59e0b; color: white; border: none; padding: 16px; width: 100%; border-radius: 8px; font-size: 18px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 6px rgba(245, 158, 11, 0.3); }
-    .submit-btn:active { background-color: #d97706; }
-    .submit-btn:disabled { background-color: #9ca3af; box-shadow: none; }
+    :root {
+      --neon-blue: #00f2fe;
+      --neon-green: #00ff87;
+      --neon-gold: #ffcc00;
+      --neon-red: #ff0844;
+      --bg-dark: #0b0f19;
+      --card-dark: #131b2e;
+      --ticket-dark: #1c263f;
+      --text-main: #f8fafc;
+      --text-sub: #94a3b8;
+    }
+
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+      background-color: var(--bg-dark); 
+      background-image: 
+        radial-gradient(at 15% 15%, rgba(255, 204, 0, 0.08) 0px, transparent 50%),
+        radial-gradient(at 85% 85%, rgba(0, 242, 254, 0.08) 0px, transparent 50%);
+      color: var(--text-main);
+      margin: 0; 
+      padding: 16px; 
+      display: flex; 
+      justify-content: center; 
+      align-items: center; 
+      min-height: 95vh; 
+      box-sizing: border-box;
+    }
     
-    #ticket-card { display: none; background: #fffbeb; border: 2px dashed #f59e0b; padding: 20px; border-radius: 12px; margin-top: 10px; }
-    .qr-img { width: 190px; height: 190px; margin: 10px 0; border: 8px solid white; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-    .highlight-text { font-size: 18px; font-weight: bold; color: #b45309; margin: 10px 0; }
-    .info-box { text-align: left; background: white; padding: 12px; border-radius: 8px; margin-top: 15px; font-size: 15px; color: #374151; line-height: 1.8; border: 1px solid #fde68a; }
-    .screenshot-notice { background: #ef4444; color: white; padding: 10px; border-radius: 6px; font-weight: bold; font-size: 16px; margin-bottom: 15px; animation: pulse 2s infinite; }
-    @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.03); } 100% { transform: scale(1); } }
+    .container { width: 100%; max-width: 420px; }
+
+    /* 🌌 頂部迎賓導航列 */
+    .header-banner {
+      background: rgba(19, 27, 46, 0.8);
+      backdrop-filter: blur(12px);
+      padding: 18px;
+      border-radius: 18px;
+      text-align: center;
+      margin-bottom: 20px;
+      border: 1px solid rgba(255, 204, 0, 0.3);
+      box-shadow: 0 10px 30px -10px rgba(255, 204, 0, 0.2);
+    }
+    h1 { color: var(--neon-gold); font-size: 22px; margin: 0 0 6px 0; font-weight: 900; letter-spacing: 1px; text-shadow: 0 0 15px rgba(255, 204, 0, 0.3); }
+    .subtitle { color: var(--text-sub); font-size: 14px; margin: 0; line-height: 1.5; }
+
+    /* 🛡️ 主卡片視覺 */
+    .card { 
+      background: var(--card-dark); 
+      padding: 24px 20px; 
+      border-radius: 24px; 
+      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.6); 
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      position: relative;
+    }
+
+    label { display: block; text-align: left; font-weight: 800; color: var(--text-sub); margin-bottom: 6px; font-size: 14px; letter-spacing: 0.5px; }
+    
+    input, select { 
+      width: 100%; padding: 16px; border-radius: 14px; border: 2px solid rgba(255, 255, 255, 0.1); 
+      background: rgba(11, 15, 25, 0.9); color: white; font-size: 16px; font-weight: bold;
+      margin-bottom: 18px; box-sizing: border-box; transition: all 0.25s ease; outline: none;
+    }
+    input::placeholder { color: #475569; font-weight: normal; }
+    input:focus { border-color: var(--neon-blue); box-shadow: 0 0 15px rgba(0, 242, 254, 0.2); }
+    
+    #activity { background: rgba(19, 27, 46, 0.9); border-color: var(--neon-gold); color: var(--neon-gold); }
+    #activity option { background: white; color: #0f172a; }
+
+    /* 🔑 獨立高亮通關密語框 */
+    .secret-box { background: rgba(255, 204, 0, 0.05); padding: 12px; border-radius: 16px; border: 1px dashed rgba(255, 204, 0, 0.4); margin-bottom: 20px; }
+    .secret-box label { color: var(--neon-gold); }
+    #secret_code { border-color: var(--neon-gold); margin-bottom: 0; text-transform: uppercase; letter-spacing: 2px; text-align: center; font-size: 18px; color: var(--neon-gold); }
+
+    /* ⚡ 霓虹送出按鈕 */
+    .submit-btn { 
+      background: linear-gradient(135deg, var(--neon-gold), #ff9900); 
+      color: #000; border: none; padding: 18px; width: 100%; border-radius: 14px; 
+      font-size: 18px; font-weight: 900; cursor: pointer; letter-spacing: 1px;
+      box-shadow: 0 0 25px rgba(255, 204, 0, 0.4); transition: all 0.2s ease;
+    }
+    .submit-btn:active { transform: scale(0.97); }
+    .submit-btn:disabled { background: #334155 !important; color: #64748b !important; box-shadow: none !important; cursor: not-allowed; transform: none; }
+    
+    /* 🎟️ 尊榮曜石黑「電子憑證卡」設計 */
+    #ticket-card { display: none; text-align: center; }
+    
+    .ticket-box {
+      background: var(--ticket-dark); border: 1px solid rgba(255, 204, 0, 0.4); border-radius: 20px;
+      padding: 24px 18px; margin: 15px 0; position: relative;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.5), inset 0 0 20px rgba(255, 204, 0, 0.05);
+    }
+    /* 打孔切角 */
+    .ticket-box::before, .ticket-box::after {
+      content: ""; position: absolute; top: 62%; width: 24px; height: 24px;
+      background-color: var(--card-dark); border: 1px solid rgba(255, 204, 0, 0.4); border-radius: 50%;
+    }
+    .ticket-box::before { left: -14px; border-left-color: transparent; border-top-color: transparent; transform: rotate(45deg); }
+    .ticket-box::after { right: -14px; border-right-color: transparent; border-bottom-color: transparent; transform: rotate(45deg); }
+
+    .qr-img { width: 190px; height: 190px; margin: 15px auto; border: 8px solid white; border-radius: 16px; box-shadow: 0 0 25px rgba(255, 204, 0, 0.3); display: block; }
+    .highlight-text { font-size: 17px; font-weight: 900; color: var(--neon-gold); letter-spacing: 1px; margin: 10px 0 15px 0; text-shadow: 0 0 10px rgba(255, 204, 0, 0.3); }
+    
+    .info-list { text-align: left; border-top: 2px dashed rgba(255, 255, 255, 0.15); padding-top: 18px; display: flex; flex-direction: column; gap: 12px; }
+    .info-row { display: flex; justify-content: space-between; font-size: 15px; }
+    .info-row strong { color: var(--text-sub); width: 90px; }
+    .info-row span { color: white; font-weight: 800; text-align: right; word-break: break-all; }
+    #res-phone { color: var(--neon-gold); font-family: monospace; font-size: 18px !important; }
+
+    .screenshot-notice { background: rgba(255, 8, 68, 0.2); border: 1px solid var(--neon-red); color: #ff8f9c; padding: 12px; border-radius: 12px; font-weight: 900; font-size: 15px; margin-bottom: 15px; animation: pulse 1.5s infinite; letter-spacing: 0.5px; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
   </style>
 </head>
 <body>
 
-<div class="card">
-  <!-- 👉 步驟一：登記表單區塊 -->
-  <div id="form-section">
-    <h1>🎁 活動兌換登記</h1>
-    <p>請填寫社群資訊與手機，立即生成「專屬領獎條碼」！</p>
-    
-    <label>🎯 選擇領取活動：</label>
-    <select id="activity" style="background-color: #fffbeb; border-color: #f59e0b; font-weight: bold;">
-      <option value="父親節社群活動">父親節社群活動</option>
-      <option value="中秋節活動">中秋節活動</option>
-    </select>
-
-    <label>💬 社群名字 (IG/FB 暱稱)：</label>
-    <input type="text" id="name" placeholder="例：小新 / Amy" required>
-
-    <label>🔗 社群帳號 ID：</label>
-    <input type="text" id="social_id" placeholder="例：@shin_123 / LINE ID" required>
-
-    <label>📱 手機號碼 (核對與防重複)：</label>
-    <input type="tel" id="phone" placeholder="例：0912345678" maxlength="10" required>
-
-    <!-- 🌟 新增：鑰匙孔！讓客人填寫活動密語 -->
-    <label>🔑 活動通關密語 (請見官方後台私訊)：</label>
-    <input type="text" id="secret_code" placeholder="例：TFC55" required style="text-transform: uppercase;">
-
-    <button id="btn" class="submit-btn" onclick="register()">立即生成領券條碼</button>
+<div class="container">
+  <!-- 👉 頂部橫幅 -->
+  <div class="header-banner">
+    <h1>👑 VIP 專屬終端領券系統</h1>
+    <p class="subtitle">完成活動通關驗證，立即生成「雷射加密領獎憑證」</p>
   </div>
 
-  <!-- 👉 步驟二：秒速生成的「專屬憑證卡」區塊 -->
-  <div id="ticket-card">
-    <div class="screenshot-notice">📸 請立即「截圖」保存此畫面！</div>
-    <div style="font-size: 18px; font-weight: bold; color: #92400e;">🎉 登記成功！您的領獎憑證</div>
-    
-    <img id="qr-code-img" class="qr-img" src="" alt="核銷條碼">
-    
-    <div class="highlight-text">憑此畫面至全台門市兌換</div>
+  <div class="card">
+    <!-- 👉 步驟一：登記表單區塊 -->
+    <div id="form-section">
+      <label>🎯 選擇兌換活動項目</label>
+      <select id="activity">
+        <option value="父親節社群活動">父親節社群活動</option>
+        <option value="中秋節活動">中秋節活動</option>
+      </select>
 
-    <div class="info-box">
-      <strong>🎯 活動：</strong><span id="res-act"></span><br>
-      <strong>💬 名字：</strong><span id="res-name"></span><br>
-      <strong>🔗 帳號：</strong><span id="res-social"></span><br>
-      <strong>📱 電話：</strong><span id="res-phone" style="color: #d97706; font-weight: bold;"></span>
+      <label>💬 社群暱稱 (IG/FB 顯示名稱)</label>
+      <input type="text" id="name" placeholder="例：小新 / Amy" required>
+
+      <label>🔗 社群帳號 ID (供核對使用)</label>
+      <input type="text" id="social_id" placeholder="例：@shin_123 / LINE ID" required>
+
+      <label>📱 聯絡手機號碼 (防重複驗證)</label>
+      <input type="tel" id="phone" placeholder="例：0912345678" maxlength="10" required>
+
+      <!-- 🌟 專屬霓虹黃金鑰匙孔！ -->
+      <div class="secret-box">
+        <label>🔑 活動專屬通關密語</label>
+        <input type="text" id="secret_code" placeholder="請填入官方公告密語" required>
+      </div>
+
+      <button id="btn" class="submit-btn" onclick="register()">⚡ 立即驗證並生成憑證</button>
     </div>
-    
-    <p style="font-size: 13px; color: #6b7280; margin-top: 15px; margin-bottom: 0;">
-      💡 <strong>溫馨提醒：</strong>若不會截圖，直接至櫃檯向店員「報手機號碼」也能領取喔！
-    </p>
+
+    <!-- 👉 步驟二：科幻數位憑證卡區塊 -->
+    <div id="ticket-card">
+      <div class="screenshot-notice">📸 警告：請立即「截圖」保存此加密憑證！</div>
+      
+      <div class="ticket-box">
+        <div style="font-size: 18px; font-weight: 900; color: white; letter-spacing: 1px;">🎉 驗證通過！專屬數位憑證</div>
+        
+        <img id="qr-code-img" class="qr-img" src="" alt="核銷條碼">
+        <div class="highlight-text">★ 憑此雷射條碼至全台門市核銷 ★</div>
+
+        <div class="info-list">
+          <div class="info-row"><strong>🎯 兌換項目</strong> <span id="res-act" style="color: var(--neon-blue);"></span></div>
+          <div class="info-row"><strong>💬 顧客姓名</strong> <span id="res-name"></span></div>
+          <div class="info-row"><strong>🔗 社群帳號</strong> <span id="res-social"></span></div>
+          <div class="info-row"><strong>📱 綁定手機</strong> <span id="res-phone"></span></div>
+        </div>
+      </div>
+      
+      <p style="font-size: 13px; color: var(--text-sub); margin-top: 15px; margin-bottom: 0; line-height: 1.6;">
+        💡 <strong>終端提示：</strong>若無法截圖，直接至櫃檯向門市人員「報手機號碼」亦可完成連線核銷。
+      </p>
+    </div>
   </div>
 </div>
 
@@ -80,19 +192,29 @@
   // ⚠️ 已經幫你保留你的 API 網址
   var API_URL = "https://script.google.com/macros/s/AKfycbyteRoiXgX3h9dpU325M0mg--jNEy1ayfpRPGmXebEEn3Q2Tq37yGNmXiShcrOQqyCm/exec";
 
+  // 📳 觸覺震動觸發器
+  function triggerVibe(pattern) {
+    if ("vibrate" in navigator) { try { navigator.vibrate(pattern); } catch(e) {} }
+  }
+
+  // 🎉 勝利灑幣煙火大慶祝
+  function triggerConfetti() {
+    if (typeof confetti === 'function') {
+      confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 } });
+      setTimeout(() => {
+        confetti({ particleCount: 50, angle: 60, spread: 55, origin: { x: 0 } });
+        confetti({ particleCount: 50, angle: 120, spread: 55, origin: { x: 1 } });
+      }, 250);
+    }
+  }
+
   // 🌟 F5 指紋鎖：網頁一打開，立刻檢查瀏覽器是否已經有領券紀錄！
   window.onload = function() {
     var savedPhone = localStorage.getItem("pos_saved_phone");
     var savedAct = localStorage.getItem("pos_saved_act");
     if (savedPhone && savedAct === document.getElementById('activity').value) {
-      alert("💡 系統偵測到此瀏覽器已經領取過「" + savedAct + "」囉！為您顯示專屬憑證。");
-      document.getElementById('form-section').style.display = 'none';
-      document.getElementById('ticket-card').style.display = 'block';
-      document.getElementById('res-act').innerText = savedAct;
-      document.getElementById('res-name').innerText = localStorage.getItem("pos_saved_name") || "忠實顧客";
-      document.getElementById('res-social').innerText = localStorage.getItem("pos_saved_social") || "";
-      document.getElementById('res-phone').innerText = savedPhone;
-      document.getElementById('qr-code-img').src = "https://quickchart.io/qr?text=" + savedPhone + "&size=200&margin=1&dark=92400e";
+      alert("💡 終端偵測：此瀏覽器已經領取過「" + savedAct + "」囉！自動載入專屬加密憑證。");
+      showTicket(savedAct, localStorage.getItem("pos_saved_name") || "VIP 顧客", localStorage.getItem("pos_saved_social") || "", savedPhone);
     }
   };
 
@@ -102,22 +224,21 @@
     var name = document.getElementById('name').value.trim();
     var socialId = document.getElementById('social_id').value.trim();
     var phone = document.getElementById('phone').value.trim();
-    var secretCode = document.getElementById('secret_code').value.trim(); // 👉 你問的第一段：在這裡抓取密語！
+    var secretCode = document.getElementById('secret_code').value.trim(); 
 
-    // 👉 你問的第一段：在這裡檢查密語有沒有填！
-    if (!name) return alert("⚠️ 請輸入您的社群名字！");
+    if (!name) return alert("⚠️ 請輸入您的社群暱稱！");
     if (!socialId) return alert("⚠️ 請輸入您的社群帳號 ID！");
-    if (!secretCode) return alert("⚠️ 請輸入活動通關密語！"); 
     if (!phone || phone.length < 8) return alert("⚠️ 請輸入正確的手機號碼！");
+    if (!secretCode) return alert("⚠️ 請填入活動專屬通關密語！"); 
     
     phone = phone.replace(/\D/g, '');
+    triggerVibe(40);
 
     var btn = document.getElementById('btn');
     btn.disabled = true;
-    btn.innerText = "資料寫入與生成條碼中...";
+    btn.innerText = "⏳ 終端連線加密驗證中...";
 
     var baseUrl = API_URL.split('?')[0]; 
-    // 👉 你問的第二段：在這裡把 "code": secretCode 一起打包送出去！
     var params = new URLSearchParams({
       "action": "register",
       "id": phone,
@@ -133,7 +254,11 @@
       .then(result => {
         if (result.status === "success" || result.status === "already_registered") {
           if (result.status === "already_registered") {
-            alert("💡 系統偵測到此手機號碼或社群帳號之前已經登記過囉！為您顯示原本的領券條碼。");
+            alert("💡 系統偵測到此手機號碼或社群帳號之前已經登記過囉！為您顯示原本的專屬憑證。");
+          } else {
+            // 新登記成功！狂發震動 + 煙火彩帶！
+            triggerVibe([80, 50, 80, 50, 150]);
+            triggerConfetti();
           }
           
           localStorage.setItem("pos_saved_phone", phone);
@@ -141,28 +266,36 @@
           localStorage.setItem("pos_saved_name", result.name || name);
           localStorage.setItem("pos_saved_social", result.social_id || socialId);
 
-          document.getElementById('form-section').style.display = 'none';
-          document.getElementById('ticket-card').style.display = 'block';
-          
-          document.getElementById('res-act').innerText = act;
-          document.getElementById('res-name').innerText = result.name || name;
-          document.getElementById('res-social').innerText = result.social_id || socialId;
-          document.getElementById('res-phone').innerText = phone;
-          
-          var qrUrl = "https://quickchart.io/qr?text=" + phone + "&size=200&margin=1&dark=92400e";
-          document.getElementById('qr-code-img').src = qrUrl;
+          showTicket(act, result.name || name, result.social_id || socialId, phone);
         } else {
-          // 如果後端發現通關密語錯了，就會在這裡跳出警告提示！
-          alert(result.error || "登記提示：系統回傳異常 (" + JSON.stringify(result) + ")");
+          // 密語錯誤或系統異常警告
+          triggerVibe([100, 50, 100]);
+          alert(result.error || "驗證失敗：系統回傳異常 (" + JSON.stringify(result) + ")");
           btn.disabled = false;
-          btn.innerText = "立即生成領券條碼";
+          btn.innerText = "⚡ 立即驗證並生成憑證";
         }
       })
       .catch(error => {
+        triggerVibe([100, 50, 100]);
         alert("連線發生問題，請檢查網路狀態！錯誤描述：" + error);
         btn.disabled = false;
-        btn.innerText = "立即生成領券條碼";
+        btn.innerText = "⚡ 立即驗證並生成憑證";
       });
+  }
+
+  // 顯示數位卡片專用函數
+  function showTicket(act, name, social, phone) {
+    document.getElementById('form-section').style.display = 'none';
+    document.getElementById('ticket-card').style.display = 'block';
+    
+    document.getElementById('res-act').innerText = act;
+    document.getElementById('res-name').innerText = name;
+    document.getElementById('res-social').innerText = social;
+    document.getElementById('res-phone').innerText = phone;
+    
+    // 生成雷射黃金條碼
+    var qrUrl = "https://quickchart.io/qr?text=" + phone + "&size=220&margin=1&dark=ffcc00&light=131b2e";
+    document.getElementById('qr-code-img').src = qrUrl;
   }
 </script>
 </body>
