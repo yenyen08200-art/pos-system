@@ -300,7 +300,6 @@
     fetch(url, { method: 'GET', redirect: 'follow' })
       .then(response => response.json())
       .then(result => {
-        // 🌟 革命性升級：不管是成功，還是「剛才已經登記過」，一律視為成功！絕不跳錯誤！
         if (result.status === "success" || result.status === "already_registered") {
           if (result.status === "already_registered") {
             alert("💡 歡迎回來！系統偵測到您之前已經成功登記過此活動，自動為您載入專屬餐券！");
@@ -323,13 +322,11 @@
         }
       })
       .catch(error => {
-        // 🌟 斷線自癒機制：如果網路稍微延遲卡住，不馬上跳錯，主動去後台確認一次到底成功了沒！
         var checkUrl = baseUrl + "?action=check&id=" + phone + "&sheet=" + encodeURIComponent(act) + "&t=" + new Date().getTime();
         fetch(checkUrl, { method: 'GET', redirect: 'follow' })
           .then(r => r.json())
           .then(checkRes => {
             if (checkRes.exists) {
-              // 其實後台已經成功寫入了！直接帶入餐券！
               localStorage.setItem("pos_" + act + "_phone", phone);
               localStorage.setItem("pos_" + act + "_name", checkRes.name || name);
               localStorage.setItem("pos_" + act + "_social", checkRes.social_id || socialId);
@@ -392,6 +389,39 @@
     fetch(url, { method: 'GET', redirect: 'follow' })
       .then(response => response.json())
       .then(res => {
+        // 🌟🌟🌟 核心解藥一：後台找不到資料（被刪除或清空表單），立即自爆清除手機記憶並彈回表單！ 🌟🌟🌟
+        if (!res.exists) {
+          if (syncTimer) clearInterval(syncTimer);
+          localStorage.removeItem("pos_" + act + "_phone");
+          localStorage.removeItem("pos_" + act + "_name");
+          localStorage.removeItem("pos_" + act + "_social");
+          localStorage.removeItem("pos_" + act + "_status");
+          
+          triggerVibe([100, 50, 100]);
+          alert("💡 系統通知：您的【" + act + "】兌換紀錄已被總部重置或移除！畫面將自動返回輸入表單。");
+          
+          document.getElementById('ticket-card').style.display = 'none';
+          document.getElementById('loading').style.display = 'none';
+          document.getElementById('form-section').style.display = 'block';
+          return;
+        }
+
+        // 🌟🌟🌟 核心解藥二：資料還在，自動檢查後台「姓名」與「帳號」是否有被修改，即時校正同步！ 🌟🌟🌟
+        if (res.exists) {
+          var currentName = document.getElementById('res-name').innerText;
+          var currentSocial = document.getElementById('res-social').innerText;
+          
+          if (res.name && res.name !== currentName) {
+            document.getElementById('res-name').innerText = res.name;
+            localStorage.setItem("pos_" + act + "_name", res.name);
+          }
+          if (res.social_id && res.social_id !== currentSocial) {
+            document.getElementById('res-social').innerText = res.social_id;
+            localStorage.setItem("pos_" + act + "_social", res.social_id);
+          }
+        }
+
+        // 🌟🌟🌟 核心解藥三：同步已核銷狀態 🌟🌟🌟
         if (res.exists && res.status === "已兌換") {
           if (syncTimer) clearInterval(syncTimer);
           localStorage.setItem("pos_" + act + "_status", "已兌換");
