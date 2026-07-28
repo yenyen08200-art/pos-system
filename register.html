@@ -181,19 +181,19 @@
       display: inline-block; border: 2px solid var(--cherry-red); color: var(--cherry-red);
       font-size: 13px; font-weight: 900; letter-spacing: 2px; padding: 4px 14px;
       border-radius: 2px; transform: rotate(-4deg);
-      margin-bottom: 14px; background: rgba(153, 27, 27, 0.03);
+      margin-bottom: 14px; background: rgba(153, 27, 27, 0.03); transition: all 0.3s ease;
     }
     
     .qr-box {
       background: white; padding: 12px; border: var(--border-ink); border-radius: 2px;
       display: inline-block; margin: 10px 0; box-shadow: 0 8px 20px rgba(0,0,0,0.06);
     }
-    .qr-img { width: 180px; height: 180px; display: block; }
+    .qr-img { width: 180px; height: 180px; display: block; transition: opacity 0.3s ease; }
     
     .highlight-text { 
       font-size: 16px; font-weight: 850; color: var(--ink-black); letter-spacing: 1px; 
       margin: 12px 0 20px 0; border-bottom: 1px solid var(--ink-black);
-      padding-bottom: 12px; display: block;
+      padding-bottom: 12px; display: block; transition: all 0.3s ease;
     }
     
     .info-list { text-align: left; display: flex; flex-direction: column; gap: 10px; font-size: 15px; }
@@ -352,6 +352,8 @@
 <script>
   // ⚠️ 已經幫你保留你的 API 網址
   var API_URL = "https://script.google.com/macros/s/AKfycbyteRoiXgX3h9dpU325M0mg--jNEy1ayfpRPGmXebEEn3Q2Tq37yGNmXiShcrOQqyCm/exec";
+  
+  var syncTimer = null; // 🌟 總部心跳連線計時器
 
   function triggerVibe(pattern) {
     if ("vibrate" in navigator) { try { navigator.vibrate(pattern); } catch(e) {} }
@@ -389,6 +391,7 @@
         savedPhone
       );
     } else {
+      if (syncTimer) clearInterval(syncTimer); // 🌟 沒領過券，停止背景通訊
       document.getElementById('ticket-card').style.display = 'none';
       document.getElementById('loading').style.display = 'none';
       document.getElementById('form-section').style.display = 'block';
@@ -397,6 +400,7 @@
 
   // 🌟 智慧防洗單二：按下切換按鈕時，自動尋找「他還沒領過的活動」！
   function resetToForm() {
+    if (syncTimer) clearInterval(syncTimer); // 🌟 切換畫面時，立刻停止背景通訊！
     var select = document.getElementById('activity');
     var nextUnclaimed = "";
     var allClaimed = true;
@@ -494,9 +498,54 @@
     document.getElementById('res-social').innerText = social;
     document.getElementById('res-phone').innerText = phone;
     
-    // ✅ 生成老式打字機炭黑條碼 (dark=27272a) 搭配純白底色，極致藝術又順秒！
+    // ✅ 生成老式打字機炭黑條碼 (dark=27272a) 搭配純白底色
     var qrUrl = "https://quickchart.io/qr?text=" + phone + "&size=250&margin=2&dark=27272a&light=ffffff";
-    document.getElementById('qr-code-img').src = qrUrl;
+    var qrImg = document.getElementById('qr-code-img');
+    qrImg.src = qrUrl;
+    qrImg.style.opacity = "1"; // 🌟 初始化重置條碼透明度
+
+    // 🌟🌟🌟 免費版專屬：智慧節流心跳偵測 (每 10 秒自動查一次核銷狀態) 🌟🌟🌟
+    if (syncTimer) clearInterval(syncTimer);
+    var pollCount = 0;
+
+    syncTimer = setInterval(function() {
+      pollCount++;
+      
+      // 🛡️ 防禦一：沒停留在網頁上 (切換到 IG 或鎖屏)，暫停查詢，節省 Google 免費流量！
+      if (document.hidden) return;
+
+      // 🛡️ 防禦二：停在畫面上超過 5 分鐘 (30 次) 沒動靜，自動休眠煞車！
+      if (pollCount > 30) {
+        clearInterval(syncTimer);
+        return;
+      }
+
+      var baseUrl = API_URL.split('?')[0];
+      var url = baseUrl + "?action=check&id=" + phone + "&sheet=" + encodeURIComponent(act) + "&t=" + new Date().getTime();
+      
+      fetch(url, { method: 'GET', redirect: 'follow' })
+        .then(response => response.json())
+        .then(res => {
+          if (res.exists && res.status === "已兌換") {
+            clearInterval(syncTimer); // 成功核銷，停止查詢
+            triggerVibe([100, 50, 100, 50, 200]); // 慶祝三連震
+            
+            // 畫面同步變身：蓋上完食郵戳、條碼退色
+            var stamp = document.querySelector(".stamp-badge");
+            stamp.innerHTML = "【 廚房已核銷確認 · 感謝完食 】";
+            stamp.style.borderColor = "#71717a";
+            stamp.style.color = "#71717a";
+            
+            var highlight = document.querySelector(".highlight-text");
+            highlight.innerHTML = "★ 本餐券已使用完畢 · 期待您再次光臨 ★";
+            highlight.style.color = "#71717a";
+            
+            qrImg.style.opacity = "0.15"; // 條碼變暗退色，防止二次使用
+            alert("🎉 恭喜！門市人員已完成核銷，您的餐券已成功兌換！");
+          }
+        })
+        .catch(e => {}); // 網路稍微不穩時靜默忽略，等下一個 10 秒
+    }, 10000); // 10 秒一次，絕對安全不過載！
   }
   
   function newSearchParams(obj) {
