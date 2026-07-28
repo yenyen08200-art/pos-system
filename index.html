@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-  <title>門市電子核銷系統 PRO</title>
+  <title>門市終端核銷系統 PRO MAX</title>
   
   <link rel="manifest" href="manifest.json">
   <meta name="mobile-web-app-capable" content="yes">
@@ -16,20 +16,25 @@
 
   <style>
     :root {
-      --primary: #2563eb;
-      --primary-dark: #1d4ed8;
-      --success: #10b981;
-      --success-dark: #059669;
-      --danger: #ef4444;
-      --warning: #f59e0b;
-      --bg-main: #f8fafc;
-      --text-main: #0f172a;
-      --text-sub: #64748b;
+      --neon-blue: #00f2fe;
+      --neon-indigo: #4facfe;
+      --neon-green: #00ff87;
+      --neon-emerald: #60efff;
+      --neon-red: #ff0844;
+      --neon-orange: #ffb199;
+      --bg-dark: #0b0f19;
+      --card-dark: #131b2e;
+      --ticket-dark: #1c263f;
+      --text-main: #f8fafc;
+      --text-sub: #94a3b8;
     }
 
     body { 
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif; 
-      background-color: var(--bg-main); 
+      background-color: var(--bg-dark); 
+      background-image: 
+        radial-gradient(at 10% 10%, rgba(0, 242, 254, 0.08) 0px, transparent 50%),
+        radial-gradient(at 90% 90%, rgba(0, 255, 135, 0.05) 0px, transparent 50%);
       color: var(--text-main);
       margin: 0; 
       padding: 16px; 
@@ -42,151 +47,215 @@
     
     .container { width: 100%; max-width: 420px; }
 
-    /* 🌟 頂部門市設定列 */
+    /* 🌌 頂部科幻導航列 (毛玻璃與呼吸燈) */
     .store-header { 
-      background: linear-gradient(135deg, #1e293b, #334155); 
+      background: rgba(19, 27, 46, 0.8);
+      backdrop-filter: blur(12px);
       color: white; 
       padding: 16px 20px; 
-      border-radius: 16px; 
+      border-radius: 18px; 
       margin-bottom: 20px; 
-      box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05); 
-      border: 1px solid rgba(255,255,255,0.1);
+      box-shadow: 0 10px 30px -10px rgba(0, 242, 254, 0.2);
+      border: 1px solid rgba(0, 242, 254, 0.3);
+      position: relative;
+      overflow: hidden;
     }
-    .store-header label { font-size: 14px; font-weight: 600; color: #94a3b8; margin-bottom: 6px; display: block; letter-spacing: 0.5px; }
+    .store-header::before {
+      content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 3px;
+      background: linear-gradient(90deg, var(--neon-blue), var(--neon-green));
+    }
+    .store-header label { font-size: 13px; font-weight: 700; color: var(--neon-blue); margin-bottom: 6px; display: flex; align-items: center; gap: 6px; letter-spacing: 1px; text-transform: uppercase; }
+    .store-header label::before { content: "●"; color: var(--neon-green); animation: pulse 1.5s infinite; }
+    
     .store-header select { 
-      background-color: rgba(255,255,255,0.1); 
+      background-color: rgba(11, 15, 25, 0.8); 
       color: white; 
-      border: 1px solid rgba(255,255,255,0.2); 
-      font-weight: bold; 
+      border: 1px solid rgba(255, 255, 255, 0.15); 
+      font-weight: 800; 
       font-size: 16px;
       margin-bottom: 0;
+      padding: 12px;
+      border-radius: 10px;
     }
-    .store-header select option { color: #0f172a; background: white; }
+    .store-header select option { color: #0f172a; background: white; font-weight: bold; }
 
-    /* 🌟 主卡片視覺 */
+    /* 🛡️ 主卡片視覺 (科技深邃黑) */
     .card { 
-      background: white; 
+      background: var(--card-dark); 
       padding: 24px 20px; 
-      border-radius: 20px; 
-      box-shadow: 0 20px 25px -5px rgba(0,0,0,0.05), 0 10px 10px -5px rgba(0,0,0,0.02); 
+      border-radius: 24px; 
+      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); 
       text-align: center; 
-      border: 1px solid #f1f5f9;
+      border: 1px solid rgba(255, 255, 255, 0.08);
     }
-    h2 { color: var(--text-main); margin-top: 0; margin-bottom: 20px; font-size: 22px; font-weight: 800; letter-spacing: -0.5px; }
+    h2 { color: white; margin-top: 0; margin-bottom: 20px; font-size: 22px; font-weight: 900; letter-spacing: 0.5px; text-shadow: 0 0 15px rgba(0, 242, 254, 0.3); }
     
-    /* 🌟 標籤與表單控制元件 */
-    .section-label { font-weight: 700; color: var(--text-main); font-size: 15px; display: block; margin-bottom: 8px; text-align: left; }
+    /* 🎯 活動選項區 */
+    .section-label { font-weight: 700; color: var(--text-sub); font-size: 14px; display: block; margin-bottom: 8px; text-align: left; letter-spacing: 0.5px; }
     select, input, button { 
       width: 100%; 
       padding: 16px; 
-      border-radius: 12px; 
-      border: 2px solid #e2e8f0; 
+      border-radius: 14px; 
       font-size: 16px; 
       box-sizing: border-box; 
-      transition: all 0.2s ease; 
+      transition: all 0.25s ease; 
       outline: none;
     }
-    input:focus, select:focus { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1); }
     
-    #activity-select { background-color: #f0fdf4; border-color: #86efac; color: #166534; font-weight: bold; }
+    #activity-select { 
+      background: linear-gradient(135deg, rgba(0, 255, 135, 0.1), rgba(96, 239, 255, 0.1)); 
+      border: 1px solid rgba(0, 255, 135, 0.4); 
+      color: var(--neon-green); 
+      font-weight: 800; 
+    }
+    #activity-select option { color: #0f172a; background: white; }
 
-    /* 🌟 按鈕視覺回饋 */
+    /* 🔍 搜尋與輸入框 */
+    input {
+      background: rgba(11, 15, 25, 0.9);
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      color: white;
+      font-weight: bold;
+      letter-spacing: 1px;
+    }
+    input::placeholder { color: #475569; }
+    input:focus { border-color: var(--neon-blue); box-shadow: 0 0 15px rgba(0, 242, 254, 0.2); }
+
+    /* ⚡ 霓虹科技按鈕 */
     button { 
-      background-color: var(--primary); 
-      color: white; 
       border: none; 
-      font-weight: 700; 
+      font-weight: 800; 
       cursor: pointer; 
-      box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2); 
       display: flex; 
       justify-content: center; 
       align-items: center; 
       gap: 8px;
+      letter-spacing: 0.5px;
     }
-    button:active { transform: scale(0.97); box-shadow: none; }
-    button:disabled { background-color: #cbd5e1 !important; color: #64748b; cursor: not-allowed; transform: none; box-shadow: none; }
+    button:active { transform: scale(0.96); }
+    button:disabled { background: #334155 !important; color: #64748b !important; cursor: not-allowed; transform: none; box-shadow: none !important; border: none !important; }
     
-    .btn-green { background-color: var(--success); box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.2); }
-    .btn-green:active { background-color: var(--success-dark); }
-    .btn-dark { background-color: #334155; box-shadow: 0 4px 6px -1px rgba(51, 65, 85, 0.2); }
-    .btn-danger { background-color: var(--danger); }
-    .undo-btn { background-color: var(--warning); color: white; margin-top: 12px; font-size: 15px; box-shadow: 0 4px 6px -1px rgba(245, 158, 11, 0.2); }
+    .btn-green { 
+      background: linear-gradient(135deg, #00b09b, #96c93d); 
+      color: #000; 
+      box-shadow: 0 0 20px rgba(0, 255, 135, 0.4); 
+    }
+    .btn-green:active { box-shadow: 0 0 10px rgba(0, 255, 135, 0.6); }
+    
+    .btn-dark { 
+      background: #1e293b; 
+      color: white; 
+      border: 1px solid rgba(255,255,255,0.1); 
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3); 
+    }
+    
+    .btn-redeem {
+      background: linear-gradient(135deg, var(--neon-blue), var(--neon-indigo));
+      color: #000;
+      box-shadow: 0 0 25px rgba(0, 242, 254, 0.5);
+      font-size: 18px; 
+      padding: 18px;
+    }
+    
+    .undo-btn { 
+      background: linear-gradient(135deg, #ff0844, #ffb199); 
+      color: white; 
+      margin-top: 14px; 
+      font-size: 15px; 
+      box-shadow: 0 0 20px rgba(255, 8, 68, 0.4); 
+    }
 
-    /* 🌟 條碼掃描區 */
-    #reader-container { display: none; margin: 15px 0; border: 3px solid var(--text-main); border-radius: 16px; overflow: hidden; background: #000; }
+    /* 📷 HUD 戰術掃描框 */
+    #reader-container { display: none; margin: 15px 0; border: 2px solid var(--neon-blue); border-radius: 18px; overflow: hidden; background: #000; box-shadow: 0 0 20px rgba(0, 242, 254, 0.3); }
     #reader { width: 100%; }
-    .scan-cancel-btn { border-radius: 0; margin-bottom: 0; padding: 14px; background-color: var(--danger); font-size: 15px; }
+    .scan-cancel-btn { border-radius: 0; margin-bottom: 0; padding: 14px; background: var(--neon-red); color: white; font-size: 15px; }
 
-    /* 🌟 專業轉圈圈 Loading 動畫 */
-    #loading { display: none; margin: 30px 0; color: var(--text-sub); font-size: 15px; font-weight: 600; }
+    /* ⏳ 霓虹轉圈圈 Animation */
+    #loading { display: none; margin: 30px 0; color: var(--neon-blue); font-size: 15px; font-weight: 700; letter-spacing: 1px; }
     .spinner {
-      width: 40px; height: 40px; margin: 0 auto 12px auto;
-      border: 4px solid #e2e8f0; border-top: 4px solid var(--primary);
-      border-radius: 50%; animation: spin 0.8s linear infinite;
+      width: 44px; height: 44px; margin: 0 auto 14px auto;
+      border: 4px solid rgba(0, 242, 254, 0.1); border-top: 4px solid var(--neon-blue);
+      border-radius: 50%; animation: spin 0.7s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
+      box-shadow: 0 0 15px rgba(0, 242, 254, 0.3);
     }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
 
-    /* 🎟️ 存根聯卡片設計 */
+    /* 💳 尊榮黑卡「霓虹電子憑證」設計 */
     .ticket-card {
-      background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 16px;
-      padding: 20px; margin: 20px 0; position: relative; text-align: left;
-      box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+      background: var(--ticket-dark); 
+      border: 1px solid rgba(0, 242, 254, 0.3); 
+      border-radius: 20px;
+      padding: 22px 18px; 
+      margin: 20px 0; 
+      position: relative; 
+      box-shadow: 0 15px 35px rgba(0,0,0,0.4), inset 0 0 20px rgba(0, 242, 254, 0.05);
     }
+    /* 左右黑色半圓形打孔切角 (完美對齊深灰卡片底色) */
     .ticket-card::before, .ticket-card::after {
       content: ""; position: absolute; top: 58%; width: 24px; height: 24px;
-      background-color: white; border: 2px solid #e2e8f0; border-radius: 50%;
+      background-color: var(--card-dark); border: 1px solid rgba(0, 242, 254, 0.3); border-radius: 50%;
     }
     .ticket-card::before { left: -14px; border-left-color: transparent; border-top-color: transparent; transform: rotate(45deg); }
     .ticket-card::after { right: -14px; border-right-color: transparent; border-bottom-color: transparent; transform: rotate(45deg); }
 
-    /* 🛠️ 置中且上下對齊的完美排版 */
+    /* 🛠️ 置中且垂直對齊的完美排版 */
     .ticket-info { 
-      border-bottom: 2px dashed #cbd5e1; 
-      padding-bottom: 16px; 
-      margin-bottom: 16px; 
+      border-bottom: 2px dashed rgba(255, 255, 255, 0.15); 
+      padding-bottom: 18px; 
+      margin-bottom: 18px; 
       display: flex; 
       flex-direction: column; 
-      gap: 12px; /* 每行之間的間距 */
+      gap: 14px;
     }
     .info-row { 
       display: flex; 
-      justify-content: center; /* 讓整行內容在卡片正中間 */
+      justify-content: center;
       align-items: center; 
       font-size: 15px; 
     }
     .info-row strong { 
-      color: var(--text-main); 
+      color: var(--text-sub); 
       white-space: nowrap; 
-      width: 100px; /* 固定標題寬度，確保三個圖示上下完全對齊 */
-      text-align: left; 
+      width: 95px; 
+      text-align: left;
+      font-weight: 600; 
     }
     .info-row span { 
-      font-weight: 700; 
-      color: var(--text-main); 
-      font-size: 16px; 
-      text-align: left; /* 讓顧客資料緊貼在標題右邊 */
-      width: 140px; /* 固定資料寬度 */
-      padding-left: 10px; /* 給標題跟資料之間一點呼吸空間 */
-      word-break: break-all; /* 帳號太長會自動換行，絕不跑版 */
+      font-weight: 800; 
+      color: white; 
+      font-size: 17px; 
+      text-align: left; 
+      width: 145px; 
+      padding-left: 10px; 
+      word-break: break-all;
+      letter-spacing: 0.5px;
     }
     
-    .status-box { padding: 14px; border-radius: 12px; font-weight: 800; font-size: 18px; text-align: center; letter-spacing: 0.5px; }
-    .unclaimed { background-color: #d1fae5; color: #065f46; border: 2px solid #34d399; }
-    .claimed { background-color: #fee2e2; color: #991b1b; border: 2px solid #f87171; }
-    
-    .redeem-details { background: #fff1f2; border: 1px solid #fecdd3; padding: 12px; border-radius: 10px; font-size: 14px; color: #9f1239; margin-top: 12px; text-align: center; line-height: 1.6; }
+    /* 專屬數位科技字體感 */
+    #id-text { color: var(--neon-blue); font-family: monospace; font-size: 19px !important; text-shadow: 0 0 10px rgba(0, 242, 254, 0.4); }
+    #social-text { color: var(--neon-green); }
 
-    #ios-prompt { display: none; position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(10px); color: white; padding: 18px; border-radius: 16px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3); width: 85%; max-width: 350px; text-align: center; z-index: 1000; border: 1px solid rgba(255,255,255,0.1); }
-    .ios-prompt-text { font-size: 14px; margin-bottom: 12px; line-height: 1.6; }
-    .ios-close-btn { background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: bold; width: 100%; }
+    /* 狀態勳章 (帶霓虹光暈) */
+    .status-box { padding: 15px; border-radius: 14px; font-weight: 900; font-size: 18px; text-align: center; letter-spacing: 1px; }
+    .unclaimed { background: rgba(0, 255, 135, 0.1); color: var(--neon-green); border: 2px solid var(--neon-green); box-shadow: 0 0 20px rgba(0, 255, 135, 0.2); }
+    .claimed { background: rgba(255, 8, 68, 0.1); color: #ff4b72; border: 2px solid #ff4b72; box-shadow: 0 0 20px rgba(255, 8, 68, 0.2); }
+    
+    .redeem-details { background: rgba(255, 8, 68, 0.05); border: 1px solid rgba(255, 8, 68, 0.3); padding: 14px; border-radius: 12px; font-size: 14px; color: #ff8f9c; margin-top: 14px; text-align: center; line-height: 1.6; }
+    .redeem-details strong { color: white; }
+
+    #ios-prompt { display: none; position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: rgba(11, 15, 25, 0.95); backdrop-filter: blur(15px); color: white; padding: 20px; border-radius: 20px; box-shadow: 0 20px 50px rgba(0,0,0,0.8); width: 85%; max-width: 350px; text-align: center; z-index: 1000; border: 1px solid var(--neon-blue); }
+    .ios-prompt-text { font-size: 14px; margin-bottom: 15px; line-height: 1.6; color: var(--text-sub); }
+    .ios-prompt-text strong { color: white; }
+    .ios-close-btn { background: var(--neon-blue); color: #000; border: none; padding: 12px 20px; border-radius: 10px; font-size: 15px; font-weight: 900; width: 100%; box-shadow: 0 0 15px rgba(0, 242, 254, 0.4); }
   </style>
 </head>
 <body>
 
 <div class="container">
-  <!-- 📍 頂部導航列：設定門市 -->
+  <!-- 📍 頂部科幻導航列：設定門市 -->
   <div class="store-header">
-    <label>📍 今日值班門市設定</label>
+    <label>TERMINAL STATUS: ONLINE</label>
     <select id="global-store-select" onchange="updateActivities(); saveStore();">
       <option value="">請選擇您所在的門市...</option>
       <option value="嘉義門市">嘉義門市</option>
@@ -203,10 +272,10 @@
 
   <!-- 🎁 核心核銷卡片 -->
   <div class="card">
-    <h2>🎁 電子兌換券終端核銷</h2>
+    <h2>⚡ 電子券終端核銷系統</h2>
     
-    <div style="margin-bottom: 18px;">
-      <span class="section-label">🎯 顧客兌換活動項目：</span>
+    <div style="margin-bottom: 20px;">
+      <span class="section-label">🎯 顧客兌換活動項目</span>
       <select id="activity-select">
         <option value="">請先在上方選擇門市</option>
       </select>
@@ -216,22 +285,22 @@
     <div style="display: flex; gap: 8px; margin-bottom: 12px;">
       <input type="tel" id="search-input" placeholder="輸入顧客手機" style="flex: 1; margin-bottom: 0;">
       <button onclick="startScanner()" class="btn-dark" style="width: 56px; padding: 0; font-size: 20px;" title="開啟相機掃描">📷</button>
-      <button id="search-btn" onclick="searchCoupon()" class="btn-green" style="width: 90px; margin-bottom: 0;">查詢</button>
+      <button id="search-btn" onclick="searchCoupon()" class="btn-green" style="width: 95px; margin-bottom: 0;">查詢</button>
     </div>
 
-    <!-- 📷 條碼掃描區 -->
+    <!-- 📷 HUD 戰術掃描區 -->
     <div id="reader-container">
       <div id="reader"></div>
-      <button class="scan-cancel-btn" onclick="stopScanner()">✖ 關閉相機</button>
+      <button class="scan-cancel-btn" onclick="stopScanner()">✖ 關閉掃描儀</button>
     </div>
 
-    <!-- ⏳ 轉圈圈 Loading -->
+    <!-- ⏳ 霓虹轉圈圈 Loading -->
     <div id="loading">
       <div class="spinner"></div>
-      正在連線至總部資料庫...
+      ACCESSING CLOUD DATABASE...
     </div>
     
-    <!-- 🎟️ 存根聯卡片結果顯示區 -->
+    <!-- 🎟️ 尊榮黑卡結果顯示區 -->
     <div id="content" style="display:none;">
       <div class="ticket-card">
         
@@ -239,7 +308,7 @@
         <div class="ticket-info">
           <div class="info-row">
             <strong>📱 兌換手機</strong> 
-            <span id="id-text" style="color: var(--primary);"></span>
+            <span id="id-text"></span>
           </div>
           <div class="info-row">
             <strong>👤 顧客姓名</strong> 
@@ -247,7 +316,7 @@
           </div>
           <div class="info-row">
             <strong>🔗 社群帳號</strong> 
-            <span id="social-text" style="color: var(--success-dark);"></span>
+            <span id="social-text"></span>
           </div>
         </div>
 
@@ -255,8 +324,8 @@
         <div id="redeem-details" class="redeem-details" style="display:none;"></div>
       </div>
 
-      <div id="action-area" style="margin-top: 16px;">
-        <button id="redeem-btn" onclick="submitRedeem()" style="font-size: 18px; padding: 18px;">
+      <div id="action-area" style="margin-top: 18px;">
+        <button id="redeem-btn" class="btn-redeem" onclick="submitRedeem()">
           ✔ 確認核銷優惠 (點擊即失效)
         </button>
       </div>
@@ -369,7 +438,7 @@
     var searchBtn = document.getElementById('search-btn');
     searchBtn.disabled = true;
     searchBtn.innerText = "查詢中";
-    searchBtn.style.backgroundColor = "#94a3b8";
+    searchBtn.style.background = "#334155";
 
     clearInterval(undoInterval);
     document.getElementById('undo-area').style.display = 'none';
@@ -384,7 +453,7 @@
         // 解除按鈕鎖
         searchBtn.disabled = false;
         searchBtn.innerText = "查詢";
-        searchBtn.style.backgroundColor = "";
+        searchBtn.style.background = "";
         
         document.getElementById('loading').style.display = 'none';
         if (!result.exists) return alert(result.error || "❌ 在活動名單中找不到此手機號碼！");
@@ -398,7 +467,7 @@
       .catch(error => {
         searchBtn.disabled = false;
         searchBtn.innerText = "查詢";
-        searchBtn.style.backgroundColor = "";
+        searchBtn.style.background = "";
         
         alert("查詢逾時！請確認網路狀態，或直接重整頁面試試。\n(錯誤描述：" + error.message + ")");
         document.getElementById('loading').style.display = 'none';
