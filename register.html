@@ -3,13 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-  <title>VIP 輕奢專屬領券系統</title>
+  <title>AMERICAN DINER VIP PASS</title>
   
   <link rel="manifest" href="manifest.json">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="活動領券">
+  <meta name="apple-mobile-web-app-title" content="DINER PASS">
   <link rel="apple-touch-icon" href="icon.png">
 
   <!-- 引入慶祝彩帶引擎 -->
@@ -17,24 +17,25 @@
 
   <style>
     :root {
-      --bg-main: #f5f0eb;       /* 溫柔燕麥奶茶底色 */
-      --card-bg: #ffffff;       /* 溫潤純白厚卡質地 */
-      --ticket-bg: #faf7f2;     /* 奶油米白憑證底色 */
-      --text-main: #4a3b32;     /* 深焙濃縮咖啡黑 */
-      --text-sub: #8c7a6b;      /* 溫柔伯爵茶灰 */
-      --accent: #c48b71;        /* 玫瑰焦糖泰奶色 */
-      --accent-dark: #a86f56;   /* 按壓深焦糖色 */
-      --border-color: #e6dfd5;  /* 柔和邊框色 */
-      --alert-red: #d9777f;     /* 溫柔玫瑰紅 */
+      --bg-diner: #fef3c7;      /* 美式奶油奶昔底色 */
+      --card-bg: #ffffff;       /* 濃郁純白 */
+      --diner-red: #dc2626;     /* 經典番茄醬紅 */
+      --diner-yellow: #fbbf24;  /* 美式芥末起司黃 */
+      --diner-blue: #2563eb;    /* 復古霓虹藍 */
+      --text-black: #18181b;    /* 硬派黑安格斯深黑 */
+      --border-thick: 3px solid #18181b; /* 潮流美式厚黑邊 */
+      --shadow-pop: 5px 5px 0px #18181b; /* 復古硬派陰影 */
     }
 
     body { 
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif; 
-      background-color: var(--bg-main); 
+      background-color: var(--bg-diner); 
       background-image: 
-        radial-gradient(at 10% 10%, rgba(196, 139, 113, 0.08) 0px, transparent 60%),
-        radial-gradient(at 90% 90%, rgba(140, 122, 107, 0.08) 0px, transparent 60%);
-      color: var(--text-main);
+        radial-gradient(var(--diner-yellow) 15%, transparent 16%),
+        radial-gradient(var(--diner-red) 15%, transparent 16%);
+      background-size: 60px 60px;
+      background-position: 0 0, 30px 30px;
+      color: var(--text-black);
       margin: 0; 
       padding: 16px; 
       display: flex; 
@@ -46,145 +47,130 @@
     
     .container { width: 100%; max-width: 420px; }
 
-    /* 🌿 韓系簡約精品導航橫幅 */
+    /* 🍔 潮流美式餐館招牌橫幅 */
     .header-banner {
-      background: var(--card-bg);
-      padding: 22px 18px;
+      background: var(--diner-red);
+      color: white;
+      padding: 20px 15px;
       border-radius: 20px;
       text-align: center;
-      margin-bottom: 20px;
-      border: 1px solid var(--border-color);
-      box-shadow: 0 10px 25px -5px rgba(74, 59, 50, 0.05);
+      margin-bottom: 22px;
+      border: var(--border-thick);
+      box-shadow: var(--shadow-pop);
+      position: relative;
+      overflow: hidden;
     }
-    h1 { color: var(--text-main); font-size: 22px; margin: 0 0 6px 0; font-weight: 850; letter-spacing: 1px; }
-    .subtitle { color: var(--text-sub); font-size: 14px; margin: 0; line-height: 1.5; font-weight: 500; }
+    .header-banner::after {
+      content: "★ ★ ★"; position: absolute; bottom: 4px; left: 0; width: 100%;
+      color: var(--diner-yellow); font-size: 12px; letter-spacing: 6px;
+    }
+    h1 { font-size: 24px; margin: 0 0 6px 0; font-weight: 900; letter-spacing: 1.5px; text-transform: uppercase; text-shadow: 2px 2px 0px #18181b; }
+    .subtitle { color: #fef08a; font-size: 14px; margin: 0; font-weight: 700; letter-spacing: 0.5px; }
 
     /* 🛡️ 主卡片視覺 */
     .card { 
       background: var(--card-bg); 
       padding: 26px 22px; 
       border-radius: 24px; 
-      box-shadow: 0 20px 40px -10px rgba(74, 59, 50, 0.08); 
-      border: 1px solid var(--border-color);
+      border: var(--border-thick);
+      box-shadow: 8px 8px 0px #18181b; 
       position: relative;
     }
 
-    label { display: block; text-align: left; font-weight: 750; color: var(--text-main); margin-bottom: 8px; font-size: 14px; letter-spacing: 0.5px; }
+    label { display: block; text-align: left; font-weight: 850; color: var(--text-black); margin-bottom: 8px; font-size: 15px; }
     
     input, select { 
-      width: 100%; padding: 16px; border-radius: 14px; border: 2px solid var(--border-color); 
-      background: #fcfbf9; color: var(--text-main); font-size: 16px; font-weight: 700;
-      margin-bottom: 18px; box-sizing: border-box; transition: all 0.25s ease; outline: none;
+      width: 100%; padding: 16px; border-radius: 14px; border: var(--border-thick); 
+      background: #fffbeb; color: var(--text-black); font-size: 16px; font-weight: 800;
+      margin-bottom: 18px; box-sizing: border-box; transition: all 0.15s ease; outline: none;
+      box-shadow: 3px 3px 0px #18181b;
     }
-    input::placeholder { color: #bcaaa0; font-weight: 400; }
-    input:focus, select:focus { border-color: var(--accent); background: #ffffff; box-shadow: 0 0 0 4px rgba(196, 139, 113, 0.15); }
+    input::placeholder { color: #a1a1aa; font-weight: 500; }
+    input:focus, select:focus { background: #ffffff; transform: translate(-2px, -2px); box-shadow: 5px 5px 0px var(--diner-red); }
     
-    #activity { background-color: #faf7f2; border-color: #d8cca6; color: var(--text-main); cursor: pointer; }
-    #activity option { background: white; color: var(--text-main); }
+    #activity { background-color: #fef08a; cursor: pointer; }
+    #activity option { background: white; color: var(--text-black); font-weight: bold; }
 
-    /* 🔑 玫瑰焦糖通關密語框 */
-    .secret-box { background: #faf7f2; padding: 14px; border-radius: 16px; border: 1.5px dashed #d8cca6; margin-bottom: 22px; }
-    .secret-box label { color: var(--accent-dark); }
-    #secret_code { border-color: #d8cca6; background: white; margin-bottom: 0; text-transform: uppercase; letter-spacing: 3px; text-align: center; font-size: 18px; color: var(--accent-dark); }
+    /* 🔑 芥末起司通關密語框 */
+    .secret-box { background: #fef9c3; padding: 14px; border-radius: 16px; border: 3px dashed var(--diner-red); margin-bottom: 22px; }
+    .secret-box label { color: var(--diner-red); text-transform: uppercase; }
+    #secret_code { border-color: var(--diner-red); background: white; margin-bottom: 0; text-transform: uppercase; letter-spacing: 3px; text-align: center; font-size: 20px; color: var(--diner-red); box-shadow: 3px 3px 0px var(--diner-red); }
 
-    /* 🧋 玫瑰焦糖送出按鈕 */
+    /* 🍔 美式硬派送出按鈕 */
     .submit-btn { 
-      background: linear-gradient(135deg, var(--accent), var(--accent-dark)); 
-      color: white; border: none; padding: 18px; width: 100%; border-radius: 16px; 
-      font-size: 17px; font-weight: 800; cursor: pointer; letter-spacing: 1px;
-      box-shadow: 0 8px 20px -4px rgba(196, 139, 113, 0.4); transition: all 0.2s ease;
+      background: var(--diner-yellow); color: var(--text-black); border: var(--border-thick); 
+      padding: 18px; width: 100%; border-radius: 16px; font-size: 18px; font-weight: 900; 
+      cursor: pointer; letter-spacing: 1px; text-transform: uppercase;
+      box-shadow: var(--shadow-pop); transition: all 0.15s ease;
     }
-    .submit-btn:active { transform: scale(0.98); box-shadow: 0 4px 10px -2px rgba(196, 139, 113, 0.3); }
-    .submit-btn:disabled { background: #dcd5cd !important; color: #8c7a6b !important; box-shadow: none !important; cursor: not-allowed; transform: none; }
+    .submit-btn:active { transform: translate(3px, 3px); box-shadow: 2px 2px 0px #18181b; }
+    .submit-btn:disabled { background: #e4e4e7 !important; color: #a1a1aa !important; box-shadow: none !important; cursor: not-allowed; transform: none; border-color: #a1a1aa; }
     
-    /* 🔄 切換活動按鈕 (奶茶副按鈕風) */
+    /* 🔄 切換活動按鈕 (潮流副按鈕風) */
     .switch-btn {
-      background: #faf7f2; color: var(--accent-dark); border: 1.5px solid #d8cca6;
-      padding: 14px; width: 100%; border-radius: 14px; font-size: 15px; font-weight: 750;
-      cursor: pointer; margin-top: 14px; transition: all 0.2s ease;
+      background: #ffffff; color: var(--text-black); border: var(--border-thick);
+      padding: 15px; width: 100%; border-radius: 14px; font-size: 16px; font-weight: 850;
+      cursor: pointer; margin-top: 16px; transition: all 0.15s ease; box-shadow: 4px 4px 0px var(--diner-blue);
     }
-    .switch-btn:active { background: #f0eae1; transform: scale(0.98); }
+    .switch-btn:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0px var(--diner-blue); }
 
-    /* 👷‍♂️ 奶茶系 Q版搬磚小男孩 動畫專區 */
+    /* 👨‍🍳 美式餐館 Q版漢堡小廚師 動畫區 */
     #loading { display: none; margin: 25px 0; text-align: center; }
     .chibi-loader-box { display: flex; flex-direction: column; align-items: center; justify-content: center; }
-    .chibi-svg { width: 130px; height: 100px; overflow: visible; margin-bottom: 15px; filter: drop-shadow(0 10px 15px rgba(74, 59, 50, 0.15)); }
+    .chibi-svg { width: 140px; height: 110px; overflow: visible; margin-bottom: 15px; filter: drop-shadow(4px 6px 0px rgba(0,0,0,0.15)); }
     
-    .chibi-boy { animation: chibi-bounce 0.45s infinite alternate cubic-bezier(0.4, 0, 0.6, 1); transform-origin: center bottom; }
-    .shadow { animation: shadow-scale 0.45s infinite alternate cubic-bezier(0.4, 0, 0.6, 1); transform-origin: center; }
-    .brick-holding { animation: brick-wobble 0.45s infinite alternate ease-in-out; transform-origin: center; }
-    .drop-1 { animation: sweat-fly-right 0.9s infinite linear; }
-    .drop-2 { animation: sweat-fly-left 0.9s 0.45s infinite linear; }
+    .chibi-boy { animation: chibi-bounce 0.4s infinite alternate cubic-bezier(0.4, 0, 0.6, 1); transform-origin: center bottom; }
+    .shadow { animation: shadow-scale 0.4s infinite alternate cubic-bezier(0.4, 0, 0.6, 1); transform-origin: center; }
+    .burger-holding { animation: burger-wobble 0.4s infinite alternate ease-in-out; transform-origin: center; }
+    .star-fly { animation: star-pop 0.8s infinite linear; }
     
-    @keyframes chibi-bounce {
-      0% { transform: translateY(0) scaleY(0.96); }
-      100% { transform: translateY(-12px) scaleY(1.04); }
-    }
-    @keyframes shadow-scale {
-      0% { transform: scale(1); opacity: 0.8; }
-      100% { transform: scale(0.55); opacity: 0.2; }
-    }
-    @keyframes brick-wobble {
-      0% { transform: rotate(-4deg) translateY(0); }
-      100% { transform: rotate(4deg) translateY(-3px); }
-    }
-    @keyframes sweat-fly-right {
-      0% { transform: translate(0, 0) scale(0.4); opacity: 0; }
-      40% { opacity: 1; }
-      100% { transform: translate(18px, -18px) scale(1.3); opacity: 0; }
-    }
-    @keyframes sweat-fly-left {
-      0% { transform: translate(0, 0) scale(0.4); opacity: 0; }
-      40% { opacity: 1; }
-      100% { transform: translate(-18px, -12px) scale(1.3); opacity: 0; }
-    }
+    @keyframes chibi-bounce { 0% { transform: translateY(0) scaleY(0.95); } 100% { transform: translateY(-14px) scaleY(1.05); } }
+    @keyframes shadow-scale { 0% { transform: scale(1); opacity: 0.8; } 100% { transform: scale(0.5); opacity: 0.2; } }
+    @keyframes burger-wobble { 0% { transform: rotate(-6deg) translateY(0); } 100% { transform: rotate(6deg) translateY(-4px); } }
+    @keyframes star-pop { 0% { transform: translate(0, 0) scale(0.3); opacity: 0; } 50% { opacity: 1; } 100% { transform: translate(24px, -20px) scale(1.4) rotate(180deg); opacity: 0; } }
     
     .loading-text {
-      background: linear-gradient(90deg, var(--accent), var(--accent-dark));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      font-weight: 800;
-      font-size: 16px;
-      letter-spacing: 0.5px;
+      background: var(--diner-red); color: white; padding: 8px 16px; border-radius: 10px;
+      font-weight: 900; font-size: 16px; border: 2px solid #18181b; box-shadow: 3px 3px 0px #18181b;
       animation: pulse-text 1.5s infinite;
     }
-    @keyframes pulse-text { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+    @keyframes pulse-text { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.03); } }
 
-    /* 🎟️ 輕奢精品「電子憑證卡」設計 */
+    /* 🎟️ 復古餐館「餐券憑證卡」設計 */
     #ticket-card { display: none; text-align: center; }
     
     .ticket-box {
-      background: var(--ticket-bg); border: 1.5px solid #e3d8c8; border-radius: 20px;
+      background: #fffbeb; border: var(--border-thick); border-radius: 20px;
       padding: 26px 18px; margin: 15px 0; position: relative;
-      box-shadow: 0 10px 25px -5px rgba(74, 59, 50, 0.06);
+      box-shadow: var(--shadow-pop);
     }
     .ticket-box::before, .ticket-box::after {
-      content: ""; position: absolute; top: 60%; width: 24px; height: 24px;
-      background-color: var(--card-bg); border: 1.5px solid #e3d8c8; border-radius: 50%;
+      content: ""; position: absolute; top: 58%; width: 26px; height: 26px;
+      background-color: var(--card-bg); border: var(--border-thick); border-radius: 50%;
     }
-    .ticket-box::before { left: -14px; border-left-color: transparent; border-top-color: transparent; transform: rotate(45deg); }
-    .ticket-box::after { right: -14px; border-right-color: transparent; border-bottom-color: transparent; transform: rotate(45deg); }
+    .ticket-box::before { left: -15px; border-left-color: transparent; border-top-color: transparent; transform: rotate(45deg); }
+    .ticket-box::after { right: -15px; border-right-color: transparent; border-bottom-color: transparent; transform: rotate(45deg); }
 
-    .qr-img { width: 190px; height: 190px; margin: 15px auto; border: 8px solid white; border-radius: 16px; box-shadow: 0 8px 20px rgba(74, 59, 50, 0.08); display: block; }
-    .highlight-text { font-size: 16px; font-weight: 850; color: var(--accent-dark); letter-spacing: 1px; margin: 12px 0 18px 0; }
+    .qr-img { width: 190px; height: 190px; margin: 15px auto; border: 4px solid #18181b; border-radius: 16px; box-shadow: 4px 4px 0px var(--diner-red); display: block; background: white; }
+    .highlight-text { font-size: 16px; font-weight: 900; color: var(--diner-red); letter-spacing: 1px; margin: 14px 0 18px 0; background: #fef08a; padding: 6px; border-radius: 8px; border: 2px solid #18181b; }
     
-    .info-list { text-align: left; border-top: 1.5px dashed #d8cca6; padding-top: 18px; display: flex; flex-direction: column; gap: 12px; }
+    .info-list { text-align: left; border-top: 3px dashed #18181b; padding-top: 18px; display: flex; flex-direction: column; gap: 12px; }
     .info-row { display: flex; justify-content: space-between; font-size: 15px; }
-    .info-row strong { color: var(--text-sub); width: 90px; font-weight: 600; }
-    .info-row span { color: var(--text-main); font-weight: 800; text-align: right; word-break: break-all; }
-    #res-phone { color: var(--accent-dark); font-family: monospace; font-size: 18px !important; }
+    .info-row strong { color: #52525b; width: 90px; font-weight: 800; }
+    .info-row span { color: var(--text-black); font-weight: 900; text-align: right; word-break: break-all; }
+    #res-phone { color: var(--diner-red); font-family: monospace; font-size: 19px !important; }
 
-    .screenshot-notice { background: #fdf2f2; border: 1px solid var(--alert-red); color: var(--alert-red); padding: 12px; border-radius: 14px; font-weight: 800; font-size: 15px; margin-bottom: 18px; animation: pulse 2s infinite; letter-spacing: 0.5px; }
-    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+    .screenshot-notice { background: var(--diner-red); color: white; border: var(--border-thick); padding: 12px; border-radius: 14px; font-weight: 900; font-size: 16px; margin-bottom: 18px; box-shadow: 4px 4px 0px #18181b; animation: bounce-notice 2s infinite; }
+    @keyframes bounce-notice { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
   </style>
 </head>
 <body>
 
 <div class="container">
-  <!-- 👉 頂部橫幅 -->
+  <!-- 👉 潮流美式招牌橫幅 -->
   <div class="header-banner">
-    <h1>✨ VIP 輕奢專屬禮遇</h1>
-    <p class="subtitle">完成活動通關驗證，立即領取您的限時專屬憑證</p>
+    <h1>🍔 DINER VIP PASS 🍟</h1>
+    <p class="subtitle">輸入通關密語 · 領取限時美式專屬禮遇</p>
   </div>
 
   <div class="card">
@@ -205,87 +191,96 @@
       <label>📱 聯絡手機號碼 (防重複驗證)</label>
       <input type="tel" id="phone" placeholder="例：0912345678" maxlength="10" required>
 
-      <!-- 🌟 專屬玫瑰焦糖鑰匙孔！ -->
+      <!-- 🌟 美式芥末起司鑰匙孔！ -->
       <div class="secret-box">
         <label>🔑 活動專屬通關密語</label>
         <input type="text" id="secret_code" placeholder="請填入官方公告密語" required>
       </div>
 
-      <button id="btn" class="submit-btn" onclick="register()">✨ 立即驗證並生成憑證</button>
+      <button id="btn" class="submit-btn" onclick="register()">🔥 立即驗證 · 生成專屬餐券</button>
     </div>
 
-    <!-- 👷‍♂️ 奶茶系 Q版搬磚小男孩 動畫區 -->
+    <!-- 👨‍🍳 美式餐館 Q版漢堡小廚師 動畫區 -->
     <div id="loading">
       <div class="chibi-loader-box">
-        <svg viewBox="0 0 120 100" class="chibi-svg">
+        <svg viewBox="0 0 130 110" class="chibi-svg">
           <!-- 地面陰影 -->
-          <ellipse cx="60" cy="92" rx="26" ry="5" fill="rgba(196, 139, 113, 0.2)" class="shadow"/>
-          <!-- 飛濺的玫瑰焦糖汗珠 -->
-          <path d="M 86 42 Q 93 36 91 50 Z" fill="#c48b71" class="drop-1"/>
-          <path d="M 34 46 Q 27 40 29 54 Z" fill="#a86f56" class="drop-2"/>
+          <ellipse cx="65" cy="100" rx="28" ry="6" fill="#18181b" class="shadow"/>
+          <!-- 噴發的小星星 -->
+          <path d="M 100 40 L 103 48 L 111 50 L 105 56 L 107 64 L 100 59 L 93 64 L 95 56 L 89 50 L 97 48 Z" fill="#fbbf24" stroke="#18181b" stroke-width="1.5" class="star-fly"/>
           
           <g class="chibi-boy">
             <!-- 雙腳 -->
-            <ellipse cx="50" cy="86" rx="6" ry="5" fill="#a86f56"/>
-            <ellipse cx="70" cy="86" rx="6" ry="5" fill="#a86f56"/>
-            <!-- 身體與工作服 (伯爵茶灰) -->
-            <rect x="46" y="58" width="28" height="26" rx="8" fill="#8c7a6b"/>
-            <rect x="50" y="68" width="20" height="16" rx="4" fill="#4a3b32"/>
+            <ellipse cx="53" cy="94" rx="7" ry="6" fill="#18181b"/>
+            <ellipse cx="77" cy="94" rx="7" ry="6" fill="#18181b"/>
+            <!-- 身體與紅白圍裙 -->
+            <rect x="48" y="64" width="34" height="26" rx="8" fill="#ffffff" stroke="#18181b" stroke-width="2.5"/>
+            <rect x="54" y="68" width="22" height="22" rx="4" fill="#dc2626"/>
             <!-- 大頭 -->
-            <circle cx="60" cy="42" r="23" fill="#fff0e6"/>
+            <circle cx="65" cy="45" r="25" fill="#ffedd5" stroke="#18181b" stroke-width="2.5"/>
             <!-- 腮紅 -->
-            <ellipse cx="43" cy="46" rx="5" ry="3.5" fill="#d9777f" opacity="0.6"/>
-            <ellipse cx="77" cy="46" rx="5" ry="3.5" fill="#d9777f" opacity="0.6"/>
-            <!-- 堅毅認真的眼神 (^ ^) -->
-            <path d="M 45 40 Q 49 35 53 40" stroke="#4a3b32" stroke-width="3" fill="none" stroke-linecap="round"/>
-            <path d="M 67 40 Q 71 35 75 40" stroke="#4a3b32" stroke-width="3" fill="none" stroke-linecap="round"/>
-            <!-- 努力奮鬥的嘴巴 (w) -->
-            <path d="M 56 50 Q 58.5 53 60 50 Q 61.5 53 64 50" stroke="#4a3b32" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-            <!-- 燕麥色工程安全帽 -->
-            <path d="M 35 38 A 25 25 0 0 1 85 38 Z" fill="#e6dfd5"/>
-            <rect x="33" y="36" width="54" height="6" rx="3" fill="#d8cca6"/>
-            <circle cx="60" cy="24" r="5" fill="#c48b71"/>
-            <!-- 雙手奮力搬著厚磚頭 (玫瑰焦糖色) -->
-            <g class="brick-holding">
-              <rect x="32" y="54" width="56" height="20" rx="4" fill="#c48b71" stroke="#a86f56" stroke-width="1.5"/>
-              <line x1="60" y1="54" x2="60" y2="74" stroke="#f5f0eb" stroke-width="1.5" opacity="0.5"/>
-              <line x1="32" y1="64" x2="88" y2="64" stroke="#f5f0eb" stroke-width="1.5" opacity="0.5"/>
-              <line x1="46" y1="54" x2="46" y2="64" stroke="#f5f0eb" stroke-width="1.5" opacity="0.5"/>
-              <line x1="74" y1="64" x2="74" y2="74" stroke="#f5f0eb" stroke-width="1.5" opacity="0.5"/>
-              <circle cx="42" cy="64" r="6" fill="#fff0e6" stroke="#a86f56" stroke-width="1"/>
-              <circle cx="78" cy="64" r="6" fill="#fff0e6" stroke="#a86f56" stroke-width="1"/>
+            <ellipse cx="46" cy="50" rx="5" ry="3.5" fill="#f87171"/>
+            <ellipse cx="84" cy="50" rx="5" ry="3.5" fill="#f87171"/>
+            <!-- 快樂眼睛 (^ ^) -->
+            <path d="M 48 44 Q 52 38 56 44" stroke="#18181b" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <path d="M 74 44 Q 78 38 82 44" stroke="#18181b" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <!-- 張大嘴巴 (D) -->
+            <path d="M 60 53 Q 65 60 70 53 Z" fill="#dc2626" stroke="#18181b" stroke-width="2"/>
+            <!-- 美式紅白餐館紙帽 -->
+            <path d="M 38 38 C 40 18, 90 18, 92 38 Z" fill="#ffffff" stroke="#18181b" stroke-width="2.5"/>
+            <path d="M 45 26 L 55 38 M 60 22 L 65 38 M 75 24 L 75 38 M 85 28 L 82 38" stroke="#dc2626" stroke-width="3"/>
+            <rect x="36" y="36" width="58" height="8" rx="4" fill="#dc2626" stroke="#18181b" stroke-width="2"/>
+            
+            <!-- 雙手搬著巨無霸美式漢堡 🍔 -->
+            <g class="burger-holding">
+              <!-- 漢堡下麵包 -->
+              <path d="M 36 78 Q 65 85 94 78 L 90 86 Q 65 90 40 86 Z" fill="#d97706" stroke="#18181b" stroke-width="2"/>
+              <!-- 漢堡排 -->
+              <rect x="38" y="72" width="54" height="8" rx="4" fill="#78350f" stroke="#18181b" stroke-width="2"/>
+              <!-- 起司與生菜 -->
+              <path d="M 36 72 L 45 76 L 55 70 L 65 77 L 75 70 L 85 76 L 94 72 L 90 68 L 40 68 Z" fill="#fbbf24" stroke="#18181b" stroke-width="1.5"/>
+              <path d="M 38 68 Q 48 64 58 68 Q 68 72 78 66 Q 88 64 92 68 stroke="#22c55e" stroke-width="4" fill="none"/>
+              <!-- 漢堡上麵包 -->
+              <path d="M 36 66 C 38 52, 92 52, 94 66 Z" fill="#f59e0b" stroke="#18181b" stroke-width="2.5"/>
+              <!-- 白芝麻 -->
+              <circle cx="50" cy="60" r="1.5" fill="#ffffff"/>
+              <circle cx="65" cy="57" r="1.5" fill="#ffffff"/>
+              <circle cx="80" cy="61" r="1.5" fill="#ffffff"/>
+              <!-- 廚師小手 -->
+              <circle cx="42" cy="74" r="6" fill="#ffedd5" stroke="#18181b" stroke-width="2"/>
+              <circle cx="88" cy="74" r="6" fill="#ffedd5" stroke="#18181b" stroke-width="2"/>
             </g>
           </g>
         </svg>
         <div class="loading-text">
-          🧱 正在為您生成專屬憑證... 💦
+          🍔 廚房正火速為您製作專屬憑證... 🍟
         </div>
       </div>
     </div>
 
-    <!-- 👉 步驟二：輕奢厚卡紙憑證卡區塊 -->
+    <!-- 👉 步驟二：復古餐券憑證卡區塊 -->
     <div id="ticket-card">
-      <div class="screenshot-notice">📸 溫馨提醒：請立即「截圖」保存此兌換憑證</div>
+      <div class="screenshot-notice">📸 警告：請立即「截圖」保存此兌換餐券！</div>
       
       <div class="ticket-box">
-        <div style="font-size: 18px; font-weight: 850; color: var(--text-main); letter-spacing: 1px;">🎉 驗證通過！專屬憑證</div>
+        <div style="font-size: 20px; font-weight: 900; color: var(--text-black); letter-spacing: 1px; text-transform: uppercase;">🎉 VIP MEAL VOUCHER 🎉</div>
         
         <img id="qr-code-img" class="qr-img" src="" alt="核銷條碼">
-        <div class="highlight-text">★ 憑此條碼至全台門市享專屬禮遇 ★</div>
+        <div class="highlight-text">★ 憑此雷射條碼至門市享專屬禮遇 ★</div>
 
         <div class="info-list">
-          <div class="info-row"><strong>🎯 兌換項目</strong> <span id="res-act" style="color: var(--accent-dark);"></span></div>
+          <div class="info-row"><strong>🎯 兌換項目</strong> <span id="res-act" style="color: var(--diner-red);"></span></div>
           <div class="info-row"><strong>💬 顧客姓名</strong> <span id="res-name"></span></div>
           <div class="info-row"><strong>🔗 社群帳號</strong> <span id="res-social"></span></div>
           <div class="info-row"><strong>📱 綁定手機</strong> <span id="res-phone"></span></div>
         </div>
       </div>
       
-      <!-- 🌟 終極解藥：讓客人一鍵切換回表單選其他活動！ -->
-      <button class="switch-btn" onclick="resetToForm()">🔄 我要領取／切換其他活動</button>
+      <!-- 🌟 智慧防洗單解藥：切換時自動尋找「還沒領過的活動」！ -->
+      <button class="switch-btn" onclick="resetToForm()">🔄 我要切換／領取其他活動專區</button>
 
-      <p style="font-size: 13px; color: var(--text-sub); margin-top: 16px; margin-bottom: 0; line-height: 1.6; font-weight: 500;">
-        💡 <strong>兌換須知：</strong>若無法截圖，直接至櫃檯向門市人員「報手機號碼」亦可完成連線核銷。
+      <p style="font-size: 13px; color: #71717a; margin-top: 16px; margin-bottom: 0; line-height: 1.6; font-weight: 700;">
+        💡 <strong>兌換須知：</strong>若無法截圖，直接至櫃檯向門市人員「報手機號碼」亦可完成核銷。
       </p>
     </div>
   </div>
@@ -301,27 +296,30 @@
 
   function triggerConfetti() {
     if (typeof confetti === 'function') {
-      var morandiColors = ['#c48b71', '#a86f56', '#d8cca6', '#8c7a6b', '#f5f0eb'];
-      confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 }, colors: morandiColors });
+      // 搭配美式餐館風格的經典慶祝配色 (番茄紅、芥末黃、霓虹藍、奶油白)
+      var dinerColors = ['#dc2626', '#fbbf24', '#2563eb', '#ffffff', '#f97316'];
+      confetti({ particleCount: 85, spread: 75, origin: { y: 0.6 }, colors: dinerColors });
       setTimeout(() => {
-        confetti({ particleCount: 50, angle: 60, spread: 55, origin: { x: 0 }, colors: morandiColors });
-        confetti({ particleCount: 50, angle: 120, spread: 55, origin: { x: 1 }, colors: morandiColors });
+        confetti({ particleCount: 50, angle: 60, spread: 55, origin: { x: 0 }, colors: dinerColors });
+        confetti({ particleCount: 50, angle: 120, spread: 55, origin: { x: 1 }, colors: dinerColors });
       }, 250);
     }
   }
 
-  // 🌟 網頁載入時，立即檢查「預設選取的活動」是否有紀錄
   window.onload = function() {
     checkSavedTicket(true);
   };
 
-  // 🌟🌟🌟 核心解藥：檢查指定活動的獨立置物櫃！ 🌟🌟🌟
+  // 🌟🌟🌟 核心防護一：只要選單變動，立刻檢查有沒有領過！領過就秒秀條碼，絕不給重複輸入！ 🌟🌟🌟
   function checkSavedTicket(isFirstLoad) {
     var act = document.getElementById('activity').value;
     var savedPhone = localStorage.getItem("pos_" + act + "_phone");
     
     if (savedPhone) {
-      if (!isFirstLoad) alert("💡 系統偵測：您之前已經領取過「" + act + "」的憑證囉！為您載入條碼。");
+      if (!isFirstLoad) {
+        triggerVibe([50, 50]);
+        alert("💡 系統偵測：您已經領過「" + act + "」的憑證囉！自動為您顯示條碼。");
+      }
       showTicket(
         act, 
         localStorage.getItem("pos_" + act + "_name") || "VIP 顧客", 
@@ -335,14 +333,37 @@
     }
   }
 
+  // 🌟🌟🌟 核心防護二：按下切換按鈕時，自動尋找「他還沒領過的活動」！ 🌟🌟🌟
   function resetToForm() {
+    var select = document.getElementById('activity');
+    var nextUnclaimed = "";
+    var allClaimed = true;
+
+    // 迴圈檢查哪一個選項是「還沒領過的」
+    for (var i = 0; i < select.options.length; i++) {
+      var val = select.options[i].value;
+      if (!localStorage.getItem("pos_" + val + "_phone")) {
+        nextUnclaimed = val;
+        allClaimed = false;
+        break;
+      }
+    }
+
+    // 如果全部都領過了，直接擋下來，不給打開表單！
+    if (allClaimed) {
+      triggerVibe([80, 50, 80]);
+      alert("💡 讚啦！您目前「所有開放的活動」都已經領取過專屬憑證囉！為您保留目前的兌換券。");
+      return;
+    }
+
+    // 自動幫他把選單切換到「尚未領取」的那個活動，並打開空白表單！
+    select.value = nextUnclaimed;
     document.getElementById('ticket-card').style.display = 'none';
     document.getElementById('loading').style.display = 'none';
     document.getElementById('form-section').style.display = 'block';
     triggerVibe(30);
   }
 
-  // 🌟 主管點擊送出的核心大函數
   function register() {
     var act = document.getElementById('activity').value;
     var name = document.getElementById('name').value.trim();
@@ -358,13 +379,10 @@
     phone = phone.replace(/\D/g, '');
     triggerVibe(40);
 
-    // 🌟 切換畫面：隱藏表單，顯示搬磚小男孩動畫！
     document.getElementById('form-section').style.display = 'none';
     document.getElementById('loading').style.display = 'block';
 
     var baseUrl = API_URL.split('?')[0]; 
-    
-    // 🌟 終極防卡死：加入時間戳記 (t) 破除快取
     var params = newSearchParams({
       "action": "register",
       "id": phone,
@@ -376,7 +394,6 @@
     });
     var url = baseUrl + "?" + params.toString();
 
-    // 🌟 終極防卡死：加入 redirect: 'follow' 確保 iOS 順利收到 Google 回傳！
     fetch(url, { method: 'GET', redirect: 'follow' })
       .then(response => response.json())
       .then(result => {
@@ -396,8 +413,6 @@
         } else {
           triggerVibe([100, 50, 100]);
           alert(result.error || "驗證失敗：系統回傳異常 (" + JSON.stringify(result) + ")");
-          
-          // 若失敗，隱藏動畫，把表單變回來
           document.getElementById('loading').style.display = 'none';
           document.getElementById('form-section').style.display = 'block';
         }
@@ -405,8 +420,6 @@
       .catch(error => {
         triggerVibe([100, 50, 100]);
         alert("連線發生問題，請檢查網路狀態！錯誤描述：" + error);
-        
-        // 若斷線，隱藏動畫，把表單變回來
         document.getElementById('loading').style.display = 'none';
         document.getElementById('form-section').style.display = 'block';
       });
@@ -422,12 +435,11 @@
     document.getElementById('res-social').innerText = social;
     document.getElementById('res-phone').innerText = phone;
     
-    // ✅ 生成濃縮咖啡棕色條碼 (dark=4a3b32) 搭配純白底色，優雅又秒刷！
-    var qrUrl = "https://quickchart.io/qr?text=" + phone + "&size=250&margin=2&dark=4a3b32&light=ffffff";
+    // ✅ 生成標準美式深黑條碼 (dark=18181b) 搭配純白底色，1000% 瞬秒極速通關！
+    var qrUrl = "https://quickchart.io/qr?text=" + phone + "&size=250&margin=2&dark=18181b&light=ffffff";
     document.getElementById('qr-code-img').src = qrUrl;
   }
   
-  // 提供給舊版瀏覽器的備用支援
   function newSearchParams(obj) {
     var params = [];
     for (var key in obj) {
