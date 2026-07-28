@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-  <title>門市電子核銷系統 PRO</title>
+  <title>門市電子核銷系統</title>
   
   <link rel="manifest" href="manifest.json">
   <meta name="mobile-web-app-capable" content="yes">
@@ -42,7 +42,7 @@
     
     .container { width: 100%; max-width: 420px; }
 
-    /* 🌟 頂部門市設定列：高質感導航列風格 */
+    /* 🌟 頂部門市設定列 */
     .store-header { 
       background: linear-gradient(135deg, #1e293b, #334155); 
       color: white; 
@@ -88,10 +88,9 @@
     }
     input:focus, select:focus { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1); }
     
-    /* 🌟 專屬活動下拉框：醒目品牌藍背景 */
     #activity-select { background-color: #f0fdf4; border-color: #86efac; color: #166534; font-weight: bold; }
 
-    /* 🌟 按鈕視覺回饋強化 (友善長輩大觸控區) */
+    /* 🌟 按鈕視覺回饋 */
     button { 
       background-color: var(--primary); 
       color: white; 
@@ -127,23 +126,45 @@
     }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-    /* 🎟️ 核心亮點：高質感「優惠券存根聯」卡片設計 */
+    /* 🎟️ 存根聯卡片設計 */
     .ticket-card {
       background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 16px;
       padding: 20px; margin: 20px 0; position: relative; text-align: left;
       box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
     }
-    /* 製作左右兩側的半圓形打孔切角 */
     .ticket-card::before, .ticket-card::after {
-      content: ""; position: absolute; top: 55%; width: 24px; height: 24px;
+      content: ""; position: absolute; top: 58%; width: 24px; height: 24px;
       background-color: white; border: 2px solid #e2e8f0; border-radius: 50%;
     }
     .ticket-card::before { left: -14px; border-left-color: transparent; border-top-color: transparent; transform: rotate(45deg); }
     .ticket-card::after { right: -14px; border-right-color: transparent; border-bottom-color: transparent; transform: rotate(45deg); }
 
-    .ticket-info { font-size: 15px; color: var(--text-sub); line-height: 2; border-bottom: 2px dashed #cbd5e1; padding-bottom: 16px; margin-bottom: 16px; }
-    .ticket-info strong { color: var(--text-main); }
-    .ticket-info span { font-weight: 700; color: var(--text-main); font-size: 16px; float: right; }
+    /* 🛠️ 關鍵修復：使用 Flexbox 強制左右對齊，絕對不會掉下去！ */
+    .ticket-info { 
+      border-bottom: 2px dashed #cbd5e1; 
+      padding-bottom: 16px; 
+      margin-bottom: 16px; 
+      display: flex; 
+      flex-direction: column; 
+      gap: 12px; /* 每行之間的間距 */
+    }
+    .info-row { 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      font-size: 15px; 
+    }
+    .info-row strong { 
+      color: var(--text-main); 
+      white-space: nowrap; /* 強制標題不斷行 */
+    }
+    .info-row span { 
+      font-weight: 700; 
+      color: var(--text-main); 
+      font-size: 16px; 
+      text-align: right; 
+      word-break: break-all; /* 如果帳號超級長，自動換行不跑版 */
+    }
     
     .status-box { padding: 14px; border-radius: 12px; font-weight: 800; font-size: 18px; text-align: center; letter-spacing: 0.5px; }
     .unclaimed { background-color: #d1fae5; color: #065f46; border: 2px solid #34d399; }
@@ -151,7 +172,6 @@
     
     .redeem-details { background: #fff1f2; border: 1px solid #fecdd3; padding: 12px; border-radius: 10px; font-size: 14px; color: #9f1239; margin-top: 12px; text-align: center; line-height: 1.6; }
 
-    /* 🌟 iOS 下方提示框 */
     #ios-prompt { display: none; position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(10px); color: white; padding: 18px; border-radius: 16px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3); width: 85%; max-width: 350px; text-align: center; z-index: 1000; border: 1px solid rgba(255,255,255,0.1); }
     .ios-prompt-text { font-size: 14px; margin-bottom: 12px; line-height: 1.6; }
     .ios-close-btn { background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: bold; width: 100%; }
@@ -210,10 +230,21 @@
     <!-- 🎟️ 存根聯卡片結果顯示區 -->
     <div id="content" style="display:none;">
       <div class="ticket-card">
+        
+        <!-- 🛠️ 關鍵修復區域：改為行列 Flex 結構 -->
         <div class="ticket-info">
-          <strong>📱 兌換手機</strong> <span id="id-text" style="color: var(--primary);"></span><br>
-          <strong>👤 顧客姓名</strong> <span id="name-text"></span><br>
-          <strong>🔗 社群帳號</strong> <span id="social-text" style="color: var(--success-dark);"></span>
+          <div class="info-row">
+            <strong>📱 兌換手機</strong> 
+            <span id="id-text" style="color: var(--primary);"></span>
+          </div>
+          <div class="info-row">
+            <strong>👤 顧客姓名</strong> 
+            <span id="name-text"></span>
+          </div>
+          <div class="info-row">
+            <strong>🔗 社群帳號</strong> 
+            <span id="social-text" style="color: var(--success-dark);"></span>
+          </div>
         </div>
 
         <div id="status-badge" class="status-box"></div>
@@ -235,7 +266,6 @@
   </div>
 </div>
 
-<!-- iOS 桌面安裝提示 -->
 <div id="ios-prompt">
   <div class="ios-prompt-text">
     💡 <strong>店員專屬 POS 下載教學：</strong><br>
@@ -331,7 +361,7 @@
     if (!activity) return alert("⚠️ 請選擇要核銷的活動！");
     if (!phone) return alert("⚠️ 請輸入顧客手機號碼！");
 
-    // 🌟 防連點鎖：立刻變灰停用
+    // 🌟 防連點鎖
     var searchBtn = document.getElementById('search-btn');
     searchBtn.disabled = true;
     searchBtn.innerText = "查詢中";
