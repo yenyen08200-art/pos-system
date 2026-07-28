@@ -194,6 +194,7 @@
 </div>
 
 <script>
+  // ⚠️ 已經幫你保留你的 API 網址
   var API_URL = "https://script.google.com/macros/s/AKfycbyteRoiXgX3h9dpU325M0mg--jNEy1ayfpRPGmXebEEn3Q2Tq37yGNmXiShcrOQqyCm/exec";
   var syncTimer = null; 
 
@@ -283,6 +284,7 @@
     triggerVibe(40);
 
     document.getElementById('form-section').style.display = 'none';
+    document.getElementById('loading').style.display = 'none';
     document.getElementById('loading').style.display = 'block';
 
     var baseUrl = API_URL.split('?')[0]; 
@@ -364,7 +366,7 @@
     var cachedStatus = localStorage.getItem("pos_" + act + "_status");
     if (cachedStatus === "已兌換") {
       renderRedeemedState("門市", false); 
-      return; 
+      // 🌟🌟🌟 注意：這裡已經成功移除了 return; 讓背景雷達隨時為撤銷核銷做好監控準備！ 🌟🌟🌟
     } else {
       qrImg.style.opacity = "1"; 
     }
@@ -389,7 +391,7 @@
     fetch(url, { method: 'GET', redirect: 'follow' })
       .then(response => response.json())
       .then(res => {
-        // 🌟🌟🌟 核心解藥一：後台找不到資料（被刪除或清空表單），立即自爆清除手機記憶並彈回表單！ 🌟🌟🌟
+        // 解藥一：後台被刪除，立即自爆返回表單
         if (!res.exists) {
           if (syncTimer) clearInterval(syncTimer);
           localStorage.removeItem("pos_" + act + "_phone");
@@ -406,7 +408,7 @@
           return;
         }
 
-        // 🌟🌟🌟 核心解藥二：資料還在，自動檢查後台「姓名」與「帳號」是否有被修改，即時校正同步！ 🌟🌟🌟
+        // 解藥二：後台改名，即時校正同步
         if (res.exists) {
           var currentName = document.getElementById('res-name').innerText;
           var currentSocial = document.getElementById('res-social').innerText;
@@ -421,11 +423,23 @@
           }
         }
 
-        // 🌟🌟🌟 核心解藥三：同步已核銷狀態 🌟🌟🌟
-        if (res.exists && res.status === "已兌換") {
-          if (syncTimer) clearInterval(syncTimer);
-          localStorage.setItem("pos_" + act + "_status", "已兌換");
-          renderRedeemedState(res.store || "門市", isFromTimer);
+        // 🌟🌟🌟 解藥三：雙向監控「已核銷」與「被店員撤銷 (Undo)」狀態！ 🌟🌟🌟
+        if (res.exists) {
+          var cachedStatus = localStorage.getItem("pos_" + act + "_status");
+
+          if (res.status === "已兌換") {
+            // 如果後台是已兌換，且手機目前的備忘錄還不是已兌換
+            if (cachedStatus !== "已兌換") {
+              localStorage.setItem("pos_" + act + "_status", "已兌換");
+              renderRedeemedState(res.store || "門市", isFromTimer);
+            }
+          } else {
+            // 🌟 奇蹟反轉：如果後台「不是已兌換」(被店員撤銷了！)，但手機備忘錄竟然還記著「已兌換」！
+            if (cachedStatus === "已兌換") {
+              localStorage.removeItem("pos_" + act + "_status"); // 1. 解除終身記憶鎖！
+              renderValidState(isFromTimer); // 2. 瞬間把條碼跟郵戳變回有效狀態！
+            }
+          }
         }
       })
       .catch(e => {});
@@ -447,6 +461,26 @@
     if (triggerSoundAndAlert) {
       triggerVibe([100, 50, 100, 50, 200]);
       alert("🎉 恭喜！門市人員已於【" + storeName + "】完成核銷，您的餐券已成功兌換！");
+    }
+  }
+
+  // 🌟 獨立抽出的「恢復有效狀態」專用 UI 函數
+  function renderValidState(triggerSoundAndAlert) {
+    var qrImg = document.getElementById('qr-code-img');
+    qrImg.style.opacity = "1"; // 條碼恢復 100% 清晰
+    
+    var stamp = document.querySelector(".stamp-badge");
+    stamp.innerHTML = "【 小編已核銷確認 · 專屬兌換券 】";
+    stamp.style.borderColor = "var(--cherry-red)";
+    stamp.style.color = "var(--cherry-red)";
+    
+    var highlight = document.querySelector(".highlight-text");
+    highlight.innerHTML = "至德州小騎士門市,出示此條碼即可核銷";
+    highlight.style.color = "var(--ink-black)";
+    
+    if (triggerSoundAndAlert) {
+      triggerVibe([100, 50, 100]);
+      alert("💡 系統通知：您的餐券已被門市人員「撤銷核銷」，已恢復為【有效狀態】，可再次使用！");
     }
   }
   
