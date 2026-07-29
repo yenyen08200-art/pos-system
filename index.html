@@ -47,6 +47,7 @@
     .info-row strong { color: var(--txt-s); width: 100px; text-align: left; }
     .info-row span { color: white; width: 150px; text-align: left; font-size: 18px; font-weight: 900;}
     #id-text { color: var(--neon-b); font-family: monospace; font-size: 22px !important; text-shadow: 0 0 10px rgba(0,242,254,0.5); }
+    #social-text { color: var(--neon-g); text-shadow: 0 0 10px rgba(0,255,135,0.4); }
     
     .status-box { padding: 16px; border-radius: 12px; font-weight: 900; font-size: 18px; margin: 20px 0; letter-spacing: 1px; }
     .unclaimed { background: rgba(0,255,135,0.1); color: var(--neon-g); border: 2px solid var(--neon-g); box-shadow: 0 0 20px rgba(0,255,135,0.2); }
@@ -104,6 +105,7 @@
     <div id="content" style="display:none; background:rgba(0,0,0,0.2); padding:25px; border-radius:18px; margin-top:20px; border:1px solid rgba(0,242,254,0.2);">
       <div class="info-row"><strong>📱 兌換手機</strong><span id="id-text"></span></div>
       <div class="info-row"><strong>👤 顧客姓名</strong><span id="name-text"></span></div>
+      <div class="info-row"><strong>🔗 社群帳號</strong><span id="social-text"></span></div> <!-- 🌟 帳號顯示加回來囉！ -->
       <div id="status" class="status-box"></div>
       <div id="action-area"><button id="btn-redeem" class="btn-redeem" onclick="redeem()">✔ 確認核銷優惠</button></div>
       <div id="undo-area" style="display:none;"><button id="btn-undo" class="btn-undo" onclick="undo()">⚡ 撤銷 (<span id="t-undo">5</span>s)</button></div>
@@ -153,8 +155,13 @@
         if(r.found_in_other_sheet && confirm(`此號碼登記在【${r.actual_sheet}】！\n是否自動切換？`)) { $('act').value = r.actual_sheet; return check(); }
         beep('err'); return alert("❌ 找不到號碼！");
       }
-      beep('ok'); $('content').style.display='block'; $('id-text').innerText=ph; $('name-text').innerText=r.name;
-      setUI(r); $('next-area').style.display='block';
+      beep('ok'); 
+      $('content').style.display='block'; 
+      $('id-text').innerText=ph; 
+      $('name-text').innerText=r.name;
+      $('social-text').innerText=r.social_id || "未提供"; // 🌟 這裡負責把社群帳號秀出來！
+      setUI(r); 
+      $('next-area').style.display='block';
     } catch(e) { beep('err'); alert("網路逾時！"); $('loading').style.display='none'; $('btn-search').disabled=false; $('btn-search').innerText="查詢"; }
   }
 
@@ -186,4 +193,4 @@
   }
 </script>
 </body>
-</html> 
+</html>
