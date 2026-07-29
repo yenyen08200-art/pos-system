@@ -40,22 +40,27 @@
     .switch-btn { background: transparent; color: var(--ink-black); border: 2px dashed var(--ink-black); margin-top: 25px; font-size: 15px; }
     .switch-btn:active { transform: scale(0.95); background: rgba(0,0,0,0.05); }
 
-    /* 🌟 全新：科技全息掃描動畫 */
-    #loading { display: none; padding: 50px 20px; text-align: center; }
-    .cyber-loader { width: 120px; height: 120px; margin: 0 auto 25px; position: relative; }
-    .cyber-ring { fill: none; stroke: var(--cherry-red); stroke-width: 4; stroke-dasharray: 150; stroke-dashoffset: 0; animation: spin-ring 1.5s linear infinite; filter: drop-shadow(0 0 8px var(--cherry-red)); }
-    .cyber-core { fill: var(--cherry-red); animation: pulse-core 1.5s ease-in-out infinite; filter: drop-shadow(0 0 12px var(--cherry-red)); }
-    @keyframes spin-ring { 100% { transform: rotate(360deg); } }
-    @keyframes pulse-core { 0%, 100% { transform: scale(0.8); opacity: 0.7; } 50% { transform: scale(1.1); opacity: 1; } }
-    .loading-text { color: var(--cherry-red); font-weight: 900; font-size: 17px; letter-spacing: 1.5px; animation: text-flicker 1.5s infinite; text-shadow: 0 0 10px rgba(225, 29, 72, 0.4); }
-    @keyframes text-flicker { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+    /* 🍔 漢堡小男孩動畫回歸 */
+    #loading { display: none; padding: 40px 22px; text-align: center; }
+    .chibi-loader-box { display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    .chibi-svg { width: 135px; height: 105px; overflow: visible; margin-bottom: 20px; filter: drop-shadow(0 8px 12px rgba(225, 29, 72, 0.2)); }
+    .chibi-boy { animation: chibi-bounce 0.45s infinite alternate cubic-bezier(0.4, 0, 0.6, 1); transform-origin: center bottom; }
+    .shadow { animation: shadow-scale 0.45s infinite alternate cubic-bezier(0.4, 0, 0.6, 1); transform-origin: center; }
+    .burger-holding { animation: burger-wobble 0.45s infinite alternate ease-in-out; transform-origin: center; }
+    .star-fly { animation: star-pop 0.8s infinite linear; }
+    @keyframes chibi-bounce { 0% { transform: translateY(0) scaleY(0.96); } 100% { transform: translateY(-12px) scaleY(1.04); } }
+    @keyframes shadow-scale { 0% { transform: scale(1); opacity: 0.8; } 100% { transform: scale(0.5); opacity: 0.2; } }
+    @keyframes burger-wobble { 0% { transform: rotate(-5deg) translateY(0); } 100% { transform: rotate(5deg) translateY(-3px); } }
+    @keyframes star-pop { 0% { transform: translate(0, 0) scale(0.3); opacity: 0; } 50% { opacity: 1; } 100% { transform: translate(22px, -18px) scale(1.3) rotate(180deg); opacity: 0; } }
+    .loading-text { color: var(--cherry-red); font-weight: 800; font-size: 16px; letter-spacing: 1px; animation: pulse-text 1.5s infinite; text-shadow: 0 0 10px rgba(225, 29, 72, 0.3); }
+    @keyframes pulse-text { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
 
     /* 完美排版修復 */
     .notice { background: #fff1f2; border: 2px solid var(--cherry-red); color: var(--cherry-red); padding: 14px; border-radius: 6px; font-weight: 900; font-size: 15px; margin-bottom: 22px; box-shadow: 0 4px 15px rgba(225, 29, 72, 0.15); letter-spacing: 0.5px; }
-    .stamp-badge { display: inline-block; border: 2.5px solid var(--cherry-red); color: var(--cherry-red); font-size: 14px; font-weight: 900; padding: 6px 16px; border-radius: 4px; transform: rotate(-3deg); margin-bottom: 20px; box-shadow: 0 0 10px rgba(225, 29, 72, 0.2); }
+    .stamp-badge { display: inline-block; border: 2.5px solid var(--cherry-red); color: var(--cherry-red); font-size: 14px; font-weight: 900; padding: 6px 16px; border-radius: 4px; transform: rotate(-3deg); margin-bottom: 20px; box-shadow: 0 0 10px rgba(225, 29, 72, 0.2); transition: 0.3s; }
     .qr-box { background: #fff; padding: 15px; border: var(--border-ink); border-radius: 8px; display: inline-block; margin: 15px 0 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
     .qr-img { width: 190px; height: 190px; display: block; transition: opacity 0.3s ease; }
-    .highlight-text { font-size: 17px; font-weight: 900; border-bottom: 2px solid var(--ink-black); padding-bottom: 15px; display: block; margin: 0 0 25px; letter-spacing: 1px; }
+    .highlight-text { font-size: 17px; font-weight: 900; border-bottom: 2px solid var(--ink-black); padding-bottom: 15px; display: block; margin: 0 0 25px; letter-spacing: 1px; transition: 0.3s;}
     .info-list { text-align: left; display: flex; flex-direction: column; gap: 14px; font-size: 16px; background: rgba(0,0,0,0.02); padding: 20px; border-radius: 8px; border: 1px dashed rgba(0,0,0,0.2); }
     .info-row { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dotted #a1a1aa; padding-bottom: 10px; }
     .info-row:last-child { border-bottom: none; padding-bottom: 0; }
@@ -71,7 +76,7 @@
     <div class="check-header">
       <span class="check-no">【 德州小騎士 】</span>
       <h1>電子領卷系統</h1>
-      <p class="subtitle">VIP 專屬科技憑證</p>
+      <p class="subtitle">專屬兌換憑證</p>
     </div>
     <div class="server-meta">
       <span>服務生：<strong>小戰熊</strong></span>
@@ -79,6 +84,7 @@
       <span>人數：<strong>1 位</strong></span>
     </div>
 
+    <!-- 表單 -->
     <div id="form-section" class="check-body">
       <label>🎯 兌換活動項目</label>
       <select id="activity" onchange="checkSaved()"><option value="父親節社群活動">父親節社群活動</option><option value="中秋節活動">中秋節活動</option></select>
@@ -89,15 +95,45 @@
       <button class="submit-btn" onclick="register()">⚡ 領取專屬兌換卷</button>
     </div>
 
+    <!-- 漢堡小廚師載入中 -->
     <div id="loading">
-      <!-- 🌟 全新科技全息雷達動畫 -->
-      <svg viewBox="0 0 100 100" class="cyber-loader">
-        <circle cx="50" cy="50" r="40" class="cyber-ring" stroke-linecap="round" transform="rotate(-90 50 50)"/>
-        <path d="M50 30 L55 45 L70 45 L58 55 L62 70 L50 60 L38 70 L42 55 L30 45 L45 45 Z" class="cyber-core"/>
-      </svg>
-      <div class="loading-text">⚡ 系統光速建檔中...</div>
+      <div class="chibi-loader-box">
+        <svg viewBox="0 0 130 110" class="chibi-svg">
+          <ellipse cx="65" cy="100" rx="28" ry="6" fill="#27272a" class="shadow"/>
+          <path d="M 100 40 L 103 48 L 111 50 L 105 56 L 107 64 L 100 59 L 93 64 L 95 56 L 89 50 L 97 48 Z" fill="#d97706" stroke="#27272a" stroke-width="1.5" class="star-fly"/>
+          <g class="chibi-boy">
+            <ellipse cx="53" cy="94" rx="7" ry="6" fill="#27272a"/>
+            <ellipse cx="77" cy="94" rx="7" ry="6" fill="#27272a"/>
+            <rect x="48" y="64" width="34" height="26" rx="8" fill="#fdfbf7" stroke="#27272a" stroke-width="2.5"/>
+            <rect x="54" y="68" width="22" height="22" rx="4" fill="#991b1b"/>
+            <circle cx="65" cy="45" r="25" fill="#fff5eb" stroke="#27272a" stroke-width="2.5"/>
+            <ellipse cx="46" cy="50" rx="5" ry="3.5" fill="#e11d48" opacity="0.75"/>
+            <ellipse cx="84" cy="50" rx="5" ry="3.5" fill="#e11d48" opacity="0.75"/>
+            <path d="M 48 44 Q 52 38 56 44" stroke="#27272a" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <path d="M 74 44 Q 78 38 82 44" stroke="#27272a" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <path d="M 60 53 Q 65 60 70 53 Z" fill="#991b1b" stroke="#27272a" stroke-width="2"/>
+            <path d="M 38 38 C 40 18, 90 18, 92 38 Z" fill="#fdfbf7" stroke="#27272a" stroke-width="2.5"/>
+            <path d="M 45 26 L 55 38 M 60 22 L 65 38 M 75 24 L 75 38 M 85 28 L 82 38" stroke="#991b1b" stroke-width="3"/>
+            <rect x="36" y="36" width="58" height="8" rx="4" fill="#991b1b" stroke="#27272a" stroke-width="2"/>
+            <g class="burger-holding">
+              <path d="M 36 78 Q 65 85 94 78 L 90 86 Q 65 90 40 86 Z" fill="#b45309" stroke="#27272a" stroke-width="2"/>
+              <rect x="38" y="72" width="54" height="8" rx="4" fill="#451a03" stroke="#27272a" stroke-width="2"/>
+              <path d="M 36 72 L 45 76 L 55 70 L 65 77 L 75 70 L 85 76 L 94 72 L 90 68 L 40 68 Z" fill="#d97706" stroke="#27272a" stroke-width="1.5"/>
+              <path d="M 38 68 Q 48 64 58 68 Q 68 72 78 66 Q 88 64 92 68" stroke="#15803d" stroke-width="4" fill="none"/>
+              <path d="M 36 66 C 38 52, 92 52, 94 66 Z" fill="#d97706" stroke="#27272a" stroke-width="2.5"/>
+              <circle cx="50" cy="60" r="1.5" fill="#fdfbf7"/>
+              <circle cx="65" cy="57" r="1.5" fill="#fdfbf7"/>
+              <circle cx="80" cy="61" r="1.5" fill="#fdfbf7"/>
+              <circle cx="42" cy="74" r="6" fill="#fff5eb" stroke="#27272a" stroke-width="2"/>
+              <circle cx="88" cy="74" r="6" fill="#fff5eb" stroke="#27272a" stroke-width="2"/>
+            </g>
+          </g>
+        </svg>
+        <div class="loading-text">🍔 廚房正火速為您製作專屬兌換卷... 🍟</div>
+      </div>
     </div>
 
+    <!-- 餐券 -->
     <div id="ticket-card" style="display:none;">
       <div class="notice">📸 請立即「截圖」保存此兌換券！</div>
       <div class="stamp-badge" id="stamp">【 小編已核銷確認 · 專屬兌換券 】</div>
@@ -105,10 +141,10 @@
       <div class="qr-box"><img id="qr" class="qr-img" src=""></div>
       <span class="highlight-text" id="hl-text">至德州小騎士門市出示核銷</span>
       <div class="info-list">
-        <div class="info-row"><strong>項目</strong> <span id="r-act" style="color:var(--cherry-red);"></span></div>
-        <div class="info-row"><strong>姓名</strong> <span id="r-name"></span></div>
-        <div class="info-row"><strong>帳號</strong> <span id="r-social"></span></div>
-        <div class="info-row"><strong>手機</strong> <span id="r-phone"></span></div>
+        <div class="info-row"><strong>🎯 兌換活動項目</strong> <span id="r-act" style="color:var(--cherry-red);"></span></div>
+        <div class="info-row"><strong>💬 社群暱稱</strong> <span id="r-name"></span></div>
+        <div class="info-row"><strong>🔗 社群帳號</strong> <span id="r-social"></span></div>
+        <div class="info-row"><strong>📱 手機號碼</strong> <span id="r-phone"></span></div>
       </div>
       <button class="switch-btn" onclick="switchAct()">🔄 我要切換／領取其他活動</button>
     </div>
@@ -172,7 +208,7 @@
   function renderTicket(act, name, soc, ph) {
     hide('form-section'); hide('loading'); show('ticket-card');
     $('r-act').innerText=act; $('r-name').innerText=name; $('r-social').innerText=soc; $('r-phone').innerText=ph;
-    $('qr').src = `https://quickchart.io/qr?text=${ph}&size=250&dark=27272a`;
+    $('qr').src = `https://quickchart.io/qr?text=${ph}&size=250&dark=e11d48`;
     
     setUI(localStorage.getItem(`p_${act}_status`) === "已兌換");
     if(timer) clearInterval(timer);
@@ -193,7 +229,7 @@
 
   function setUI(isRedeemed, alertUser=false) {
     $('qr').style.opacity = isRedeemed ? "0.15" : "1";
-    $('stamp').innerHTML = isRedeemed ? "【 已核銷確認 · 感謝完食 】" : "【 小編已核銷確認 · 專屬兌換券 】";
+    $('stamp').innerHTML = isRedeemed ? "【 廚房已核銷確認 · 感謝完食 】" : "【 小編已核銷確認 · 專屬兌換券 】";
     $('stamp').style.borderColor = isRedeemed ? "#71717a" : "var(--cherry-red)";
     $('stamp').style.color = isRedeemed ? "#71717a" : "var(--cherry-red)";
     $('hl-text').innerHTML = isRedeemed ? "★ 本餐券已使用完畢 ★" : "至德州小騎士門市出示核銷";
