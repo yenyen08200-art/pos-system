@@ -7,41 +7,61 @@
   <link rel="apple-touch-icon" href="icon.png">
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
   <style>
-    :root { --bg-parchment:#f4ece1; --paper-cream:#fdfbf7; --paper-warm:#f7f2e8; --cherry-red:#991b1b; --mustard-gold:#d97706; --ink-black:#27272a; --ink-muted:#71717a; --border-ink:1.5px solid #27272a; --paper-texture:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.06'/%3E%3C/svg%3E"); }
-    body { font-family: system-ui, sans-serif; background: var(--bg-parchment) var(--paper-texture); background-size: 150px; color: var(--ink-black); margin: 0; padding: 20px 16px; display: flex; justify-content: center; min-height: 95vh; }
+    :root { --bg-parchment:#f4ece1; --paper-cream:#fdfbf7; --cherry-red:#e11d48; --ink-black:#27272a; --ink-muted:#71717a; --border-ink:1.5px solid #27272a; --paper-texture:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.06'/%3E%3C/svg%3E"); }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg-parchment) var(--paper-texture); background-size: 150px; color: var(--ink-black); margin: 0; padding: 20px 16px; display: flex; justify-content: center; min-height: 95vh; }
     .container { width: 100%; max-width: 400px; }
-    .guest-check { background: var(--paper-cream) var(--paper-texture); border: var(--border-ink); border-radius: 4px; box-shadow: 0 15px 35px -5px rgba(0,0,0,0.15); overflow: hidden; }
-    .check-header { background: var(--paper-warm) var(--paper-texture); border-bottom: 2px double var(--ink-black); padding: 22px; text-align: center; }
-    .check-no { font-family: monospace; font-size: 13px; font-weight: 800; color: var(--cherry-red); letter-spacing: 1px; display: block; margin-bottom: 8px; }
-    h1 { font-size: 24px; font-weight: 900; margin: 0 0 6px 0; }
+    .guest-check { background: var(--paper-cream) var(--paper-texture); border: var(--border-ink); border-radius: 8px; box-shadow: 0 15px 35px -5px rgba(0,0,0,0.2); overflow: hidden; }
+    
+    .check-header { border-bottom: 2px double var(--ink-black); padding: 25px 22px 18px; text-align: center; }
+    .check-no { font-family: monospace; font-size: 14px; font-weight: 900; color: var(--cherry-red); letter-spacing: 2px; display: block; margin-bottom: 8px; text-shadow: 0 0 8px rgba(225, 29, 72, 0.4); }
+    h1 { font-size: 26px; font-weight: 900; margin: 0 0 6px 0; letter-spacing: 1px; }
     .subtitle { font-size: 13px; color: var(--ink-muted); margin: 0; font-weight: 700; }
-    .server-meta { display: flex; justify-content: space-between; border-bottom: var(--border-ink); padding: 10px 22px; font-size: 13px; font-weight: 700; color: var(--ink-muted); }
+    .server-meta { display: flex; justify-content: space-between; border-bottom: var(--border-ink); padding: 12px 22px; font-size: 14px; font-weight: 700; color: var(--ink-muted); }
     .server-meta strong { color: var(--ink-black); }
-    .check-body, #ticket-card { padding: 24px 22px; }
-    label { display: block; font-weight: 800; margin-bottom: 8px; font-size: 14px; }
-    input, select, button { width: 100%; padding: 14px 16px; border-radius: 2px; border: var(--border-ink); background: var(--paper-warm); color: var(--ink-black); font-size: 16px; font-weight: 700; margin-bottom: 18px; box-sizing: border-box; outline: none; transition: 0.2s; }
-    input:focus, select:focus { background: #fff; border-color: var(--cherry-red); box-shadow: inset 3px 0 0 var(--cherry-red); }
-    .secret-box { background: #fffdf9; padding: 14px; border: 1.5px dashed var(--cherry-red); margin-bottom: 24px; text-align: center; }
-    .secret-box label { color: var(--cherry-red); margin-bottom: 8px; }
-    #secret_code { border-color: #fca5a5; background: #fffafa; text-align: center; font-size: 20px; font-weight: 900; color: var(--cherry-red); text-transform: uppercase; letter-spacing: 4px; margin-bottom:0;}
-    .submit-btn { background: var(--cherry-red); color: #fff; border-color: var(--cherry-red); cursor: pointer; letter-spacing: 1.5px; }
-    .switch-btn { background: transparent; border: 1.5px dashed var(--ink-black); cursor: pointer; margin-top: 20px; }
-    #loading { display: none; padding: 40px 22px; text-align: center; }
-    .chibi-svg { width: 135px; height: 105px; filter: drop-shadow(0 8px 12px rgba(0,0,0,0.12)); margin-bottom: 20px;}
-    .chibi-boy { animation: bounce 0.45s infinite alternate; transform-origin: center bottom; }
-    @keyframes bounce { 0% { transform: translateY(0) scaleY(0.96); } 100% { transform: translateY(-12px) scaleY(1.04); } }
-    .loading-text { color: var(--cherry-red); font-weight: 800; font-size: 16px; animation: pulse 1.5s infinite; }
-    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
-    .stamp-badge { display: inline-block; border: 2px solid var(--cherry-red); color: var(--cherry-red); font-size: 13px; font-weight: 900; padding: 4px 14px; border-radius: 2px; transform: rotate(-4deg); margin-bottom: 14px; transition: 0.3s; }
-    .qr-box { background: #fff; padding: 12px; border: var(--border-ink); display: inline-block; margin: 10px 0; }
-    .qr-img { width: 180px; height: 180px; display: block; transition: 0.3s; }
-    .highlight-text { font-size: 16px; font-weight: 850; border-bottom: 1px solid var(--ink-black); padding-bottom: 12px; display: block; margin: 12px 0 20px; }
-    .info-list { text-align: left; display: flex; flex-direction: column; gap: 10px; font-size: 15px; }
-    .info-row { display: flex; justify-content: space-between; border-bottom: 1px dotted #d4d4d8; padding-bottom: 8px; }
-    .info-row strong { color: var(--ink-muted); }
-    .info-row span { font-weight: 850; text-align: right; }
-    #res-phone { color: var(--cherry-red); font-family: monospace; font-size: 18px; font-weight: 900; }
-    .notice { background: #fef2f2; border: 1.5px solid var(--cherry-red); color: var(--cherry-red); padding: 12px; font-weight: 800; font-size: 15px; margin-bottom: 18px; }
+    
+    .check-body, #ticket-card { padding: 30px 24px; text-align: center; }
+    label { display: block; font-weight: 800; margin-bottom: 8px; font-size: 15px; text-align: left; }
+    input, select { width: 100%; padding: 15px 16px; border-radius: 6px; border: var(--border-ink); background: rgba(255,255,255,0.8); color: var(--ink-black); font-size: 16px; font-weight: 700; margin-bottom: 20px; box-sizing: border-box; outline: none; transition: 0.3s; }
+    input:focus, select:focus { background: #fff; border-color: var(--cherry-red); box-shadow: 0 0 12px rgba(225, 29, 72, 0.3); }
+    
+    .secret-box { background: #fffdf9; padding: 18px; border: 2px dashed var(--cherry-red); border-radius: 8px; margin-bottom: 25px; box-shadow: inset 0 0 15px rgba(225, 29, 72, 0.05); }
+    .secret-box label { color: var(--cherry-red); text-align: center; font-size: 16px; }
+    #secret_code { border-color: #fda4af; text-align: center; font-size: 22px; font-weight: 900; color: var(--cherry-red); text-transform: uppercase; letter-spacing: 5px; margin-bottom: 0; box-shadow: 0 0 10px rgba(225, 29, 72, 0.2); }
+    
+    /* 🌟 科技呼吸光效按鈕 */
+    @keyframes breathe-btn {
+      0% { box-shadow: 0 0 10px rgba(225, 29, 72, 0.4); transform: scale(1); }
+      50% { box-shadow: 0 0 25px rgba(225, 29, 72, 0.8), 0 0 10px rgba(225, 29, 72, 0.6) inset; transform: scale(1.02); }
+      100% { box-shadow: 0 0 10px rgba(225, 29, 72, 0.4); transform: scale(1); }
+    }
+    button { width: 100%; padding: 16px; border-radius: 6px; font-size: 17px; font-weight: 900; cursor: pointer; transition: all 0.2s; outline: none; font-family: inherit; }
+    .submit-btn { background: var(--cherry-red); color: #fff; border: 2px solid var(--cherry-red); letter-spacing: 1.5px; animation: breathe-btn 2s infinite ease-in-out; }
+    .submit-btn:active { transform: scale(0.95); animation: none; box-shadow: 0 0 30px rgba(225, 29, 72, 1); }
+    .switch-btn { background: transparent; color: var(--ink-black); border: 2px dashed var(--ink-black); margin-top: 25px; font-size: 15px; }
+    .switch-btn:active { transform: scale(0.95); background: rgba(0,0,0,0.05); }
+
+    /* 🌟 全新：科技全息掃描動畫 */
+    #loading { display: none; padding: 50px 20px; text-align: center; }
+    .cyber-loader { width: 120px; height: 120px; margin: 0 auto 25px; position: relative; }
+    .cyber-ring { fill: none; stroke: var(--cherry-red); stroke-width: 4; stroke-dasharray: 150; stroke-dashoffset: 0; animation: spin-ring 1.5s linear infinite; filter: drop-shadow(0 0 8px var(--cherry-red)); }
+    .cyber-core { fill: var(--cherry-red); animation: pulse-core 1.5s ease-in-out infinite; filter: drop-shadow(0 0 12px var(--cherry-red)); }
+    @keyframes spin-ring { 100% { transform: rotate(360deg); } }
+    @keyframes pulse-core { 0%, 100% { transform: scale(0.8); opacity: 0.7; } 50% { transform: scale(1.1); opacity: 1; } }
+    .loading-text { color: var(--cherry-red); font-weight: 900; font-size: 17px; letter-spacing: 1.5px; animation: text-flicker 1.5s infinite; text-shadow: 0 0 10px rgba(225, 29, 72, 0.4); }
+    @keyframes text-flicker { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+    /* 完美排版修復 */
+    .notice { background: #fff1f2; border: 2px solid var(--cherry-red); color: var(--cherry-red); padding: 14px; border-radius: 6px; font-weight: 900; font-size: 15px; margin-bottom: 22px; box-shadow: 0 4px 15px rgba(225, 29, 72, 0.15); letter-spacing: 0.5px; }
+    .stamp-badge { display: inline-block; border: 2.5px solid var(--cherry-red); color: var(--cherry-red); font-size: 14px; font-weight: 900; padding: 6px 16px; border-radius: 4px; transform: rotate(-3deg); margin-bottom: 20px; box-shadow: 0 0 10px rgba(225, 29, 72, 0.2); }
+    .qr-box { background: #fff; padding: 15px; border: var(--border-ink); border-radius: 8px; display: inline-block; margin: 15px 0 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+    .qr-img { width: 190px; height: 190px; display: block; transition: opacity 0.3s ease; }
+    .highlight-text { font-size: 17px; font-weight: 900; border-bottom: 2px solid var(--ink-black); padding-bottom: 15px; display: block; margin: 0 0 25px; letter-spacing: 1px; }
+    .info-list { text-align: left; display: flex; flex-direction: column; gap: 14px; font-size: 16px; background: rgba(0,0,0,0.02); padding: 20px; border-radius: 8px; border: 1px dashed rgba(0,0,0,0.2); }
+    .info-row { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dotted #a1a1aa; padding-bottom: 10px; }
+    .info-row:last-child { border-bottom: none; padding-bottom: 0; }
+    .info-row strong { color: var(--ink-muted); font-weight: 800; }
+    .info-row span { font-weight: 900; text-align: right; font-size: 17px; }
+    #r-phone { color: var(--cherry-red); font-family: monospace; font-size: 20px; font-weight: 900; text-shadow: 0 0 5px rgba(225, 29, 72, 0.2); }
   </style>
 </head>
 <body>
@@ -51,7 +71,7 @@
     <div class="check-header">
       <span class="check-no">【 德州小騎士 】</span>
       <h1>電子領卷系統</h1>
-      <p class="subtitle">限時活動專屬兌換券</p>
+      <p class="subtitle">VIP 專屬科技憑證</p>
     </div>
     <div class="server-meta">
       <span>服務生：<strong>小戰熊</strong></span>
@@ -59,7 +79,6 @@
       <span>人數：<strong>1 位</strong></span>
     </div>
 
-    <!-- 表單 -->
     <div id="form-section" class="check-body">
       <label>🎯 兌換活動項目</label>
       <select id="activity" onchange="checkSaved()"><option value="父親節社群活動">父親節社群活動</option><option value="中秋節活動">中秋節活動</option></select>
@@ -67,24 +86,24 @@
       <label>🔗 社群帳號</label><input type="text" id="social_id" placeholder="例：tfc.1986" required>
       <label>📱 手機號碼</label><input type="tel" id="phone" placeholder="例：0958585888" oninput="this.value=this.value.replace(/\D/g,'').slice(0,10)" required>
       <div class="secret-box"><label>🔑 通關密語</label><input type="text" id="secret_code" placeholder="請填入密語" required></div>
-      <button class="submit-btn" onclick="register()">🍔 領取專屬兌換卷</button>
+      <button class="submit-btn" onclick="register()">⚡ 領取專屬兌換卷</button>
     </div>
 
-    <!-- 載入中 -->
     <div id="loading">
-      <svg viewBox="0 0 130 110" class="chibi-svg">
-        <g class="chibi-boy"><rect x="48" y="64" width="34" height="26" rx="8" fill="#fdfbf7" stroke="#27272a" stroke-width="2.5"/><rect x="54" y="68" width="22" height="22" rx="4" fill="#991b1b"/><circle cx="65" cy="45" r="25" fill="#fff5eb" stroke="#27272a" stroke-width="2.5"/><path d="M 60 53 Q 65 60 70 53 Z" fill="#991b1b" stroke="#27272a" stroke-width="2"/><path d="M 38 38 C 40 18, 90 18, 92 38 Z" fill="#fdfbf7" stroke="#27272a" stroke-width="2.5"/><rect x="36" y="36" width="58" height="8" rx="4" fill="#991b1b" stroke="#27272a" stroke-width="2"/><g transform="translate(0, -6)"><path d="M 36 78 Q 65 85 94 78 L 90 86 Q 65 90 40 86 Z" fill="#b45309" stroke="#27272a" stroke-width="2"/><rect x="38" y="72" width="54" height="8" rx="4" fill="#451a03" stroke="#27272a" stroke-width="2"/><path d="M 36 66 C 38 52, 92 52, 94 66 Z" fill="#d97706" stroke="#27272a" stroke-width="2.5"/></g></g>
+      <!-- 🌟 全新科技全息雷達動畫 -->
+      <svg viewBox="0 0 100 100" class="cyber-loader">
+        <circle cx="50" cy="50" r="40" class="cyber-ring" stroke-linecap="round" transform="rotate(-90 50 50)"/>
+        <path d="M50 30 L55 45 L70 45 L58 55 L62 70 L50 60 L38 70 L42 55 L30 45 L45 45 Z" class="cyber-core"/>
       </svg>
-      <div class="loading-text">🍔 廚房正火速製作中... 🍟</div>
+      <div class="loading-text">⚡ 系統光速建檔中...</div>
     </div>
 
-    <!-- 餐券 -->
-    <div id="ticket-card">
+    <div id="ticket-card" style="display:none;">
       <div class="notice">📸 請立即「截圖」保存此兌換券！</div>
       <div class="stamp-badge" id="stamp">【 小編已核銷確認 · 專屬兌換券 】</div>
-      <h2 style="font-size:19px; margin:0">活動兌換卷</h2>
+      <h2 style="font-size:22px; margin:0 0 10px; font-weight:900;">活動兌換卷</h2>
       <div class="qr-box"><img id="qr" class="qr-img" src=""></div>
-      <span class="highlight-text" id="hl-text">至德州小騎士門市,出示此條碼即可核銷</span>
+      <span class="highlight-text" id="hl-text">至德州小騎士門市出示核銷</span>
       <div class="info-list">
         <div class="info-row"><strong>項目</strong> <span id="r-act" style="color:var(--cherry-red);"></span></div>
         <div class="info-row"><strong>姓名</strong> <span id="r-name"></span></div>
@@ -123,22 +142,16 @@
     if(timer) clearInterval(timer);
     const sel = $('activity'), current = sel.value;
     const next = Array.from(sel.options).find(o => !localStorage.getItem(`p_${o.value}_phone`))?.value;
-    
-    if(next) {
-      sel.value = next; hide('ticket-card'); hide('loading'); show('form-section'); vibe(30);
-    } else {
-      vibe([50,50]);
-      sel.value = Array.from(sel.options).find(o => o.value !== current).value;
-      checkSaved(true);
+    if(next) { sel.value = next; hide('ticket-card'); hide('loading'); show('form-section'); vibe(30); } 
+    else {
+      vibe([50,50]); sel.value = Array.from(sel.options).find(o => o.value !== current).value; checkSaved(true);
     }
   }
 
   async function register() {
     const act=$('activity').value, name=$('name').value.trim(), soc=$('social_id').value.trim(), ph=$('phone').value.replace(/\D/g,''), cd=$('secret_code').value.trim();
     if(!name || !soc || ph.length<8 || !cd) return alert("⚠️ 請完整填寫資料與密語！");
-    
     hide('form-section'); show('loading'); vibe(40);
-    
     try {
       const res = await fetch(`${API}?action=register&id=${ph}&name=${name}&social_id=${soc}&code=${cd}&sheet=${act}&t=${Date.now()}`).then(r=>r.json());
       if (res.status === "success" || res.status === "already_registered") {
@@ -146,11 +159,13 @@
         localStorage.removeItem(`p_${act}_status`);
         localStorage.setItem(`p_${act}_phone`, ph); localStorage.setItem(`p_${act}_name`, res.name||name); localStorage.setItem(`p_${act}_social`, res.social_id||soc);
         renderTicket(act, res.name||name, res.social_id||soc, ph);
-      } else {
-        alert(res.error); hide('loading'); show('form-section');
-      }
+      } else { alert(res.error); hide('loading'); show('form-section'); }
     } catch(e) {
-      alert("網路不穩，系統將於背景重試！"); hide('loading'); show('form-section');
+      const checkRes = await fetch(`${API}?action=check&id=${ph}&sheet=${act}&t=${Date.now()}`).then(r=>r.json()).catch(()=>null);
+      if(checkRes && checkRes.exists) {
+        localStorage.setItem(`p_${act}_phone`, ph); localStorage.setItem(`p_${act}_name`, checkRes.name||name); localStorage.setItem(`p_${act}_social`, checkRes.social_id||soc);
+        renderTicket(act, checkRes.name||name, checkRes.social_id||soc, ph);
+      } else { alert("網路延遲，請重試！"); hide('loading'); show('form-section'); }
     }
   }
 
@@ -159,19 +174,14 @@
     $('r-act').innerText=act; $('r-name').innerText=name; $('r-social').innerText=soc; $('r-phone').innerText=ph;
     $('qr').src = `https://quickchart.io/qr?text=${ph}&size=250&dark=27272a`;
     
-    if(localStorage.getItem(`p_${act}_status`) === "已兌換") setUI(true);
-    else setUI(false);
-
+    setUI(localStorage.getItem(`p_${act}_status`) === "已兌換");
     if(timer) clearInterval(timer);
     let polls = 0;
     timer = setInterval(async () => {
       if(document.hidden || ++polls > 30) return (polls>30 && clearInterval(timer));
       try {
         const res = await fetch(`${API}?action=check&id=${ph}&sheet=${act}&t=${Date.now()}`).then(r=>r.json());
-        if(!res.exists) {
-          clearInterval(timer); ['phone','name','social','status'].forEach(k=>localStorage.removeItem(`p_${act}_${k}`));
-          alert("💡 您的兌換紀錄已被總部重置！"); hide('ticket-card'); show('form-section'); return;
-        }
+        if(!res.exists) { clearInterval(timer); ['phone','name','social','status'].forEach(k=>localStorage.removeItem(`p_${act}_${k}`)); alert("💡 紀錄已被總部重置！"); hide('ticket-card'); show('form-section'); return; }
         if(res.name && res.name!==$('r-name').innerText) { $('r-name').innerText=res.name; localStorage.setItem(`p_${act}_name`,res.name); }
         
         const cached = localStorage.getItem(`p_${act}_status`);
