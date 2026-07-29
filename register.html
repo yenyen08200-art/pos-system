@@ -194,7 +194,6 @@
 </div>
 
 <script>
-  // ⚠️ 已經幫你保留你的 API 網址
   var API_URL = "https://script.google.com/macros/s/AKfycbyteRoiXgX3h9dpU325M0mg--jNEy1ayfpRPGmXebEEn3Q2Tq37yGNmXiShcrOQqyCm/exec";
   var syncTimer = null; 
 
@@ -240,32 +239,43 @@
     }
   }
 
+  // 🌟🌟🌟 終局解鎖：雙滿貫自動切換器 🌟🌟🌟
   function resetToForm() {
     if (syncTimer) clearInterval(syncTimer); 
     var select = document.getElementById('activity');
+    var currentAct = select.value;
     var nextUnclaimed = "";
-    var allClaimed = true;
 
+    // 1. 優先找找看有沒有「還沒領過」的活動
     for (var i = 0; i < select.options.length; i++) {
       var val = select.options[i].value;
       if (!localStorage.getItem("pos_" + val + "_phone")) {
         nextUnclaimed = val;
-        allClaimed = false;
         break;
       }
     }
 
-    if (allClaimed) {
-      triggerVibe([80, 50, 80]);
-      alert("💡 讚啦！您目前「所有開放的活動」都已經領取過專屬餐券囉！為您保留目前的憑證。");
-      return;
+    // 2. 如果還有沒領過的，跳回表單讓他填
+    if (nextUnclaimed !== "") {
+      select.value = nextUnclaimed;
+      document.getElementById('ticket-card').style.display = 'none';
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('form-section').style.display = 'block';
+      triggerVibe(30);
+    } 
+    // 3. 🌟 如果全部都領過了，就「一秒無縫切換」到另一張已領過的券！
+    else {
+      triggerVibe([50, 50]);
+      for (var i = 0; i < select.options.length; i++) {
+        var val = select.options[i].value;
+        if (val !== currentAct) {
+          select.value = val;
+          break; // 找到另一個活動就換過去
+        }
+      }
+      // true 代表靜默切換，不會跳出煩人的 alert 警告視窗！
+      checkSavedTicket(true); 
     }
-
-    select.value = nextUnclaimed;
-    document.getElementById('ticket-card').style.display = 'none';
-    document.getElementById('loading').style.display = 'none';
-    document.getElementById('form-section').style.display = 'block';
-    triggerVibe(30);
   }
 
   function register() {
@@ -366,7 +376,6 @@
     var cachedStatus = localStorage.getItem("pos_" + act + "_status");
     if (cachedStatus === "已兌換") {
       renderRedeemedState("門市", false); 
-      // 🌟🌟🌟 注意：這裡已經成功移除了 return; 讓背景雷達隨時為撤銷核銷做好監控準備！ 🌟🌟🌟
     } else {
       qrImg.style.opacity = "1"; 
     }
@@ -391,7 +400,6 @@
     fetch(url, { method: 'GET', redirect: 'follow' })
       .then(response => response.json())
       .then(res => {
-        // 解藥一：後台被刪除，立即自爆返回表單
         if (!res.exists) {
           if (syncTimer) clearInterval(syncTimer);
           localStorage.removeItem("pos_" + act + "_phone");
@@ -408,7 +416,6 @@
           return;
         }
 
-        // 解藥二：後台改名，即時校正同步
         if (res.exists) {
           var currentName = document.getElementById('res-name').innerText;
           var currentSocial = document.getElementById('res-social').innerText;
@@ -423,21 +430,18 @@
           }
         }
 
-        // 🌟🌟🌟 解藥三：雙向監控「已核銷」與「被店員撤銷 (Undo)」狀態！ 🌟🌟🌟
         if (res.exists) {
           var cachedStatus = localStorage.getItem("pos_" + act + "_status");
 
           if (res.status === "已兌換") {
-            // 如果後台是已兌換，且手機目前的備忘錄還不是已兌換
             if (cachedStatus !== "已兌換") {
               localStorage.setItem("pos_" + act + "_status", "已兌換");
               renderRedeemedState(res.store || "門市", isFromTimer);
             }
           } else {
-            // 🌟 奇蹟反轉：如果後台「不是已兌換」(被店員撤銷了！)，但手機備忘錄竟然還記著「已兌換」！
             if (cachedStatus === "已兌換") {
-              localStorage.removeItem("pos_" + act + "_status"); // 1. 解除終身記憶鎖！
-              renderValidState(isFromTimer); // 2. 瞬間把條碼跟郵戳變回有效狀態！
+              localStorage.removeItem("pos_" + act + "_status"); 
+              renderValidState(isFromTimer); 
             }
           }
         }
@@ -464,10 +468,9 @@
     }
   }
 
-  // 🌟 獨立抽出的「恢復有效狀態」專用 UI 函數
   function renderValidState(triggerSoundAndAlert) {
     var qrImg = document.getElementById('qr-code-img');
-    qrImg.style.opacity = "1"; // 條碼恢復 100% 清晰
+    qrImg.style.opacity = "1"; 
     
     var stamp = document.querySelector(".stamp-badge");
     stamp.innerHTML = "【 小編已核銷確認 · 專屬兌換券 】";
