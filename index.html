@@ -105,7 +105,7 @@
     <div id="content" style="display:none; background:rgba(0,0,0,0.2); padding:25px; border-radius:18px; margin-top:20px; border:1px solid rgba(0,242,254,0.2);">
       <div class="info-row"><strong>📱 兌換手機</strong><span id="id-text"></span></div>
       <div class="info-row"><strong>👤 顧客姓名</strong><span id="name-text"></span></div>
-      <div class="info-row"><strong>🔗 社群帳號</strong><span id="social-text"></span></div> <!-- 🌟 帳號顯示加回來囉！ -->
+      <div class="info-row"><strong>🔗 社群帳號</strong><span id="social-text"></span></div> 
       <div id="status" class="status-box"></div>
       <div id="action-area"><button id="btn-redeem" class="btn-redeem" onclick="redeem()">✔ 確認核銷優惠</button></div>
       <div id="undo-area" style="display:none;"><button id="btn-undo" class="btn-undo" onclick="undo()">⚡ 撤銷 (<span id="t-undo">5</span>s)</button></div>
@@ -159,15 +159,28 @@
       $('content').style.display='block'; 
       $('id-text').innerText=ph; 
       $('name-text').innerText=r.name;
-      $('social-text').innerText=r.social_id || "未提供"; // 🌟 這裡負責把社群帳號秀出來！
+      $('social-text').innerText=r.social_id || "未提供"; 
       setUI(r); 
       $('next-area').style.display='block';
     } catch(e) { beep('err'); alert("網路逾時！"); $('loading').style.display='none'; $('btn-search').disabled=false; $('btn-search').innerText="查詢"; }
   }
 
   function setUI(r) {
-    if(r.status === "已兌換") { $('status').className="status-box claimed"; $('status').innerText="❌ 券已失效 / 已領取"; $('action-area').style.display='none'; } 
-    else { $('status').className="status-box unclaimed"; $('status').innerText="✅ 有效優惠券"; $('action-area').style.display='block'; $('btn-redeem').disabled=false; $('btn-redeem').innerText="✔ 確認核銷優惠"; }
+    if(r.status === "已兌換") {
+      $('status').className="status-box claimed";
+      if (r.store && r.time) {
+        $('status').innerHTML = `❌ 券已失效 / 已領取<br><span style="font-size:15px; color:#ffb199; display:block; margin-top:10px; font-weight:700;">📌 於 ${r.store} 兌換<br>🕒 ${r.time}</span>`;
+      } else {
+        $('status').innerText="❌ 券已失效 / 已領取";
+      }
+      $('action-area').style.display='none';
+    } else {
+      $('status').className="status-box unclaimed";
+      $('status').innerText="✅ 有效優惠券";
+      $('action-area').style.display='block';
+      $('btn-redeem').disabled=false;
+      $('btn-redeem').innerText="✔ 確認核銷優惠";
+    }
   }
 
   async function redeem() {
@@ -175,12 +188,24 @@
     $('btn-redeem').disabled=true; $('btn-redeem').innerText="⏳ 寫入中...";
     try {
       const r = await fetch(`${API}?action=redeem&id=${$('id-text').innerText}&store=${$('store').value}&sheet=${$('act').value}&t=${Date.now()}`).then(r=>r.json());
-      if(r.status==="success" || r.status==="error_already_redeemed") {
-        setUI({status:"已兌換"}); beep('win'); confetti({particleCount:80, spread:70}); navigator.vibrate&&navigator.vibrate([80,50,80,50,150]);
+      
+      if(r.status === "success") {
+        const now = new Date();
+        const ts = `${now.getFullYear()}/${now.getMonth()+1}/${now.getDate()} ${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`;
+        setUI({status: "已兌換", store: $('store').value, time: ts}); 
+        beep('win'); confetti({particleCount:80, spread:70}); navigator.vibrate&&navigator.vibrate([80,50,80,50,150]);
         $('undo-area').style.display='block'; $('btn-undo').disabled=false; $('btn-undo').innerHTML='⚡ 撤銷 (<span id="t-undo">5</span>s)';
         let left=5; uTimer=setInterval(()=>{ if(--left<=0) {clearInterval(uTimer); $('undo-area').style.display='none';} else $('t-undo').innerText=left; }, 1000);
-      } else { beep('err'); alert("核銷失敗，請重試！"); $('btn-redeem').disabled=false; $('btn-redeem').innerText="✔ 確認核銷優惠"; }
-    } catch(e) { beep('ok'); alert("網路延遲，請按查詢重整狀態！"); $('btn-redeem').disabled=false; $('btn-redeem').innerText="✔ 確認核銷優惠"; }
+      } else if (r.status === "error_already_redeemed") {
+        setUI({status: "已兌換", store: r.store, time: r.time});
+        beep('err');
+        alert(`⚠️ 注意！此券已於\n時間：${r.time}\n門市：${r.store}\n核銷完畢，不可重複兌換！`);
+      } else { 
+        beep('err'); alert("核銷失敗，請重試！"); $('btn-redeem').disabled=false; $('btn-redeem').innerText="✔ 確認核銷優惠"; 
+      }
+    } catch(e) { 
+      beep('ok'); alert("網路延遲，請按查詢重整狀態！"); $('btn-redeem').disabled=false; $('btn-redeem').innerText="✔ 確認核銷優惠"; 
+    }
   }
 
   async function undo() {
