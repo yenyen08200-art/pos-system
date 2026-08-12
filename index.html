@@ -11,61 +11,30 @@
     :root { --neon-b:#00f2fe; --neon-g:#00ff87; --bg-d:#0b0f19; --card-d:#131b2e; --txt-m:#f8fafc; --txt-s:#94a3b8; }
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg-d); color: var(--txt-m); margin: 0; padding: 16px; display: flex; justify-content: center; min-height: 100vh; }
     .container { width: 100%; max-width: 420px; }
-    
     .card { background: var(--card-d); padding: 24px 20px; border-radius: 20px; text-align: center; border: 1px solid rgba(255,255,255,0.08); margin-bottom: 15px; box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
     h2 { margin: 0 0 15px; color: #fff; font-weight: 900; letter-spacing: 1px; text-shadow: 0 0 15px rgba(0,242,254,0.4); }
-    
     select, input, button { width: 100%; padding: 16px; border-radius: 12px; font-size: 16px; font-weight: 900; outline: none; margin-bottom: 12px; box-sizing: border-box; transition: 0.3s; font-family: inherit; }
     select { background: rgba(11,15,25,0.8); color: white; border: 1px solid rgba(255,255,255,0.15); }
     input { background: rgba(11,15,25,0.9); border: 2px solid rgba(255,255,255,0.1); color: white; letter-spacing: 1px; }
     input:focus { border-color: var(--neon-b); box-shadow: 0 0 15px rgba(0,242,254,0.4); }
-    
     button { cursor: pointer; border: none; letter-spacing: 1px; }
-    button:disabled { background: #334155 !important; color: #64748b !important; box-shadow: none !important; animation: none !important; transform: none !important; }
-    
-    /* 🌟 全域科幻呼吸燈特效 */
-    @keyframes glow-green { 0%,100% {box-shadow: 0 0 10px rgba(0,255,135,0.4);} 50% {box-shadow: 0 0 25px rgba(0,255,135,0.8), 0 0 10px inset rgba(0,255,135,0.5);} }
-    @keyframes glow-blue { 0%,100% {box-shadow: 0 0 15px rgba(0,242,254,0.4);} 50% {box-shadow: 0 0 30px rgba(0,242,254,0.9), 0 0 15px inset rgba(0,242,254,0.5);} }
+    @keyframes glow-green { 0%,100% {box-shadow: 0 0 10px rgba(0,255,135,0.4);} 50% {box-shadow: 0 0 25px rgba(0,255,135,0.8);} }
+    @keyframes glow-blue { 0%,100% {box-shadow: 0 0 15px rgba(0,242,254,0.4);} 50% {box-shadow: 0 0 30px rgba(0,242,254,0.9);} }
     @keyframes glow-red { 0%,100% {box-shadow: 0 0 10px rgba(255,8,68,0.4);} 50% {box-shadow: 0 0 25px rgba(255,8,68,0.8);} }
-
     .btn-green { background: linear-gradient(135deg, #00b09b, #96c93d); color: #000; animation: glow-green 2s infinite ease-in-out; }
-    .btn-green:active { transform: scale(0.95); animation: none; box-shadow: 0 0 30px rgba(0,255,135,1); }
-    
     .btn-redeem { background: linear-gradient(135deg, var(--neon-b), #4facfe); color: #000; font-size: 18px; padding: 20px; animation: glow-blue 2s infinite ease-in-out; }
-    .btn-redeem:active { transform: scale(0.95); animation: none; box-shadow: 0 0 40px rgba(0,242,254,1); }
-    
     .btn-undo { background: linear-gradient(135deg, #ff0844, #ffb199); color: white; animation: glow-red 2s infinite ease-in-out; }
-    .btn-undo:active { transform: scale(0.95); }
-    
-    .btn-dark { background: #1e293b; color: white; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
-    .btn-dark:active { transform: scale(0.95); }
-    
+    .btn-dark { background: #1e293b; color: white; }
     .btn-next { background: transparent; color: var(--neon-b); border: 2px dashed var(--neon-b); padding: 14px; margin-top: 15px; }
-    .btn-next:active { background: rgba(0,242,254,0.1); transform: scale(0.95); }
-
     .info-row { display: flex; justify-content: center; margin-bottom: 12px; font-size: 16px; border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 8px;}
     .info-row strong { color: var(--txt-s); width: 100px; text-align: left; }
     .info-row span { color: white; width: 150px; text-align: left; font-size: 18px; font-weight: 900;}
-    #id-text { color: var(--neon-b); font-family: monospace; font-size: 22px !important; text-shadow: 0 0 10px rgba(0,242,254,0.5); }
-    #social-text { color: var(--neon-g); text-shadow: 0 0 10px rgba(0,255,135,0.4); }
-    #gift-text { color: #ffdb4d; font-size: 20px !important; text-shadow: 0 0 12px rgba(255,219,77,0.6); }
-    
+    #id-text { color: var(--neon-b); font-family: monospace; font-size: 22px !important; }
+    #social-text { color: var(--neon-g); }
+    #gift-text { color: #ffdb4d; font-size: 20px !important; }
     .status-box { padding: 16px; border-radius: 12px; font-weight: 900; font-size: 18px; margin: 20px 0; letter-spacing: 1px; }
-    .unclaimed { background: rgba(0,255,135,0.1); color: var(--neon-g); border: 2px solid var(--neon-g); box-shadow: 0 0 20px rgba(0,255,135,0.2); }
-    .claimed { background: rgba(255,8,68,0.1); color: #ff4b72; border: 2px solid #ff4b72; box-shadow: 0 0 20px rgba(255,8,68,0.2); }
-    
-    /* 搬磚動畫 */
-    #loading { display: none; margin: 25px 0; color: var(--neon-b); font-weight: 900; font-size: 16px; animation: glow-text 1.5s infinite; text-shadow: 0 0 15px rgba(0,242,254,0.5); text-align: center;}
-    @keyframes glow-text { 0%,100%{opacity:1;} 50%{opacity:0.5;} }
-    .chibi-svg { width: 130px; height: 100px; overflow: visible; margin-bottom: 10px; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.5)); }
-    .chibi-boy { animation: chibi-bounce 0.45s infinite alternate; transform-origin: center bottom; }
-    .brick-holding { animation: brick-wobble 0.45s infinite alternate ease-in-out; transform-origin: center; }
-    .drop-1 { animation: sweat-fly-right 0.9s infinite linear; }
-    .drop-2 { animation: sweat-fly-left 0.9s 0.45s infinite linear; }
-    @keyframes chibi-bounce { 0% { transform: translateY(0) scaleY(0.96); } 100% { transform: translateY(-12px) scaleY(1.04); } }
-    @keyframes brick-wobble { 0% { transform: rotate(-4deg); } 100% { transform: rotate(4deg) translateY(-3px); } }
-    @keyframes sweat-fly-right { 0% { transform: scale(0.4); opacity: 0; } 40% { opacity: 1; } 100% { transform: translate(18px,-18px) scale(1.3); opacity: 0; } }
-    @keyframes sweat-fly-left { 0% { transform: scale(0.4); opacity: 0; } 40% { opacity: 1; } 100% { transform: translate(-18px,-12px) scale(1.3); opacity: 0; } }
+    .unclaimed { background: rgba(0,255,135,0.1); color: var(--neon-g); border: 2px solid var(--neon-g); }
+    .claimed { background: rgba(255,8,68,0.1); color: #ff4b72; border: 2px solid #ff4b72; }
   </style>
 </head>
 <body>
@@ -86,28 +55,12 @@
       <button class="btn-green" id="btn-search" onclick="check()" style="width:90px;">查詢</button>
     </div>
     
-    <div id="reader-container" style="display:none; background:#000; border-radius:12px; overflow:hidden; border:2px solid var(--neon-b); margin-top:10px;"><div id="reader"></div><button onclick="stopScan()" style="background:var(--neon-red); color:#fff; border-radius:0; margin:0;">✖ 關閉</button></div>
-    
-    <div id="loading">
-      <svg viewBox="0 0 120 100" class="chibi-svg">
-        <path d="M 86 42 Q 93 36 91 50 Z" fill="#00f2fe" class="drop-1"/><path d="M 34 46 Q 27 40 29 54 Z" fill="#00ff87" class="drop-2"/>
-        <g class="chibi-boy">
-          <ellipse cx="50" cy="86" rx="6" ry="5" fill="#ffb199"/><ellipse cx="70" cy="86" rx="6" ry="5" fill="#ffb199"/>
-          <rect x="46" y="58" width="28" height="26" rx="8" fill="#1d4ed8"/><rect x="50" y="68" width="20" height="16" rx="4" fill="#0b0f19"/><circle cx="60" cy="42" r="23" fill="#ffe0d2"/>
-          <path d="M 45 40 Q 49 35 53 40" stroke="#0b0f19" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M 67 40 Q 71 35 75 40" stroke="#0b0f19" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M 56 50 Q 58.5 53 60 50 Q 61.5 53 64 50" stroke="#0b0f19" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-          <path d="M 35 38 A 25 25 0 0 1 85 38 Z" fill="#ffdb4d"/><rect x="33" y="36" width="54" height="6" rx="3" fill="#ffcc00"/><circle cx="60" cy="24" r="5" fill="#ff9900"/>
-          <g class="brick-holding">
-            <rect x="32" y="54" width="56" height="20" rx="4" fill="#ff0844" stroke="#ff8f9c" stroke-width="1.5"/><line x1="60" y1="54" x2="60" y2="74" stroke="#ffb199" stroke-width="1.5"/><line x1="32" y1="64" x2="88" y2="64" stroke="#ffb199" stroke-width="1.5"/><line x1="46" y1="54" x2="46" y2="64" stroke="#ffb199" stroke-width="1.5"/><line x1="74" y1="64" x2="74" y2="74" stroke="#ffb199" stroke-width="1.5"/><circle cx="42" cy="64" r="6" fill="#ffe0d2" stroke="#ffb199" stroke-width="1"/><circle cx="78" cy="64" r="6" fill="#ffe0d2" stroke="#ffb199" stroke-width="1"/>
-          </g>
-        </g>
-      </svg><br>🧱 正在努力搬磚中，請稍候... 💦
-    </div>
+    <div id="reader-container" style="display:none; background:#000; border-radius:12px; overflow:hidden; border:2px solid var(--neon-b); margin-top:10px;"><div id="reader"></div><button onclick="stopScan()" style="background:#ff0844; color:#fff; border-radius:0; margin:0;">✖ 關閉</button></div>
 
     <div id="content" style="display:none; background:rgba(0,0,0,0.2); padding:25px; border-radius:18px; margin-top:20px; border:1px solid rgba(0,242,254,0.2);">
       <div class="info-row"><strong>📱 兌換手機</strong><span id="id-text"></span></div>
       <div class="info-row"><strong>👤 顧客姓名</strong><span id="name-text"></span></div>
       <div class="info-row"><strong>🔗 社群帳號</strong><span id="social-text"></span></div> 
-      <!-- 🌟 新增：兌換餐點名稱欄位 -->
       <div class="info-row"><strong>🎁 兌換餐點</strong><span id="gift-text"></span></div> 
       <div id="status" class="status-box"></div>
       <div id="action-area"><button id="btn-redeem" class="btn-redeem" onclick="redeem()">✔ 確認核銷優惠</button></div>
@@ -117,39 +70,36 @@
   </div>
 </div>
 
-<script>
-  const API = "https://script.google.com/macros/s/AKfycbyteRoiXgX3h9dpU325M0mg--jNEy1ayfpRPGmXebEEn3Q2Tq37yGNmXiShcrOQqyCm/exec";
-  const evMap = { "嘉義門市":["父親節社群活動","中秋節活動"], "成功門市":["父親節社群活動","中秋節活動"], "安醫門市":["父親節社群活動","中秋節活動"], "三井門市":["父親節社群活動","中秋節活動"], "三多門市":["父親節社群活動","中秋節活動"], "台鋁門市":["父親節社群活動","中秋節活動"], "義享門市":["父親節社群活動","中秋節活動"], "左車門市":["父親節社群活動","中秋節活動"], "屏車門市":["父親節社群活動","中秋節活動"] };
-  
-  // 🍗 🌟 各活動對應餐點對照表（未來有新活動直接增加在這裡即可！）
-  const giftMap = {
-    "父親節社群活動": "香辣小炸雞(小)",
-    "中秋節活動": "蛋黃酥乙顆"
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+  // 🌟 這裡已經替換成你的專屬 Firebase 金鑰
+  const firebaseConfig = {
+    apiKey: "AIzaSyBINQuYtYZA8RLfwm51AfGLTYj1TX_UcFo",
+    authDomain: "texas-chick-event.firebaseapp.com",
+    projectId: "texas-chick-event",
+    storageBucket: "texas-chick-event.firebasestorage.app",
+    messagingSenderId: "281248037440",
+    appId: "1:281248037440:web:20c32ba4136ea7c57ffda5",
+    measurementId: "G-HZ6334WB3B"
   };
 
-  const $ = id => document.getElementById(id);
-  
-  // 🌟 將系統時間轉換為台灣可讀時間格式
-  function formatTime(t) {
-    if (!t) return "";
-    const d = new Date(t);
-    if (isNaN(d.getTime())) return t; 
-    const pad = n => n < 10 ? '0' + n : n;
-    return `${d.getFullYear()}/${pad(d.getMonth()+1)}/${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
-  }
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
 
+  const evMap = { "嘉義門市":["父親節社群活動","中秋節活動"], "成功門市":["父親節社群活動","中秋節活動"], "安醫門市":["父親節社群活動","中秋節活動"], "三井門市":["父親節社群活動","中秋節活動"], "三多門市":["父親節社群活動","中秋節活動"], "台鋁門市":["父親節社群活動","中秋節活動"], "義享門市":["父親節社群活動","中秋節活動"], "左車門市":["父親節社群活動","中秋節活動"], "屏車門市":["父親節社群活動","中秋節活動"] };
+  const giftMap = { "父親節社群活動": "香辣小炸雞(小)", "中秋節活動": "蛋黃酥乙顆" };
+  const $ = id => document.getElementById(id);
   let scanner, uTimer;
 
-  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  function beep(t) {
-    if(audioCtx.state === 'suspended') audioCtx.resume();
-    const o = audioCtx.createOscillator(), g = audioCtx.createGain(); o.connect(g); g.connect(audioCtx.destination);
-    if(t==='ok') { o.type='sine'; o.frequency.setValueAtTime(800, audioCtx.currentTime); o.frequency.exponentialRampToValueAtTime(1400, audioCtx.currentTime+0.1); }
-    if(t==='win') { o.type='triangle'; o.frequency.setValueAtTime(1046, audioCtx.currentTime); }
-    if(t==='err') { o.type='sawtooth'; o.frequency.setValueAtTime(250, audioCtx.currentTime); o.frequency.exponentialRampToValueAtTime(130, audioCtx.currentTime+0.2); }
-    g.gain.setValueAtTime(0.2, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime+(t==='err'?0.3:0.15));
-    o.start(); o.stop(audioCtx.currentTime+0.3); navigator.vibrate && navigator.vibrate(t==='err'?[100,50,100]:40);
-  }
+  window.loadAct = loadAct;
+  window.startScan = startScan;
+  window.stopScan = stopScan;
+  window.nextCust = nextCust;
+  window.check = check;
+  window.redeem = redeem;
+  window.undo = undo;
 
   window.onload = () => { if(localStorage.getItem('p_store')) { $('store').value = localStorage.getItem('p_store'); loadAct(); } };
   function loadAct() { const s = $('store').value; localStorage.setItem('p_store', s); $('act').innerHTML = s ? evMap[s].map(a=>`<option>${a}</option>`).join('') : '<option>選擇門市</option>'; }
@@ -157,86 +107,71 @@
   function startScan() {
     $('reader-container').style.display = 'block';
     if(!scanner) scanner = new Html5Qrcode("reader");
-    scanner.start({facingMode:"environment"}, {fps:10, qrbox:250}, txt => { $('phone').value=txt.replace(/\D/g,''); stopScan(); beep('ok'); check(); }, ()=>{}).catch(e=>alert("無相機權限"));
+    scanner.start({facingMode:"environment"}, {fps:10, qrbox:250}, txt => { $('phone').value=txt.replace(/\D/g,''); stopScan(); check(); }, ()=>{}).catch(e=>alert("無相機權限"));
   }
   function stopScan() { if(scanner && scanner.isScanning) scanner.stop(); $('reader-container').style.display='none'; }
-
-  function nextCust() { $('phone').value = ""; $('content').style.display = 'none'; $('phone').focus(); beep('ok'); }
+  function nextCust() { $('phone').value = ""; $('content').style.display = 'none'; $('phone').focus(); }
 
   async function check() {
     const ph=$('phone').value, st=$('store').value, ac=$('act').value;
     if(!st || !ac || !ph) return alert("⚠️ 資料未齊！");
-    
-    $('btn-search').disabled=true; $('btn-search').innerText="查詢中"; $('loading').style.display='block'; $('content').style.display='none';
-    try {
-      const r = await fetch(`${API}?action=check&id=${ph}&sheet=${ac}&t=${Date.now()}`).then(r=>r.json());
-      $('loading').style.display='none'; $('btn-search').disabled=false; $('btn-search').innerText="查詢";
-      if(!r.exists) {
-        if(r.found_in_other_sheet && confirm(`此號碼登記在【${r.actual_sheet}】！\n是否自動切換？`)) { $('act').value = r.actual_sheet; return check(); }
-        beep('err'); return alert("❌ 找不到號碼！");
-      }
-      beep('ok'); 
+
+    const docRef = doc(db, ac, ph);
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists()) {
+      const data = docSnap.data();
       $('content').style.display='block'; 
       $('id-text').innerText=ph; 
-      $('name-text').innerText=r.name;
-      $('social-text').innerText=r.social_id || "未提供"; 
-      
-      // 🌟 自動根據當前活動載入餐點名稱！
+      $('name-text').innerText=data.name;
+      $('social-text').innerText=data.social_id || "未提供"; 
       $('gift-text').innerText = giftMap[ac] || "專屬活動贈品";
-      
-      setUI(r); 
+      setUI(data); 
       $('next-area').style.display='block';
-    } catch(e) { beep('err'); alert("網路逾時！"); $('loading').style.display='none'; $('btn-search').disabled=false; $('btn-search').innerText="查詢"; }
+    } else {
+      alert("❌ 找不到號碼！");
+    }
   }
 
   function setUI(r) {
     if(r.status === "已兌換") {
       $('status').className="status-box claimed";
-      if (r.store && r.time) {
-        $('status').innerHTML = `❌ 券已失效 / 已領取<br><span style="font-size:15px; color:#ffb199; display:block; margin-top:10px; font-weight:700;">📌 於 ${r.store} 兌換<br>🕒 ${formatTime(r.time)}</span>`;
-      } else {
-        $('status').innerText="❌ 券已失效 / 已領取";
-      }
+      $('status').innerHTML = `❌ 券已失效 / 已領取<br><span style="font-size:15px; color:#ffb199; display:block; margin-top:10px; font-weight:700;">📌 於 ${r.store} 兌換<br>🕒 ${r.redeemTime}</span>`;
       $('action-area').style.display='none';
     } else {
       $('status').className="status-box unclaimed";
       $('status').innerText="✅ 有效優惠券";
       $('action-area').style.display='block';
       $('btn-redeem').disabled=false;
-      $('btn-redeem').innerText="✔ 確認核銷優惠";
     }
   }
 
   async function redeem() {
     if(!confirm("確定核銷？憑證將失效！")) return;
-    $('btn-redeem').disabled=true; $('btn-redeem').innerText="⏳ 寫入中...";
-    try {
-      const r = await fetch(`${API}?action=redeem&id=${$('id-text').innerText}&store=${$('store').value}&sheet=${$('act').value}&t=${Date.now()}`).then(r=>r.json());
-      
-      if(r.status === "success") {
-        setUI({status: "已兌換", store: $('store').value, time: Date.now()}); 
-        beep('win'); confetti({particleCount:80, spread:70}); navigator.vibrate&&navigator.vibrate([80,50,80,50,150]);
-        $('undo-area').style.display='block'; $('btn-undo').disabled=false; $('btn-undo').innerHTML='⚡ 撤銷 (<span id="t-undo">5</span>s)';
-        let left=5; uTimer=setInterval(()=>{ if(--left<=0) {clearInterval(uTimer); $('undo-area').style.display='none';} else $('t-undo').innerText=left; }, 1000);
-      } else if (r.status === "error_already_redeemed") {
-        setUI({status: "已兌換", store: r.store, time: r.time});
-        beep('err');
-        alert(`⚠️ 注意！此券已於\n時間：${formatTime(r.time)}\n門市：${r.store}\n核銷完畢，不可重複兌換！`);
-      } else { 
-        beep('err'); alert("核銷失敗，請重試！"); $('btn-redeem').disabled=false; $('btn-redeem').innerText="✔ 確認核銷優惠"; 
-      }
-    } catch(e) { 
-      beep('ok'); alert("網路延遲，請按查詢重整狀態！"); $('btn-redeem').disabled=false; $('btn-redeem').innerText="✔ 確認核銷優惠"; 
-    }
+    const ph = $('id-text').innerText, st = $('store').value, ac = $('act').value;
+    
+    const d = new Date();
+    const pad = n => n < 10 ? '0' + n : n;
+    const nowStr = `${d.getFullYear()}/${pad(d.getMonth()+1)}/${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+
+    const docRef = doc(db, ac, ph);
+    await updateDoc(docRef, { status: "已兌換", store: st, redeemTime: nowStr });
+
+    setUI({ status: "已兌換", store: st, redeemTime: nowStr });
+    confetti({particleCount:80, spread:70});
+
+    $('undo-area').style.display='block'; $('btn-undo').disabled=false; $('btn-undo').innerHTML='⚡ 撤銷 (<span id="t-undo">5</span>s)';
+    let left=5; uTimer=setInterval(()=>{ if(--left<=0) {clearInterval(uTimer); $('undo-area').style.display='none';} else $('t-undo').innerText=left; }, 1000);
   }
 
   async function undo() {
-    clearInterval(uTimer); $('btn-undo').disabled=true; $('btn-undo').innerText="⏳ 撤銷中...";
-    try {
-      const r = await fetch(`${API}?action=undo&id=${$('id-text').innerText}&sheet=${$('act').value}&t=${Date.now()}`).then(r=>r.json());
-      if(r.status==="success") { $('undo-area').style.display='none'; beep('ok'); alert("✅ 已撤銷！"); check(); }
-      else throw "err";
-    } catch(e) { beep('err'); alert("撤銷失敗，請重整！"); $('undo-area').style.display='none'; }
+    clearInterval(uTimer);
+    const ph = $('id-text').innerText, ac = $('act').value;
+    const docRef = doc(db, ac, ph);
+    await updateDoc(docRef, { status: "", store: "", redeemTime: "" });
+    $('undo-area').style.display='none';
+    alert("✅ 已撤銷！");
+    check();
   }
 </script>
 </body>
