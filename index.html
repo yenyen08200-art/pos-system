@@ -118,6 +118,17 @@
   const API = "https://script.google.com/macros/s/AKfycbyteRoiXgX3h9dpU325M0mg--jNEy1ayfpRPGmXebEEn3Q2Tq37yGNmXiShcrOQqyCm/exec";
   const evMap = { "嘉義門市":["父親節社群活動","中秋節活動"], "成功門市":["父親節社群活動","中秋節活動"], "安醫門市":["父親節社群活動","中秋節活動"], "三井門市":["父親節社群活動","中秋節活動"], "三多門市":["父親節社群活動","中秋節活動"], "台鋁門市":["父親節社群活動","中秋節活動"], "義享門市":["父親節社群活動","中秋節活動"], "左車門市":["父親節社群活動","中秋節活動"], "屏車門市":["父親節社群活動","中秋節活動"] };
   const $ = id => document.getElementById(id);
+  
+  // 🌟 將系統時間轉換為台灣可讀時間格式
+  function formatTime(t) {
+    if (!t) return "";
+    const d = new Date(t);
+    // 如果無法解析，就原樣輸出；否則轉換成 YYYY/MM/DD HH:MM:SS
+    if (isNaN(d.getTime())) return t; 
+    const pad = n => n < 10 ? '0' + n : n;
+    return `${d.getFullYear()}/${pad(d.getMonth()+1)}/${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+  }
+
   let scanner, uTimer;
 
   const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -169,7 +180,7 @@
     if(r.status === "已兌換") {
       $('status').className="status-box claimed";
       if (r.store && r.time) {
-        $('status').innerHTML = `❌ 券已失效 / 已領取<br><span style="font-size:15px; color:#ffb199; display:block; margin-top:10px; font-weight:700;">📌 於 ${r.store} 兌換<br>🕒 ${r.time}</span>`;
+        $('status').innerHTML = `❌ 券已失效 / 已領取<br><span style="font-size:15px; color:#ffb199; display:block; margin-top:10px; font-weight:700;">📌 於 ${r.store} 兌換<br>🕒 ${formatTime(r.time)}</span>`;
       } else {
         $('status').innerText="❌ 券已失效 / 已領取";
       }
@@ -199,7 +210,7 @@
       } else if (r.status === "error_already_redeemed") {
         setUI({status: "已兌換", store: r.store, time: r.time});
         beep('err');
-        alert(`⚠️ 注意！此券已於\n時間：${r.time}\n門市：${r.store}\n核銷完畢，不可重複兌換！`);
+        alert(`⚠️ 注意！此券已於\n時間：${formatTime(r.time)}\n門市：${r.store}\n核銷完畢，不可重複兌換！`);
       } else { 
         beep('err'); alert("核銷失敗，請重試！"); $('btn-redeem').disabled=false; $('btn-redeem').innerText="✔ 確認核銷優惠"; 
       }
