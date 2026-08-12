@@ -187,6 +187,10 @@
   async function register() {
     const act=$('activity').value, name=$('name').value.trim(), soc=$('social_id').value.trim(), ph=$('phone').value.replace(/\D/g,''), cd=$('secret_code').value.trim();
     if(!name || !soc || ph.length<8 || !cd) return alert("⚠️ 請完整填寫資料與密語！");
+    
+    // 👇 確保客人填的是 09 開頭的手機號碼！
+    if(!ph.startsWith('09')) return alert("⚠️ 手機號碼格式錯誤，請輸入 09 開頭的手機號碼！");
+
     hide('form-section'); show('loading'); vibe(40);
     try {
       const res = await fetch(`${API}?action=register&id=${ph}&name=${name}&social_id=${soc}&code=${cd}&sheet=${act}&t=${Date.now()}`).then(r=>r.json());
@@ -224,7 +228,7 @@
         if(res.status==="已兌換" && cached!=="已兌換") { localStorage.setItem(`p_${act}_status`,"已兌換"); setUI(true, true); }
         else if(res.status!=="已兌換" && cached==="已兌換") { localStorage.removeItem(`p_${act}_status`); setUI(false, true); }
       } catch(e){}
-    }, 10000);
+    }, 30000); // 👇 這裡已經從 10000 改成 30000，大幅減輕伺服器壓力！
   }
 
   function setUI(isRedeemed, alertUser=false) {
