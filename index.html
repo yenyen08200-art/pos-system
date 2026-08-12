@@ -201,9 +201,8 @@
       const r = await fetch(`${API}?action=redeem&id=${$('id-text').innerText}&store=${$('store').value}&sheet=${$('act').value}&t=${Date.now()}`).then(r=>r.json());
       
       if(r.status === "success") {
-        const now = new Date();
-        const ts = `${now.getFullYear()}/${now.getMonth()+1}/${now.getDate()} ${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`;
-        setUI({status: "已兌換", store: $('store').value, time: ts}); 
+        // 直接傳入 Date.now()，讓稍早寫好的 setUI 去呼叫 formatTime 幫我們完美排版
+        setUI({status: "已兌換", store: $('store').value, time: Date.now()}); 
         beep('win'); confetti({particleCount:80, spread:70}); navigator.vibrate&&navigator.vibrate([80,50,80,50,150]);
         $('undo-area').style.display='block'; $('btn-undo').disabled=false; $('btn-undo').innerHTML='⚡ 撤銷 (<span id="t-undo">5</span>s)';
         let left=5; uTimer=setInterval(()=>{ if(--left<=0) {clearInterval(uTimer); $('undo-area').style.display='none';} else $('t-undo').innerText=left; }, 1000);
