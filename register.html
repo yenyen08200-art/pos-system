@@ -228,7 +228,7 @@
         if(res.status==="已兌換" && cached!=="已兌換") { localStorage.setItem(`p_${act}_status`,"已兌換"); setUI(true, true); }
         else if(res.status!=="已兌換" && cached==="已兌換") { localStorage.removeItem(`p_${act}_status`); setUI(false, true); }
       } catch(e){}
-    }, 30000); // 👇 這裡已經從 10000 改成 30000，大幅減輕伺服器壓力！
+    }, 5000); // 👇 這裡已經從 10000 改成 30000，大幅減輕伺服器壓力！
   }
 
   function setUI(isRedeemed, alertUser=false) {
