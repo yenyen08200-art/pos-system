@@ -74,7 +74,6 @@
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
   import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-  // 🌟 這裡已經替換成你的專屬 Firebase 金鑰
   const firebaseConfig = {
     apiKey: "AIzaSyBINQuYtYZA8RLfwm51AfGLTYj1TX_UcFo",
     authDomain: "texas-chick-event.firebaseapp.com",
@@ -89,9 +88,40 @@
   const db = getFirestore(app);
 
   const evMap = { "嘉義門市":["父親節社群活動"], "成功門市":["父親節社群活動"], "安醫門市":["父親節社群活動"], "三井門市":["父親節社群活動"], "三多門市":["父親節社群活動"], "台鋁門市":["父親節社群活動"], "義享門市":["父親節社群活動"], "左車門市":["父親節社群活動"], "屏車門市":["父親節社群活動"] };
-  const giftMap = { "父親節社群活動": "香辣小炸雞(小)", "中秋節活動": "例蛋黃酥乙顆" };
+  const giftMap = { "父親節社群活動": "香辣小炸雞(小)", "中秋節活動": "蛋黃酥乙顆" }; 
   const $ = id => document.getElementById(id);
   let scanner, uTimer;
+
+  // 🔥 音效與震動模組 (支援網頁直接發出嗶聲)
+  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  function playAlert(type) {
+    // 震動處理 (支援 Android)
+    if (navigator.vibrate) {
+      if (type === 'scan') navigator.vibrate([150]); // 短震1次
+      if (type === 'error') navigator.vibrate([300]); // 長震1次
+      if (type === 'success') navigator.vibrate([100, 50, 100, 50, 200]); // 慶祝震動
+    }
+    // 音效處理 (支援所有設備，需互動後解鎖)
+    if(audioCtx.state === 'suspended') audioCtx.resume();
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain); gain.connect(audioCtx.destination);
+    
+    if(type === 'scan') { // 掃到號碼：清脆高音
+      osc.frequency.value = 1200; osc.type = 'sine';
+      gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+      osc.start(); osc.stop(audioCtx.currentTime + 0.1);
+    } else if(type === 'error') { // 錯誤/找不到：低音長音
+      osc.frequency.value = 300; osc.type = 'square';
+      gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+      osc.start(); osc.stop(audioCtx.currentTime + 0.3);
+    } else if(type === 'success') { // 核銷成功：升調
+      osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+      osc.frequency.linearRampToValueAtTime(1200, audioCtx.currentTime + 0.2);
+      osc.type = 'sine'; gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+      osc.start(); osc.stop(audioCtx.currentTime + 0.3);
+    }
+  }
 
   window.loadAct = loadAct;
   window.startScan = startScan;
@@ -107,38 +137,37 @@
   function startScan() {
     $('reader-container').style.display = 'block';
     if(!scanner) scanner = new Html5Qrcode("reader");
-    scanner.start({facingMode:"environment"}, {fps:10, qrbox:250}, txt => { $('phone').value=txt.replace(/\D/g,''); stopScan(); check(); }, ()=>{}).catch(e=>alert("無相機權限"));
+    scanner.start({facingMode:"environment"}, {fps:10, qrbox:250}, txt => { 
+      $('phone').value=txt.replace(/\D/g,''); 
+      stopScan(); 
+      check(); 
+    }, ()=>{}).catch(e=>alert("無相機權限"));
   }
   function stopScan() { if(scanner && scanner.isScanning) scanner.stop(); $('reader-container').style.display='none'; }
   function nextCust() { $('phone').value = ""; $('content').style.display = 'none'; $('phone').focus(); }
 
-// 🚀 升級版：秒速查詢與跨活動智慧跳轉
   async function check() {
     const ph=$('phone').value, st=$('store').value, ac=$('act').value;
     if(!st || !ac || !ph) return alert("⚠️ 資料未齊！");
 
-    // 1. 每次查詢前，先將畫面清空，避免殘留上一個客人的資料
     $('content').style.display = 'none';
 
     const docRef = doc(db, ac, ph);
     const docSnap = await getDoc(docRef);
 
     if (docSnap.exists()) {
-      // 情況 A：在當前選擇的活動中找到資料
       const data = docSnap.data();
+      playAlert('scan'); // 🔊 觸發查詢成功音效
       renderContent(data, ph, ac);
     } else {
-      // 情況 B：當前活動找不到，去搜查「其他活動」
       const otherActs = evMap[st].filter(a => a !== ac);
       let foundOtherData = null;
       let foundOtherActName = "";
 
-      // 尋找其他活動中，是否有「存在」且「未兌換」的紀錄
       for (const otherAct of otherActs) {
         const otherSnap = await getDoc(doc(db, otherAct, ph));
         if (otherSnap.exists()) {
           const data = otherSnap.data();
-          // 判斷：如果已經兌換過，就不理他；只有未兌換才跳通知
           if (data.status !== "已兌換") {
             foundOtherData = data;
             foundOtherActName = otherAct;
@@ -148,23 +177,21 @@
       }
 
       if (foundOtherData) {
-        // 情況 B-1：找到其他未兌換的活動
+        playAlert('error'); // 🔊 觸發錯誤/提示音效
         if (confirm(`❌ 找不到「${ac}」的紀錄。\n\n💡 但發現客人有未兌換的「${foundOtherActName}」，是否要自動切換過去？`)) {
-          $('act').value = foundOtherActName; // 自動幫店員切換下拉選單
+          $('act').value = foundOtherActName; 
           renderContent(foundOtherData, ph, foundOtherActName);
         } else {
-          // 店員按取消，畫面保持清空狀態，並清除輸入框
           $('phone').value = "";
         }
       } else {
-        // 情況 B-2：全部都找不到，或是其他活動都已經換過了
+        playAlert('error'); // 🔊 觸發錯誤/提示音效
         alert("❌ 查無號碼，或該客人的所有活動皆已兌換完畢！");
         $('phone').value = "";
       }
     }
   }
 
-  // 獨立出一個渲染畫面的函數，讓程式碼更乾淨
   function renderContent(data, ph, ac) {
     $('content').style.display='block';
     $('id-text').innerText=ph;
@@ -200,6 +227,7 @@
     await updateDoc(docRef, { status: "已兌換", store: st, redeemTime: nowStr });
 
     setUI({ status: "已兌換", store: st, redeemTime: nowStr });
+    playAlert('success'); // 🔊 觸發核銷成功歡呼音效
     confetti({particleCount:80, spread:70});
 
     $('undo-area').style.display='block'; $('btn-undo').disabled=false; $('btn-undo').innerHTML='⚡ 撤銷 (<span id="t-undo">5</span>s)';
@@ -216,5 +244,5 @@
     check();
   }
 </script>
-</body> 
-</html>   
+</body>
+</html>
