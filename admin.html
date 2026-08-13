@@ -9,7 +9,7 @@
   <style>
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f4f7f6; color: #333; padding: 0; margin: 0; min-height: 100vh;}
     
-    /* 🔒 密碼鎖畫面 (支援 Google 登入版) */
+    /* 🔒 密碼鎖畫面 */
     #login-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f4f7f6; display: flex; justify-content: center; align-items: center; z-index: 1000; }
     .login-card { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); text-align: center; width: 320px; }
     .login-card h2 { margin-top: 0; color: #2c3e50; }
@@ -17,8 +17,6 @@
     .login-card input:focus { border-color: #27ae60; }
     .login-card button { background: #2c3e50; color: white; border: none; padding: 14px; font-size: 16px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; transition: 0.2s; }
     .login-card button:hover { background: #1a252f; }
-    
-    /* Google 登入按鈕特殊樣式 */
     .btn-google { background: #fff !important; color: #7f8c8d !important; border: 2px solid #ecf0f1 !important; margin-top: 5px; }
     .btn-google:hover { background: #f8f9fa !important; border-color: #ddd !important; }
 
@@ -27,6 +25,10 @@
     .container { max-width: 1200px; margin: 0 auto; }
     .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
     h1 { margin: 0; color: #2c3e50; font-size: 24px; }
+    .header-title-area { display: flex; align-items: center; gap: 10px; }
+    .live-badge { background: #e74c3c; color: white; font-size: 12px; font-weight: bold; padding: 4px 8px; border-radius: 4px; animation: pulse 1.5s infinite; }
+    @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+
     .controls { display: flex; gap: 10px; }
     .controls select, .controls button { padding: 12px 18px; font-size: 16px; border-radius: 8px; border: 1px solid #ddd; outline: none; font-weight: bold; }
     .controls select { background: #f8f9fa; cursor: pointer; }
@@ -82,7 +84,6 @@
       
       <div style="margin: 15px 0; color: #bdc3c7; font-size: 13px;">── 或 ──</div>
       
-      <!-- 🔥 新增的 Google 登入按鈕 -->
       <button onclick="loginWithGoogle()" id="google-btn" class="btn-google">
         🌐 使用 Google 帳號登入
       </button>
@@ -93,7 +94,10 @@
   <div id="main-app">
     <div class="container">
       <div class="header">
-        <h1>📊 總部戰情室</h1>
+        <div class="header-title-area">
+          <h1>📊 總部戰情室</h1>
+          <span class="live-badge">LIVE 即時連線中</span>
+        </div>
         <div class="controls">
           <select id="act-select" onchange="fetchData()">
             <option value="父親節社群活動">父親節社群活動</option>
@@ -160,8 +164,8 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-    // 🔥 引入 Google 登入需要的套件
+    // 🔥 引入 onSnapshot 來做即時監聽
+    import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
     import { getAuth, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
     const firebaseConfig = {
@@ -177,99 +181,78 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const auth = getAuth(app); 
-    const googleProvider = new GoogleAuthProvider(); // 🔥 初始化 Google 登入供應器
+    const googleProvider = new GoogleAuthProvider(); 
     
     let allData = []; 
     let sortCol = 'timestamp'; 
     let sortAsc = false; 
     let storeChartInstance = null;
     let statusChartInstance = null;
+    let unsubscribeSnapshot = null; // 🔥 用來儲存並清除舊的監聽器
 
-   // 👑 總部管理員專屬「白名單」 (在這裡填入你允許登入的信箱)
+    // 👑 總部管理員專屬「白名單」
     const adminEmails = ["yenyen08200@gmail.com", "admin@gmail.com"];
 
-    // 🔒 監聽使用者的登入狀態 (加入白名單防護)
     onAuthStateChanged(auth, (user) => {
       if (user) {
-        // 檢查登入的人，他的信箱有沒有在白名單裡面？
         if (adminEmails.includes(user.email)) {
-          // 🟢 白名單核准：是老闆，放行！
           document.getElementById('login-screen').style.display = 'none';
           document.getElementById('main-app').style.display = 'block';
           fetchData(); 
         } else {
-          // 🔴 非白名單：路人甲，踢出去！
           alert(`❌ 權限不足！\n信箱 ${user.email} 非總部管理員。`);
-          signOut(auth); // 強制把他登出
+          signOut(auth); 
         }
       } else {
-        // 沒登入狀態，顯示登入畫面
         document.getElementById('main-app').style.display = 'none';
         document.getElementById('login-screen').style.display = 'flex';
+        // 登出時，停止即時監聽
+        if (unsubscribeSnapshot) unsubscribeSnapshot();
       }
     });
 
-    // 🔑 執行 Email 登入 (抓蟲升級版)
     window.login = function() {
       const email = document.getElementById('email').value;
       const pwd = document.getElementById('pwd').value;
       const btn = document.getElementById('login-btn');
-      
       if(!email || !pwd) return alert("⚠️ 請輸入帳號與密碼！");
-      
       btn.innerText = "驗證中...";
       btn.disabled = true;
-
       signInWithEmailAndPassword(auth, email, pwd)
-        .then(() => {
-          btn.innerText = "安全登入";
-          btn.disabled = false;
-        })
-        .catch((error) => {
-          console.error(error);
-          alert("❌ 帳號密碼登入失敗！\n系統錯誤代碼：" + error.code); 
-          btn.innerText = "安全登入";
-          btn.disabled = false;
-        });
+        .then(() => { btn.innerText = "安全登入"; btn.disabled = false; })
+        .catch((error) => { alert("❌ 帳號密碼登入失敗！"); btn.innerText = "安全登入"; btn.disabled = false; });
     };
 
-    // 🔑 執行 Google 登入 (新功能)
     window.loginWithGoogle = function() {
       const btn = document.getElementById('google-btn');
       btn.innerText = "驗證中...";
       btn.disabled = true;
-
       signInWithPopup(auth, googleProvider)
-        .then(() => {
-          btn.innerText = "🌐 使用 Google 帳號登入";
-          btn.disabled = false;
-        })
-        .catch((error) => {
-          console.error(error.code);
-          alert("❌ Google 登入失敗！");
-          btn.innerText = "🌐 使用 Google 帳號登入";
-          btn.disabled = false;
-        });
+        .then(() => { btn.innerText = "🌐 使用 Google 帳號登入"; btn.disabled = false; })
+        .catch((error) => { alert("❌ Google 登入失敗！"); btn.innerText = "🌐 使用 Google 帳號登入"; btn.disabled = false; });
     };
 
-    // 🚪 執行登出
     window.logout = function() {
       signOut(auth).then(() => {
         document.getElementById('email').value = "";
         document.getElementById('pwd').value = "";
-      }).catch((error) => {
-        alert("登出失敗：" + error.message);
       });
     };
 
-    // 📥 抓取資料
-    window.fetchData = async function() {
+    // 🔥 升級為全自動即時抓取資料
+    window.fetchData = function() {
       const act = document.getElementById('act-select').value;
       const tbody = document.getElementById('table-body');
-      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding: 40px; color: #7f8c8d;">資料載入中... 🚀</td></tr>';
       
-      try {
-        const querySnapshot = await getDocs(collection(db, act));
+      // 如果已經在監聽舊活動了，先停止監聽 (避免資料錯亂)
+      if (unsubscribeSnapshot) {
+        unsubscribeSnapshot();
+      }
+
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding: 40px; color: #7f8c8d;">📡 與資料庫即時連線中...</td></tr>';
+      
+      // onSnapshot 會在資料庫有任何變動時，自動執行裡面的程式
+      unsubscribeSnapshot = onSnapshot(collection(db, act), (querySnapshot) => {
         allData = [];
         let redeemedCount = 0;
         let storeStats = {}; 
@@ -292,13 +275,12 @@
 
         drawCharts(storeStats, redeemedCount, unredeemedCount);
         renderTable(); 
-      } catch (e) {
-        console.error(e);
-        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding: 40px; color: red;">讀取資料失敗，請確認網路連線。</td></tr>';
-      }
+      }, (error) => {
+        console.error("即時監聽失敗:", error);
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding: 40px; color: red;">連線中斷，請確認網路連線。</td></tr>';
+      });
     };
 
-    // 🎨 繪製圖表 (升級百分比顯示版)
     function drawCharts(storeStats, redeemed, unredeemed) {
       if (storeChartInstance) storeChartInstance.destroy();
       if (statusChartInstance) statusChartInstance.destroy();
@@ -307,7 +289,6 @@
       const storeLabels = sortedStores.map(s => s[0]);
       const storeData = sortedStores.map(s => s[1]);
 
-      // 1. 門市長條圖
       const ctxStore = document.getElementById('storeChart').getContext('2d');
       storeChartInstance = new Chart(ctxStore, {
         type: 'bar',
@@ -330,7 +311,6 @@
         }
       });
 
-      // 2. 兌換率甜甜圈圖 (加入 % 數計算)
       const ctxStatus = document.getElementById('statusChart').getContext('2d');
       statusChartInstance = new Chart(ctxStatus, {
         type: 'doughnut',
@@ -351,13 +331,10 @@
             legend: { position: 'bottom' },
             tooltip: {
               callbacks: {
-                // 滑鼠移上去時自動計算 % 數
                 label: function(context) {
                   let label = context.label || '';
                   let value = context.raw || 0;
-                  // 取得總數
                   let total = context.chart._metasets[context.datasetIndex].total;
-                  // 計算百分比 (四捨五入)
                   let percentage = total > 0 ? Math.round((value / total) * 100) + '%' : '0%';
                   return `${label}: ${value} 張 (${percentage})`;
                 }
@@ -368,7 +345,6 @@
       });
     }
 
-    // 🔼 設定排序
     window.setSort = function(col) {
       if (sortCol === col) sortAsc = !sortAsc;
       else { sortCol = col; sortAsc = true; }
@@ -380,7 +356,6 @@
       renderTable();
     };
 
-    // 🔍 畫出表格
     window.renderTable = function() {
       const tbody = document.getElementById('table-body');
       const searchTerm = document.getElementById('search-box').value.trim().toLowerCase();
@@ -418,7 +393,6 @@
       `).join('');
     };
 
-    // 📥 匯出 Excel
     window.exportExcel = function() {
       if (allData.length === 0) return alert('⚠️ 目前沒有資料可以匯出喔！');
       const act = document.getElementById('act-select').value;
