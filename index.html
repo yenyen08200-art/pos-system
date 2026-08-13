@@ -112,25 +112,67 @@
   function stopScan() { if(scanner && scanner.isScanning) scanner.stop(); $('reader-container').style.display='none'; }
   function nextCust() { $('phone').value = ""; $('content').style.display = 'none'; $('phone').focus(); }
 
+// 🚀 升級版：秒速查詢與跨活動智慧跳轉
   async function check() {
     const ph=$('phone').value, st=$('store').value, ac=$('act').value;
     if(!st || !ac || !ph) return alert("⚠️ 資料未齊！");
+
+    // 1. 每次查詢前，先將畫面清空，避免殘留上一個客人的資料
+    $('content').style.display = 'none';
 
     const docRef = doc(db, ac, ph);
     const docSnap = await getDoc(docRef);
 
     if (docSnap.exists()) {
+      // 情況 A：在當前選擇的活動中找到資料
       const data = docSnap.data();
-      $('content').style.display='block'; 
-      $('id-text').innerText=ph; 
-      $('name-text').innerText=data.name;
-      $('social-text').innerText=data.social_id || "未提供"; 
-      $('gift-text').innerText = giftMap[ac] || "專屬活動贈品";
-      setUI(data); 
-      $('next-area').style.display='block';
+      renderContent(data, ph, ac);
     } else {
-      alert("❌ 找不到號碼！");
+      // 情況 B：當前活動找不到，去搜查「其他活動」
+      const otherActs = evMap[st].filter(a => a !== ac);
+      let foundOtherData = null;
+      let foundOtherActName = "";
+
+      // 尋找其他活動中，是否有「存在」且「未兌換」的紀錄
+      for (const otherAct of otherActs) {
+        const otherSnap = await getDoc(doc(db, otherAct, ph));
+        if (otherSnap.exists()) {
+          const data = otherSnap.data();
+          // 判斷：如果已經兌換過，就不理他；只有未兌換才跳通知
+          if (data.status !== "已兌換") {
+            foundOtherData = data;
+            foundOtherActName = otherAct;
+            break; 
+          }
+        }
+      }
+
+      if (foundOtherData) {
+        // 情況 B-1：找到其他未兌換的活動
+        if (confirm(`❌ 找不到「${ac}」的紀錄。\n\n💡 但發現客人有未兌換的「${foundOtherActName}」，是否要自動切換過去？`)) {
+          $('act').value = foundOtherActName; // 自動幫店員切換下拉選單
+          renderContent(foundOtherData, ph, foundOtherActName);
+        } else {
+          // 店員按取消，畫面保持清空狀態，並清除輸入框
+          $('phone').value = "";
+        }
+      } else {
+        // 情況 B-2：全部都找不到，或是其他活動都已經換過了
+        alert("❌ 查無號碼，或該客人的所有活動皆已兌換完畢！");
+        $('phone').value = "";
+      }
     }
+  }
+
+  // 獨立出一個渲染畫面的函數，讓程式碼更乾淨
+  function renderContent(data, ph, ac) {
+    $('content').style.display='block';
+    $('id-text').innerText=ph;
+    $('name-text').innerText=data.name;
+    $('social-text').innerText=data.social_id || "未提供";
+    $('gift-text').innerText = giftMap[ac] || "專屬活動贈品";
+    setUI(data);
+    $('next-area').style.display='block';
   }
 
   function setUI(r) {
