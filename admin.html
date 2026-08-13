@@ -197,7 +197,7 @@
       }
     });
 
-    // 🔑 執行 Email 登入
+   // 🔑 執行 Email 登入 (抓蟲升級版)
     window.login = function() {
       const email = document.getElementById('email').value;
       const pwd = document.getElementById('pwd').value;
@@ -214,8 +214,9 @@
           btn.disabled = false;
         })
         .catch((error) => {
-          console.error(error.code);
-          alert("❌ 帳號或密碼錯誤！");
+          console.error(error);
+          // 🔥 讓系統印出真實的錯誤代碼，方便我們抓問題
+          alert("❌ 帳號密碼登入失敗！\n系統錯誤代碼：" + error.code); 
           btn.innerText = "安全登入";
           btn.disabled = false;
         });
