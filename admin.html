@@ -185,13 +185,25 @@
     let storeChartInstance = null;
     let statusChartInstance = null;
 
-    // 🔒 監聽使用者的登入狀態
+   // 👑 總部管理員專屬「白名單」 (在這裡填入你允許登入的信箱)
+    const adminEmails = ["yenyen08200@gmail.com", "admin@gmail.com"];
+
+    // 🔒 監聽使用者的登入狀態 (加入白名單防護)
     onAuthStateChanged(auth, (user) => {
       if (user) {
-        document.getElementById('login-screen').style.display = 'none';
-        document.getElementById('main-app').style.display = 'block';
-        fetchData(); 
+        // 檢查登入的人，他的信箱有沒有在白名單裡面？
+        if (adminEmails.includes(user.email)) {
+          // 🟢 白名單核准：是老闆，放行！
+          document.getElementById('login-screen').style.display = 'none';
+          document.getElementById('main-app').style.display = 'block';
+          fetchData(); 
+        } else {
+          // 🔴 非白名單：路人甲，踢出去！
+          alert(`❌ 權限不足！\n信箱 ${user.email} 非總部管理員。`);
+          signOut(auth); // 強制把他登出
+        }
       } else {
+        // 沒登入狀態，顯示登入畫面
         document.getElementById('main-app').style.display = 'none';
         document.getElementById('login-screen').style.display = 'flex';
       }
