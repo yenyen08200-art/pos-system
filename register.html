@@ -6,6 +6,8 @@
   <title>電子領卷系統</title>
   <link rel="apple-touch-icon" href="icon.png">
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+  <!-- 🔥 引入本地 QR-Code 生成套件 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
   <style>
     :root { --bg-parchment:#f4ece1; --paper-cream:#fdfbf7; --cherry-red:#e11d48; --ink-black:#27272a; --ink-muted:#71717a; --border-ink:1.5px solid #27272a; --paper-texture:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.06'/%3E%3C/svg%3E"); }
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg-parchment) var(--paper-texture); background-size: 150px; color: var(--ink-black); margin: 0; padding: 20px 16px; display: flex; justify-content: center; min-height: 95vh; }
@@ -32,7 +34,8 @@
     .notice { background: #fff1f2; border: 2px solid var(--cherry-red); color: var(--cherry-red); padding: 14px; border-radius: 6px; font-weight: 900; font-size: 15px; margin-bottom: 22px; box-shadow: 0 4px 15px rgba(225, 29, 72, 0.15); letter-spacing: 0.5px; }
     .stamp-badge { display: inline-block; border: 2.5px solid var(--cherry-red); color: var(--cherry-red); font-size: 14px; font-weight: 900; padding: 6px 16px; border-radius: 4px; transform: rotate(-3deg); margin-bottom: 20px; box-shadow: 0 0 10px rgba(225, 29, 72, 0.2); transition: 0.3s; }
     .qr-box { background: #fff; padding: 15px; border: var(--border-ink); border-radius: 8px; display: inline-block; margin: 15px 0 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
-    .qr-img { width: 190px; height: 190px; display: block; transition: opacity 0.3s ease; }
+    /* 🔥 這裡改成 canvas，讓 JS 自己畫圖 */
+    .qr-img { display: block; transition: opacity 0.3s ease; margin: 0 auto; }
     .highlight-text { font-size: 17px; font-weight: 900; border-bottom: 2px solid var(--ink-black); padding-bottom: 15px; display: block; margin: 0 0 25px; letter-spacing: 1px; transition: 0.3s;}
     .info-list { text-align: left; display: flex; flex-direction: column; gap: 14px; font-size: 16px; background: rgba(0,0,0,0.02); padding: 20px; border-radius: 8px; border: 1px dashed rgba(0,0,0,0.2); }
     .info-row { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dotted #a1a1aa; padding-bottom: 10px; }
@@ -71,7 +74,10 @@
       <div class="notice">📸 請立即「截圖」保存此兌換券！</div>
       <div class="stamp-badge" id="stamp">【 小編已核銷確認 · 專屬兌換券 】</div>
       <h2 style="font-size:22px; margin:0 0 10px; font-weight:900;">活動兌換卷</h2>
-      <div class="qr-box"><img id="qr" class="qr-img" src=""></div>
+      <div class="qr-box">
+        <!-- 🔥 替換成 canvas 標籤 -->
+        <canvas id="qr" class="qr-img"></canvas>
+      </div>
       <span class="highlight-text" id="hl-text">至德州小騎士門市出示核銷</span>
       <div class="info-list">
         <div class="info-row"><strong>🎯 兌換活動項目</strong> <span id="r-act" style="color:var(--cherry-red);"></span></div>
@@ -88,7 +94,6 @@
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
   import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-  // 🌟 這裡已經替換成你的專屬 Firebase 金鑰
   const firebaseConfig = {
     apiKey: "AIzaSyBINQuYtYZA8RLfwm51AfGLTYj1TX_UcFo",
     authDomain: "texas-chick-event.firebaseapp.com",
@@ -110,7 +115,6 @@
   window.switchAct = switchAct;
   window.register = register;
 
-  // 清除網址列多餘參數
   if (window.location.search) { window.history.replaceState({}, document.title, window.location.pathname); }
   window.onload = () => checkSaved(true);
 
@@ -135,7 +139,7 @@
     else { sel.value = Array.from(sel.options).find(o => o.value !== current).value; checkSaved(true); }
   }
 
-async function register() {
+  async function register() {
     const act=$('activity').value, name=$('name').value.trim(), soc=$('social_id').value.trim(), ph=$('phone').value.replace(/\D/g,''), cd=$('secret_code').value.trim();
     if(!name || !soc || ph.length<8 || !cd) return alert("⚠️ 請完整填寫資料與密語！");
     if(!ph.startsWith('09')) return alert("⚠️ 請輸入 09 開頭的手機號碼！");
@@ -145,24 +149,20 @@ async function register() {
     const docSnap = await getDoc(docRef);
 
     if(!docSnap.exists()) {
-      // 情況 A：這是一個全新的客人
       await setDoc(docRef, {
         name, social_id: soc, phone: ph, status: "", store: "", redeemTime: "", timestamp: new Date().toLocaleString()
       });
       confetti({particleCount:80, spread:70});
       
-      // 把他填寫的資料存進手機暫存並顯示
       localStorage.setItem(`p_${act}_phone`, ph);
       localStorage.setItem(`p_${act}_name`, name);
       localStorage.setItem(`p_${act}_social`, soc);
       renderTicket(act, name, soc, ph);
       
     } else {
-      // 情況 B：這個號碼已經領過了（客人用無痕或重填）
-      const data = docSnap.data(); // 🔥 把後台真實的資料抓出來！
+      const data = docSnap.data();
       alert("💡 此號碼已領取過活動憑證！為您載入原始資料。");
       
-      // 強制用後台的 data.name 和 data.social_id 來顯示，無視他剛剛亂填的
       localStorage.setItem(`p_${act}_phone`, ph);
       localStorage.setItem(`p_${act}_name`, data.name);
       localStorage.setItem(`p_${act}_social`, data.social_id);
@@ -174,7 +174,14 @@ async function register() {
     $('form-section').style.display = 'none';
     $('ticket-card').style.display = 'block';
     $('r-act').innerText=act; $('r-name').innerText=name; $('r-social').innerText=soc; $('r-phone').innerText=ph;
-    $('qr').src = `https://quickchart.io/qr?text=${ph}&size=250&dark=e11d48`;
+    
+    // 🔥 使用本地端立刻生成 QR Code (不再依賴外部網站)
+    new QRious({
+      element: $('qr'),
+      value: ph,
+      size: 200,
+      foreground: '#e11d48'
+    });
 
     if(unsubscribe) unsubscribe();
     unsubscribe = onSnapshot(doc(db, act, ph), (docSnap) => {
