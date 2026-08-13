@@ -129,16 +129,15 @@
   <!-- 🧭 左側導覽列 (對應設計圖左側深色設計) -->
   <div class="sidebar" id="sidebar-nav" style="display: none;">
     <div class="sidebar-brand">
-      <h2>Texas Chick</h2>
-      <p>總部戰情指揮中心</p>
+      <h2>德州小騎士</h2>
+      <p>後台控制室</p>
     </div>
     <div class="sidebar-menu">
-      <div class="sidebar-item active">📊 數據戰情儀表板</div>
+      <div class="sidebar-item active">📊 電子兌換卷儀表板</div>
       <div class="sidebar-item" onclick="alert('分店管理與權限設定功能開發中...')">🏪 門市管理中心</div>
       <div class="sidebar-item" onclick="alert('行銷推播與名單分析功能開發中...')">🎯 行銷資產管理</div>
     </div>
     <div style="font-size: 11px; opacity: 0.6; text-align: center;">
-      Theme inspired by AI UI/UX Concept
     </div>
   </div>
 
@@ -147,12 +146,13 @@
     <div class="container">
       <div class="header">
         <div class="header-title-area">
-          <h1>📊 營運即時戰情室 <span class="live-badge">LIVE 監控中</span></h1>
+          <h1>📊 電子兌換卷儀表板 <span class="live-badge">LIVE 監控中</span></h1>
         </div>
         <div class="controls">
           <select id="act-select" onchange="fetchData()">
             <option value="父親節社群活動">父親節社群活動</option>
             <option value="中秋節活動">中秋節活動</option>
+            <option value="中秋節活動">測試中...</option>
           </select>
           <button class="btn-expire" onclick="expireTickets()">🧹 結算過期</button>
           <button class="btn-export" onclick="exportExcel()">📥 匯出 Excel</button>
@@ -182,7 +182,7 @@
       <!-- 📈 圖表區 -->
       <div class="charts-wrapper">
         <div class="chart-box" style="flex: 2;">
-          <h3>🏆 各門市核銷戰力分佈</h3>
+          <h3>🏆 各門市核銷分佈</h3>
           <canvas id="storeChart" style="max-height: 240px;"></canvas>
         </div>
         <div class="chart-box" style="flex: 1;">
