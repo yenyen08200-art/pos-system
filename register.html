@@ -135,7 +135,7 @@
     else { sel.value = Array.from(sel.options).find(o => o.value !== current).value; checkSaved(true); }
   }
 
-  async function register() {
+async function register() {
     const act=$('activity').value, name=$('name').value.trim(), soc=$('social_id').value.trim(), ph=$('phone').value.replace(/\D/g,''), cd=$('secret_code').value.trim();
     if(!name || !soc || ph.length<8 || !cd) return alert("⚠️ 請完整填寫資料與密語！");
     if(!ph.startsWith('09')) return alert("⚠️ 請輸入 09 開頭的手機號碼！");
@@ -145,16 +145,29 @@
     const docSnap = await getDoc(docRef);
 
     if(!docSnap.exists()) {
+      // 情況 A：這是一個全新的客人
       await setDoc(docRef, {
         name, social_id: soc, phone: ph, status: "", store: "", redeemTime: "", timestamp: new Date().toLocaleString()
       });
       confetti({particleCount:80, spread:70});
+      
+      // 把他填寫的資料存進手機暫存並顯示
+      localStorage.setItem(`p_${act}_phone`, ph);
+      localStorage.setItem(`p_${act}_name`, name);
+      localStorage.setItem(`p_${act}_social`, soc);
+      renderTicket(act, name, soc, ph);
+      
+    } else {
+      // 情況 B：這個號碼已經領過了（客人用無痕或重填）
+      const data = docSnap.data(); // 🔥 把後台真實的資料抓出來！
+      alert("💡 此號碼已領取過活動憑證！為您載入原始資料。");
+      
+      // 強制用後台的 data.name 和 data.social_id 來顯示，無視他剛剛亂填的
+      localStorage.setItem(`p_${act}_phone`, ph);
+      localStorage.setItem(`p_${act}_name`, data.name);
+      localStorage.setItem(`p_${act}_social`, data.social_id);
+      renderTicket(act, data.name, data.social_id, ph);
     }
-
-    localStorage.setItem(`p_${act}_phone`, ph);
-    localStorage.setItem(`p_${act}_name`, name);
-    localStorage.setItem(`p_${act}_social`, soc);
-    renderTicket(act, name, soc, ph);
   }
 
   function renderTicket(act, name, soc, ph) {
