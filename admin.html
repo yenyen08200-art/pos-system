@@ -32,6 +32,11 @@
     .controls { display: flex; gap: 10px; }
     .controls select, .controls button { padding: 12px 18px; font-size: 16px; border-radius: 8px; border: 1px solid #ddd; outline: none; font-weight: bold; }
     .controls select { background: #f8f9fa; cursor: pointer; }
+    
+    /* 🧹 結算按鈕樣式 */
+    .btn-expire { background: #f39c12; color: white; border: none; cursor: pointer; transition: 0.2s; }
+    .btn-expire:hover { background: #d68910; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(243, 156, 18, 0.3); }
+
     .btn-export { background: #27ae60; color: white; border: none; cursor: pointer; transition: 0.2s; }
     .btn-export:hover { background: #219653; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(39, 174, 96, 0.3); }
     .btn-logout { background: #e74c3c; color: white; border: none; cursor: pointer; transition: 0.2s; }
@@ -41,6 +46,7 @@
     .stat-card { background: white; padding: 25px 20px; border-radius: 12px; flex: 1; min-width: 150px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-align: center; border-bottom: 4px solid #bdc3c7; }
     .stat-card.c-redeemed { border-bottom-color: #27ae60; }
     .stat-card.c-unredeemed { border-bottom-color: #e74c3c; }
+    .stat-card.c-expired { border-bottom-color: #95a5a6; } /* 灰色的過期卡片 */
     .stat-card h3 { margin: 0 0 10px; color: #7f8c8d; font-size: 14px; letter-spacing: 1px; }
     .stat-card .num { font-size: 34px; font-weight: 900; color: #2c3e50; }
 
@@ -67,6 +73,7 @@
     tr:hover { background: #fdfdfd; }
     .status-yes { color: #27ae60; font-weight: 900; background: rgba(39, 174, 96, 0.1); padding: 4px 10px; border-radius: 20px; font-size: 13px; }
     .status-no { color: #e74c3c; font-weight: 900; background: rgba(231, 76, 60, 0.1); padding: 4px 10px; border-radius: 20px; font-size: 13px; }
+    .status-expired { color: #7f8c8d; font-weight: 900; background: rgba(127, 140, 141, 0.1); padding: 4px 10px; border-radius: 20px; font-size: 13px; } /* 新增的過期標籤樣式 */
     .time-text { font-size: 13px; color: #95a5a6; }
   </style>
 </head>
@@ -103,6 +110,8 @@
             <option value="父親節社群活動">父親節社群活動</option>
             <option value="中秋節活動">中秋節活動</option>
           </select>
+          <!-- 🧹 新增的結算按鈕 -->
+          <button class="btn-expire" onclick="expireTickets()">🧹 結算過期</button>
           <button class="btn-export" onclick="exportExcel()">📥 匯出 Excel</button>
           <button class="btn-logout" onclick="logout()">登出</button>
         </div>
@@ -114,12 +123,17 @@
           <div class="num" id="total-count">0</div>
         </div>
         <div class="stat-card c-redeemed">
-          <h3>已核銷數量</h3>
+          <h3>已核銷</h3>
           <div class="num" id="redeemed-count" style="color:#27ae60;">0</div>
         </div>
         <div class="stat-card c-unredeemed">
-          <h3>未核銷數量</h3>
+          <h3>待核銷</h3>
           <div class="num" id="unredeemed-count" style="color:#e74c3c;">0</div>
+        </div>
+        <!-- ☠️ 新增的過期數據卡片 -->
+        <div class="stat-card c-expired">
+          <h3>已過期</h3>
+          <div class="num" id="expired-count" style="color:#7f8c8d;">0</div>
         </div>
       </div>
 
@@ -130,7 +144,7 @@
           <canvas id="storeChart" style="max-height: 250px;"></canvas>
         </div>
         <div class="chart-box" style="flex: 1;">
-          <h3>⚡ 總體兌換率</h3>
+          <h3>⚡ 總體兌換狀態</h3>
           <canvas id="statusChart" style="max-height: 250px;"></canvas>
         </div>
       </div>
@@ -164,8 +178,8 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    // 🔥 引入 onSnapshot 來做即時監聽
-    import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    // 🔥 引入 updateDoc 和 doc 來更新資料庫
+    import { getFirestore, collection, onSnapshot, getDocs, updateDoc, doc, query, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
     import { getAuth, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
     const firebaseConfig = {
@@ -188,7 +202,7 @@
     let sortAsc = false; 
     let storeChartInstance = null;
     let statusChartInstance = null;
-    let unsubscribeSnapshot = null; // 🔥 用來儲存並清除舊的監聽器
+    let unsubscribeSnapshot = null; 
 
     // 👑 總部管理員專屬「白名單」
     const adminEmails = ["yenyen08200@gmail.com", "admin@gmail.com"];
@@ -206,7 +220,6 @@
       } else {
         document.getElementById('main-app').style.display = 'none';
         document.getElementById('login-screen').style.display = 'flex';
-        // 登出時，停止即時監聽
         if (unsubscribeSnapshot) unsubscribeSnapshot();
       }
     });
@@ -239,41 +252,45 @@
       });
     };
 
-    // 🔥 升級為全自動即時抓取資料
+    // 📥 全自動即時抓取資料
     window.fetchData = function() {
       const act = document.getElementById('act-select').value;
       const tbody = document.getElementById('table-body');
       
-      // 如果已經在監聽舊活動了，先停止監聽 (避免資料錯亂)
-      if (unsubscribeSnapshot) {
-        unsubscribeSnapshot();
-      }
+      if (unsubscribeSnapshot) unsubscribeSnapshot();
 
       tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding: 40px; color: #7f8c8d;">📡 與資料庫即時連線中...</td></tr>';
       
-      // onSnapshot 會在資料庫有任何變動時，自動執行裡面的程式
       unsubscribeSnapshot = onSnapshot(collection(db, act), (querySnapshot) => {
         allData = [];
         let redeemedCount = 0;
+        let expiredCount = 0; // 🔥 記錄過期數量
         let storeStats = {}; 
 
         querySnapshot.forEach((doc) => {
           const d = doc.data();
+          // 把 document 的 ID 存起來，等一下更新狀態會用到
+          d.id = doc.id; 
           allData.push(d);
+          
           if (d.status === "已兌換") {
             redeemedCount++;
             if (d.store) {
               storeStats[d.store] = (storeStats[d.store] || 0) + 1;
             }
+          } else if (d.status === "已過期") {
+            expiredCount++; // 記錄過期票券
           }
         });
 
-        const unredeemedCount = allData.length - redeemedCount;
+        const unredeemedCount = allData.length - redeemedCount - expiredCount; // 待核銷 = 總數 - 已核銷 - 已過期
+        
         document.getElementById('total-count').innerText = allData.length;
         document.getElementById('redeemed-count').innerText = redeemedCount;
         document.getElementById('unredeemed-count').innerText = unredeemedCount;
+        document.getElementById('expired-count').innerText = expiredCount; // 更新畫面過期數字
 
-        drawCharts(storeStats, redeemedCount, unredeemedCount);
+        drawCharts(storeStats, redeemedCount, unredeemedCount, expiredCount); // 傳入過期數量畫圖
         renderTable(); 
       }, (error) => {
         console.error("即時監聽失敗:", error);
@@ -281,7 +298,62 @@
       });
     };
 
-    function drawCharts(storeStats, redeemed, unredeemed) {
+    // 🧹 總部大絕招：結算過期票券
+    window.expireTickets = async function() {
+      const act = document.getElementById('act-select').value;
+      
+      // 1. 雙重確認防呆機制
+      const confirmText = prompt(`⚠️ 警告：此操作不可逆！\n\n您確定要把「${act}」所有【未兌換】的票券強制設為【已過期】嗎？\n\n如果確定，請在下方輸入「結算」兩個字：`);
+      if (confirmText !== "結算") {
+        alert("操作已取消。");
+        return;
+      }
+
+      try {
+        const btn = document.querySelector('.btn-expire');
+        btn.innerText = "處理中...";
+        btn.disabled = true;
+
+        // 2. 找出所有狀態是「未兌換」的資料
+        const q = query(collection(db, act), where("status", "==", "未兌換"));
+        const querySnapshot = await getDocs(q);
+        
+        if (querySnapshot.empty) {
+          alert("🎉 目前沒有任何【未兌換】的票券可以結算！");
+        } else {
+          // 3. 迴圈把找到的資料，一筆一筆更新為「已過期」
+          let updated = 0;
+          const updatePromises = [];
+          
+          querySnapshot.forEach((docSnap) => {
+            const docRef = doc(db, act, docSnap.id);
+            const p = updateDoc(docRef, {
+              status: "已過期",
+              redeemTime: "活動結束，逾期未換"
+            });
+            updatePromises.push(p);
+            updated++;
+          });
+
+          // 等待所有更新完成
+          await Promise.all(updatePromises);
+          alert(`✅ 結算完成！\n總共將 ${updated} 筆票券設為已過期。`);
+        }
+
+        btn.innerText = "🧹 結算過期";
+        btn.disabled = false;
+
+      } catch (error) {
+        console.error("結算失敗:", error);
+        alert("結算失敗，請檢查網路連線或權限設定。");
+        document.querySelector('.btn-expire').innerText = "🧹 結算過期";
+        document.querySelector('.btn-expire').disabled = false;
+      }
+    };
+
+
+    // 🎨 繪製圖表 (加入第三色：灰色過期)
+    function drawCharts(storeStats, redeemed, unredeemed, expired) {
       if (storeChartInstance) storeChartInstance.destroy();
       if (statusChartInstance) statusChartInstance.destroy();
 
@@ -311,14 +383,15 @@
         }
       });
 
+      // 甜甜圈圖：加入已過期分類
       const ctxStatus = document.getElementById('statusChart').getContext('2d');
       statusChartInstance = new Chart(ctxStatus, {
         type: 'doughnut',
         data: {
-          labels: ['已核銷', '未核銷'],
+          labels: ['已核銷', '待核銷', '已過期'],
           datasets: [{
-            data: (redeemed === 0 && unredeemed === 0) ? [0, 1] : [redeemed, unredeemed],
-            backgroundColor: ['#27ae60', '#e74c3c'],
+            data: (redeemed === 0 && unredeemed === 0 && expired === 0) ? [0, 1, 0] : [redeemed, unredeemed, expired],
+            backgroundColor: ['#27ae60', '#e74c3c', '#95a5a6'], // 綠、紅、灰
             borderWidth: 0,
             hoverOffset: 4
           }]
@@ -380,17 +453,24 @@
         return;
       }
 
-      tbody.innerHTML = filteredData.map(d => `
-        <tr>
-          <td style="font-family:monospace; font-size:16px; font-weight:bold; color:#2c3e50;">${d.phone || ''}</td>
-          <td style="font-weight:bold;">${d.name || ''}</td>
-          <td style="color:#3498db;">${d.social_id || '未提供'}</td>
-          <td><span class="${d.status === '已兌換' ? 'status-yes' : 'status-no'}">${d.status || '未兌換'}</span></td>
-          <td style="font-weight:bold; color:#8e44ad;">${d.store || '-'}</td>
-          <td class="time-text">${d.redeemTime || '-'}</td>
-          <td class="time-text">${d.timestamp || '-'}</td>
-        </tr>
-      `).join('');
+      // 在表格渲染時，根據狀態給予不同的顏色標籤
+      tbody.innerHTML = filteredData.map(d => {
+        let statusBadge = `<span class="status-no">${d.status || '未兌換'}</span>`; // 預設紅色
+        if (d.status === '已兌換') statusBadge = `<span class="status-yes">已兌換</span>`; // 綠色
+        if (d.status === '已過期') statusBadge = `<span class="status-expired">已過期</span>`; // 灰色
+
+        return `
+          <tr>
+            <td style="font-family:monospace; font-size:16px; font-weight:bold; color:#2c3e50;">${d.phone || ''}</td>
+            <td style="font-weight:bold;">${d.name || ''}</td>
+            <td style="color:#3498db;">${d.social_id || '未提供'}</td>
+            <td>${statusBadge}</td>
+            <td style="font-weight:bold; color:#8e44ad;">${d.store || '-'}</td>
+            <td class="time-text">${d.redeemTime || '-'}</td>
+            <td class="time-text">${d.timestamp || '-'}</td>
+          </tr>
+        `;
+      }).join('');
     };
 
     window.exportExcel = function() {
