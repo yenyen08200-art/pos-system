@@ -4,21 +4,23 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>總部戰情室 - 數據報表</title>
-  <!-- 引入 SheetJS (匯出 Excel) -->
   <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
-  <!-- 🔥 引入 Chart.js (動態圖表) -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f4f7f6; color: #333; padding: 0; margin: 0; min-height: 100vh;}
     
-    /* 🔒 密碼鎖畫面 */
+    /* 🔒 密碼鎖畫面 (支援 Google 登入版) */
     #login-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f4f7f6; display: flex; justify-content: center; align-items: center; z-index: 1000; }
-    .login-card { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); text-align: center; }
+    .login-card { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); text-align: center; width: 320px; }
     .login-card h2 { margin-top: 0; color: #2c3e50; }
-    .login-card input { padding: 12px; font-size: 18px; border: 2px solid #ddd; border-radius: 8px; margin-bottom: 20px; text-align: center; outline: none; width: 200px; letter-spacing: 2px; }
+    .login-card input { width: 100%; padding: 14px; font-size: 16px; border: 2px solid #ddd; border-radius: 8px; margin-bottom: 15px; text-align: left; outline: none; box-sizing: border-box; }
     .login-card input:focus { border-color: #27ae60; }
-    .login-card button { background: #2c3e50; color: white; border: none; padding: 12px 24px; font-size: 16px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; transition: 0.2s; }
+    .login-card button { background: #2c3e50; color: white; border: none; padding: 14px; font-size: 16px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; transition: 0.2s; }
     .login-card button:hover { background: #1a252f; }
+    
+    /* Google 登入按鈕特殊樣式 */
+    .btn-google { background: #fff !important; color: #7f8c8d !important; border: 2px solid #ecf0f1 !important; margin-top: 5px; }
+    .btn-google:hover { background: #f8f9fa !important; border-color: #ddd !important; }
 
     /* 主要內容區 */
     #main-app { padding: 20px; display: none; }
@@ -30,6 +32,8 @@
     .controls select { background: #f8f9fa; cursor: pointer; }
     .btn-export { background: #27ae60; color: white; border: none; cursor: pointer; transition: 0.2s; }
     .btn-export:hover { background: #219653; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(39, 174, 96, 0.3); }
+    .btn-logout { background: #e74c3c; color: white; border: none; cursor: pointer; transition: 0.2s; }
+    .btn-logout:hover { background: #c0392b; }
     
     .dashboard { display: flex; gap: 20px; margin-bottom: 20px; flex-wrap: wrap; }
     .stat-card { background: white; padding: 25px 20px; border-radius: 12px; flex: 1; min-width: 150px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-align: center; border-bottom: 4px solid #bdc3c7; }
@@ -70,9 +74,18 @@
   <div id="login-screen">
     <div class="login-card">
       <h2>🔒 總部戰情室</h2>
-      <p style="color:#7f8c8d; margin-bottom: 20px; font-size: 14px;">請輸入授權密碼以檢視機密數據</p>
-      <input type="password" id="pwd" placeholder="輸入密碼" onkeypress="if(event.key==='Enter') login()">
-      <button onclick="login()">解鎖進入</button>
+      <p style="color:#7f8c8d; margin-bottom: 20px; font-size: 14px;">請登入最高權限帳號</p>
+      
+      <input type="email" id="email" placeholder="總部帳號 (Email)">
+      <input type="password" id="pwd" placeholder="登入密碼" onkeypress="if(event.key==='Enter') login()">
+      <button onclick="login()" id="login-btn">安全登入</button>
+      
+      <div style="margin: 15px 0; color: #bdc3c7; font-size: 13px;">── 或 ──</div>
+      
+      <!-- 🔥 新增的 Google 登入按鈕 -->
+      <button onclick="loginWithGoogle()" id="google-btn" class="btn-google">
+        🌐 使用 Google 帳號登入
+      </button>
     </div>
   </div>
 
@@ -87,6 +100,7 @@
             <option value="中秋節活動">中秋節活動</option>
           </select>
           <button class="btn-export" onclick="exportExcel()">📥 匯出 Excel</button>
+          <button class="btn-logout" onclick="logout()">登出</button>
         </div>
       </div>
 
@@ -147,6 +161,8 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    // 🔥 引入 Google 登入需要的套件
+    import { getAuth, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyBINQuYtYZA8RLfwm51AfGLTYj1TX_UcFo",
@@ -160,26 +176,78 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
+    const auth = getAuth(app); 
+    const googleProvider = new GoogleAuthProvider(); // 🔥 初始化 Google 登入供應器
     
     let allData = []; 
     let sortCol = 'timestamp'; 
     let sortAsc = false; 
-    
-    // 儲存圖表實例，以便更新時銷毀舊圖表
     let storeChartInstance = null;
     let statusChartInstance = null;
 
-    // 🔒 密碼驗證
-    window.login = function() {
-      const pwd = document.getElementById('pwd').value;
-      if (pwd === "860906") {
+    // 🔒 監聽使用者的登入狀態
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
         document.getElementById('login-screen').style.display = 'none';
         document.getElementById('main-app').style.display = 'block';
         fetchData(); 
       } else {
-        alert("❌ 密碼錯誤，拒絕存取！");
-        document.getElementById('pwd').value = "";
+        document.getElementById('main-app').style.display = 'none';
+        document.getElementById('login-screen').style.display = 'flex';
       }
+    });
+
+    // 🔑 執行 Email 登入
+    window.login = function() {
+      const email = document.getElementById('email').value;
+      const pwd = document.getElementById('pwd').value;
+      const btn = document.getElementById('login-btn');
+      
+      if(!email || !pwd) return alert("⚠️ 請輸入帳號與密碼！");
+      
+      btn.innerText = "驗證中...";
+      btn.disabled = true;
+
+      signInWithEmailAndPassword(auth, email, pwd)
+        .then(() => {
+          btn.innerText = "安全登入";
+          btn.disabled = false;
+        })
+        .catch((error) => {
+          console.error(error.code);
+          alert("❌ 帳號或密碼錯誤！");
+          btn.innerText = "安全登入";
+          btn.disabled = false;
+        });
+    };
+
+    // 🔑 執行 Google 登入 (新功能)
+    window.loginWithGoogle = function() {
+      const btn = document.getElementById('google-btn');
+      btn.innerText = "驗證中...";
+      btn.disabled = true;
+
+      signInWithPopup(auth, googleProvider)
+        .then(() => {
+          btn.innerText = "🌐 使用 Google 帳號登入";
+          btn.disabled = false;
+        })
+        .catch((error) => {
+          console.error(error.code);
+          alert("❌ Google 登入失敗！");
+          btn.innerText = "🌐 使用 Google 帳號登入";
+          btn.disabled = false;
+        });
+    };
+
+    // 🚪 執行登出
+    window.logout = function() {
+      signOut(auth).then(() => {
+        document.getElementById('email').value = "";
+        document.getElementById('pwd').value = "";
+      }).catch((error) => {
+        alert("登出失敗：" + error.message);
+      });
     };
 
     // 📥 抓取資料
@@ -206,16 +274,11 @@
         });
 
         const unredeemedCount = allData.length - redeemedCount;
-
-        // 更新上方三大數字
         document.getElementById('total-count').innerText = allData.length;
         document.getElementById('redeemed-count').innerText = redeemedCount;
         document.getElementById('unredeemed-count').innerText = unredeemedCount;
 
-        // 🎨 繪製圖表
         drawCharts(storeStats, redeemedCount, unredeemedCount);
-        
-        // 渲染表格
         renderTable(); 
       } catch (e) {
         console.error(e);
@@ -223,18 +286,15 @@
       }
     };
 
-    // 🎨 繪製圖表函數
+    // 🎨 繪製圖表
     function drawCharts(storeStats, redeemed, unredeemed) {
-      // 銷毀舊圖表（避免圖表重疊報錯）
       if (storeChartInstance) storeChartInstance.destroy();
       if (statusChartInstance) statusChartInstance.destroy();
 
-      // 準備門市資料並排序
       const sortedStores = Object.entries(storeStats).sort((a, b) => b[1] - a[1]);
       const storeLabels = sortedStores.map(s => s[0]);
       const storeData = sortedStores.map(s => s[1]);
 
-      // 1. 繪製門市長條圖
       const ctxStore = document.getElementById('storeChart').getContext('2d');
       storeChartInstance = new Chart(ctxStore, {
         type: 'bar',
@@ -257,7 +317,6 @@
         }
       });
 
-      // 2. 繪製兌換率甜甜圈圖
       const ctxStatus = document.getElementById('statusChart').getContext('2d');
       statusChartInstance = new Chart(ctxStatus, {
         type: 'doughnut',
