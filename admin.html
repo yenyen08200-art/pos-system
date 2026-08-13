@@ -4,11 +4,22 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>總部戰情室 - 數據報表</title>
-  <!-- 🔥 引入外部套件 SheetJS，用來一鍵生成 Excel 檔案 -->
   <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
   <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f4f7f6; color: #333; padding: 20px; margin: 0; }
-    .container { max-width: 1100px; margin: 0 auto; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f4f7f6; color: #333; padding: 0; margin: 0; height: 100vh;}
+    
+    /* 🔒 密碼鎖畫面 */
+    #login-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f4f7f6; display: flex; justify-content: center; align-items: center; z-index: 1000; }
+    .login-card { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); text-align: center; }
+    .login-card h2 { margin-top: 0; color: #2c3e50; }
+    .login-card input { padding: 12px; font-size: 18px; border: 2px solid #ddd; border-radius: 8px; margin-bottom: 20px; text-align: center; outline: none; width: 200px; letter-spacing: 2px; }
+    .login-card input:focus { border-color: #27ae60; }
+    .login-card button { background: #2c3e50; color: white; border: none; padding: 12px 24px; font-size: 16px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; transition: 0.2s; }
+    .login-card button:hover { background: #1a252f; }
+
+    /* 主要內容區 */
+    #main-app { padding: 20px; display: none; }
+    .container { max-width: 1200px; margin: 0 auto; }
     .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
     h1 { margin: 0; color: #2c3e50; font-size: 24px; }
     .controls { display: flex; gap: 10px; }
@@ -16,16 +27,35 @@
     .controls select { background: #f8f9fa; cursor: pointer; }
     .btn-export { background: #27ae60; color: white; border: none; cursor: pointer; transition: 0.2s; }
     .btn-export:hover { background: #219653; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(39, 174, 96, 0.3); }
-    .dashboard { display: flex; gap: 20px; margin-bottom: 25px; flex-wrap: wrap; }
-    .stat-card { background: white; padding: 25px 20px; border-radius: 12px; flex: 1; min-width: 200px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-align: center; border-bottom: 4px solid #bdc3c7; }
+    
+    .dashboard { display: flex; gap: 20px; margin-bottom: 20px; flex-wrap: wrap; }
+    .stat-card { background: white; padding: 25px 20px; border-radius: 12px; flex: 1; min-width: 150px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-align: center; border-bottom: 4px solid #bdc3c7; }
     .stat-card.c-redeemed { border-bottom-color: #27ae60; }
     .stat-card.c-unredeemed { border-bottom-color: #e74c3c; }
-    .stat-card h3 { margin: 0 0 10px; color: #7f8c8d; font-size: 15px; letter-spacing: 1px; }
-    .stat-card .num { font-size: 38px; font-weight: 900; color: #2c3e50; }
-    .table-container { background: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); overflow-x: auto; }
-    table { width: 100%; border-collapse: collapse; min-width: 800px; }
+    .stat-card h3 { margin: 0 0 10px; color: #7f8c8d; font-size: 14px; letter-spacing: 1px; }
+    .stat-card .num { font-size: 34px; font-weight: 900; color: #2c3e50; }
+
+    /* 📊 門市排行榜 */
+    .leaderboard-container { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; background: white; padding: 15px 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); align-items: center; }
+    .leaderboard-title { font-weight: 900; color: #2c3e50; margin-right: 10px; display: flex; align-items: center; gap: 5px; }
+    .store-badge { background: #f8f9fa; padding: 8px 15px; border-radius: 8px; font-weight: bold; color: #7f8c8d; border-left: 4px solid #8e44ad; font-size: 14px; }
+    .store-badge span { color: #8e44ad; font-size: 16px; margin-left: 5px; font-weight: 900; }
+
+    /* 表格控制與搜尋 */
+    .table-toolbar { display: flex; justify-content: space-between; margin-bottom: 15px; align-items: center; }
+    .search-box { padding: 12px 15px; border-radius: 8px; border: 1px solid #ddd; font-size: 15px; width: 300px; outline: none; transition: 0.3s; }
+    .search-box:focus { border-color: #3498db; box-shadow: 0 0 8px rgba(52, 152, 219, 0.2); }
+    
+    .table-container { background: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); overflow-x: auto; height: 60vh; }
+    table { width: 100%; border-collapse: collapse; min-width: 850px; }
     th, td { padding: 16px 20px; text-align: left; border-bottom: 1px solid #f1f2f6; }
-    th { background: #f8f9fa; color: #2c3e50; font-weight: 800; font-size: 15px; position: sticky; top: 0; }
+    
+    /* 🔼 標題自動排序 */
+    th { background: #f8f9fa; color: #2c3e50; font-weight: 800; font-size: 15px; position: sticky; top: 0; cursor: pointer; user-select: none; transition: 0.2s; white-space: nowrap; }
+    th:hover { background: #e9ecef; }
+    th .sort-icon { color: #bdc3c7; margin-left: 5px; font-size: 12px; }
+    th.active .sort-icon { color: #3498db; }
+    
     tr:hover { background: #fdfdfd; }
     .status-yes { color: #27ae60; font-weight: 900; background: rgba(39, 174, 96, 0.1); padding: 4px 10px; border-radius: 20px; font-size: 13px; }
     .status-no { color: #e74c3c; font-weight: 900; background: rgba(231, 76, 60, 0.1); padding: 4px 10px; border-radius: 20px; font-size: 13px; }
@@ -33,51 +63,78 @@
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="header">
-      <h1>📊 總部戰情室</h1>
-      <div class="controls">
-        <select id="act-select" onchange="loadData()">
-          <option value="父親節社群活動">父親節社群活動</option>
-          <option value="中秋節活動">中秋節活動</option>
-          <!-- 💡 如果以後有新活動，直接在這裡加 <option> 即可 -->
-        </select>
-        <button class="btn-export" onclick="exportExcel()">📥 匯出 Excel</button>
-      </div>
-    </div>
 
-    <div class="dashboard">
-      <div class="stat-card">
-        <h3>總發行張數</h3>
-        <div class="num" id="total-count">0</div>
-      </div>
-      <div class="stat-card c-redeemed">
-        <h3>已核銷數量</h3>
-        <div class="num" id="redeemed-count" style="color:#27ae60;">0</div>
-      </div>
-      <div class="stat-card c-unredeemed">
-        <h3>未核銷數量</h3>
-        <div class="num" id="unredeemed-count" style="color:#e74c3c;">0</div>
-      </div>
+  <!-- 🔒 密碼鎖畫面 -->
+  <div id="login-screen">
+    <div class="login-card">
+      <h2>🔒 總部戰情室</h2>
+      <p style="color:#7f8c8d; margin-bottom: 20px; font-size: 14px;">請輸入授權密碼以檢視機密數據</p>
+      <input type="password" id="pwd" placeholder="輸入密碼" onkeypress="if(event.key==='Enter') login()">
+      <button onclick="login()">解鎖進入</button>
     </div>
+  </div>
 
-    <div class="table-container">
-      <table id="data-table">
-        <thead>
-          <tr>
-            <th>📱 手機號碼</th>
-            <th>👤 顧客姓名</th>
-            <th>🔗 社群帳號</th>
-            <th>⚡ 狀態</th>
-            <th>📌 核銷門市</th>
-            <th>🕒 核銷時間</th>
-            <th>📅 領券時間</th>
-          </tr>
-        </thead>
-        <tbody id="table-body">
-          <tr><td colspan="7" style="text-align:center; padding: 40px; color: #7f8c8d;">資料載入中... 🚀</td></tr>
-        </tbody>
-      </table>
+  <!-- 主要內容區 -->
+  <div id="main-app">
+    <div class="container">
+      <div class="header">
+        <h1>📊 總部戰情室</h1>
+        <div class="controls">
+          <select id="act-select" onchange="fetchData()">
+            <option value="父親節社群活動">父親節社群活動</option>
+            <option value="中秋節活動">中秋節活動</option>
+          </select>
+          <button class="btn-export" onclick="exportExcel()">📥 匯出 Excel</button>
+        </div>
+      </div>
+
+      <div class="dashboard">
+        <div class="stat-card">
+          <h3>總發行張數</h3>
+          <div class="num" id="total-count">0</div>
+        </div>
+        <div class="stat-card c-redeemed">
+          <h3>已核銷數量</h3>
+          <div class="num" id="redeemed-count" style="color:#27ae60;">0</div>
+        </div>
+        <div class="stat-card c-unredeemed">
+          <h3>未核銷數量</h3>
+          <div class="num" id="unredeemed-count" style="color:#e74c3c;">0</div>
+        </div>
+      </div>
+
+      <!-- 📊 門市排行榜 -->
+      <div class="leaderboard-container">
+        <div class="leaderboard-title">🏆 門市核銷戰績：</div>
+        <div id="store-leaderboard" style="display: flex; gap: 10px; flex-wrap: wrap;">
+          <span style="color:#95a5a6; font-size: 14px;">尚無核銷紀錄</span>
+        </div>
+      </div>
+
+      <!-- 搜尋與表格區 -->
+      <div class="table-toolbar">
+        <input type="text" id="search-box" class="search-box" placeholder="🔍 輸入手機號碼或姓名快速搜尋..." onkeyup="renderTable()">
+        <span style="color:#95a5a6; font-size: 13px;" id="result-count"></span>
+      </div>
+
+      <div class="table-container">
+        <table id="data-table">
+          <thead>
+            <tr>
+              <th onclick="setSort('phone')">📱 手機號碼 <span class="sort-icon" id="sort-phone">▼</span></th>
+              <th onclick="setSort('name')">👤 顧客姓名 <span class="sort-icon" id="sort-name">▼</span></th>
+              <th onclick="setSort('social_id')">🔗 社群帳號 <span class="sort-icon" id="sort-social_id">▼</span></th>
+              <th onclick="setSort('status')">⚡ 狀態 <span class="sort-icon" id="sort-status">▼</span></th>
+              <th onclick="setSort('store')">📌 核銷門市 <span class="sort-icon" id="sort-store">▼</span></th>
+              <th onclick="setSort('redeemTime')">🕒 核銷時間 <span class="sort-icon" id="sort-redeemTime">▼</span></th>
+              <th onclick="setSort('timestamp')" class="active">📅 領券時間 <span class="sort-icon" id="sort-timestamp">▼</span></th>
+            </tr>
+          </thead>
+          <tbody id="table-body">
+            <!-- 資料會塞在這裡 -->
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 
@@ -85,7 +142,6 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    // 🌟 你的專屬 Firebase 金鑰
     const firebaseConfig = {
       apiKey: "AIzaSyBINQuYtYZA8RLfwm51AfGLTYj1TX_UcFo",
       authDomain: "texas-chick-event.firebaseapp.com",
@@ -99,65 +155,134 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     
-    let currentData = [];
+    let allData = []; // 儲存從資料庫抓下來的所有原始資料
+    let sortCol = 'timestamp'; // 預設排序欄位
+    let sortAsc = false; // 預設由新到舊
 
-    // 抓取資料庫並顯示在網頁上
-    window.loadData = async function() {
+    // 🔒 密碼驗證邏疑
+    window.login = function() {
+      const pwd = document.getElementById('pwd').value;
+      if (pwd === "860906") {
+        document.getElementById('login-screen').style.display = 'none';
+        document.getElementById('main-app').style.display = 'block';
+        fetchData(); // 密碼正確才去抓資料
+      } else {
+        alert("❌ 密碼錯誤，拒絕存取！");
+        document.getElementById('pwd').value = "";
+      }
+    };
+
+    // 📥 去 Firebase 抓資料
+    window.fetchData = async function() {
       const act = document.getElementById('act-select').value;
       const tbody = document.getElementById('table-body');
       tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding: 40px; color: #7f8c8d;">資料載入中... 🚀</td></tr>';
       
       try {
         const querySnapshot = await getDocs(collection(db, act));
-        currentData = [];
+        allData = [];
         let redeemedCount = 0;
+        let storeStats = {}; // 用來算門市排行榜
 
         querySnapshot.forEach((doc) => {
           const d = doc.data();
-          currentData.push(d);
-          if (d.status === "已兌換") redeemedCount++;
+          allData.push(d);
+          if (d.status === "已兌換") {
+            redeemedCount++;
+            if (d.store) {
+              storeStats[d.store] = (storeStats[d.store] || 0) + 1;
+            }
+          }
         });
 
-        // 1. 更新上方儀表板數字
-        document.getElementById('total-count').innerText = currentData.length;
+        // 更新上方三大數字
+        document.getElementById('total-count').innerText = allData.length;
         document.getElementById('redeemed-count').innerText = redeemedCount;
-        document.getElementById('unredeemed-count').innerText = currentData.length - redeemedCount;
+        document.getElementById('unredeemed-count').innerText = allData.length - redeemedCount;
 
-        // 2. 渲染下方表格
-        if (currentData.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding: 40px; color: #e74c3c; font-weight: bold;">此活動目前尚無任何領券紀錄喔！</td></tr>';
-          return;
+        // 🏆 渲染門市排行榜
+        const leaderboardDiv = document.getElementById('store-leaderboard');
+        if (Object.keys(storeStats).length > 0) {
+          // 把門市依照兌換數量從多到少排序
+          const sortedStores = Object.entries(storeStats).sort((a, b) => b[1] - a[1]);
+          leaderboardDiv.innerHTML = sortedStores.map(s => 
+            `<div class="store-badge">${s[0]}<span>${s[1]}</span></div>`
+          ).join('');
+        } else {
+          leaderboardDiv.innerHTML = '<span style="color:#95a5a6; font-size: 14px;">目前尚無核銷紀錄</span>';
         }
 
-        // 將資料依照領券時間排序 (最新的在最上面)
-        currentData.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-
-        tbody.innerHTML = currentData.map(d => `
-          <tr>
-            <td style="font-family:monospace; font-size:16px; font-weight:bold; color:#2c3e50;">${d.phone || ''}</td>
-            <td style="font-weight:bold;">${d.name || ''}</td>
-            <td style="color:#3498db;">${d.social_id || '未提供'}</td>
-            <td><span class="${d.status === '已兌換' ? 'status-yes' : 'status-no'}">${d.status || '未兌換'}</span></td>
-            <td style="font-weight:bold; color:#8e44ad;">${d.store || '-'}</td>
-            <td class="time-text">${d.redeemTime || '-'}</td>
-            <td class="time-text">${d.timestamp || '-'}</td>
-          </tr>
-        `).join('');
-
+        renderTable(); // 抓完資料後，呼叫畫表格的函數
       } catch (e) {
         console.error(e);
-        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding: 40px; color: red;">讀取資料失敗，請重新整理網頁。</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding: 40px; color: red;">讀取資料失敗，請確認網路連線。</td></tr>';
       }
     };
 
-    // 匯出成 Excel 檔案的功能
+    // 🔼 設定排序欄位
+    window.setSort = function(col) {
+      if (sortCol === col) {
+        sortAsc = !sortAsc; // 如果點同一個欄位，就切換正反序
+      } else {
+        sortCol = col;
+        sortAsc = true; // 如果點新欄位，預設為正序
+      }
+      
+      // 更新箭頭圖示
+      document.querySelectorAll('th').forEach(th => th.classList.remove('active'));
+      document.querySelectorAll('.sort-icon').forEach(icon => icon.innerText = '▼');
+      event.currentTarget.classList.add('active');
+      document.getElementById(`sort-${col}`).innerText = sortAsc ? '▲' : '▼';
+
+      renderTable();
+    };
+
+    // 🔍 畫出表格（包含搜尋過濾與排序邏輯）
+    window.renderTable = function() {
+      const tbody = document.getElementById('table-body');
+      const searchTerm = document.getElementById('search-box').value.trim().toLowerCase();
+
+      // 1. 搜尋過濾
+      let filteredData = allData.filter(d => {
+        return (d.phone || '').toLowerCase().includes(searchTerm) ||
+               (d.name || '').toLowerCase().includes(searchTerm);
+      });
+
+      // 2. 排序
+      filteredData.sort((a, b) => {
+        let valA = a[sortCol] || '';
+        let valB = b[sortCol] || '';
+        if (valA < valB) return sortAsc ? -1 : 1;
+        if (valA > valB) return sortAsc ? 1 : -1;
+        return 0;
+      });
+
+      document.getElementById('result-count').innerText = `顯示 ${filteredData.length} 筆結果`;
+
+      // 3. 渲染
+      if (filteredData.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding: 40px; color: #e74c3c; font-weight: bold;">找不到符合的資料 🥲</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = filteredData.map(d => `
+        <tr>
+          <td style="font-family:monospace; font-size:16px; font-weight:bold; color:#2c3e50;">${d.phone || ''}</td>
+          <td style="font-weight:bold;">${d.name || ''}</td>
+          <td style="color:#3498db;">${d.social_id || '未提供'}</td>
+          <td><span class="${d.status === '已兌換' ? 'status-yes' : 'status-no'}">${d.status || '未兌換'}</span></td>
+          <td style="font-weight:bold; color:#8e44ad;">${d.store || '-'}</td>
+          <td class="time-text">${d.redeemTime || '-'}</td>
+          <td class="time-text">${d.timestamp || '-'}</td>
+        </tr>
+      `).join('');
+    };
+
+    // 📥 匯出 Excel
     window.exportExcel = function() {
-      if (currentData.length === 0) return alert('⚠️ 目前沒有資料可以匯出喔！');
-      
+      if (allData.length === 0) return alert('⚠️ 目前沒有資料可以匯出喔！');
       const act = document.getElementById('act-select').value;
-      
-      // 整理要匯出的中文字段
-      const exportArr = currentData.map(d => ({
+      const exportArr = allData.map(d => ({
         "手機號碼": d.phone,
         "顧客姓名": d.name,
         "社群帳號": d.social_id || '未提供',
@@ -166,18 +291,12 @@
         "核銷時間": d.redeemTime || '',
         "領券時間": d.timestamp || ''
       }));
-
-      // 呼叫 SheetJS 套件打包下載
       const ws = XLSX.utils.json_to_sheet(exportArr);
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, "兌換名單");
-      
       const dateStr = new Date().toISOString().slice(0,10);
       XLSX.writeFile(wb, `${act}_兌換報表_${dateStr}.xlsx`);
     };
-
-    // 網頁一打開就自動載入預設活動的資料
-    window.onload = loadData;
   </script>
 </body>
 </html>
