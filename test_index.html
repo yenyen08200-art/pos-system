@@ -1,267 +1,500 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-  <title>內部測試區</title>
-  <link rel="apple-touch-icon" href="icon.png">
-  <script src="https://unpkg.com/html5-qrcode"></script>
-  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
-  <style>
-    /* 🎨 視覺風格基調：同步戰情室的暖色復古大地色系 */
-    :root {
-      --bg-cream: #f5f2eb;       /* 整體乳黃色背景 */
-      --sidebar-bg: #8c7a5b;     /* 主視覺：深橄欖棕 */
-      --card-bg: #ffffff;        /* 純白卡片背景 */
-      --text-main: #3e382b;      /* 深咖啡色主文字 */
-      --text-sub: #8c8270;       /* 柔和副文字 */
-      --accent-orange: #d96b43;  /* 炸雞橘紅 (用於主要行動) */
-      --accent-green: #6b8c6e;   /* 柔和植栽綠 (用於成功狀態) */
-      --accent-gray: #8c8c8c;    /* 復古灰 (用於失效/撤銷) */
-      --border-light: #e6dec5;   /* 卡片邊框色 */
-    }
-
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg-cream); color: var(--text-main); margin: 0; padding: 16px; display: flex; justify-content: center; min-height: 100vh; align-items: flex-start; }
-    .container { width: 100%; max-width: 420px; margin-top: 10px; }
-    
-    .card { background: var(--card-bg); padding: 24px 20px; border-radius: 20px; text-align: center; border: 2px solid var(--border-light); margin-bottom: 15px; box-shadow: 0 10px 30px rgba(62,56,43,0.06); }
-    h2 { margin: 0 0 15px; color: var(--text-main); font-weight: 900; letter-spacing: 1px; }
-    
-    select, input, button { width: 100%; padding: 16px; border-radius: 12px; font-size: 16px; font-weight: 900; outline: none; margin-bottom: 12px; box-sizing: border-box; transition: 0.2s; font-family: inherit; }
-    select { background: #faf8f5; color: var(--text-main); border: 2px solid var(--border-light); cursor: pointer; }
-    input { background: #faf8f5; border: 2px solid var(--border-light); color: var(--text-main); letter-spacing: 1px; }
-    input:focus { border-color: var(--accent-orange); box-shadow: 0 0 10px rgba(217, 107, 67, 0.15); }
-    
-    button { cursor: pointer; border: none; letter-spacing: 1px; }
-    button:hover { opacity: 0.9; transform: translateY(-1px); }
-    
-    /* 統一按鈕配色 */
-    .btn-green { background: var(--sidebar-bg); color: #fff; } /* 查詢按鈕：深橄欖棕 */
-    .btn-redeem { background: var(--accent-orange); color: #fff; font-size: 18px; padding: 20px; box-shadow: 0 4px 15px rgba(217, 107, 67, 0.3); } /* 核銷按鈕：橘紅 */
-    .btn-undo { background: var(--accent-gray); color: white; } /* 撤銷按鈕：復古灰 */
-    .btn-dark { background: var(--accent-green); color: white; } /* 掃描按鈕：植栽綠 */
-    .btn-next { background: transparent; color: var(--sidebar-bg); border: 2px dashed var(--sidebar-bg); padding: 14px; margin-top: 15px; } /* 下一位按鈕 */
-
-    .info-row { display: flex; justify-content: center; margin-bottom: 12px; font-size: 16px; border-bottom: 1px dashed var(--border-light); padding-bottom: 8px;}
-    .info-row strong { color: var(--text-sub); width: 100px; text-align: left; }
-    .info-row span { color: var(--text-main); width: 150px; text-align: left; font-size: 18px; font-weight: 900;}
-    
-    #id-text { font-family: monospace; font-size: 20px !important; }
-    #social-text { color: var(--sidebar-bg); }
-    #gift-text { color: var(--accent-orange); font-size: 20px !important; }
-    
-    .status-box { padding: 16px; border-radius: 12px; font-weight: 900; font-size: 18px; margin: 20px 0; letter-spacing: 1px; }
-    .unclaimed { background: rgba(107, 140, 110, 0.12); color: var(--accent-green); border: 2px solid var(--accent-green); } /* 綠色代表可以核銷 */
-    .claimed { background: rgba(140, 140, 140, 0.12); color: var(--accent-gray); border: 2px solid var(--accent-gray); } /* 灰色代表已失效 */
-
-    /* 掃描器外觀微調 */
-    #reader-container { display:none; background: #faf8f5; border-radius:16px; overflow:hidden; border:2px solid var(--border-light); margin-top:10px; }
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<title>抽獎核銷系統 | 門市 POS 兌換平台</title>
+<meta name="description" content="門市專用抽獎核銷 POS：掃碼查詢顧客資料、即時確認兌換與 5 秒撤銷，支援平板與手機操作。" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Space+Grotesk:wght@500;700&display=swap" />
+<style>
+:root{
+  --background:oklch(0.17 0.024 259);
+  --foreground:oklch(0.97 0.006 250);
+  --card:oklch(0.225 0.028 260);
+  --primary:oklch(0.78 0.17 68);
+  --primary-foreground:oklch(0.2 0.03 60);
+  --secondary:oklch(0.29 0.03 260);
+  --secondary-foreground:oklch(0.96 0.006 250);
+  --muted:oklch(0.27 0.028 260);
+  --muted-foreground:oklch(0.7 0.025 258);
+  --accent:oklch(0.78 0.14 195);
+  --destructive:oklch(0.63 0.22 25);
+  --success:oklch(0.75 0.17 156);
+  --border:oklch(1 0 0 / 10%);
+  --input:oklch(1 0 0 / 14%);
+  --surface-glow:0 0 0 1px oklch(1 0 0 / 6%), 0 24px 60px -20px oklch(0 0 0 / 60%);
+  --gradient-tech:linear-gradient(135deg, oklch(0.78 0.17 68), oklch(0.72 0.16 40));
+  --gradient-panel:linear-gradient(160deg, oklch(0.24 0.03 262), oklch(0.2 0.026 258));
+  --radius:1.25rem;
+}
+*{box-sizing:border-box;margin:0;padding:0;border-color:var(--border)}
+html,body{height:100%}
+body{
+  background:var(--background);color:var(--foreground);
+  font-family:"Space Grotesk","Noto Sans TC",system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+main{
+  min-height:100vh;
+  background-image:
+    radial-gradient(circle at 15% 10%, oklch(0.78 0.17 68 / 12%), transparent 45%),
+    radial-gradient(circle at 85% 0%, oklch(0.78 0.14 195 / 12%), transparent 40%),
+    linear-gradient(oklch(1 0 0 / 3%) 1px, transparent 1px),
+    linear-gradient(90deg, oklch(1 0 0 / 3%) 1px, transparent 1px);
+  background-size:auto,auto,44px 44px,44px 44px;
+}
+.wrap{max-width:1400px;margin:0 auto;width:100%;padding:20px 16px}
+@media(min-width:768px){.wrap{padding:32px}}
+header{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px;margin-bottom:24px}
+.brand{display:flex;align-items:center;gap:16px}
+.logo{width:56px;height:56px;display:flex;align-items:center;justify-content:center;border-radius:18px;font-size:26px;
+  background-image:var(--gradient-tech);color:var(--primary-foreground);box-shadow:0 12px 30px -12px oklch(0 0 0/.8);
+  transition:transform .3s}
+.logo:hover{transform:scale(1.05)}
+h1{font-size:clamp(22px,3vw,30px);font-weight:700;letter-spacing:-.02em}
+.sub{font-size:14px;color:var(--muted-foreground)}
+.panel{background-image:var(--gradient-panel);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--surface-glow)}
+.status{display:flex;align-items:center;gap:12px;padding:10px 16px;font-size:14px}
+.dot{position:relative;display:inline-flex;width:10px;height:10px}
+.dot i{position:absolute;inset:0;border-radius:999px;background:var(--success)}
+.dot i:first-child{opacity:.7;animation:ring 1.8s ease-out infinite}
+@keyframes ring{0%{transform:scale(1);opacity:.7}100%{transform:scale(2.6);opacity:0}}
+.grid{display:grid;gap:24px}
+@media(min-width:1024px){.grid{grid-template-columns:minmax(0,1fr) minmax(0,1.15fr)}}
+section.panel{padding:20px}
+@media(min-width:768px){section.panel{padding:24px}}
+.rise{animation:rise .45s cubic-bezier(.2,.7,.3,1) both}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.block+.block{margin-top:24px}
+.label{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.2em;color:var(--muted-foreground);margin-bottom:12px}
+.stores{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+@media(min-width:640px){.stores{grid-template-columns:repeat(3,minmax(0,1fr))}}
+button{font-family:inherit;cursor:pointer}
+.store-btn{min-height:56px;border-radius:14px;border:1px solid var(--border);background:var(--secondary);color:var(--secondary-foreground);
+  font-size:16px;font-weight:600;transition:all .2s}
+.store-btn:hover{background:var(--muted);border-color:oklch(0.78 0.17 68/.6)}
+.store-btn:active{transform:scale(.97)}
+.store-btn.on{background-image:var(--gradient-tech);color:var(--primary-foreground);border-color:var(--primary);box-shadow:0 12px 26px -14px oklch(0 0 0/.9)}
+.acts{display:flex;flex-direction:column;gap:10px}
+.act-btn{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:64px;padding:0 16px;text-align:left;
+  border-radius:14px;border:1px solid var(--border);background:var(--secondary);color:var(--foreground);transition:all .2s}
+.act-btn:hover{background:var(--muted);border-color:oklch(0.78 0.14 195/.5)}
+.act-btn:active{transform:scale(.99)}
+.act-btn.on{border-color:var(--accent);background:oklch(0.78 0.14 195/.15)}
+.act-name{display:block;font-size:18px;font-weight:600}
+.act-gift{display:block;font-size:12px;color:var(--muted-foreground);margin-top:2px}
+.radio{width:14px;height:14px;border-radius:999px;border:2px solid var(--muted-foreground);flex:none}
+.act-btn.on .radio{border-color:var(--accent);background:var(--accent)}
+.empty{border:1px dashed var(--border);border-radius:14px;padding:24px;text-align:center;font-size:14px;color:var(--muted-foreground)}
+.searchbar{display:flex;flex-direction:column;gap:10px}
+@media(min-width:640px){.searchbar{flex-direction:row}}
+#phone{flex:1;min-height:64px;border-radius:14px;border:1px solid var(--input);background:oklch(0.17 0.024 259/.6);
+  color:var(--foreground);padding:0 16px;font-size:20px;font-weight:600;letter-spacing:.08em;outline:none;transition:all .2s}
+#phone::placeholder{font-size:16px;font-weight:400;letter-spacing:normal;color:var(--muted-foreground)}
+#phone:focus{border-color:var(--primary);box-shadow:0 0 0 4px oklch(0.78 0.17 68/.25)}
+.icon-btn{min-height:64px;padding:0 20px;font-size:24px;border-radius:14px;border:1px solid var(--border);background:var(--secondary);color:var(--foreground);transition:all .2s}
+.icon-btn:hover{background:var(--muted)}
+.icon-btn:active{transform:scale(.95)}
+.primary-btn{min-height:64px;padding:0 28px;font-size:18px;font-weight:700;border:none;border-radius:14px;
+  background-image:var(--gradient-tech);color:var(--primary-foreground);box-shadow:0 14px 30px -16px oklch(0 0 0/.9);transition:all .2s}
+.primary-btn:hover{filter:brightness(1.1)}
+.primary-btn:active{transform:scale(.95)}
+button:disabled{opacity:.5;cursor:not-allowed}
+#scan-area{margin-top:16px}
+.reader-wrap{position:relative;overflow:hidden;border-radius:18px;border:1px solid oklch(0.78 0.14 195/.4)}
+#reader{width:100%}
+.scanline{position:absolute;left:0;right:0;top:0;height:3px;background:oklch(0.78 0.14 195/.85);pointer-events:none;animation:scan 2.4s linear infinite}
+@keyframes scan{0%{top:0}100%{top:100%}}
+.close-cam{margin-top:12px;width:100%;min-height:56px;border-radius:14px;font-size:16px;font-weight:600;color:var(--foreground);
+  border:1px solid oklch(0.63 0.22 25/.5);background:oklch(0.63 0.22 25/.15);transition:background .2s}
+.close-cam:hover{background:oklch(0.63 0.22 25/.25)}
+.right{display:flex;flex-direction:column}
+.placeholder{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;text-align:center;padding:80px 0}
+.placeholder .emoji{font-size:60px;opacity:.4}
+.placeholder p{color:var(--muted-foreground)}
+.placeholder .p1{font-size:18px;font-weight:600}
+.placeholder .p2{font-size:14px;max-width:22rem;opacity:.7}
+.detail{flex:1;display:flex;flex-direction:column;gap:20px}
+.banner{border-radius:18px;padding:16px 20px;font-size:18px;font-weight:700;border:1px solid}
+.banner.ok{border-color:oklch(0.75 0.17 156/.5);background:oklch(0.75 0.17 156/.15);color:var(--success)}
+.banner.bad{border-color:oklch(0.63 0.22 25/.5);background:oklch(0.63 0.22 25/.15);color:var(--destructive)}
+.banner small{display:block;font-size:14px;font-weight:500;opacity:.8;margin-top:4px}
+.cards{display:grid;gap:12px}
+@media(min-width:640px){.cards{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.info{border:1px solid var(--border);background:oklch(0.29 0.03 260/.6);border-radius:18px;padding:14px 16px;transition:transform .2s}
+.info:hover{transform:translateY(-2px)}
+.info.hl{border-color:oklch(0.78 0.17 68/.5);background:oklch(0.78 0.17 68/.1)}
+.info .k{font-size:12px;font-weight:500;text-transform:uppercase;letter-spacing:.12em;color:var(--muted-foreground)}
+.info .v{margin-top:4px;font-size:20px;font-weight:700}
+.info .v.mono{letter-spacing:.12em}
+.actions{margin-top:auto;padding-top:8px;display:flex;flex-direction:column;gap:12px}
+.redeem{min-height:96px;width:100%;border:none;border-radius:18px;font-size:28px;font-weight:900;letter-spacing:.04em;
+  background-image:var(--gradient-tech);color:var(--primary-foreground);box-shadow:0 26px 50px -22px oklch(0 0 0/1);transition:all .2s}
+.redeem:hover{transform:translateY(-2px);filter:brightness(1.1)}
+.redeem:active{transform:scale(.98)}
+.undo{min-height:64px;width:100%;border-radius:18px;font-size:20px;font-weight:700;color:var(--accent);
+  border:1px solid oklch(0.78 0.14 195/.5);background:oklch(0.78 0.14 195/.15);transition:background .2s}
+.undo:hover{background:oklch(0.78 0.14 195/.25)}
+.next{min-height:64px;width:100%;border-radius:18px;font-size:18px;font-weight:600;color:var(--foreground);
+  border:1px solid var(--border);background:var(--secondary);transition:all .2s}
+.next:hover{background:var(--muted)}
+.next:active{transform:scale(.98)}
+.hidden{display:none !important}
+</style>
 </head>
 <body>
+<main>
+  <div class="wrap">
+    <header>
+      <div class="brand">
+        <div class="logo">⚡</div>
+        <div>
+          <h1>抽獎核銷系統</h1>
+          <p class="sub">Redemption POS · 內部測試區</p>
+        </div>
+      </div>
+      <div class="panel status">
+        <span class="dot"><i></i><i></i></span>
+        <span style="color:var(--muted-foreground)">今日值班門市</span>
+        <span id="duty" style="font-weight:600">尚未選擇</span>
+      </div>
+    </header>
 
-<div class="container">
-  <div class="card" style="padding:15px 20px;">
-    <label style="color:var(--text-sub); font-size:14px; font-weight:900; display:block; margin-bottom:8px; text-align:left;">📍 今日值班門市</label>
-    <select id="store" onchange="loadAct()" style="margin-bottom:0;"><option value="">請選擇門市</option><option>嘉義門市</option><option>成功門市</option><option>安醫門市</option><option>三井門市</option><option>三多門市</option><option>台鋁門市</option><option>義享門市</option><option>左車門市</option><option>屏車門市</option></select>
-  </div>
+    <div class="grid">
+      <!-- LEFT -->
+      <section class="panel rise">
+        <div class="block">
+          <h2 class="label">● 選擇門市</h2>
+          <div class="stores" id="stores"></div>
+        </div>
 
-  <div class="card">
-    <h2>⚡ 抽獎核銷系統</h2>
-    <select id="act" style="background:#f5f2eb; border-color:var(--border-light); color:var(--text-main);"><option value="">請先選擇門市</option></select>
-    
-    <div style="display:flex; gap:8px;">
-      <input type="tel" id="phone" placeholder="顧客手機" style="flex:1;" oninput="this.value=this.value.replace(/\D/g,'').slice(0,10)">
-      <button class="btn-dark" onclick="startScan()" style="width:55px; font-size:22px; padding:0;" title="掃描">📷</button>
-      <button class="btn-green" id="btn-search" onclick="check()" style="width:90px;">查詢</button>
+        <div class="block">
+          <h2 class="label">● 活動選單</h2>
+          <div id="acts"></div>
+        </div>
+
+        <div class="block">
+          <h2 class="label">● 掃描 / 查詢</h2>
+          <div class="searchbar">
+            <input id="phone" inputmode="numeric" placeholder="輸入兌換手機號碼" />
+            <button class="icon-btn" id="btn-scan" aria-label="掃描 QR Code">📷</button>
+            <button class="primary-btn" id="btn-check">查詢</button>
+          </div>
+          <div id="scan-area" class="hidden">
+            <div class="reader-wrap">
+              <div id="reader"></div>
+              <div class="scanline"></div>
+            </div>
+            <button class="close-cam" id="btn-stop">✖ 關閉相機</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- RIGHT -->
+      <section class="panel rise right">
+        <div id="placeholder" class="placeholder">
+          <div class="emoji">🎟️</div>
+          <p class="p1">等待掃描顧客憑證</p>
+          <p class="p2">選擇門市與活動後，掃描 QR Code 或輸入手機號碼即可帶出顧客資訊。</p>
+        </div>
+        <div id="detail" class="detail hidden">
+          <div id="banner" class="banner ok rise"></div>
+          <div class="cards">
+            <div class="info"><div class="k">📱 兌換手機</div><div class="v mono" id="v-phone">—</div></div>
+            <div class="info"><div class="k">👤 顧客姓名</div><div class="v" id="v-name">—</div></div>
+            <div class="info"><div class="k">🔗 社群帳號</div><div class="v" id="v-social">—</div></div>
+            <div class="info hl"><div class="k">🎁 兌換餐點</div><div class="v" id="v-gift">—</div></div>
+          </div>
+          <div class="actions">
+            <button class="redeem" id="btn-redeem">✔ 確認核銷優惠</button>
+            <button class="undo hidden" id="btn-undo">⚡ 撤銷 (5s)</button>
+            <button class="next" id="btn-next">🧹 清除／服務下一位</button>
+          </div>
+        </div>
+      </section>
     </div>
-    
-    <div id="reader-container"><div id="reader"></div><button onclick="stopScan()" style="background:var(--accent-gray); color:#fff; border-radius:0; margin:0;">✖ 關閉</button></div>
-
-    <div id="content" style="display:none; background:#faf8f5; padding:25px; border-radius:18px; margin-top:20px; border:1px solid var(--border-light);">
-      <div class="info-row"><strong>📱 兌換手機</strong><span id="id-text"></span></div>
-      <div class="info-row"><strong>👤 顧客姓名</strong><span id="name-text"></span></div>
-      <div class="info-row"><strong>🔗 社群帳號</strong><span id="social-text"></span></div> 
-      <div class="info-row"><strong>🎁 兌換餐點</strong><span id="gift-text"></span></div> 
-      <div id="status" class="status-box"></div>
-      <div id="action-area"><button id="btn-redeem" class="btn-redeem" onclick="redeem()">✔ 確認核銷優惠</button></div>
-      <div id="undo-area" style="display:none;"><button id="btn-undo" class="btn-undo" onclick="undo()">⚡ 撤銷 (<span id="t-undo">5</span>s)</button></div>
-      <div id="next-area" style="display:none;"><button class="btn-next" onclick="nextCust()">🧹 清除／服務下一位</button></div>
-    </div>
   </div>
-</div>
+</main>
 
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyBINQuYtYZA8RLfwm51AfGLTYj1TX_UcFo",
-    authDomain: "texas-chick-event.firebaseapp.com",
-    projectId: "texas-chick-event",
-    storageBucket: "texas-chick-event.firebasestorage.app",
-    messagingSenderId: "281248037440",
-    appId: "1:281248037440:web:20c32ba4136ea7c57ffda5",
-    measurementId: "G-HZ6334WB3B"
-  };
+/* ===== Firebase 設定（原樣硬編碼） ===== */
+const firebaseConfig = {
+  apiKey: "AIzaSyBINQuYtYZA8RLfwm51AfGLTYj1TX_UcFo",
+  authDomain: "texas-chick-event.firebaseapp.com",
+  projectId: "texas-chick-event",
+  storageBucket: "texas-chick-event.firebasestorage.app",
+  messagingSenderId: "281248037440",
+  appId: "1:281248037440:web:20c32ba4136ea7c57ffda5",
+  measurementId: "G-HZ6334WB3B",
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
+const evMap = {
+  "嘉義門市": ["活動測試區", "活動測試區2"],
+  "成功門市": ["活動測試區", "活動測試區3"],
+  "安醫門市": ["活動測試區"],
+  "三井門市": ["活動測試區"],
+  "三多門市": ["活動測試區"],
+  "台鋁門市": ["活動測試區"],
+  "義享門市": ["活動測試區"],
+  "左車門市": ["活動測試區"],
+  "屏車門市": ["活動測試區"],
+};
+const giftMap = {
+  "活動測試區": "香辣小炸雞(小)",
+  "活動測試區2": "蛋黃酥乙顆",
+  "活動測試區3": "神杖一顆",
+};
 
-  const evMap = { "嘉義門市":["活動測試區","活動測試區2"], "成功門市":["活動測試區","活動測試區3"], "安醫門市":["活動測試區"], "三井門市":["活動測試區"], "三多門市":["活動測試區"], "台鋁門市":["活動測試區"], "義享門市":["活動測試區"], "左車門市":["活動測試區"], "屏車門市":["活動測試區"] };
-  const giftMap = { "活動測試區": "香辣小炸雞(小)", "活動測試區2": "蛋黃酥乙顆", "活動測試區3": "神杖一顆"}; 
-  const $ = id => document.getElementById(id);
-  let scanner, uTimer;
-
-  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  function playAlert(type) {
-    if (navigator.vibrate) {
-      if (type === 'scan') navigator.vibrate([150]); 
-      if (type === 'error') navigator.vibrate([300]); 
-      if (type === 'success') navigator.vibrate([100, 50, 100, 50, 200]); 
-    }
-    if(audioCtx.state === 'suspended') audioCtx.resume();
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    osc.connect(gain); gain.connect(audioCtx.destination);
-    
-    if(type === 'scan') { 
-      osc.frequency.value = 1200; osc.type = 'sine';
-      gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-      osc.start(); osc.stop(audioCtx.currentTime + 0.1);
-    } else if(type === 'error') { 
-      osc.frequency.value = 300; osc.type = 'square';
-      gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
-      osc.start(); osc.stop(audioCtx.currentTime + 0.3);
-    } else if(type === 'success') { 
-      osc.frequency.setValueAtTime(800, audioCtx.currentTime);
-      osc.frequency.linearRampToValueAtTime(1200, audioCtx.currentTime + 0.2);
-      osc.type = 'sine'; gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-      osc.start(); osc.stop(audioCtx.currentTime + 0.3);
-    }
+/* ===== 音效 / 震動 ===== */
+let audioCtx = null;
+function playAlert(type){
+  if (navigator.vibrate){
+    if (type === "scan") navigator.vibrate([150]);
+    if (type === "error") navigator.vibrate([300]);
+    if (type === "success") navigator.vibrate([100,50,100,50,200]);
   }
-
-  window.loadAct = loadAct;
-  window.startScan = startScan;
-  window.stopScan = stopScan;
-  window.nextCust = nextCust;
-  window.check = check;
-  window.redeem = redeem;
-  window.undo = undo;
-
-  window.onload = () => { if(localStorage.getItem('p_store')) { $('store').value = localStorage.getItem('p_store'); loadAct(); } };
-  function loadAct() { const s = $('store').value; localStorage.setItem('p_store', s); $('act').innerHTML = s ? evMap[s].map(a=>`<option>${a}</option>`).join('') : '<option>選擇門市</option>'; }
-
-  function startScan() {
-    $('reader-container').style.display = 'block';
-    if(!scanner) scanner = new Html5Qrcode("reader");
-    scanner.start({facingMode:"environment"}, {fps:10, qrbox:250}, txt => { 
-      $('phone').value=txt.replace(/\D/g,''); 
-      stopScan(); 
-      check(); 
-    }, ()=>{}).catch(e=>alert("無相機權限"));
+  audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+  if (!audioCtx) return;
+  if (audioCtx.state === "suspended") audioCtx.resume();
+  const osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
+  osc.connect(gain); gain.connect(audioCtx.destination);
+  if (type === "scan"){
+    osc.frequency.value = 1200; osc.type = "sine";
+    gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+    osc.start(); osc.stop(audioCtx.currentTime + 0.1);
+  } else if (type === "error"){
+    osc.frequency.value = 300; osc.type = "square";
+    gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+    osc.start(); osc.stop(audioCtx.currentTime + 0.3);
+  } else {
+    osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+    osc.frequency.linearRampToValueAtTime(1200, audioCtx.currentTime + 0.2);
+    osc.type = "sine";
+    gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+    osc.start(); osc.stop(audioCtx.currentTime + 0.3);
   }
-  function stopScan() { if(scanner && scanner.isScanning) scanner.stop(); $('reader-container').style.display='none'; }
-  function nextCust() { $('phone').value = ""; $('content').style.display = 'none'; $('phone').focus(); }
+}
 
-  async function check() {
-    const ph=$('phone').value, st=$('store').value, ac=$('act').value;
-    if(!st || !ac || !ph) return alert("⚠️ 資料未齊！");
+/* ===== 狀態 ===== */
+const $ = (id) => document.getElementById(id);
+let store = "", act = "", shownPhone = "", shownAct = "", record = null;
+let scanner = null, uTimer = null, busy = false;
 
-    $('content').style.display = 'none';
+function setBusy(b){
+  busy = b;
+  $("btn-check").disabled = b;
+  $("btn-redeem").disabled = b;
+  $("btn-check").innerText = b ? "查詢中…" : "查詢";
+}
 
-    const docRef = doc(db, ac, ph);
-    const docSnap = await getDoc(docRef);
+/* ===== 左側渲染 ===== */
+function renderStores(){
+  const box = $("stores"); box.innerHTML = "";
+  Object.keys(evMap).forEach((s) => {
+    const b = document.createElement("button");
+    b.className = "store-btn" + (store === s ? " on" : "");
+    b.innerText = s;
+    b.onclick = () => selectStore(s);
+    box.appendChild(b);
+  });
+  $("duty").innerText = store || "尚未選擇";
+}
+function renderActs(){
+  const box = $("acts"); box.innerHTML = "";
+  if (!store){
+    box.innerHTML = '<p class="empty">請先選擇門市</p>';
+    return;
+  }
+  const list = document.createElement("div");
+  list.className = "acts";
+  (evMap[store] || []).forEach((a) => {
+    const b = document.createElement("button");
+    b.className = "act-btn" + (act === a ? " on" : "");
+    b.innerHTML = '<span><span class="act-name"></span><span class="act-gift"></span></span><span class="radio"></span>';
+    b.querySelector(".act-name").innerText = a;
+    b.querySelector(".act-gift").innerText = "🎁 " + (giftMap[a] || "專屬活動贈品");
+    b.onclick = () => { act = a; renderActs(); };
+    list.appendChild(b);
+  });
+  box.appendChild(list);
+}
+function selectStore(s){
+  store = s;
+  localStorage.setItem("p_store", s);
+  act = (evMap[s] || [])[0] || "";
+  record = null;
+  renderStores(); renderActs(); renderRight();
+}
 
-    if (docSnap.exists()) {
-      const data = docSnap.data();
-      playAlert('scan'); 
-      renderContent(data, ph, ac);
-    } else {
-      const otherActs = evMap[st].filter(a => a !== ac);
-      let foundOtherData = null;
-      let foundOtherActName = "";
+/* ===== 右側渲染 ===== */
+function renderRight(){
+  if (!record){
+    $("placeholder").classList.remove("hidden");
+    $("detail").classList.add("hidden");
+    return;
+  }
+  $("placeholder").classList.add("hidden");
+  $("detail").classList.remove("hidden");
+  const claimed = record.status === "已兌換";
+  const banner = $("banner");
+  banner.className = "banner rise " + (claimed ? "bad" : "ok");
+  banner.innerHTML = claimed
+    ? "❌ 券已失效 / 已領取<small>📌 於 " + (record.store || "—") + " 兌換</small><small>🕒 " + (record.redeemTime || "—") + "</small>"
+    : "✅ 有效優惠券";
+  $("v-phone").innerText = shownPhone;
+  $("v-name").innerText = record.name || "—";
+  $("v-social").innerText = record.social_id || "未提供";
+  $("v-gift").innerText = giftMap[shownAct] || "專屬活動贈品";
+  $("btn-redeem").classList.toggle("hidden", claimed);
+}
 
-      for (const otherAct of otherActs) {
-        const otherSnap = await getDoc(doc(db, otherAct, ph));
-        if (otherSnap.exists()) {
-          const data = otherSnap.data();
-          if (data.status !== "已兌換") {
-            foundOtherData = data;
-            foundOtherActName = otherAct;
-            break; 
-          }
-        }
+function renderContent(data, ph, ac){
+  shownPhone = ph; shownAct = ac; record = data;
+  hideUndo();
+  renderRight();
+}
+function hideUndo(){
+  if (uTimer) clearInterval(uTimer);
+  $("btn-undo").classList.add("hidden");
+}
+
+/* ===== 掃描 ===== */
+async function startScan(){
+  $("scan-area").classList.remove("hidden");
+  if (!scanner) scanner = new Html5Qrcode("reader");
+  scanner.start(
+    { facingMode: "environment" },
+    { fps: 10, qrbox: 250 },
+    (txt) => {
+      const digits = txt.replace(/\D/g, "");
+      $("phone").value = digits;
+      stopScan();
+      check(digits);
+    },
+    () => {}
+  ).catch(() => alert("無相機權限"));
+}
+function stopScan(){
+  if (scanner && scanner.isScanning) scanner.stop();
+  $("scan-area").classList.add("hidden");
+}
+
+/* ===== 查詢 ===== */
+async function check(overridePhone){
+  const ph = overridePhone || $("phone").value;
+  const st = store, ac = act;
+  if (!st || !ac || !ph) return alert("⚠️ 資料未齊！");
+
+  record = null; renderRight();
+  setBusy(true);
+  try {
+    const snap = await getDoc(doc(db, ac, ph));
+    if (snap.exists()){
+      playAlert("scan");
+      renderContent(snap.data(), ph, ac);
+      return;
+    }
+    const otherActs = (evMap[st] || []).filter((a) => a !== ac);
+    let foundOtherData = null, foundOtherActName = "";
+    for (const otherAct of otherActs){
+      const otherSnap = await getDoc(doc(db, otherAct, ph));
+      if (otherSnap.exists()){
+        const data = otherSnap.data();
+        if (data.status !== "已兌換"){ foundOtherData = data; foundOtherActName = otherAct; break; }
       }
-
-      if (foundOtherData) {
-        playAlert('error'); 
-        if (confirm(`❌ 找不到「${ac}」的紀錄。\n\n💡 但發現客人有未兌換的「${foundOtherActName}」，是否要自動切換過去？`)) {
-          $('act').value = foundOtherActName; 
-          renderContent(foundOtherData, ph, foundOtherActName);
-        } else {
-          $('phone').value = "";
-        }
+    }
+    if (foundOtherData){
+      playAlert("error");
+      if (confirm("❌ 找不到「" + ac + "」的紀錄。\n\n💡 但發現客人有未兌換的「" + foundOtherActName + "」，是否要自動切換過去？")){
+        act = foundOtherActName;
+        renderActs();
+        renderContent(foundOtherData, ph, foundOtherActName);
       } else {
-        playAlert('error'); 
-        alert("❌ 查無號碼，或該客人的所有活動皆已兌換完畢！");
-        $('phone').value = "";
+        $("phone").value = "";
       }
-    }
-  }
-
-  function renderContent(data, ph, ac) {
-    $('content').style.display='block';
-    $('id-text').innerText=ph;
-    $('name-text').innerText=data.name;
-    $('social-text').innerText=data.social_id || "未提供";
-    $('gift-text').innerText = giftMap[ac] || "專屬活動贈品";
-    setUI(data);
-    $('next-area').style.display='block';
-  }
-
-  function setUI(r) {
-    if(r.status === "已兌換") {
-      $('status').className="status-box claimed";
-      // 狀態文字的顏色也改為溫潤的復古灰
-      $('status').innerHTML = `❌ 券已失效 / 已領取<br><span style="font-size:14px; color:var(--text-sub); display:block; margin-top:10px; font-weight:700;">📌 於 ${r.store} 兌換<br>🕒 ${r.redeemTime}</span>`;
-      $('action-area').style.display='none';
     } else {
-      $('status').className="status-box unclaimed";
-      $('status').innerText="✅ 有效優惠券";
-      $('action-area').style.display='block';
-      $('btn-redeem').disabled=false;
+      playAlert("error");
+      alert("❌ 查無號碼，或該客人的所有活動皆已兌換完畢！");
+      $("phone").value = "";
     }
+  } finally {
+    setBusy(false);
   }
+}
 
-  async function redeem() {
-    if(!confirm("確定核銷？憑證將失效！")) return;
-    const ph = $('id-text').innerText, st = $('store').value, ac = $('act').value;
-    
-    const d = new Date();
-    const pad = n => n < 10 ? '0' + n : n;
-    const nowStr = `${d.getFullYear()}/${pad(d.getMonth()+1)}/${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
-
-    const docRef = doc(db, ac, ph);
-    await updateDoc(docRef, { status: "已兌換", store: st, redeemTime: nowStr });
-
-    setUI({ status: "已兌換", store: st, redeemTime: nowStr });
-    playAlert('success'); 
-    confetti({particleCount:80, spread:70});
-
-    $('undo-area').style.display='block'; $('btn-undo').disabled=false; $('btn-undo').innerHTML='⚡ 撤銷 (<span id="t-undo">5</span>s)';
-    let left=5; uTimer=setInterval(()=>{ if(--left<=0) {clearInterval(uTimer); $('undo-area').style.display='none';} else $('t-undo').innerText=left; }, 1000);
+/* ===== 核銷 / 撤銷 ===== */
+async function redeem(){
+  if (!confirm("確定核銷？憑證將失效！")) return;
+  const ph = shownPhone, st = store, ac = act;
+  const d = new Date(), pad = (n) => (n < 10 ? "0" + n : String(n));
+  const nowStr = d.getFullYear() + "/" + pad(d.getMonth()+1) + "/" + pad(d.getDate()) + " " +
+                 pad(d.getHours()) + ":" + pad(d.getMinutes()) + ":" + pad(d.getSeconds());
+  setBusy(true);
+  try {
+    await updateDoc(doc(db, ac, ph), { status: "已兌換", store: st, redeemTime: nowStr });
+  } finally {
+    setBusy(false);
   }
+  record = Object.assign({}, record || {}, { status: "已兌換", store: st, redeemTime: nowStr });
+  renderRight();
+  playAlert("success");
+  if (window.confetti) confetti({ particleCount: 80, spread: 70 });
 
-  async function undo() {
-    clearInterval(uTimer);
-    const ph = $('id-text').innerText, ac = $('act').value;
-    const docRef = doc(db, ac, ph);
-    await updateDoc(docRef, { status: "", store: "", redeemTime: "" });
-    $('undo-area').style.display='none';
-    alert("✅ 已撤銷！");
-    check();
+  const btn = $("btn-undo");
+  btn.classList.remove("hidden");
+  let left = 5;
+  btn.innerText = "⚡ 撤銷 (" + left + "s)";
+  if (uTimer) clearInterval(uTimer);
+  uTimer = setInterval(() => {
+    left -= 1;
+    if (left <= 0){ clearInterval(uTimer); btn.classList.add("hidden"); }
+    else btn.innerText = "⚡ 撤銷 (" + left + "s)";
+  }, 1000);
+}
+
+async function undo(){
+  if (uTimer) clearInterval(uTimer);
+  const ph = shownPhone, ac = act;
+  setBusy(true);
+  try {
+    await updateDoc(doc(db, ac, ph), { status: "", store: "", redeemTime: "" });
+  } finally {
+    setBusy(false);
   }
+  $("btn-undo").classList.add("hidden");
+  alert("✅ 已撤銷！");
+  check(ph);
+}
+
+function nextCust(){
+  $("phone").value = "";
+  record = null;
+  hideUndo();
+  renderRight();
+  $("phone").focus();
+}
+
+/* ===== 綁定 ===== */
+$("btn-scan").onclick = startScan;
+$("btn-stop").onclick = stopScan;
+$("btn-check").onclick = () => check();
+$("btn-redeem").onclick = redeem;
+$("btn-undo").onclick = undo;
+$("btn-next").onclick = nextCust;
+$("phone").addEventListener("keydown", (e) => { if (e.key === "Enter") check(); });
+
+const saved = localStorage.getItem("p_store");
+if (saved && evMap[saved]){ store = saved; act = evMap[saved][0] || ""; }
+renderStores(); renderActs(); renderRight();
 </script>
 </body>
 </html>
