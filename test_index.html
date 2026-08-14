@@ -4,7 +4,6 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
 <title>抽獎核銷系統 | 門市 POS 兌換平台</title>
-<meta name="description" content="門市專用抽獎核銷 POS：掃碼查詢顧客資料、即時確認兌換與 5 秒撤銷，支援平板與手機操作。" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Space+Grotesk:wght@500;700&display=swap" />
@@ -96,7 +95,6 @@ section.panel{padding:20px}
 .stores{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px; width: 100%;}
 @media(min-width:640px){.stores{grid-template-columns:repeat(3,minmax(0,1fr))}}
 
-/* 🚀 修正 1：移除全域的強制 100% 寬度，避免電腦版按鈕撐破 */
 button{font-family:inherit;cursor:pointer;}
 
 .store-btn{width:100%;min-height:56px;border-radius:14px;border:1px solid var(--border);background:var(--secondary);color:var(--secondary-foreground);
@@ -116,7 +114,6 @@ button{font-family:inherit;cursor:pointer;}
 .act-btn.on .radio{border-color:var(--accent);background:var(--accent)}
 .empty{border:1px dashed var(--border);border-radius:14px;padding:24px;text-align:center;font-size:14px;color:var(--muted-foreground)}
 
-/* 🚀 修正 2：電腦版搜尋列特殊處理，讓按鈕固定寬度，輸入框拿走剩餘空間 */
 .searchbar{display:flex;flex-direction:column;gap:10px; width: 100%;}
 .searchbar > button { width: 100%; }
 @media(min-width:640px){
@@ -214,7 +211,6 @@ button:disabled{opacity:.5;cursor:not-allowed}
         <div class="block">
           <h2 class="label">● 掃描 / 查詢</h2>
           <div class="searchbar">
-            <!-- 允許市話與手機 -->
             <input id="phone" type="tel" placeholder="輸入手機或市話 (例:02-1234567)" oninput="this.value=this.value.replace(/[^\d\-]/g,'').slice(0,15)" />
             <button class="icon-btn" id="btn-scan" aria-label="掃描 QR Code">📷</button>
             <button class="primary-btn" id="btn-check">查詢</button>
@@ -258,6 +254,8 @@ button:disabled{opacity:.5;cursor:not-allowed}
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 <script type="module">
+// 🔥 匯入 config.js 裡面的門市與 POS 設定
+import { STORE_LIST, POS_CONFIG } from "./config.js";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
@@ -274,22 +272,22 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-const evMap = {
-  "嘉義門市": ["活動測試區", "活動測試區2"],
-  "成功門市": ["活動測試區", "活動測試區3"],
-  "安醫門市": ["活動測試區"],
-  "三井門市": ["活動測試區"],
-  "三多門市": ["活動測試區"],
-  "台鋁門市": ["活動測試區"],
-  "義享門市": ["活動測試區"],
-  "左車門市": ["活動測試區"],
-  "屏車門市": ["活動測試區"],
-};
-const giftMap = {
-  "活動測試區": "香辣小炸雞(小)",
-  "活動測試區2": "蛋黃酥乙顆",
-  "活動測試區3": "神杖一顆",
-};
+// 🔥 動態計算：根據 config.js 產出每個門市看得到的活動 (evMap)
+const evMap = {};
+STORE_LIST.forEach(s => {
+  evMap[s] = [];
+  for (const act in POS_CONFIG) {
+    if (POS_CONFIG[act].stores === "ALL" || POS_CONFIG[act].stores.includes(s)) {
+      evMap[s].push(act);
+    }
+  }
+});
+
+// 🔥 動態計算：根據 config.js 產出每個活動對應的贈品 (giftMap)
+const giftMap = {};
+for (const act in POS_CONFIG) {
+  giftMap[act] = POS_CONFIG[act].gift;
+}
 
 /* ===== 音效 / 震動 ===== */
 let audioCtx = null;
@@ -336,7 +334,8 @@ function setBusy(b){
 /* ===== 左側渲染 ===== */
 function renderStores(){
   const box = $("stores"); box.innerHTML = "";
-  Object.keys(evMap).forEach((s) => {
+  // 改為自動依照 STORE_LIST 生成按鈕
+  STORE_LIST.forEach((s) => {
     const b = document.createElement("button");
     b.className = "store-btn" + (store === s ? " on" : "");
     b.innerText = s;
