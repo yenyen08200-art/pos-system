@@ -528,7 +528,7 @@
           document.getElementById('main-app').style.display = 'block';
           
           // 登入成功後，安全載入 config.js
-          import("./config.js").then((module) => {
+          import("./config.js?v=" + new Date().getTime()).then((module) => {
             const EVENT_CONFIG = module.EVENT_CONFIG;
             const adminSelect = document.getElementById('act-select');
             adminSelect.innerHTML = '';
