@@ -305,7 +305,11 @@
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
 
-  const EVENT_SECRETS = { "父親節社群活動": "DAD88", "中秋節活動": "MOON99" };
+ const EVENT_SECRETS = { 
+  "活動測試區": "TEST", 
+  "活動測試區2": "TEST2", 
+  "活動測試區3": "TEST3" 
+};
   const $ = id => document.getElementById(id);
   let unsubscribe = null;
 
