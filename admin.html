@@ -60,7 +60,7 @@
     .btn-logout { background: #d9534f; color: white; border: none; cursor: pointer; transition: 0.2s; }
     .btn-logout:hover { opacity: 0.9; }
     
-    /* 📊 數據卡片區 (對應設計圖上方的圓角卡片列) */
+    /* 📊 數據卡片區 */
     .dashboard { display: flex; gap: 20px; margin-bottom: 25px; flex-wrap: wrap; }
     .stat-card { background: var(--card-bg); padding: 22px; border-radius: 16px; flex: 1; min-width: 140px; box-shadow: 0 4px 15px rgba(62,56,43,0.03); text-align: center; border: 1px solid #e6dec5; position: relative; overflow: hidden; }
     .stat-card::after { content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 4px; }
@@ -72,7 +72,7 @@
     .stat-card h3 { margin: 0 0 8px; color: #8c8270; font-size: 13px; letter-spacing: 1px; }
     .stat-card .num { font-size: 30px; font-weight: 900; color: var(--text-main); }
 
-    /* 📈 圖表區 (對應設計圖的中段區塊) */
+    /* 📈 圖表區 */
     .charts-wrapper { display: flex; gap: 20px; margin-bottom: 25px; flex-wrap: wrap; }
     .chart-box { background: var(--card-bg); padding: 22px; border-radius: 16px; box-shadow: 0 4px 15px rgba(62,56,43,0.03); flex: 1; min-width: 300px; border: 1px solid #e6dec5; display: flex; flex-direction: column; justify-content: center; }
     .chart-box h3 { margin: 0 0 15px 0; color: var(--text-main); font-size: 15px; font-weight: 800; }
@@ -97,12 +97,31 @@
     .status-expired { color: var(--accent-gray); font-weight: 900; background: rgba(140, 140, 140, 0.12); padding: 4px 10px; border-radius: 20px; font-size: 12px; }
     .time-text { font-size: 13px; color: #8c8270; }
 
-    /* RWD 手機響應調整 */
+    /* 📱 RWD 手機響應完美修復版 */
     @media (max-width: 768px) {
       body { flex-direction: column; }
-      .sidebar { width: 100%; height: auto; flex-direction: row; align-items: center; padding: 15px 20px; }
+      .sidebar { width: 100%; height: auto; flex-direction: row; align-items: center; justify-content: space-between; padding: 15px 20px; box-sizing: border-box; }
+      .sidebar-brand p { display: none; } /* 手機版隱藏副標題省空間 */
       .sidebar-menu { display: none; }
-      #main-app { padding: 15px; height: auto; }
+      #main-app { padding: 10px; height: auto; overflow-x: hidden; box-sizing: border-box; }
+      
+      /* 🔥 這裡修復了上方控制列被擠爆的問題 */
+      .header { flex-direction: column; align-items: stretch; gap: 15px; padding: 15px; }
+      .header-title-area { flex-direction: column; align-items: flex-start; gap: 8px; }
+      h1 { font-size: 20px; white-space: nowrap; } 
+      
+      .controls { flex-wrap: wrap; width: 100%; gap: 8px; justify-content: space-between; }
+      .controls select { width: 100%; flex-basis: 100%; } /* 下拉選單自己佔據第一排 */
+      .controls button { flex: 1; padding: 10px 5px; font-size: 13px; white-space: nowrap; } /* 下方三顆按鈕平均分配第二排 */
+      
+      /* 數據卡片與圖表手機版調整 */
+      .dashboard { gap: 10px; }
+      .stat-card { min-width: 45%; padding: 15px 10px; }
+      .stat-card .num { font-size: 24px; }
+      .charts-wrapper { flex-direction: column; }
+      .chart-box { min-width: 100%; }
+      .table-toolbar { flex-direction: column; align-items: flex-start; gap: 10px; }
+      .search-box { width: 100%; box-sizing: border-box; }
     }
   </style>
 </head>
@@ -126,7 +145,7 @@
     </div>
   </div>
 
-  <!-- 🧭 左側導覽列 (對應設計圖左側深色設計) -->
+  <!-- 🧭 左側導覽列 -->
   <div class="sidebar" id="sidebar-nav" style="display: none;">
     <div class="sidebar-brand">
       <h2>德州小騎士</h2>
@@ -137,8 +156,7 @@
       <div class="sidebar-item" onclick="alert('分店管理與權限設定功能開發中...')">🏪 門市管理中心</div>
       <div class="sidebar-item" onclick="alert('行銷推播與名單分析功能開發中...')">🎯 行銷資產管理</div>
     </div>
-    <div style="font-size: 11px; opacity: 0.6; text-align: center;">
-    </div>
+    <div style="font-size: 11px; opacity: 0.6; text-align: center;"></div>
   </div>
 
   <!-- 主要內容區 -->
@@ -152,7 +170,7 @@
           <select id="act-select" onchange="fetchData()">
             <option value="父親節社群活動">父親節社群活動</option>
             <option value="中秋節活動">中秋節活動</option>
-            <option value="中秋節活動">測試中</option>
+            <option value="中秋節活動">測試中...</option>
           </select>
           <button class="btn-expire" onclick="expireTickets()">🧹 結算過期</button>
           <button class="btn-export" onclick="exportExcel()">📥 匯出 Excel</button>
@@ -251,7 +269,7 @@
       if (user) {
         if (adminEmails.includes(user.email)) {
           document.getElementById('login-screen').style.display = 'none';
-          document.getElementById('sidebar-nav').style.display = 'flex'; // 顯示設計圖風格的左側選單
+          document.getElementById('sidebar-nav').style.display = 'flex'; 
           document.getElementById('main-app').style.display = 'block';
           fetchData(); 
         } else {
@@ -422,7 +440,7 @@
           labels: ['已核銷', '待核銷', '已過期'],
           datasets: [{
             data: (redeemed === 0 && unredeemed === 0 && expired === 0) ? [0, 1, 0] : [redeemed, unredeemed, expired],
-            backgroundColor: ['#6b8c6e', '#d96b43', '#8c8c8c'], // 對應設計圖的綠、橘、灰
+            backgroundColor: ['#6b8c6e', '#d96b43', '#8c8c8c'],
             borderWidth: 0,
             hoverOffset: 4
           }]
