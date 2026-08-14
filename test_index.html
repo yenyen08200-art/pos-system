@@ -55,12 +55,7 @@ main {
   background-size: auto,auto,44px 44px,44px 44px;
 }
 
-.wrap {
-  max-width: 1400px;
-  margin: 0 auto;
-  width: 100%;
-  padding: 20px 16px;
-}
+.wrap { max-width: 1400px; margin: 0 auto; width: 100%; padding: 20px 16px; }
 @media(min-width:768px){.wrap{padding:32px}}
 
 header{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px;margin-bottom:24px}
@@ -78,12 +73,7 @@ h1{font-size:clamp(22px,3vw,30px);font-weight:700;letter-spacing:-.02em}
 .dot i:first-child{opacity:.7;animation:ring 1.8s ease-out infinite}
 @keyframes ring{0%{transform:scale(1);opacity:.7}100%{transform:scale(2.6);opacity:0}}
 
-.grid { 
-  display: grid; 
-  gap: 24px; 
-  grid-template-columns: minmax(0, 1fr); 
-  width: 100%;
-}
+.grid { display: grid; gap: 24px; grid-template-columns: minmax(0, 1fr); width: 100%; }
 @media(min-width:1024px){.grid{grid-template-columns:minmax(0,1fr) minmax(0,1.15fr)}}
 
 section.panel{padding:20px}
@@ -96,7 +86,6 @@ section.panel{padding:20px}
 @media(min-width:640px){.stores{grid-template-columns:repeat(3,minmax(0,1fr))}}
 
 button{font-family:inherit;cursor:pointer;}
-
 .store-btn{width:100%;min-height:56px;border-radius:14px;border:1px solid var(--border);background:var(--secondary);color:var(--secondary-foreground);
   font-size:16px;font-weight:600;transition:all .2s; padding: 0 8px;}
 .store-btn:hover{background:var(--muted);border-color:oklch(0.78 0.17 68/.6)}
@@ -254,12 +243,10 @@ button:disabled{opacity:.5;cursor:not-allowed}
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 <script type="module">
-// 🔥 匯入 config.js 裡面的門市與 POS 設定
-import { STORE_LIST, POS_CONFIG } from "./config.js";
+// 🔥 防彈架構：動態載入 config.js 防快取
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-/* ===== Firebase 設定 ===== */
 const firebaseConfig = {
   apiKey: "AIzaSyBINQuYtYZA8RLfwm51AfGLTYj1TX_UcFo",
   authDomain: "texas-chick-event.firebaseapp.com",
@@ -272,7 +259,9 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// 🔥 動態計算：根據 config.js 產出每個門市看得到的活動 (evMap)
+const module = await import("./config.js?v=" + new Date().getTime());
+const { STORE_LIST, POS_CONFIG } = module;
+
 const evMap = {};
 STORE_LIST.forEach(s => {
   evMap[s] = [];
@@ -283,13 +272,11 @@ STORE_LIST.forEach(s => {
   }
 });
 
-// 🔥 動態計算：根據 config.js 產出每個活動對應的贈品 (giftMap)
 const giftMap = {};
 for (const act in POS_CONFIG) {
   giftMap[act] = POS_CONFIG[act].gift;
 }
 
-/* ===== 音效 / 震動 ===== */
 let audioCtx = null;
 function playAlert(type){
   if (navigator.vibrate){
@@ -319,7 +306,6 @@ function playAlert(type){
   }
 }
 
-/* ===== 狀態 ===== */
 const $ = (id) => document.getElementById(id);
 let store = "", act = "", shownPhone = "", shownAct = "", record = null;
 let scanner = null, uTimer = null, busy = false;
@@ -331,10 +317,8 @@ function setBusy(b){
   $("btn-check").innerText = b ? "查詢中…" : "查詢";
 }
 
-/* ===== 左側渲染 ===== */
 function renderStores(){
   const box = $("stores"); box.innerHTML = "";
-  // 改為自動依照 STORE_LIST 生成按鈕
   STORE_LIST.forEach((s) => {
     const b = document.createElement("button");
     b.className = "store-btn" + (store === s ? " on" : "");
@@ -344,6 +328,7 @@ function renderStores(){
   });
   $("duty").innerText = store || "尚未選擇";
 }
+
 function renderActs(){
   const box = $("acts"); box.innerHTML = "";
   if (!store){
@@ -358,20 +343,28 @@ function renderActs(){
     b.innerHTML = '<span><span class="act-name"></span><span class="act-gift"></span></span><span class="radio"></span>';
     b.querySelector(".act-name").innerText = a;
     b.querySelector(".act-gift").innerText = "🎁 " + (giftMap[a] || "專屬活動贈品");
-    b.onclick = () => { act = a; renderActs(); };
+    
+    // 🔥 點擊活動後，自動把游標停在輸入框
+    b.onclick = () => { 
+      act = a; 
+      renderActs(); 
+      setTimeout(() => $("phone").focus(), 100); 
+    };
     list.appendChild(b);
   });
   box.appendChild(list);
 }
+
 function selectStore(s){
   store = s;
   localStorage.setItem("p_store", s);
   act = (evMap[s] || [])[0] || "";
   record = null;
   renderStores(); renderActs(); renderRight();
+  // 🔥 點擊門市後，自動把游標停在輸入框
+  setTimeout(() => $("phone").focus(), 100);
 }
 
-/* ===== 右側渲染 ===== */
 function renderRight(){
   if (!record){
     $("placeholder").classList.remove("hidden");
@@ -381,15 +374,13 @@ function renderRight(){
   $("placeholder").classList.add("hidden");
   $("detail").classList.remove("hidden");
   
-  // 🔥 新增判斷邏輯：同時檢查「已兌換」與「已過期」
   const isClaimed = record.status === "已兌換";
   const isExpired = record.status === "已過期";
-  const isInvalid = isClaimed || isExpired; // 只要符合其中一項，就是無效票
+  const isInvalid = isClaimed || isExpired; 
 
   const banner = $("banner");
   banner.className = "banner rise " + (isInvalid ? "bad" : "ok");
   
-  // 根據不同狀態顯示不同提示
   if (isClaimed) {
     banner.innerHTML = "❌ 券已失效 / 已領取<small>📌 於 " + (record.store || "—") + " 兌換</small><small>🕒 " + (record.redeemTime || "—") + "</small>";
   } else if (isExpired) {
@@ -402,8 +393,6 @@ function renderRight(){
   $("v-name").innerText = record.name || "—";
   $("v-social").innerText = record.social_id || "未提供";
   $("v-gift").innerText = giftMap[shownAct] || "專屬活動贈品";
-  
-  // 🔥 若票券無效（已兌換或已過期），強制隱藏「確認核銷」按鈕
   $("btn-redeem").classList.toggle("hidden", isInvalid);
 }
 
@@ -417,7 +406,6 @@ function hideUndo(){
   $("btn-undo").classList.add("hidden");
 }
 
-/* ===== 掃描 ===== */
 async function startScan(){
   $("scan-area").classList.remove("hidden");
   if (!scanner) scanner = new Html5Qrcode("reader");
@@ -438,7 +426,6 @@ function stopScan(){
   $("scan-area").classList.add("hidden");
 }
 
-/* ===== 查詢 ===== */
 async function check(overridePhone){
   const ph = overridePhone || $("phone").value;
   const st = store, ac = act;
@@ -481,7 +468,6 @@ async function check(overridePhone){
   }
 }
 
-/* ===== 核銷 / 撤銷 ===== */
 async function redeem(){
   if (!confirm("確定核銷？憑證將失效！")) return;
   const ph = shownPhone, st = store, ac = act;
@@ -530,10 +516,10 @@ function nextCust(){
   record = null;
   hideUndo();
   renderRight();
-  $("phone").focus();
+  // 🔥 按下服務下一位後，自動把游標停在輸入框
+  setTimeout(() => $("phone").focus(), 100);
 }
 
-/* ===== 綁定 ===== */
 $("btn-scan").onclick = startScan;
 $("btn-stop").onclick = stopScan;
 $("btn-check").onclick = () => check();
