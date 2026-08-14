@@ -13,18 +13,11 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
   <style>
     :root{
-      --sage-deep:#5c6a5c;
-      --sage:#8b9a86;
-      --sage-light:#b9c3b1;
-      --brass:#b9915a;
-      --brass-light:#dcbb84;
-      --brass-deep:#8d6c3c;
-      --ink:#2c302c;
-      --ink-soft:#6f766e;
-      --glass:rgba(255,255,255,.34);
-      --glass-soft:rgba(255,255,255,.22);
-      --stroke:rgba(255,255,255,.55);
-      --radius:28px;
+      --sage-deep:#5c6a5c; --sage:#8b9a86; --sage-light:#b9c3b1;
+      --brass:#b9915a; --brass-light:#dcbb84; --brass-deep:#8d6c3c;
+      --ink:#2c302c; --ink-soft:#6f766e;
+      --glass:rgba(255,255,255,.34); --glass-soft:rgba(255,255,255,.22);
+      --stroke:rgba(255,255,255,.55); --radius:28px;
       --shadow:0 30px 70px -28px rgba(35,42,35,.55);
     }
     *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;min-width:0}
@@ -63,21 +56,17 @@
 
     .shell{width:100%;max-width:420px;position:relative;z-index:1;display:flex;flex-direction:column;gap:18px}
 
-    /* 玻璃基底 */
     .glass{
-      position:relative;overflow:hidden;
-      background:var(--glass);
-      backdrop-filter:blur(30px) saturate(150%);
-      -webkit-backdrop-filter:blur(30px) saturate(150%);
-      border:1px solid var(--stroke);
-      border-radius:var(--radius);
+      position:relative;overflow:hidden;background:var(--glass);
+      backdrop-filter:blur(30px) saturate(150%);-webkit-backdrop-filter:blur(30px) saturate(150%);
+      border:1px solid var(--stroke);border-radius:var(--radius);
       box-shadow:var(--shadow),inset 0 1px 0 rgba(255,255,255,.75),inset 0 -1px 0 rgba(255,255,255,.18);
     }
-    .glass::before{ /* 磨砂顆粒 / 水氣紋理 */
+    .glass::before{
       content:"";position:absolute;inset:0;pointer-events:none;opacity:.4;mix-blend-mode:overlay;
       background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='f'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4'/></filter><rect width='200' height='200' filter='url(%23f)'/></svg>");
     }
-    .glass::after{ /* 玻璃反光 */
+    .glass::after{
       content:"";position:absolute;inset:0;pointer-events:none;
       background:linear-gradient(115deg,transparent 36%,rgba(255,255,255,.4) 48%,transparent 60%);
       transform:translateX(-130%);animation:sheen 8s ease-in-out infinite;
@@ -90,10 +79,7 @@
       font-size:10.5px;letter-spacing:.4em;text-transform:uppercase;color:var(--brass-deep);font-weight:600;
     }
     .brand .mark::before,.brand .mark::after{content:"";width:26px;height:1px;background:linear-gradient(90deg,transparent,var(--brass))}
-    h1{
-      font-family:"Cormorant Garamond","Noto Sans TC",serif;
-      font-size:34px;font-weight:600;margin:0 0 8px;letter-spacing:.1em;color:#20241f;
-    }
+    h1{font-family:"Cormorant Garamond","Noto Sans TC",serif;font-size:34px;font-weight:600;margin:0 0 8px;letter-spacing:.1em;color:#20241f;}
     .subtitle{font-size:11.5px;color:var(--ink-soft);margin:0;letter-spacing:.32em;text-transform:uppercase}
 
     .meta{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(255,255,255,.28);margin-top:22px;border-radius:18px;overflow:hidden;border:1px solid rgba(255,255,255,.4)}
@@ -108,18 +94,15 @@
     label{display:block;font-size:11px;letter-spacing:.22em;color:var(--ink-soft);margin-bottom:8px;font-weight:600;text-transform:uppercase}
     input,select{
       width:100%;max-width:100%;padding:16px 16px;border-radius:16px;
-      border:1px solid rgba(255,255,255,.5);
-      background:rgba(255,255,255,.28);
+      border:1px solid rgba(255,255,255,.5);background:rgba(255,255,255,.28);
       backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
       color:var(--ink);font-size:16px;font-weight:500;font-family:inherit;
       outline:none;transition:all .35s cubic-bezier(.2,.8,.2,1);
-      appearance:none;-webkit-appearance:none;
-      box-shadow:inset 0 1px 0 rgba(255,255,255,.6);
+      appearance:none;-webkit-appearance:none;box-shadow:inset 0 1px 0 rgba(255,255,255,.6);
     }
     select{background-image:linear-gradient(45deg,transparent 50%,var(--brass-deep) 50%),linear-gradient(135deg,var(--brass-deep) 50%,transparent 50%);background-position:calc(100% - 20px) 50%,calc(100% - 14px) 50%;background-size:6px 6px,6px 6px;background-repeat:no-repeat}
     input:focus,select:focus{
-      background-color:rgba(255,255,255,.45);
-      border-color:rgba(185,145,90,.75);
+      background-color:rgba(255,255,255,.45);border-color:rgba(185,145,90,.75);
       box-shadow:0 0 0 4px rgba(185,145,90,.2),0 0 18px rgba(220,187,132,.35),inset 0 1px 0 rgba(255,255,255,.7);
       transform:translateY(-1px);
     }
@@ -141,8 +124,7 @@
     button{
       width:100%;padding:18px;border-radius:18px;font-size:14px;font-weight:600;
       letter-spacing:.18em;cursor:pointer;font-family:inherit;outline:none;position:relative;overflow:hidden;
-      transition:transform .25s cubic-bezier(.2,.8,.2,1),box-shadow .35s ease,background .35s ease;
-      z-index:2;
+      transition:transform .25s cubic-bezier(.2,.8,.2,1),box-shadow .35s ease,background .35s ease;z-index:2;
     }
     .submit-btn{
       color:#fffdf8;border:1px solid rgba(255,255,255,.45);
@@ -157,10 +139,8 @@
     .submit-btn:hover{transform:translateY(-2px);box-shadow:0 24px 46px -16px rgba(141,108,60,1)}
     .submit-btn:active{transform:scale(.975)}
     .switch-btn{
-      margin-top:26px;color:var(--ink);
-      background:rgba(255,255,255,.26);
-      border:1px solid rgba(255,255,255,.55);
-      backdrop-filter:blur(14px);font-weight:500;
+      margin-top:26px;color:var(--ink);background:rgba(255,255,255,.26);
+      border:1px solid rgba(255,255,255,.55);backdrop-filter:blur(14px);font-weight:500;
       box-shadow:0 12px 28px -20px rgba(35,42,35,.9),inset 0 1px 0 rgba(255,255,255,.6);
     }
     .switch-btn:hover{background:rgba(255,255,255,.42);transform:translateY(-2px)}
@@ -205,7 +185,6 @@
     .info-row strong{color:var(--ink-soft);font-weight:500;font-size:11px;letter-spacing:.16em;white-space:nowrap}
     .info-row span{font-weight:600;font-size:14.5px;text-align:right;word-break:break-all;min-width:0}
     #r-phone{color:var(--brass-deep);font-size:16px;letter-spacing:.08em}
-
     .footnote{text-align:center;font-size:10px;letter-spacing:.3em;color:rgba(255,255,255,.65);text-transform:uppercase;padding-bottom:4px}
 
     @media (max-width:380px){
@@ -233,11 +212,8 @@
     <section class="glass card" id="form-section">
       <div class="field">
         <label for="activity">兌換活動項目</label>
-        <select id="activity" onchange="checkSaved()">
-          <option value="活動測試區">活動測試區</option>
-          <option value="活動測試區2">活動測試區2</option>
-          <option value="活動測試區3">活動測試區3</option>
-        </select>
+        <!-- 🔥 這裡改為空選單，讓 config.js 自動填入 -->
+        <select id="activity" onchange="checkSaved()"></select>
       </div>
 
       <div class="field">
@@ -252,7 +228,6 @@
 
       <div class="field">
         <label for="phone">手機號碼</label>
-        <!-- 🔥 加上了嚴格的數字過濾 oninput="this.value=this.value.replace(/\D/g,'').slice(0,10)" -->
         <input id="phone" type="tel" inputmode="numeric" placeholder="例：0912345678 或 0212345678" oninput="this.value=this.value.replace(/\D/g,'').slice(0,10)">
       </div>
 
@@ -289,6 +264,8 @@
   </main>
 
 <script type="module">
+  // 🔥 1. 匯入共用的 config.js
+  import { EVENT_CONFIG } from "./config.js";
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
   import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
@@ -305,13 +282,20 @@
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
 
- const EVENT_SECRETS = { 
-  "活動測試區": "TEST", 
-  "活動測試區2": "TEST2", 
-  "活動測試區3": "TEST3" 
-};
+  // 🔥 2. 將密語對照表設定為 config.js 裡面的資料
+  const EVENT_SECRETS = EVENT_CONFIG;
   const $ = id => document.getElementById(id);
   let unsubscribe = null;
+
+  // 🔥 3. 網頁一載入，就自動把 config.js 的活動塞進下拉選單
+  const actSelect = $('activity');
+  actSelect.innerHTML = ""; 
+  for (const actName in EVENT_CONFIG) {
+    const opt = document.createElement('option');
+    opt.value = actName;
+    opt.text = actName;
+    actSelect.appendChild(opt);
+  }
 
   window.checkSaved = checkSaved;
   window.switchAct = switchAct;
@@ -344,7 +328,8 @@
   async function register() {
     const act=$('activity').value, name=$('name').value.trim(), soc=$('social_id').value.trim(), ph=$('phone').value.replace(/\D/g,''), cd=$('secret_code').value.trim();
     if(!name || !soc || ph.length<8 || !cd) return alert("⚠️ 請完整填寫資料與密語！");
-    // 🔥 移除 09 開頭的限制，支援市話
+    
+    // 檢查密語 (會自動比對 config.js)
     if(cd.toUpperCase() !== EVENT_SECRETS[act]) return alert("⚠️ 通關密語錯誤！");
 
     const docRef = doc(db, act, ph);
@@ -377,7 +362,6 @@
     $('ticket-card').style.display = 'block';
     $('r-act').innerText=act; $('r-name').innerText=name; $('r-social').innerText=soc; $('r-phone').innerText=ph;
 
-    // 🔥 使用本地端立刻生成 QR Code (不再依賴外部網站)
     new QRious({
       element: $('qr'),
       value: ph,
