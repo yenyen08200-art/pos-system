@@ -378,7 +378,7 @@
 
       if(!docSnap.exists()) {
         await setDoc(docRef, {
-          name, social_id: soc, phone: ph, status: "", store: "", redeemTime: "", timestamp: new Date().toLocaleString()
+          name, social_id: soc, phone: ph, status: "", store: "", redeemTime: "", timestamp: new Date().toLocaleString(), gift: customGift
         });
         confetti({particleCount:80, spread:70});
 
