@@ -439,8 +439,8 @@ function renderRight(){
   $("v-name").innerText = record.name || "—";
   $("v-social").innerText = record.social_id || "未提供";
   
-  // 🔥 客人資料跳出來時，這裡才會精準顯示該活動的贈品名稱
-  $("v-gift").innerText = giftMap[shownAct] || "專屬活動贈品";
+  // 🔥 修改：如果該客人資料有專屬贈品，就優先顯示專屬贈品，否則顯示活動預設贈品
+  $("v-gift").innerText = record.gift || giftMap[shownAct] || "專屬活動贈品";
   $("btn-redeem").classList.toggle("hidden", isInvalid);
 }
 
