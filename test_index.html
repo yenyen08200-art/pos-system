@@ -31,10 +31,11 @@
 }
 *{box-sizing:border-box;margin:0;padding:0;border-color:var(--border)}
 
-/* 🚀 修正 1：鎖定螢幕寬度，隱藏橫向卷軸，解決手機版歪一邊的問題 */
+/* 🚀 修正 1：改用 100% 與 max-width，完美解決 iOS Safari 版面右偏的問題 */
 html,body{
   height:100%;
-  width:100vw;
+  width:100%;
+  max-width:100%;
   overflow-x:hidden;
 }
 
@@ -52,7 +53,7 @@ main{
     linear-gradient(90deg, oklch(1 0 0 / 3%) 1px, transparent 1px);
   background-size:auto,auto,44px 44px,44px 44px;
 }
-.wrap{max-width:1400px;margin:0 auto;width:100%;padding:20px 16px}
+.wrap{max-width:1400px;margin:0 auto;width:100%;padding:20px 16px;box-sizing:border-box;}
 @media(min-width:768px){.wrap{padding:32px}}
 header{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px;margin-bottom:24px}
 .brand{display:flex;align-items:center;gap:16px}
