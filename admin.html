@@ -105,16 +105,14 @@
       .sidebar-menu { display: none; }
       #main-app { padding: 10px; height: auto; overflow-x: hidden; box-sizing: border-box; }
       
-      /* 🔥 這裡修復了上方控制列被擠爆的問題 */
       .header { flex-direction: column; align-items: stretch; gap: 15px; padding: 15px; }
       .header-title-area { flex-direction: column; align-items: flex-start; gap: 8px; }
       h1 { font-size: 20px; white-space: nowrap; } 
       
       .controls { flex-wrap: wrap; width: 100%; gap: 8px; justify-content: space-between; }
-      .controls select { width: 100%; flex-basis: 100%; } /* 下拉選單自己佔據第一排 */
-      .controls button { flex: 1; padding: 10px 5px; font-size: 13px; white-space: nowrap; } /* 下方三顆按鈕平均分配第二排 */
+      .controls select { width: 100%; flex-basis: 100%; }
+      .controls button { flex: 1; padding: 10px 5px; font-size: 13px; white-space: nowrap; }
       
-      /* 數據卡片與圖表手機版調整 */
       .dashboard { gap: 10px; }
       .stat-card { min-width: 45%; padding: 15px 10px; }
       .stat-card .num { font-size: 24px; }
@@ -127,7 +125,7 @@
 </head>
 <body>
 
-  <!-- 🔒 密碼鎖畫面 (風格同步) -->
+  <!-- 🔒 密碼鎖畫面 -->
   <div id="login-screen">
     <div class="login-card">
       <h2>🔒 總部戰情室</h2>
@@ -156,7 +154,6 @@
       <div class="sidebar-item" onclick="alert('分店管理與權限設定功能開發中...')">🏪 門市管理中心</div>
       <div class="sidebar-item" onclick="alert('行銷推播與名單分析功能開發中...')">🎯 行銷資產管理</div>
     </div>
-    <div style="font-size: 11px; opacity: 0.6; text-align: center;"></div>
   </div>
 
   <!-- 主要內容區 -->
@@ -167,8 +164,7 @@
           <h1>📊 電子兌換卷儀表板 <span class="live-badge">LIVE 監控中</span></h1>
         </div>
         <div class="controls">
-          <select id="act-select" onchange="fetchData()">
-          </select>
+          <select id="act-select" onchange="fetchData()"></select>
           <button class="btn-expire" onclick="expireTickets()">🧹 結算過期</button>
           <button class="btn-export" onclick="exportExcel()">📥 匯出 Excel</button>
           <button class="btn-logout" onclick="logout()">登出</button>
@@ -234,8 +230,7 @@
   </div>
 
   <script type="module">
-    // 🔥 匯入 config.js 活動設定
-    import { EVENT_CONFIG } from "./config.js";
+    // 🔥 防彈架構：取消最上方的直接 import，改用程式內動態載入
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getFirestore, collection, onSnapshot, getDocs, updateDoc, doc, query, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
     import { getAuth, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
@@ -254,21 +249,6 @@
     const db = getFirestore(app);
     const auth = getAuth(app); 
     const googleProvider = new GoogleAuthProvider(); 
-
-    // 🔥 從 config.js 自動生成活動下拉選單
-    const adminSelect = document.getElementById('act-select');
-    adminSelect.innerHTML = '';
-    for (const actName in EVENT_CONFIG) {
-      const opt = document.createElement('option');
-      opt.value = actName;
-      opt.text = actName;
-      adminSelect.appendChild(opt);
-    }
-    
-    // 確保選單生成後自動載入一次資料
-    if (adminSelect.options.length > 0) {
-      setTimeout(() => fetchData(), 100);
-    }
     
     let allData = []; 
     let sortCol = 'timestamp'; 
@@ -276,28 +256,9 @@
     let storeChartInstance = null;
     let statusChartInstance = null;
     let unsubscribeSnapshot = null; 
-
     const adminEmails = ["yenyen08200@gmail.com", "admin@gmail.com"];
 
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        if (adminEmails.includes(user.email)) {
-          document.getElementById('login-screen').style.display = 'none';
-          document.getElementById('sidebar-nav').style.display = 'flex'; 
-          document.getElementById('main-app').style.display = 'block';
-          fetchData(); 
-        } else {
-          alert(`❌ 權限不足！\n信箱 ${user.email} 非總部管理員。`);
-          signOut(auth); 
-        }
-      } else {
-        document.getElementById('sidebar-nav').style.display = 'none';
-        document.getElementById('main-app').style.display = 'none';
-        document.getElementById('login-screen').style.display = 'flex';
-        if (unsubscribeSnapshot) unsubscribeSnapshot();
-      }
-    });
-
+    // 🔥 確保所有按鈕的綁定函數一定會存在，即使設定檔還沒載入也不會壞掉！
     window.login = function() {
       const email = document.getElementById('email').value;
       const pwd = document.getElementById('pwd').value;
@@ -327,11 +288,12 @@
     };
 
     window.fetchData = function() {
-      const act = document.getElementById('act-select').value;
+      const actSelect = document.getElementById('act-select');
+      if (!actSelect || !actSelect.value) return; // 避免設定檔沒讀到時出錯
+      const act = actSelect.value;
       const tbody = document.getElementById('table-body');
       
       if (unsubscribeSnapshot) unsubscribeSnapshot();
-
       tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding: 40px; color: #8c8270;">📡 與資料庫即時連線中...</td></tr>';
       
       unsubscribeSnapshot = onSnapshot(collection(db, act), (querySnapshot) => {
@@ -363,15 +325,19 @@
         document.getElementById('expired-count').innerText = expiredCount; 
 
         drawCharts(storeStats, redeemedCount, unredeemedCount, expiredCount); 
-        renderTable(); 
+        window.renderTable(); 
       }, (error) => {
         console.error("即時監聽失敗:", error);
         tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding: 40px; color: red;">連線中斷，請確認網路連線。</td></tr>';
       });
     };
 
+    // 🔥 你剛才除錯成功的心血，這段一併保留！
     window.expireTickets = async function() {
-      const act = document.getElementById('act-select').value;
+      const actSelect = document.getElementById('act-select');
+      if (!actSelect || !actSelect.value) return;
+      const act = actSelect.value;
+
       const confirmText = prompt(`⚠️ 警告：此操作不可逆！\n\n您確定要把「${act}」所有【未兌換】的票券強制設為【已過期】嗎？\n\n如果確定，請在下方輸入「結算」兩個字：`);
       if (confirmText !== "結算") {
         alert("操作已取消。");
@@ -383,7 +349,6 @@
         btn.innerText = "處理中...";
         btn.disabled = true;
 
-        // 🔥 改用畫面已經載入的 allData 來過濾，完美捕捉「空字串」與「未兌換」的票券
         const unredeemedDocs = allData.filter(d => !d.status || d.status === "未兌換");
         
         if (unredeemedDocs.length === 0) {
@@ -415,6 +380,79 @@
         document.querySelector('.btn-expire').innerText = "🧹 結算過期";
         document.querySelector('.btn-expire').disabled = false;
       }
+    };
+
+    window.setSort = function(col) {
+      if (sortCol === col) sortAsc = !sortAsc;
+      else { sortCol = col; sortAsc = true; }
+      
+      document.querySelectorAll('th').forEach(th => th.classList.remove('active'));
+      document.querySelectorAll('.sort-icon').forEach(icon => icon.innerText = '▼');
+      event.currentTarget.classList.add('active');
+      document.getElementById(`sort-${col}`).innerText = sortAsc ? '▲' : '▼';
+      window.renderTable();
+    };
+
+    window.renderTable = function() {
+      const tbody = document.getElementById('table-body');
+      const searchTerm = document.getElementById('search-box').value.trim().toLowerCase();
+
+      let filteredData = allData.filter(d => {
+        return (d.phone || '').toLowerCase().includes(searchTerm) ||
+               (d.name || '').toLowerCase().includes(searchTerm);
+      });
+
+      filteredData.sort((a, b) => {
+        let valA = a[sortCol] || '';
+        let valB = b[sortCol] || '';
+        if (valA < valB) return sortAsc ? -1 : 1;
+        if (valA > valB) return sortAsc ? 1 : -1;
+        return 0;
+      });
+
+      document.getElementById('result-count').innerText = `顯示 ${filteredData.length} 筆結果`;
+
+      if (filteredData.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding: 40px; color: #d96b43; font-weight: bold;">找不到符合的資料 🥲</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = filteredData.map(d => {
+        let statusBadge = `<span class="status-no">${d.status || '未兌換'}</span>`; 
+        if (d.status === '已兌換') statusBadge = `<span class="status-yes">已兌換</span>`; 
+        if (d.status === '已過期') statusBadge = `<span class="status-expired">已過期</span>`; 
+
+        return `
+          <tr>
+            <td style="font-family:monospace; font-size:15px; font-weight:bold; color:var(--text-main);">${d.phone || ''}</td>
+            <td style="font-weight:bold;">${d.name || ''}</td>
+            <td style="color:#d96b43;">${d.social_id || '未提供'}</td>
+            <td>${statusBadge}</td>
+            <td style="font-weight:bold; color:var(--sidebar-bg);">${d.store || '-'}</td>
+            <td class="time-text">${d.redeemTime || '-'}</td>
+            <td class="time-text">${d.timestamp || '-'}</td>
+          </tr>
+        `;
+      }).join('');
+    };
+
+    window.exportExcel = function() {
+      if (allData.length === 0) return alert('⚠️ 目前沒有資料可以匯出喔！');
+      const act = document.getElementById('act-select').value;
+      const exportArr = allData.map(d => ({
+        "手機號碼": d.phone,
+        "顧客姓名": d.name,
+        "社群帳號": d.social_id || '未提供',
+        "兌換狀態": d.status || '未兌換',
+        "核銷門市": d.store || '',
+        "核銷時間": d.redeemTime || '',
+        "領券時間": d.timestamp || ''
+      }));
+      const ws = XLSX.utils.json_to_sheet(exportArr);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "兌換名單");
+      const dateStr = new Date().toISOString().slice(0,10);
+      XLSX.writeFile(wb, `${act}_兌換報表_${dateStr}.xlsx`);
     };
 
     function drawCharts(storeStats, redeemed, unredeemed, expired) {
@@ -481,78 +519,45 @@
       });
     }
 
-    window.setSort = function(col) {
-      if (sortCol === col) sortAsc = !sortAsc;
-      else { sortCol = col; sortAsc = true; }
-      
-      document.querySelectorAll('th').forEach(th => th.classList.remove('active'));
-      document.querySelectorAll('.sort-icon').forEach(icon => icon.innerText = '▼');
-      event.currentTarget.classList.add('active');
-      document.getElementById(`sort-${col}`).innerText = sortAsc ? '▲' : '▼';
-      renderTable();
-    };
+    // 🔥 身份驗證與動態載入 config.js (保證不會卡死 UI)
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        if (adminEmails.includes(user.email)) {
+          document.getElementById('login-screen').style.display = 'none';
+          document.getElementById('sidebar-nav').style.display = 'flex'; 
+          document.getElementById('main-app').style.display = 'block';
+          
+          // 登入成功後，安全載入 config.js
+          import("./config.js").then((module) => {
+            const EVENT_CONFIG = module.EVENT_CONFIG;
+            const adminSelect = document.getElementById('act-select');
+            adminSelect.innerHTML = '';
+            for (const actName in EVENT_CONFIG) {
+              const opt = document.createElement('option');
+              opt.value = actName;
+              opt.text = actName;
+              adminSelect.appendChild(opt);
+            }
+            if (adminSelect.options.length > 0) {
+              window.fetchData(); 
+            }
+          }).catch((error) => {
+            console.error("無法載入 config.js", error);
+            alert("⚠️ 系統警告：找不到 config.js 檔案！\n\n1. 請確認已將 config.js 上傳至 GitHub。\n2. 請確認大小寫全小寫。\n3. GitHub Pages 可能正在快取，請等 1 分鐘後重整頁面。");
+          });
 
-    window.renderTable = function() {
-      const tbody = document.getElementById('table-body');
-      const searchTerm = document.getElementById('search-box').value.trim().toLowerCase();
-
-      let filteredData = allData.filter(d => {
-        return (d.phone || '').toLowerCase().includes(searchTerm) ||
-               (d.name || '').toLowerCase().includes(searchTerm);
-      });
-
-      filteredData.sort((a, b) => {
-        let valA = a[sortCol] || '';
-        let valB = b[sortCol] || '';
-        if (valA < valB) return sortAsc ? -1 : 1;
-        if (valA > valB) return sortAsc ? 1 : -1;
-        return 0;
-      });
-
-      document.getElementById('result-count').innerText = `顯示 ${filteredData.length} 筆結果`;
-
-      if (filteredData.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding: 40px; color: #d96b43; font-weight: bold;">找不到符合的資料 🥲</td></tr>';
-        return;
+        } else {
+          alert(`❌ 權限不足！\n信箱 ${user.email} 非總部管理員。`);
+          signOut(auth); 
+        }
+      } else {
+        document.getElementById('sidebar-nav').style.display = 'none';
+        document.getElementById('main-app').style.display = 'none';
+        document.getElementById('login-screen').style.display = 'flex';
+        if (unsubscribeSnapshot) unsubscribeSnapshot();
       }
+    });
 
-      tbody.innerHTML = filteredData.map(d => {
-        let statusBadge = `<span class="status-no">${d.status || '未兌換'}</span>`; 
-        if (d.status === '已兌換') statusBadge = `<span class="status-yes">已兌換</span>`; 
-        if (d.status === '已過期') statusBadge = `<span class="status-expired">已過期</span>`; 
-
-        return `
-          <tr>
-            <td style="font-family:monospace; font-size:15px; font-weight:bold; color:var(--text-main);">${d.phone || ''}</td>
-            <td style="font-weight:bold;">${d.name || ''}</td>
-            <td style="color:#d96b43;">${d.social_id || '未提供'}</td>
-            <td>${statusBadge}</td>
-            <td style="font-weight:bold; color:var(--sidebar-bg);">${d.store || '-'}</td>
-            <td class="time-text">${d.redeemTime || '-'}</td>
-            <td class="time-text">${d.timestamp || '-'}</td>
-          </tr>
-        `;
-      }).join('');
-    };
-
-    window.exportExcel = function() {
-      if (allData.length === 0) return alert('⚠️ 目前沒有資料可以匯出喔！');
-      const act = document.getElementById('act-select').value;
-      const exportArr = allData.map(d => ({
-        "手機號碼": d.phone,
-        "顧客姓名": d.name,
-        "社群帳號": d.social_id || '未提供',
-        "兌換狀態": d.status || '未兌換',
-        "核銷門市": d.store || '',
-        "核銷時間": d.redeemTime || '',
-        "領券時間": d.timestamp || ''
-      }));
-      const ws = XLSX.utils.json_to_sheet(exportArr);
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "兌換名單");
-      const dateStr = new Date().toISOString().slice(0,10);
-      XLSX.writeFile(wb, `${act}_兌換報表_${dateStr}.xlsx`);
-    };
   </script>
 </body>
 </html>
