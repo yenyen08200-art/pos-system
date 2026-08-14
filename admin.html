@@ -167,7 +167,6 @@
           <h1>📊 電子兌換卷儀表板 <span class="live-badge">LIVE 監控中</span></h1>
         </div>
         <div class="controls">
-          <!-- 🔥 移除寫死的選項，交由 config.js 動態生成 -->
           <select id="act-select" onchange="fetchData()">
           </select>
           <button class="btn-expire" onclick="expireTickets()">🧹 結算過期</button>
@@ -264,6 +263,11 @@
       opt.value = actName;
       opt.text = actName;
       adminSelect.appendChild(opt);
+    }
+    
+    // 確保選單生成後自動載入一次資料
+    if (adminSelect.options.length > 0) {
+      setTimeout(() => fetchData(), 100);
     }
     
     let allData = []; 
@@ -366,7 +370,7 @@
       });
     };
 
-  window.expireTickets = async function() {
+    window.expireTickets = async function() {
       const act = document.getElementById('act-select').value;
       const confirmText = prompt(`⚠️ 警告：此操作不可逆！\n\n您確定要把「${act}」所有【未兌換】的票券強制設為【已過期】嗎？\n\n如果確定，請在下方輸入「結算」兩個字：`);
       if (confirmText !== "結算") {
@@ -379,7 +383,7 @@
         btn.innerText = "處理中...";
         btn.disabled = true;
 
-        // 🔥 修正核心：改用畫面已經載入的 allData 來過濾，完美捕捉「空字串」與「未兌換」的票券
+        // 🔥 改用畫面已經載入的 allData 來過濾，完美捕捉「空字串」與「未兌換」的票券
         const unredeemedDocs = allData.filter(d => !d.status || d.status === "未兌換");
         
         if (unredeemedDocs.length === 0) {
@@ -389,47 +393,7 @@
           const updatePromises = [];
           
           unredeemedDocs.forEach((d) => {
-            // 使用原本抓到的 d.id 來更新 Firebase
             const docRef = doc(db, act, d.id);
-            const p = updateDoc(docRef, {
-              status: "已過期",
-              redeemTime: "活動結束，逾期未換"
-            });
-            updatePromises.push(p);
-            updated++;
-          });
-
-          await Promise.all(updatePromises);
-          alert(`✅ 結算完成！\n總共將 ${updated} 筆票券設為已過期。`);
-        }
-
-        btn.innerText = "🧹 結算過期";
-        btn.disabled = false;
-
-      } catch (error) {
-        console.error("結算失敗:", error);
-        alert("結算失敗，請檢查網路連線或權限設定。");
-        document.querySelector('.btn-expire').innerText = "🧹 結算過期";
-        document.querySelector('.btn-expire').disabled = false;
-      }
-    };
-
-      try {
-        const btn = document.querySelector('.btn-expire');
-        btn.innerText = "處理中...";
-        btn.disabled = true;
-
-        const q = query(collection(db, act), where("status", "==", "未兌換"));
-        const querySnapshot = await getDocs(q);
-        
-        if (querySnapshot.empty) {
-          alert("🎉 目前沒有任何【未兌換】的票券可以結算！");
-        } else {
-          let updated = 0;
-          const updatePromises = [];
-          
-          querySnapshot.forEach((docSnap) => {
-            const docRef = doc(db, act, docSnap.id);
             const p = updateDoc(docRef, {
               status: "已過期",
               redeemTime: "活動結束，逾期未換"
