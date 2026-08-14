@@ -85,7 +85,7 @@ section.panel{padding:20px}
 .stores{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px; width: 100%;}
 @media(min-width:640px){.stores{grid-template-columns:repeat(3,minmax(0,1fr))}}
 
-/* 🔥 門市下拉選單專用樣式 */
+/* 門市下拉選單樣式 */
 .custom-dropdown { position: relative; width: 100%; }
 .custom-dropdown summary {
   list-style: none; width: 100%; min-height: 64px; border-radius: 14px; border: 1px solid var(--border);
@@ -143,7 +143,7 @@ button{font-family:inherit;cursor:pointer;}
 .primary-btn:active{transform:scale(.95)}
 button:disabled{opacity:.5;cursor:not-allowed}
 
-/* 🔥 全螢幕掃描器專用樣式 */
+/* 全螢幕掃描器樣式 */
 #scan-area{
   position: fixed; inset: 0; z-index: 9999; 
   background: rgba(10, 12, 16, 0.95); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
@@ -221,7 +221,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
       <!-- LEFT -->
       <section class="panel rise">
         
-        <!-- 🔥 修改為自動收合的下拉選單 -->
+        <!-- 門市下拉選單 -->
         <div class="block">
           <h2 class="label">● 選擇門市</h2>
           <details id="store-dropdown" class="custom-dropdown">
@@ -234,7 +234,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
 
         <div class="block">
           <h2 class="label">● 活動選單</h2>
-          <div id="acts"></div>
+          <div id="acts"><p class="empty">正在從雲端載入活動...</p></div>
         </div>
 
         <div class="block">
@@ -272,7 +272,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
     </div>
   </div>
   
-  <!-- 🔥 獨立出來的全螢幕掃描區 -->
+  <!-- 全螢幕掃描區 -->
   <div id="scan-area" class="hidden">
     <div class="reader-wrap">
       <div id="reader"></div>
@@ -285,300 +285,331 @@ button:disabled{opacity:.5;cursor:not-allowed}
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 <script type="module">
-// 🔥 防彈架構：動態載入 config.js 防快取
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyBINQuYtYZA8RLfwm51AfGLTYj1TX_UcFo",
-  authDomain: "texas-chick-event.firebaseapp.com",
-  projectId: "texas-chick-event",
-  storageBucket: "texas-chick-event.firebasestorage.app",
-  messagingSenderId: "281248037440",
-  appId: "1:281248037440:web:20c32ba4136ea7c57ffda5",
-  measurementId: "G-HZ6334WB3B",
-};
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+  const firebaseConfig = {
+    apiKey: "AIzaSyBINQuYtYZA8RLfwm51AfGLTYj1TX_UcFo",
+    authDomain: "texas-chick-event.firebaseapp.com",
+    projectId: "texas-chick-event",
+    storageBucket: "texas-chick-event.firebasestorage.app",
+    messagingSenderId: "281248037440",
+    appId: "1:281248037440:web:20c32ba4136ea7c57ffda5",
+    measurementId: "G-HZ6334WB3B"
+  };
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
 
-const module = await import("./config.js?v=" + new Date().getTime());
-const { STORE_LIST, POS_CONFIG } = module;
+  let STORE_LIST = [];
+  let POS_CONFIG = {};
+  let evMap = {};
+  let giftMap = {};
 
-const evMap = {};
-STORE_LIST.forEach(s => {
-  evMap[s] = [];
-  for (const act in POS_CONFIG) {
-    if (POS_CONFIG[act].stores === "ALL" || POS_CONFIG[act].stores.includes(s)) {
-      evMap[s].push(act);
+  const $ = (id) => document.getElementById(id);
+  let store = "", act = "", shownPhone = "", shownAct = "", record = null;
+  let scanner = null, uTimer = null, busy = false;
+
+  // 🔥 初始化：從雲端抓取系統設定（取代 config.js）
+  async function initPOS() {
+    try {
+      const configSnap = await getDoc(doc(db, "system", "config"));
+      if (configSnap.exists()) {
+        const data = configSnap.data();
+        STORE_LIST = data.STORE_LIST || [];
+        POS_CONFIG = data.POS_CONFIG || {};
+      } else {
+        alert("⚠️ 雲端尚未建立系統設定，請先至總部後台儲存設定！");
+        return;
+      }
+
+      // 建立對應對照表
+      evMap = {};
+      STORE_LIST.forEach(s => {
+        evMap[s] = [];
+        for (const a in POS_CONFIG) {
+          const cfg = POS_CONFIG[a];
+          if (cfg.stores === "ALL" || (Array.isArray(cfg.stores) && cfg.stores.includes(s))) {
+            evMap[s].push(a);
+          }
+        }
+      });
+
+      giftMap = {};
+      for (const a in POS_CONFIG) {
+        giftMap[a] = POS_CONFIG[a].gift;
+      }
+
+      const saved = localStorage.getItem("p_store");
+      if (saved && evMap[saved]) { 
+        store = saved; 
+        act = (evMap[saved] || [])[0] || ""; 
+      } else if (STORE_LIST.length > 0) {
+        store = STORE_LIST[0];
+        act = (evMap[store] || [])[0] || "";
+      }
+
+      renderStores(); 
+      renderActs(); 
+      renderRight();
+
+    } catch (e) {
+      console.error("載入雲端設定失敗:", e);
+      alert("無法連線至雲端讀取 POS 設定！");
     }
   }
-});
 
-const giftMap = {};
-for (const act in POS_CONFIG) {
-  giftMap[act] = POS_CONFIG[act].gift;
-}
+  initPOS();
 
-let audioCtx = null;
-function playAlert(type){
-  if (navigator.vibrate){
-    if (type === "scan") navigator.vibrate([150]);
-    if (type === "error") navigator.vibrate([300]);
-    if (type === "success") navigator.vibrate([100,50,100,50,200]);
-  }
-  audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
-  if (!audioCtx) return;
-  if (audioCtx.state === "suspended") audioCtx.resume();
-  const osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
-  osc.connect(gain); gain.connect(audioCtx.destination);
-  if (type === "scan"){
-    osc.frequency.value = 1200; osc.type = "sine";
-    gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-    osc.start(); osc.stop(audioCtx.currentTime + 0.1);
-  } else if (type === "error"){
-    osc.frequency.value = 300; osc.type = "square";
-    gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
-    osc.start(); osc.stop(audioCtx.currentTime + 0.3);
-  } else {
-    osc.frequency.setValueAtTime(800, audioCtx.currentTime);
-    osc.frequency.linearRampToValueAtTime(1200, audioCtx.currentTime + 0.2);
-    osc.type = "sine";
-    gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-    osc.start(); osc.stop(audioCtx.currentTime + 0.3);
-  }
-}
-
-const $ = (id) => document.getElementById(id);
-let store = "", act = "", shownPhone = "", shownAct = "", record = null;
-let scanner = null, uTimer = null, busy = false;
-
-function setBusy(b){
-  busy = b;
-  $("btn-check").disabled = b;
-  $("btn-redeem").disabled = b;
-  $("btn-check").innerText = b ? "查詢中…" : "查詢";
-}
-
-function renderStores(){
-  const box = $("stores"); box.innerHTML = "";
-  STORE_LIST.forEach((s) => {
-    const b = document.createElement("button");
-    b.className = "store-btn" + (store === s ? " on" : "");
-    b.innerText = s;
-    b.onclick = () => selectStore(s);
-    box.appendChild(b);
-  });
-  $("duty").innerText = store || "尚未選擇";
-  $("store-summary").innerText = store ? `已選擇：${store}` : "請選擇門市...";
-}
-
-function renderActs(){
-  const box = $("acts"); box.innerHTML = "";
-  if (!store){
-    box.innerHTML = '<p class="empty">請先選擇門市</p>';
-    return;
-  }
-  const list = document.createElement("div");
-  list.className = "acts";
-  (evMap[store] || []).forEach((a) => {
-    const b = document.createElement("button");
-    b.className = "act-btn" + (act === a ? " on" : "");
-    
-    // 🔥 修改：只顯示活動名稱，拿掉贈品顯示
-    b.innerHTML = '<span><span class="act-name"></span></span><span class="radio"></span>';
-    b.querySelector(".act-name").innerText = a;
-    
-    b.onclick = () => { 
-      act = a; 
-      renderActs(); 
-      setTimeout(() => $("phone").focus(), 100); 
-    };
-    list.appendChild(b);
-  });
-  box.appendChild(list);
-}
-
-function selectStore(s){
-  store = s;
-  localStorage.setItem("p_store", s);
-  act = (evMap[s] || [])[0] || "";
-  record = null;
-  
-  // 🔥 選完門市後，自動將下拉選單收回去
-  $("store-dropdown").removeAttribute("open");
-  
-  renderStores(); renderActs(); renderRight();
-  setTimeout(() => $("phone").focus(), 100);
-}
-
-function renderRight(){
-  if (!record){
-    $("placeholder").classList.remove("hidden");
-    $("detail").classList.add("hidden");
-    return;
-  }
-  $("placeholder").classList.add("hidden");
-  $("detail").classList.remove("hidden");
-  
-  const isClaimed = record.status === "已兌換";
-  const isExpired = record.status === "已過期";
-  const isInvalid = isClaimed || isExpired; 
-
-  const banner = $("banner");
-  banner.className = "banner rise " + (isInvalid ? "bad" : "ok");
-  
-  if (isClaimed) {
-    banner.innerHTML = "❌ 券已失效 / 已領取<small>📌 於 " + (record.store || "—") + " 兌換</small><small>🕒 " + (record.redeemTime || "—") + "</small>";
-  } else if (isExpired) {
-    banner.innerHTML = "⚠️ 券已逾期失效<small>🕒 系統已結算過期</small>";
-  } else {
-    banner.innerHTML = "✅ 有效優惠券";
+  function setBusy(b){
+    busy = b;
+    $("btn-check").disabled = b;
+    $("btn-redeem").disabled = b;
+    $("btn-check").innerText = b ? "查詢中…" : "查詢";
   }
 
-  $("v-phone").innerText = shownPhone;
-  $("v-name").innerText = record.name || "—";
-  $("v-social").innerText = record.social_id || "未提供";
-  
-  // 🔥 修改：如果該客人資料有專屬贈品，就優先顯示專屬贈品，否則顯示活動預設贈品
-  $("v-gift").innerText = record.gift || giftMap[shownAct] || "專屬活動贈品";
-  $("btn-redeem").classList.toggle("hidden", isInvalid);
-}
+  function renderStores(){
+    const box = $("stores"); box.innerHTML = "";
+    STORE_LIST.forEach((s) => {
+      const b = document.createElement("button");
+      b.className = "store-btn" + (store === s ? " on" : "");
+      b.innerText = s;
+      b.onclick = () => selectStore(s);
+      box.appendChild(b);
+    });
+    $("duty").innerText = store || "尚未選擇";
+    $("store-summary").innerText = store ? `已選擇：${store}` : "請選擇門市...";
+  }
 
-function renderContent(data, ph, ac){
-  shownPhone = ph; shownAct = ac; record = data;
-  hideUndo();
-  renderRight();
-}
-function hideUndo(){
-  if (uTimer) clearInterval(uTimer);
-  $("btn-undo").classList.add("hidden");
-}
-
-async function startScan(){
-  $("scan-area").classList.remove("hidden");
-  if (!scanner) scanner = new Html5Qrcode("reader");
-  scanner.start(
-    { facingMode: "environment" },
-    { fps: 10, qrbox: 250 },
-    (txt) => {
-      const digits = txt.replace(/[^\d\-]/g, "");
-      $("phone").value = digits;
-      stopScan();
-      check(digits);
-    },
-    () => {}
-  ).catch(() => alert("無相機權限或裝置不支援相機！"));
-}
-function stopScan(){
-  if (scanner && scanner.isScanning) scanner.stop();
-  $("scan-area").classList.add("hidden");
-}
-
-async function check(overridePhone){
-  const ph = overridePhone || $("phone").value;
-  const st = store, ac = act;
-  if (!st || !ac || !ph) return alert("⚠️ 資料未齊！");
-
-  record = null; renderRight();
-  setBusy(true);
-  try {
-    const snap = await getDoc(doc(db, ac, ph));
-    if (snap.exists()){
-      playAlert("scan");
-      renderContent(snap.data(), ph, ac);
+  function renderActs(){
+    const box = $("acts"); box.innerHTML = "";
+    if (!store){
+      box.innerHTML = '<p class="empty">請先選擇門市</p>';
       return;
     }
-    const otherActs = (evMap[st] || []).filter((a) => a !== ac);
-    let foundOtherData = null, foundOtherActName = "";
-    for (const otherAct of otherActs){
-      const otherSnap = await getDoc(doc(db, otherAct, ph));
-      if (otherSnap.exists()){
-        const data = otherSnap.data();
-        if (data.status !== "已兌換"){ foundOtherData = data; foundOtherActName = otherAct; break; }
-      }
+    const currentEvs = evMap[store] || [];
+    if(currentEvs.length === 0) {
+      box.innerHTML = '<p class="empty">此門市目前無開放活動</p>';
+      return;
     }
-    if (foundOtherData){
-      playAlert("error");
-      if (confirm("❌ 找不到「" + ac + "」的紀錄。\n\n💡 但發現客人有未兌換的「" + foundOtherActName + "」，是否要自動切換過去？")){
-        act = foundOtherActName;
-        renderActs();
-        renderContent(foundOtherData, ph, foundOtherActName);
+
+    const list = document.createElement("div");
+    list.className = "acts";
+    currentEvs.forEach((a) => {
+      const b = document.createElement("button");
+      b.className = "act-btn" + (act === a ? " on" : "");
+      b.innerHTML = '<span><span class="act-name"></span></span><span class="radio"></span>';
+      b.querySelector(".act-name").innerText = a;
+      
+      b.onclick = () => { 
+        act = a; 
+        renderActs(); 
+        setTimeout(() => $("phone").focus(), 100); 
+      };
+      list.appendChild(b);
+    });
+    box.appendChild(list);
+  }
+
+  function selectStore(s){
+    store = s;
+    localStorage.setItem("p_store", s);
+    act = (evMap[s] || [])[0] || "";
+    record = null;
+    $("store-dropdown").removeAttribute("open");
+    renderStores(); renderActs(); renderRight();
+    setTimeout(() => $("phone").focus(), 100);
+  }
+
+  function renderRight(){
+    if (!record){
+      $("placeholder").classList.remove("hidden");
+      $("detail").classList.add("hidden");
+      return;
+    }
+    $("placeholder").classList.add("hidden");
+    $("detail").classList.remove("hidden");
+    
+    const isClaimed = record.status === "已兌換";
+    const isExpired = record.status === "已過期";
+    const isInvalid = isClaimed || isExpired; 
+
+    const banner = $("banner");
+    banner.className = "banner rise " + (isInvalid ? "bad" : "ok");
+    
+    if (isClaimed) {
+      banner.innerHTML = "❌ 券已失效 / 已領取<small>📌 於 " + (record.store || "—") + " 兌換</small><small>🕒 " + (record.redeemTime || "—") + "</small>";
+    } else if (isExpired) {
+      banner.innerHTML = "⚠️ 券已逾期失效<small>🕒 系統已結算過期</small>";
+    } else {
+      banner.innerHTML = "✅ 有效優惠券";
+    }
+
+    $("v-phone").innerText = shownPhone;
+    $("v-name").innerText = record.name || "—";
+    $("v-social").innerText = record.social_id || "未提供";
+    $("v-gift").innerText = record.gift || giftMap[shownAct] || "專屬活動贈品";
+    $("btn-redeem").classList.toggle("hidden", isInvalid);
+  }
+
+  function renderContent(data, ph, ac){
+    shownPhone = ph; shownAct = ac; record = data;
+    hideUndo();
+    renderRight();
+  }
+  function hideUndo(){
+    if (uTimer) clearInterval(uTimer);
+    $("btn-undo").classList.add("hidden");
+  }
+
+  let audioCtx = null;
+  function playAlert(type){
+    if (navigator.vibrate){
+      if (type === "scan") navigator.vibrate([150]);
+      if (type === "error") navigator.vibrate([300]);
+      if (type === "success") navigator.vibrate([100,50,100,50,200]);
+    }
+    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+    if (!audioCtx) return;
+    if (audioCtx.state === "suspended") audioCtx.resume();
+    const osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
+    osc.connect(gain); gain.connect(audioCtx.destination);
+    if (type === "scan"){
+      osc.frequency.value = 1200; osc.type = "sine";
+      gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+      osc.start(); osc.stop(audioCtx.currentTime + 0.1);
+    } else if (type === "error"){
+      osc.frequency.value = 300; osc.type = "square";
+      gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+      osc.start(); osc.stop(audioCtx.currentTime + 0.3);
+    } else {
+      osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+      osc.frequency.linearRampToValueAtTime(1200, audioCtx.currentTime + 0.2);
+      osc.type = "sine";
+      gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+      osc.start(); osc.stop(audioCtx.currentTime + 0.3);
+    }
+  }
+
+  async function startScan(){
+    $("scan-area").classList.remove("hidden");
+    if (!scanner) scanner = new Html5Qrcode("reader");
+    scanner.start(
+      { facingMode: "environment" },
+      { fps: 10, qrbox: 250 },
+      (txt) => {
+        const digits = txt.replace(/[^\d\-]/g, "");
+        $("phone").value = digits;
+        stopScan();
+        check(digits);
+      },
+      () => {}
+    ).catch(() => alert("無相機權限或裝置不支援相機！"));
+  }
+  function stopScan(){
+    if (scanner && scanner.isScanning) scanner.stop();
+    $("scan-area").classList.add("hidden");
+  }
+
+  async function check(overridePhone){
+    const ph = overridePhone || $("phone").value;
+    const st = store, ac = act;
+    if (!st || !ac || !ph) return alert("⚠️ 資料未齊！");
+
+    record = null; renderRight();
+    setBusy(true);
+    try {
+      const snap = await getDoc(doc(db, ac, ph));
+      if (snap.exists()){
+        playAlert("scan");
+        renderContent(snap.data(), ph, ac);
+        return;
+      }
+      const otherActs = (evMap[st] || []).filter((a) => a !== ac);
+      let foundOtherData = null, foundOtherActName = "";
+      for (const otherAct of otherActs){
+        const otherSnap = await getDoc(doc(db, otherAct, ph));
+        if (otherSnap.exists()){
+          const data = otherSnap.data();
+          if (data.status !== "已兌換"){ foundOtherData = data; foundOtherActName = otherAct; break; }
+        }
+      }
+      if (foundOtherData){
+        playAlert("error");
+        if (confirm("❌ 找不到「" + ac + "」的紀錄。\n\n💡 但發現客人有未兌換的「" + foundOtherActName + "」，是否要自動切換過去？")){
+          act = foundOtherActName;
+          renderActs();
+          renderContent(foundOtherData, ph, foundOtherActName);
+        } else {
+          $("phone").value = "";
+        }
       } else {
+        playAlert("error");
+        alert("❌ 查無號碼，或該客人的所有活動皆已兌換完畢！");
         $("phone").value = "";
       }
-    } else {
-      playAlert("error");
-      alert("❌ 查無號碼，或該客人的所有活動皆已兌換完畢！");
-      $("phone").value = "";
+    } finally {
+      setBusy(false);
     }
-  } finally {
-    setBusy(false);
   }
-}
 
-async function redeem(){
-  if (!confirm("確定核銷？憑證將失效！")) return;
-  const ph = shownPhone, st = store, ac = act;
-  const d = new Date(), pad = (n) => (n < 10 ? "0" + n : String(n));
-  const nowStr = d.getFullYear() + "/" + pad(d.getMonth()+1) + "/" + pad(d.getDate()) + " " +
-                 pad(d.getHours()) + ":" + pad(d.getMinutes()) + ":" + pad(d.getSeconds());
-  setBusy(true);
-  try {
-    await updateDoc(doc(db, ac, ph), { status: "已兌換", store: st, redeemTime: nowStr });
-  } finally {
-    setBusy(false);
+  async function redeem(){
+    if (!confirm("確定核銷？憑證將失效！")) return;
+    const ph = shownPhone, st = store, ac = act;
+    const d = new Date(), pad = (n) => (n < 10 ? "0" + n : String(n));
+    const nowStr = d.getFullYear() + "/" + pad(d.getMonth()+1) + "/" + pad(d.getDate()) + " " +
+                   pad(d.getHours()) + ":" + pad(d.getMinutes()) + ":" + pad(d.getSeconds());
+    setBusy(true);
+    try {
+      await updateDoc(doc(db, ac, ph), { status: "已兌換", store: st, redeemTime: nowStr });
+    } finally {
+      setBusy(false);
+    }
+    record = Object.assign({}, record || {}, { status: "已兌換", store: st, redeemTime: nowStr });
+    renderRight();
+    playAlert("success");
+    if (window.confetti) confetti({ particleCount: 80, spread: 70 });
+
+    const btn = $("btn-undo");
+    btn.classList.remove("hidden");
+    let left = 5;
+    btn.innerText = "⚡ 撤銷 (" + left + "s)";
+    if (uTimer) clearInterval(uTimer);
+    uTimer = setInterval(() => {
+      left -= 1;
+      if (left <= 0){ clearInterval(uTimer); btn.classList.add("hidden"); }
+      else btn.innerText = "⚡ 撤銷 (" + left + "s)";
+    }, 1000);
   }
-  record = Object.assign({}, record || {}, { status: "已兌換", store: st, redeemTime: nowStr });
-  renderRight();
-  playAlert("success");
-  if (window.confetti) confetti({ particleCount: 80, spread: 70 });
 
-  const btn = $("btn-undo");
-  btn.classList.remove("hidden");
-  let left = 5;
-  btn.innerText = "⚡ 撤銷 (" + left + "s)";
-  if (uTimer) clearInterval(uTimer);
-  uTimer = setInterval(() => {
-    left -= 1;
-    if (left <= 0){ clearInterval(uTimer); btn.classList.add("hidden"); }
-    else btn.innerText = "⚡ 撤銷 (" + left + "s)";
-  }, 1000);
-}
-
-async function undo(){
-  if (uTimer) clearInterval(uTimer);
-  const ph = shownPhone, ac = act;
-  setBusy(true);
-  try {
-    await updateDoc(doc(db, ac, ph), { status: "", store: "", redeemTime: "" });
-  } finally {
-    setBusy(false);
+  async function undo(){
+    if (uTimer) clearInterval(uTimer);
+    const ph = shownPhone, ac = act;
+    setBusy(true);
+    try {
+      await updateDoc(doc(db, ac, ph), { status: "", store: "", redeemTime: "" });
+    } finally {
+      setBusy(false);
+    }
+    $("btn-undo").classList.add("hidden");
+    alert("✅ 已撤銷！");
+    check(ph);
   }
-  $("btn-undo").classList.add("hidden");
-  alert("✅ 已撤銷！");
-  check(ph);
-}
 
-function nextCust(){
-  $("phone").value = "";
-  record = null;
-  hideUndo();
-  renderRight();
-  // 🔥 按下服務下一位後，自動把游標停在輸入框
-  setTimeout(() => $("phone").focus(), 100);
-}
+  function nextCust(){
+    $("phone").value = "";
+    record = null;
+    hideUndo();
+    renderRight();
+    setTimeout(() => $("phone").focus(), 100);
+  }
 
-$("btn-scan").onclick = startScan;
-$("btn-stop").onclick = stopScan;
-$("btn-check").onclick = () => check();
-$("btn-redeem").onclick = redeem;
-$("btn-undo").onclick = undo;
-$("btn-next").onclick = nextCust;
-$("phone").addEventListener("keydown", (e) => { if (e.key === "Enter") check(); });
-
-const saved = localStorage.getItem("p_store");
-if (saved && evMap[saved]){ store = saved; act = evMap[saved][0] || ""; }
-renderStores(); renderActs(); renderRight();
+  $("btn-scan").onclick = startScan;
+  $("btn-stop").onclick = stopScan;
+  $("btn-check").onclick = () => check();
+  $("btn-redeem").onclick = redeem;
+  $("btn-undo").onclick = undo;
+  $("btn-next").onclick = nextCust;
+  $("phone").addEventListener("keydown", (e) => { if (e.key === "Enter") check(); });
 </script>
 </body>
 </html>
