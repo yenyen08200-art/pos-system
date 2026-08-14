@@ -380,17 +380,31 @@ function renderRight(){
   }
   $("placeholder").classList.add("hidden");
   $("detail").classList.remove("hidden");
-  const claimed = record.status === "已兌換";
+  
+  // 🔥 新增判斷邏輯：同時檢查「已兌換」與「已過期」
+  const isClaimed = record.status === "已兌換";
+  const isExpired = record.status === "已過期";
+  const isInvalid = isClaimed || isExpired; // 只要符合其中一項，就是無效票
+
   const banner = $("banner");
-  banner.className = "banner rise " + (claimed ? "bad" : "ok");
-  banner.innerHTML = claimed
-    ? "❌ 券已失效 / 已領取<small>📌 於 " + (record.store || "—") + " 兌換</small><small>🕒 " + (record.redeemTime || "—") + "</small>"
-    : "✅ 有效優惠券";
+  banner.className = "banner rise " + (isInvalid ? "bad" : "ok");
+  
+  // 根據不同狀態顯示不同提示
+  if (isClaimed) {
+    banner.innerHTML = "❌ 券已失效 / 已領取<small>📌 於 " + (record.store || "—") + " 兌換</small><small>🕒 " + (record.redeemTime || "—") + "</small>";
+  } else if (isExpired) {
+    banner.innerHTML = "⚠️ 券已逾期失效<small>🕒 系統已結算過期</small>";
+  } else {
+    banner.innerHTML = "✅ 有效優惠券";
+  }
+
   $("v-phone").innerText = shownPhone;
   $("v-name").innerText = record.name || "—";
   $("v-social").innerText = record.social_id || "未提供";
   $("v-gift").innerText = giftMap[shownAct] || "專屬活動贈品";
-  $("btn-redeem").classList.toggle("hidden", claimed);
+  
+  // 🔥 若票券無效（已兌換或已過期），強制隱藏「確認核銷」按鈕
+  $("btn-redeem").classList.toggle("hidden", isInvalid);
 }
 
 function renderContent(data, ph, ac){
