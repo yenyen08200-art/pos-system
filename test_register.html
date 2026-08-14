@@ -334,6 +334,10 @@
   window.switchAct = switchAct;
   window.register = register;
 
+  // 🔥 新增：抓取網址內的專屬贈品參數 (例如 ?gift=二號餐)
+  const urlParams = new URLSearchParams(window.location.search);
+  const customGift = urlParams.get('gift') || "";
+  
   if (window.location.search) { window.history.replaceState({}, document.title, window.location.pathname); }
   checkSaved(true);
 
