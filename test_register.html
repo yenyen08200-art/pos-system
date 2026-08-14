@@ -15,9 +15,9 @@
       --sage-deep:#5c6a5c; --sage:#8b9a86; --sage-light:#b9c3b1;
       --brass:#b9915a; --brass-light:#dcbb84; --brass-deep:#8d6c3c;
       --ink:#2c302c; --ink-soft:#6f766e;
-      --glass:rgba(255,255,255,.34); --glass-soft:rgba(255,255,255,.22);
-      --stroke:rgba(255,255,255,.55); --radius:28px;
-      --shadow:0 30px 70px -28px rgba(35,42,35,.55);
+      --glass:rgba(255,255,255,.45); --glass-soft:rgba(255,255,255,.25);
+      --stroke:rgba(255,255,255,.6); --radius:28px;
+      --shadow:0 30px 70px -28px rgba(35,42,35,.25);
     }
     *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;min-width:0}
     html,body{max-width:100%;overflow-x:hidden}
@@ -26,17 +26,21 @@
       margin:0;padding:28px 16px 60px;
       font-family:"Inter","Noto Sans TC",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
       color:var(--ink);
+      
+      /* 🔥 更新：淺藍色至金色的漸層基底 */
       background:
-        radial-gradient(120% 80% at 15% 0%,#a9b6a2 0%,transparent 55%),
-        radial-gradient(110% 90% at 90% 100%,#7e8f7c 0%,transparent 60%),
-        linear-gradient(165deg,#93a08c,#6f7d6d 60%,#5d6a5c);
+        radial-gradient(120% 80% at 20% 0%, rgba(166, 193, 238, 0.7) 0%, transparent 60%),
+        radial-gradient(110% 90% at 80% 100%, rgba(246, 211, 101, 0.5) 0%, transparent 70%),
+        linear-gradient(160deg, #dce7f3 0%, #fdf2dc 100%);
       background-attachment:fixed;
       min-height:100vh;position:relative;
       display:flex;justify-content:center;align-items:flex-start;
       font-weight:400;letter-spacing:.01em;
     }
+    
+    /* 質感雜訊顆粒 (保留以增加高級感) */
     body::before{
-      content:"";position:fixed;inset:-50%;z-index:0;pointer-events:none;opacity:.5;
+      content:"";position:fixed;inset:-50%;z-index:0;pointer-events:none;opacity:.4;
       background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/><feColorMatrix type='saturate' values='0'/></filter><rect width='160' height='160' filter='url(%23n)' opacity='.5'/></svg>");
       animation:grain 8s steps(6) infinite;
     }
@@ -44,20 +48,39 @@
       0%,100%{transform:translate3d(0,0,0)}20%{transform:translate3d(-6px,4px,0)}
       40%{transform:translate3d(5px,-6px,0)}60%{transform:translate3d(-4px,-3px,0)}80%{transform:translate3d(6px,5px,0)}
     }
+    
+    /* 🔥 更新：右上角金色呼吸光效 */
     body::after{
-      content:"";position:fixed;width:420px;height:420px;top:-150px;right:-140px;z-index:0;
-      border-radius:50%;filter:blur(90px);opacity:.35;pointer-events:none;
-      background:radial-gradient(circle,var(--brass-light),transparent 70%);
-      animation:drift 20s ease-in-out infinite;
+      content:"";position:fixed;width:500px;height:500px;top:-100px;right:-100px;z-index:0;
+      border-radius:50%;filter:blur(90px);pointer-events:none;
+      background:radial-gradient(circle, rgba(246, 211, 101, 0.65), transparent 70%);
+      animation:breathe-gold 5s ease-in-out infinite alternate;
     }
-    @keyframes drift{0%,100%{transform:translate3d(0,0,0)}50%{transform:translate3d(-40px,50px,0)}}
+    
+    /* 🔥 新增：左下角淺藍色呼吸光效 */
+    .blue-glow {
+      position:fixed;width:550px;height:550px;bottom:-150px;left:-150px;z-index:0;
+      border-radius:50%;filter:blur(100px);pointer-events:none;
+      background:radial-gradient(circle, rgba(166, 193, 238, 0.75), transparent 70%);
+      animation:breathe-blue 6s ease-in-out infinite alternate;
+    }
+
+    /* 呼吸光效動畫設定 */
+    @keyframes breathe-gold {
+      0% { opacity: 0.3; transform: scale(0.85); }
+      100% { opacity: 0.85; transform: scale(1.15); }
+    }
+    @keyframes breathe-blue {
+      0% { opacity: 0.85; transform: scale(1.15); }
+      100% { opacity: 0.3; transform: scale(0.85); }
+    }
 
     .shell{width:100%;max-width:420px;position:relative;z-index:1;display:flex;flex-direction:column;gap:18px}
     .glass{
       position:relative;overflow:hidden;background:var(--glass);
-      backdrop-filter:blur(30px) saturate(150%);-webkit-backdrop-filter:blur(30px) saturate(150%);
+      backdrop-filter:blur(35px) saturate(160%);-webkit-backdrop-filter:blur(35px) saturate(160%);
       border:1px solid var(--stroke);border-radius:var(--radius);
-      box-shadow:var(--shadow),inset 0 1px 0 rgba(255,255,255,.75),inset 0 -1px 0 rgba(255,255,255,.18);
+      box-shadow:var(--shadow),inset 0 1px 0 rgba(255,255,255,.85),inset 0 -1px 0 rgba(255,255,255,.2);
     }
     .glass::before{
       content:"";position:absolute;inset:0;pointer-events:none;opacity:.4;mix-blend-mode:overlay;
@@ -65,7 +88,7 @@
     }
     .glass::after{
       content:"";position:absolute;inset:0;pointer-events:none;
-      background:linear-gradient(115deg,transparent 36%,rgba(255,255,255,.4) 48%,transparent 60%);
+      background:linear-gradient(115deg,transparent 36%,rgba(255,255,255,.5) 48%,transparent 60%);
       transform:translateX(-130%);animation:sheen 8s ease-in-out infinite;
     }
     @keyframes sheen{0%,72%{transform:translateX(-130%)}100%{transform:translateX(130%)}}
@@ -79,8 +102,8 @@
     h1{font-family:"Cormorant Garamond","Noto Sans TC",serif;font-size:34px;font-weight:600;margin:0 0 8px;letter-spacing:.1em;color:#20241f;}
     .subtitle{font-size:11.5px;color:var(--ink-soft);margin:0;letter-spacing:.32em;text-transform:uppercase}
 
-    .meta{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(255,255,255,.28);margin-top:22px;border-radius:18px;overflow:hidden;border:1px solid rgba(255,255,255,.4)}
-    .meta div{padding:12px 6px;background:rgba(255,255,255,.24);text-align:center}
+    .meta{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(255,255,255,.4);margin-top:22px;border-radius:18px;overflow:hidden;border:1px solid rgba(255,255,255,.5)}
+    .meta div{padding:12px 6px;background:rgba(255,255,255,.35);text-align:center}
     .meta span{display:block;font-size:9.5px;letter-spacing:.24em;color:var(--ink-soft);margin-bottom:5px}
     .meta strong{font-size:12.5px;font-weight:600;color:var(--ink);letter-spacing:.04em}
 
@@ -91,31 +114,31 @@
     label{display:block;font-size:11px;letter-spacing:.22em;color:var(--ink-soft);margin-bottom:8px;font-weight:600;text-transform:uppercase}
     input,select{
       width:100%;max-width:100%;padding:16px 16px;border-radius:16px;
-      border:1px solid rgba(255,255,255,.5);background:rgba(255,255,255,.28);
+      border:1px solid rgba(255,255,255,.7);background:rgba(255,255,255,.45);
       backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
       color:var(--ink);font-size:16px;font-weight:500;font-family:inherit;
       outline:none;transition:all .35s cubic-bezier(.2,.8,.2,1);
-      appearance:none;-webkit-appearance:none;box-shadow:inset 0 1px 0 rgba(255,255,255,.6);
+      appearance:none;-webkit-appearance:none;box-shadow:inset 0 1px 0 rgba(255,255,255,.8);
     }
     select{background-image:linear-gradient(45deg,transparent 50%,var(--brass-deep) 50%),linear-gradient(135deg,var(--brass-deep) 50%,transparent 50%);background-position:calc(100% - 20px) 50%,calc(100% - 14px) 50%;background-size:6px 6px,6px 6px;background-repeat:no-repeat}
     input:focus,select:focus{
-      background-color:rgba(255,255,255,.45);border-color:rgba(185,145,90,.75);
-      box-shadow:0 0 0 4px rgba(185,145,90,.2),0 0 18px rgba(220,187,132,.35),inset 0 1px 0 rgba(255,255,255,.7);
+      background-color:rgba(255,255,255,.7);border-color:rgba(185,145,90,.75);
+      box-shadow:0 0 0 4px rgba(185,145,90,.15),0 0 18px rgba(220,187,132,.35),inset 0 1px 0 rgba(255,255,255,.9);
       transform:translateY(-1px);
     }
-    input::placeholder{color:rgba(90,96,88,.55);font-weight:400}
+    input::placeholder{color:rgba(90,96,88,.6);font-weight:400}
 
     .secret{
       margin:26px 0 28px;padding:22px 18px;border-radius:22px;text-align:center;
-      background:linear-gradient(160deg,rgba(255,255,255,.32),rgba(255,255,255,.16));
-      border:1px solid rgba(220,187,132,.5);
-      box-shadow:inset 0 1px 0 rgba(255,255,255,.7),0 0 24px -12px rgba(185,145,90,.7);
+      background:linear-gradient(160deg,rgba(255,255,255,.45),rgba(255,255,255,.2));
+      border:1px solid rgba(220,187,132,.6);
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.8),0 0 24px -12px rgba(185,145,90,.6);
       backdrop-filter:blur(16px);position:relative;z-index:2;
     }
     .secret label{color:var(--brass-deep);letter-spacing:.3em}
     #secret_code{
       text-align:center;font-size:20px;font-weight:600;letter-spacing:.42em;
-      text-transform:uppercase;color:var(--brass-deep);background:rgba(255,255,255,.4);
+      text-transform:uppercase;color:var(--brass-deep);background:rgba(255,255,255,.5);
     }
 
     button{
@@ -124,9 +147,9 @@
       transition:transform .25s cubic-bezier(.2,.8,.2,1),box-shadow .35s ease,background .35s ease;z-index:2;
     }
     .submit-btn{
-      color:#fffdf8;border:1px solid rgba(255,255,255,.45);
+      color:#fffdf8;border:1px solid rgba(255,255,255,.55);
       background:linear-gradient(135deg,#d3ab72,#b9915a 45%,#8d6c3c);
-      box-shadow:0 18px 38px -16px rgba(141,108,60,.95),inset 0 1px 0 rgba(255,255,255,.45);
+      box-shadow:0 18px 38px -16px rgba(141,108,60,.85),inset 0 1px 0 rgba(255,255,255,.5);
     }
     .submit-btn::after{
       content:"";position:absolute;inset:0;
@@ -138,11 +161,11 @@
     .submit-btn:disabled{filter:grayscale(60%);opacity:0.7;cursor:not-allowed;}
 
     .switch-btn{
-      margin-top:26px;color:var(--ink);background:rgba(255,255,255,.26);
-      border:1px solid rgba(255,255,255,.55);backdrop-filter:blur(14px);font-weight:500;
-      box-shadow:0 12px 28px -20px rgba(35,42,35,.9),inset 0 1px 0 rgba(255,255,255,.6);
+      margin-top:26px;color:var(--ink);background:rgba(255,255,255,.4);
+      border:1px solid rgba(255,255,255,.65);backdrop-filter:blur(14px);font-weight:500;
+      box-shadow:0 12px 28px -20px rgba(35,42,35,.6),inset 0 1px 0 rgba(255,255,255,.8);
     }
-    .switch-btn:hover{background:rgba(255,255,255,.42);transform:translateY(-2px)}
+    .switch-btn:hover{background:rgba(255,255,255,.55);transform:translateY(-2px)}
     .switch-btn:active{transform:scale(.975)}
 
     #ticket-card{text-align:center}
@@ -156,13 +179,13 @@
       display:inline-block;font-size:11px;font-weight:600;letter-spacing:.2em;
       padding:9px 18px;border-radius:999px;margin-bottom:20px;
       border:1px solid rgba(185,145,90,.55);color:var(--brass-deep);
-      background:rgba(255,255,255,.3);backdrop-filter:blur(10px);transition:.4s;position:relative;z-index:2;
+      background:rgba(255,255,255,.4);backdrop-filter:blur(10px);transition:.4s;position:relative;z-index:2;
       max-width:100%;
     }
     .qr-box{
-      background:rgba(255,255,255,.82);border:1px solid rgba(255,255,255,.75);
+      background:rgba(255,255,255,.9);border:1px solid rgba(255,255,255,.85);
       padding:16px;border-radius:24px;display:inline-block;margin:6px 0 22px;position:relative;z-index:2;
-      box-shadow:0 24px 50px -24px rgba(35,42,35,.7),inset 0 1px 0 rgba(255,255,255,.95);
+      box-shadow:0 24px 50px -24px rgba(35,42,35,.5),inset 0 1px 0 #ffffff;
       transition:transform .4s cubic-bezier(.2,.8,.2,1);max-width:100%;
     }
     .qr-box:hover{transform:translateY(-3px) scale(1.01)}
@@ -170,21 +193,21 @@
 
     .highlight-text{
       display:block;font-size:13.5px;font-weight:600;letter-spacing:.18em;color:var(--ink);
-      margin:0 0 24px;padding-bottom:20px;border-bottom:1px solid rgba(255,255,255,.45);
+      margin:0 0 24px;padding-bottom:20px;border-bottom:1px solid rgba(255,255,255,.5);
       transition:.4s;position:relative;z-index:2;
     }
     .info-list{
       text-align:left;display:flex;flex-direction:column;gap:12px;position:relative;z-index:2;
-      background:rgba(255,255,255,.24);border:1px solid rgba(255,255,255,.5);
+      background:rgba(255,255,255,.35);border:1px solid rgba(255,255,255,.6);
       padding:18px;border-radius:20px;backdrop-filter:blur(16px);
-      box-shadow:inset 0 1px 0 rgba(255,255,255,.7);
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.8);
     }
-    .info-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding-bottom:11px;border-bottom:1px solid rgba(255,255,255,.4)}
+    .info-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding-bottom:11px;border-bottom:1px solid rgba(255,255,255,.45)}
     .info-row:last-child{border-bottom:none;padding-bottom:0}
     .info-row strong{color:var(--ink-soft);font-weight:500;font-size:11px;letter-spacing:.16em;white-space:nowrap}
     .info-row span{font-weight:600;font-size:14.5px;text-align:right;word-break:break-all;min-width:0}
     #r-phone{color:var(--brass-deep);font-size:16px;letter-spacing:.08em}
-    .footnote{text-align:center;font-size:10px;letter-spacing:.3em;color:rgba(255,255,255,.65);text-transform:uppercase;padding-bottom:4px}
+    .footnote{text-align:center;font-size:10px;letter-spacing:.3em;color:rgba(111,118,110,.75);text-transform:uppercase;padding-bottom:4px}
 
     @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.4} }
 
@@ -198,6 +221,9 @@
   </style>
 </head>
 <body>
+  <!-- 🔥 呼吸光效元素 -->
+  <div class="blue-glow"></div>
+
   <main class="shell">
     <header class="glass brand">
       <div class="mark">德州小騎士</div>
@@ -238,7 +264,6 @@
       <div class="notice">📸 請立即「截圖」保存此兌換券</div>
       <div class="stamp-badge" id="stamp">【 小編已核銷確認 · 專屬兌換券 】</div>
       
-      <!-- 🔥 新增：貼心掃碼亮度提示 -->
       <div style="color:var(--brass-deep); font-weight:700; font-size:13px; margin-bottom:12px; animation: blink 2s infinite; letter-spacing: 0.05em; position:relative; z-index:2;">💡 請將手機螢幕調至最亮，以便門市人員核銷</div>
 
       <div class="qr-box">
@@ -259,7 +284,6 @@
   </main>
 
 <script type="module">
-  // 🔥 防彈架構：動態載入 config.js 防快取
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
   import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
@@ -325,7 +349,6 @@
     if(!name || !soc || ph.length<8 || !cd) return alert("⚠️ 請完整填寫資料與密語！");
     if(cd.toUpperCase() !== EVENT_SECRETS[act]) return alert("⚠️ 通關密語錯誤！");
 
-    // 🔥 防連點：鎖死按鈕
     const btn = $('btn-submit');
     btn.disabled = true;
     btn.innerText = "處理中...";
@@ -358,7 +381,6 @@
       console.error(e);
       alert("連線發生錯誤，請稍後再試！");
     } finally {
-      // 🔥 解鎖按鈕
       btn.disabled = false;
       btn.innerText = "領取專屬兌換卷";
     }
@@ -395,4 +417,4 @@
   }
 </script>
 </body>
-</html>  
+</html>
