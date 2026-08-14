@@ -27,7 +27,7 @@
       font-family:"Inter","Noto Sans TC",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
       color:var(--ink);
       
-      /* 🔥 更新：淺藍色至金色的漸層基底 */
+      /* 🔥 淺藍色至金色的漸層基底 */
       background:
         radial-gradient(120% 80% at 20% 0%, rgba(166, 193, 238, 0.7) 0%, transparent 60%),
         radial-gradient(110% 90% at 80% 100%, rgba(246, 211, 101, 0.5) 0%, transparent 70%),
@@ -38,7 +38,7 @@
       font-weight:400;letter-spacing:.01em;
     }
     
-    /* 質感雜訊顆粒 (保留以增加高級感) */
+    /* 質感雜訊顆粒 */
     body::before{
       content:"";position:fixed;inset:-50%;z-index:0;pointer-events:none;opacity:.4;
       background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/><feColorMatrix type='saturate' values='0'/></filter><rect width='160' height='160' filter='url(%23n)' opacity='.5'/></svg>");
@@ -49,7 +49,7 @@
       40%{transform:translate3d(5px,-6px,0)}60%{transform:translate3d(-4px,-3px,0)}80%{transform:translate3d(6px,5px,0)}
     }
     
-    /* 🔥 更新：右上角金色呼吸光效 */
+    /* 🔥 右上角金色呼吸光效 */
     body::after{
       content:"";position:fixed;width:500px;height:500px;top:-100px;right:-100px;z-index:0;
       border-radius:50%;filter:blur(90px);pointer-events:none;
@@ -57,7 +57,7 @@
       animation:breathe-gold 5s ease-in-out infinite alternate;
     }
     
-    /* 🔥 新增：左下角淺藍色呼吸光效 */
+    /* 🔥 左下角淺藍色呼吸光效 */
     .blue-glow {
       position:fixed;width:550px;height:550px;bottom:-150px;left:-150px;z-index:0;
       border-radius:50%;filter:blur(100px);pointer-events:none;
@@ -99,22 +99,17 @@
       font-size:10.5px;letter-spacing:.4em;text-transform:uppercase;color:var(--brass-deep);font-weight:600;
     }
     .brand .mark::before,.brand .mark::after{content:"";width:26px;height:1px;background:linear-gradient(90deg,transparent,var(--brass))}
-  h1 {
+    
+    h1 {
       font-family: "Noto Sans TC", sans-serif;
-      font-size: 32px;
-      font-weight: 800; /* 加粗讓漸層更明顯 */
+      font-size: 36px;
+      font-weight: 700; 
       margin: 0 0 8px;
-      letter-spacing: .15em;
-      
-      /* 🔥 拿掉外框，改成高級金屬漸層實心字 */
-      background: linear-gradient(135deg, var(--brass-light), var(--brass-deep));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      
-      /* 加上淡淡的金色發光陰影，增加立體感 */
-      filter: drop-shadow(0px 4px 8px rgba(185, 145, 90, 0.25));
-      -webkit-text-stroke: 0; /* 徹底消滅醜陋的鷹架外框 */
+      letter-spacing: .1em;
+      color: transparent; 
+      -webkit-text-stroke: 1.5px var(--brass-deep); 
     }
+    
     .subtitle{font-size:11.5px;color:var(--ink-soft);margin:0;letter-spacing:.32em;text-transform:uppercase}
 
     .meta{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(255,255,255,.4);margin-top:22px;border-radius:18px;overflow:hidden;border:1px solid rgba(255,255,255,.5)}
@@ -254,7 +249,9 @@
     <section class="glass card" id="form-section">
       <div class="field">
         <label for="activity">兌換活動項目</label>
-        <select id="activity" onchange="checkSaved()"></select>
+        <select id="activity" onchange="checkSaved()">
+          <option value="">⏳ 系統連線中...</option>
+        </select>
       </div>
       <div class="field">
         <label for="name">社群暱稱</label>
@@ -299,6 +296,7 @@
   </main>
 
 <script type="module">
+  // 🔥 改版重點：移除 import config.js，全面改用雲端讀取
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
   import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
@@ -315,31 +313,51 @@
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
 
-  const module = await import("./config.js?v=" + new Date().getTime());
-  const EVENT_SECRETS = module.EVENT_CONFIG;
-
   const $ = id => document.getElementById(id);
   let unsubscribe = null;
+  let EVENT_SECRETS = {}; // 準備存放從雲端抓下來的密碼設定
 
-  const actSelect = $('activity');
-  actSelect.innerHTML = ""; 
-  for (const actName in EVENT_SECRETS) {
-    const opt = document.createElement('option');
-    opt.value = actName;
-    opt.text = actName;
-    actSelect.appendChild(opt);
-  }
+  // 🔥 抓取網址內的專屬贈品參數 (例如 ?gift=二號餐)
+  const urlParams = new URLSearchParams(window.location.search);
+  const customGift = urlParams.get('gift') || "";
+  
+  // 隱藏參數，讓網址保持乾淨
+  if (window.location.search) { window.history.replaceState({}, document.title, window.location.pathname); }
 
   window.checkSaved = checkSaved;
   window.switchAct = switchAct;
   window.register = register;
 
-  // 🔥 新增：抓取網址內的專屬贈品參數 (例如 ?gift=二號餐)
-  const urlParams = new URLSearchParams(window.location.search);
-  const customGift = urlParams.get('gift') || "";
-  
-  if (window.location.search) { window.history.replaceState({}, document.title, window.location.pathname); }
-  checkSaved(true);
+  // 🔥 系統初始化：去 Firebase 抓設定檔
+  async function initSystem() {
+    try {
+      const configSnap = await getDoc(doc(db, "system", "config"));
+      if (configSnap.exists()) {
+        EVENT_SECRETS = configSnap.data().EVENT_CONFIG || {};
+      } else {
+        console.error("找不到雲端設定檔");
+        $('activity').innerHTML = '<option value="">⚠️ 系統設定讀取失敗</option>';
+        return;
+      }
+
+      const actSelect = $('activity');
+      actSelect.innerHTML = ""; 
+      for (const actName in EVENT_SECRETS) {
+        const opt = document.createElement('option');
+        opt.value = actName;
+        opt.text = actName;
+        actSelect.appendChild(opt);
+      }
+      
+      checkSaved(true);
+    } catch (e) {
+      console.error("讀取系統設定失敗:", e);
+      alert("系統連線異常，請重新整理頁面！");
+    }
+  }
+
+  // 網頁載入時立刻執行雲端讀取
+  initSystem();
 
   function checkSaved(isInit=false) {
     const act = $('activity').value;
@@ -365,6 +383,7 @@
 
   async function register() {
     const act=$('activity').value, name=$('name').value.trim(), soc=$('social_id').value.trim(), ph=$('phone').value.replace(/\D/g,''), cd=$('secret_code').value.trim();
+    if(!act) return alert("⚠️ 系統載入中，請稍候！");
     if(!name || !soc || ph.length<8 || !cd) return alert("⚠️ 請完整填寫資料與密語！");
     if(cd.toUpperCase() !== EVENT_SECRETS[act]) return alert("⚠️ 通關密語錯誤！");
 
@@ -377,6 +396,7 @@
       const docSnap = await getDoc(docRef);
 
       if(!docSnap.exists()) {
+        // 🔥 存入資料庫時，順便把 customGift 寫進去
         await setDoc(docRef, {
           name, social_id: soc, phone: ph, status: "", store: "", redeemTime: "", timestamp: new Date().toLocaleString(), gift: customGift
         });
@@ -436,4 +456,4 @@
   }
 </script>
 </body>
-</html>  
+</html>
