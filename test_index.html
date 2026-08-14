@@ -2,7 +2,6 @@
 <html lang="zh-TW">
 <head>
 <meta charset="utf-8" />
-<!-- 🚀 加上 viewport-fit=cover 確保適應各種手機瀏海與安全範圍 -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
 <title>抽獎核銷系統 | 門市 POS 兌換平台</title>
 <meta name="description" content="門市專用抽獎核銷 POS：掃碼查詢顧客資料、即時確認兌換與 5 秒撤銷，支援平板與手機操作。" />
@@ -32,7 +31,6 @@
 }
 *{box-sizing:border-box;margin:0;padding:0;border-color:var(--border)}
 
-/* 🚀 殺手鐧 1：徹底封死 HTML 與 BODY 的橫向溢出 */
 html { overflow-x: hidden; }
 body {
   height: 100%;
@@ -45,7 +43,6 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* 🚀 殺手鐧 2：確保主容器不會被內部元件撐破 */
 main {
   min-height: 100vh;
   width: 100%;
@@ -82,7 +79,6 @@ h1{font-size:clamp(22px,3vw,30px);font-weight:700;letter-spacing:-.02em}
 .dot i:first-child{opacity:.7;animation:ring 1.8s ease-out infinite}
 @keyframes ring{0%{transform:scale(1);opacity:.7}100%{transform:scale(2.6);opacity:0}}
 
-/* 🚀 殺手鐧 3：強制 grid 單欄在手機版縮放，防止 Blowout */
 .grid { 
   display: grid; 
   gap: 24px; 
@@ -99,14 +95,17 @@ section.panel{padding:20px}
 .label{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.2em;color:var(--muted-foreground);margin-bottom:12px}
 .stores{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px; width: 100%;}
 @media(min-width:640px){.stores{grid-template-columns:repeat(3,minmax(0,1fr))}}
-button{font-family:inherit;cursor:pointer;width:100%;}
-.store-btn{min-height:56px;border-radius:14px;border:1px solid var(--border);background:var(--secondary);color:var(--secondary-foreground);
+
+/* 🚀 修正 1：移除全域的強制 100% 寬度，避免電腦版按鈕撐破 */
+button{font-family:inherit;cursor:pointer;}
+
+.store-btn{width:100%;min-height:56px;border-radius:14px;border:1px solid var(--border);background:var(--secondary);color:var(--secondary-foreground);
   font-size:16px;font-weight:600;transition:all .2s; padding: 0 8px;}
 .store-btn:hover{background:var(--muted);border-color:oklch(0.78 0.17 68/.6)}
 .store-btn:active{transform:scale(.97)}
 .store-btn.on{background-image:var(--gradient-tech);color:var(--primary-foreground);border-color:var(--primary);box-shadow:0 12px 26px -14px oklch(0 0 0/.9)}
 .acts{display:flex;flex-direction:column;gap:10px; width:100%;}
-.act-btn{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:64px;padding:0 16px;text-align:left;
+.act-btn{width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:64px;padding:0 16px;text-align:left;
   border-radius:14px;border:1px solid var(--border);background:var(--secondary);color:var(--foreground);transition:all .2s;}
 .act-btn:hover{background:var(--muted);border-color:oklch(0.78 0.14 195/.5)}
 .act-btn:active{transform:scale(.99)}
@@ -116,8 +115,17 @@ button{font-family:inherit;cursor:pointer;width:100%;}
 .radio{width:14px;height:14px;border-radius:999px;border:2px solid var(--muted-foreground);flex:none}
 .act-btn.on .radio{border-color:var(--accent);background:var(--accent)}
 .empty{border:1px dashed var(--border);border-radius:14px;padding:24px;text-align:center;font-size:14px;color:var(--muted-foreground)}
+
+/* 🚀 修正 2：電腦版搜尋列特殊處理，讓按鈕固定寬度，輸入框拿走剩餘空間 */
 .searchbar{display:flex;flex-direction:column;gap:10px; width: 100%;}
-@media(min-width:640px){.searchbar{flex-direction:row}}
+.searchbar > button { width: 100%; }
+@media(min-width:640px){
+  .searchbar { flex-direction: row; }
+  .searchbar > button { width: auto; flex-shrink: 0; }
+  #btn-scan { width: 80px; }
+  #btn-check { min-width: 120px; }
+}
+
 #phone{flex:1;min-height:64px;border-radius:14px;border:1px solid var(--input);background:oklch(0.17 0.024 259/.6);
   color:var(--foreground);padding:0 16px;font-size:20px;font-weight:600;letter-spacing:.08em;outline:none;transition:all .2s; width: 100%; min-width: 0;}
 #phone::placeholder{font-size:15px;font-weight:400;letter-spacing:normal;color:var(--muted-foreground)}
