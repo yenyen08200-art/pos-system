@@ -9,7 +9,6 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
-  <!-- 🔥 引入本地 QR-Code 生成套件 -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
   <style>
     :root{
@@ -36,7 +35,6 @@
       display:flex;justify-content:center;align-items:flex-start;
       font-weight:400;letter-spacing:.01em;
     }
-    /* 全域雜訊顆粒 */
     body::before{
       content:"";position:fixed;inset:-50%;z-index:0;pointer-events:none;opacity:.5;
       background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/><feColorMatrix type='saturate' values='0'/></filter><rect width='160' height='160' filter='url(%23n)' opacity='.5'/></svg>");
@@ -55,7 +53,6 @@
     @keyframes drift{0%,100%{transform:translate3d(0,0,0)}50%{transform:translate3d(-40px,50px,0)}}
 
     .shell{width:100%;max-width:420px;position:relative;z-index:1;display:flex;flex-direction:column;gap:18px}
-
     .glass{
       position:relative;overflow:hidden;background:var(--glass);
       backdrop-filter:blur(30px) saturate(150%);-webkit-backdrop-filter:blur(30px) saturate(150%);
@@ -136,8 +133,10 @@
       background:linear-gradient(115deg,transparent 40%,rgba(255,255,255,.4) 50%,transparent 60%);
       transform:translateX(-130%);animation:sheen 5s ease-in-out infinite;
     }
-    .submit-btn:hover{transform:translateY(-2px);box-shadow:0 24px 46px -16px rgba(141,108,60,1)}
-    .submit-btn:active{transform:scale(.975)}
+    .submit-btn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 24px 46px -16px rgba(141,108,60,1)}
+    .submit-btn:active:not(:disabled){transform:scale(.975)}
+    .submit-btn:disabled{filter:grayscale(60%);opacity:0.7;cursor:not-allowed;}
+
     .switch-btn{
       margin-top:26px;color:var(--ink);background:rgba(255,255,255,.26);
       border:1px solid rgba(255,255,255,.55);backdrop-filter:blur(14px);font-weight:500;
@@ -187,6 +186,8 @@
     #r-phone{color:var(--brass-deep);font-size:16px;letter-spacing:.08em}
     .footnote{text-align:center;font-size:10px;letter-spacing:.3em;color:rgba(255,255,255,.65);text-transform:uppercase;padding-bottom:4px}
 
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
     @media (max-width:380px){
       body{padding:20px 12px 44px}
       .brand{padding:28px 18px 22px}
@@ -212,42 +213,37 @@
     <section class="glass card" id="form-section">
       <div class="field">
         <label for="activity">兌換活動項目</label>
-        <!-- 🔥 這裡改為空選單，讓 config.js 自動填入 -->
         <select id="activity" onchange="checkSaved()"></select>
       </div>
-
       <div class="field">
         <label for="name">社群暱稱</label>
         <input id="name" type="text" placeholder="請輸入您的社群暱稱">
       </div>
-
       <div class="field">
         <label for="social_id">社群帳號</label>
         <input id="social_id" type="text" placeholder="IG / FB 帳號">
       </div>
-
       <div class="field">
         <label for="phone">手機號碼</label>
-        <input id="phone" type="tel" inputmode="numeric" placeholder="例：0912345678 或 0212345678" oninput="this.value=this.value.replace(/\D/g,'').slice(0,10)">
+        <input id="phone" type="tel" inputmode="numeric" placeholder="例：0912345678" oninput="this.value=this.value.replace(/\D/g,'').slice(0,10)">
       </div>
-
       <div class="secret">
         <label for="secret_code">通關密語</label>
         <input id="secret_code" type="text" placeholder="＊＊＊＊＊">
       </div>
-
-      <button class="submit-btn" onclick="register()">領取專屬兌換卷</button>
+      <button class="submit-btn" id="btn-submit" onclick="register()">領取專屬兌換卷</button>
     </section>
 
     <section class="glass card" id="ticket-card" style="display:none">
       <div class="notice">📸 請立即「截圖」保存此兌換券</div>
       <div class="stamp-badge" id="stamp">【 小編已核銷確認 · 專屬兌換券 】</div>
-      <p class="subtitle" style="margin-bottom:10px">活動兌換卷</p>
+      
+      <!-- 🔥 新增：貼心掃碼亮度提示 -->
+      <div style="color:var(--brass-deep); font-weight:700; font-size:13px; margin-bottom:12px; animation: blink 2s infinite; letter-spacing: 0.05em; position:relative; z-index:2;">💡 請將手機螢幕調至最亮，以便門市人員核銷</div>
 
       <div class="qr-box">
         <canvas id="qr" class="qr-img"></canvas>
       </div>
-
       <span class="highlight-text" id="hl-text">至德州小騎士門市出示核銷</span>
 
       <div class="info-list">
@@ -256,7 +252,6 @@
         <div class="info-row"><strong>社群帳號</strong><span id="r-social"></span></div>
         <div class="info-row"><strong>手機號碼</strong><span id="r-phone"></span></div>
       </div>
-
       <button class="switch-btn" onclick="switchAct()">切換／領取其他活動</button>
     </section>
 
@@ -264,8 +259,7 @@
   </main>
 
 <script type="module">
-  // 🔥 1. 匯入共用的 config.js
-  import { EVENT_CONFIG } from "./config.js";
+  // 🔥 防彈架構：動態載入 config.js 防快取
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
   import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
@@ -282,15 +276,15 @@
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
 
-  // 🔥 2. 將密語對照表設定為 config.js 裡面的資料
-  const EVENT_SECRETS = EVENT_CONFIG;
+  const module = await import("./config.js?v=" + new Date().getTime());
+  const EVENT_SECRETS = module.EVENT_CONFIG;
+
   const $ = id => document.getElementById(id);
   let unsubscribe = null;
 
-  // 🔥 3. 網頁一載入，就自動把 config.js 的活動塞進下拉選單
   const actSelect = $('activity');
   actSelect.innerHTML = ""; 
-  for (const actName in EVENT_CONFIG) {
+  for (const actName in EVENT_SECRETS) {
     const opt = document.createElement('option');
     opt.value = actName;
     opt.text = actName;
@@ -302,10 +296,11 @@
   window.register = register;
 
   if (window.location.search) { window.history.replaceState({}, document.title, window.location.pathname); }
-  window.onload = () => checkSaved(true);
+  checkSaved(true);
 
   function checkSaved(isInit=false) {
     const act = $('activity').value;
+    if(!act) return;
     const phone = localStorage.getItem(`p_${act}_phone`);
     if(phone) {
       if(!isInit) alert(`💡 您已領過「${act}」！為您顯示憑證。`);
@@ -328,32 +323,44 @@
   async function register() {
     const act=$('activity').value, name=$('name').value.trim(), soc=$('social_id').value.trim(), ph=$('phone').value.replace(/\D/g,''), cd=$('secret_code').value.trim();
     if(!name || !soc || ph.length<8 || !cd) return alert("⚠️ 請完整填寫資料與密語！");
-    
-    // 檢查密語 (會自動比對 config.js)
     if(cd.toUpperCase() !== EVENT_SECRETS[act]) return alert("⚠️ 通關密語錯誤！");
 
-    const docRef = doc(db, act, ph);
-    const docSnap = await getDoc(docRef);
+    // 🔥 防連點：鎖死按鈕
+    const btn = $('btn-submit');
+    btn.disabled = true;
+    btn.innerText = "處理中...";
 
-    if(!docSnap.exists()) {
-      await setDoc(docRef, {
-        name, social_id: soc, phone: ph, status: "", store: "", redeemTime: "", timestamp: new Date().toLocaleString()
-      });
-      confetti({particleCount:80, spread:70});
+    try {
+      const docRef = doc(db, act, ph);
+      const docSnap = await getDoc(docRef);
 
-      localStorage.setItem(`p_${act}_phone`, ph);
-      localStorage.setItem(`p_${act}_name`, name);
-      localStorage.setItem(`p_${act}_social`, soc);
-      renderTicket(act, name, soc, ph);
+      if(!docSnap.exists()) {
+        await setDoc(docRef, {
+          name, social_id: soc, phone: ph, status: "", store: "", redeemTime: "", timestamp: new Date().toLocaleString()
+        });
+        confetti({particleCount:80, spread:70});
 
-    } else {
-      const data = docSnap.data();
-      alert("💡 此號碼已領取過活動憑證！為您載入原始資料。");
+        localStorage.setItem(`p_${act}_phone`, ph);
+        localStorage.setItem(`p_${act}_name`, name);
+        localStorage.setItem(`p_${act}_social`, soc);
+        renderTicket(act, name, soc, ph);
 
-      localStorage.setItem(`p_${act}_phone`, ph);
-      localStorage.setItem(`p_${act}_name`, data.name);
-      localStorage.setItem(`p_${act}_social`, data.social_id);
-      renderTicket(act, data.name, data.social_id, ph);
+      } else {
+        const data = docSnap.data();
+        alert("💡 此號碼已領取過活動憑證！為您載入原始資料。");
+
+        localStorage.setItem(`p_${act}_phone`, ph);
+        localStorage.setItem(`p_${act}_name`, data.name);
+        localStorage.setItem(`p_${act}_social`, data.social_id);
+        renderTicket(act, data.name, data.social_id, ph);
+      }
+    } catch (e) {
+      console.error(e);
+      alert("連線發生錯誤，請稍後再試！");
+    } finally {
+      // 🔥 解鎖按鈕
+      btn.disabled = false;
+      btn.innerText = "領取專屬兌換卷";
     }
   }
 
