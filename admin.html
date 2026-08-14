@@ -96,6 +96,10 @@
     .status-expired{color:#8A93A5;font-weight:800;background:rgba(138,147,165,.12);padding:5px 12px;border-radius:999px;font-size:12px}
     .time-text{font-size:13px;color:var(--text-sub)}
 
+    /* 🔥 新增：重設按鈕樣式 */
+    .btn-reset { background: rgba(240,118,84,.1); border: 1px solid rgba(240,118,84,.3); color: var(--accent); font-size: 12px; font-weight: 700; padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: 0.2s; white-space: nowrap; }
+    .btn-reset:hover { background: var(--accent); color: #fff; }
+
     @media (max-width:900px){
       .dashboard{grid-template-columns:1fr 1fr}
     }
@@ -203,12 +207,12 @@
               <th onclick="setSort('phone')">📱 手機號碼 <span class="sort-icon" id="sort-phone">▼</span></th>
               <th onclick="setSort('name')">👤 顧客姓名 <span class="sort-icon" id="sort-name">▼</span></th>
               <th onclick="setSort('social_id')">🔗 社群帳號 <span class="sort-icon" id="sort-social_id">▼</span></th>
-              <!-- 🔥 修正 1：加上專屬贈品標題 -->
-              <th onclick="setSort('gift')">🎁 專屬贈品 <span class="sort-icon" id="sort-gift">▼</span></th>
+              <th onclick="setSort('gift')">🎁 兌換品項 <span class="sort-icon" id="sort-gift">▼</span></th>
               <th onclick="setSort('status')">⚡ 狀態 <span class="sort-icon" id="sort-status">▼</span></th>
               <th onclick="setSort('store')">📌 核銷門市 <span class="sort-icon" id="sort-store">▼</span></th>
               <th onclick="setSort('redeemTime')">🕒 核銷時間 <span class="sort-icon" id="sort-redeemTime">▼</span></th>
               <th onclick="setSort('timestamp')">📅 領券時間 <span class="sort-icon" id="sort-timestamp">▼</span></th>
+              <th>⚙️ 管理操作</th> <!-- 🔥 新增操作欄位 -->
             </tr>
           </thead>
           <tbody id="table-body"></tbody>
@@ -244,6 +248,9 @@
     let statusChartInstance = null;
     let unsubscribeSnapshot = null; 
     const adminEmails = ["yenyen08200@gmail.com", "admin@gmail.com"];
+    
+    // 🔥 全域變數：用來存放從 config.js 抓出來的 POS 贈品資料
+    let globalPosConfig = {};
 
     window.login = function() {
       const email = document.getElementById('email').value;
@@ -288,7 +295,7 @@
       const tbody = document.getElementById('table-body');
       
       if (unsubscribeSnapshot) unsubscribeSnapshot();
-      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding: 40px; color: #8A93A5;">📡 與資料庫即時連線中...</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="9" style="text-align:center; padding: 40px; color: #8A93A5;">📡 與資料庫即時連線中...</td></tr>';
       
       const q = query(collection(db, act), limit(500));
 
@@ -324,8 +331,28 @@
         window.renderTable(); 
       }, (error) => {
         console.error("即時監聽失敗:", error);
-        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding: 40px; color: red;">連線中斷，請確認網路連線。</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="9" style="text-align:center; padding: 40px; color: red;">連線中斷，請確認網路連線。</td></tr>';
       });
+    };
+
+    // 🔥 新增：獨立重設單一客人的核銷狀態！
+    window.resetSingleTicket = async function(phone) {
+      const act = document.getElementById('act-select').value;
+      if (!confirm(`⚠️ 確定要將手機號碼「${phone}」的憑證重設為【未兌換】嗎？\n(此操作將清空他的核銷門市與時間紀錄)`)) {
+        return;
+      }
+      try {
+        const docRef = doc(db, act, phone);
+        await updateDoc(docRef, {
+          status: "", 
+          store: "", 
+          redeemTime: ""
+        });
+        // 由於我們有 onSnapshot，資料庫改完畫面會瞬間自己更新，不用額外寫 alert
+      } catch (error) {
+        console.error("重設失敗:", error);
+        alert("重設失敗，請檢查權限或連線。");
+      }
     };
 
     window.expireTickets = async function() {
@@ -391,6 +418,10 @@
     window.renderTable = function() {
       const tbody = document.getElementById('table-body');
       const searchTerm = document.getElementById('search-box').value.trim().toLowerCase();
+      const currentAct = document.getElementById('act-select').value;
+      
+      // 🔥 抓取這個活動在 config.js 裡設定的「預設贈品」
+      const defaultGift = globalPosConfig[currentAct]?.gift || '預設活動贈品';
 
       let filteredData = allData.filter(d => {
         return (d.phone || '').toLowerCase().includes(searchTerm) ||
@@ -408,7 +439,7 @@
       document.getElementById('result-count').innerText = `顯示 ${filteredData.length} 筆結果`;
 
       if (filteredData.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding: 40px; color: #F07654; font-weight: bold;">找不到符合的資料 🥲</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="9" style="text-align:center; padding: 40px; color: #F07654; font-weight: bold;">找不到符合的資料 🥲</td></tr>';
         return;
       }
 
@@ -416,18 +447,26 @@
         let statusBadge = `<span class="status-no">${d.status || '未兌換'}</span>`; 
         if (d.status === '已兌換') statusBadge = `<span class="status-yes">已兌換</span>`; 
         if (d.status === '已過期') statusBadge = `<span class="status-expired">已過期</span>`; 
+        
+        // 🔥 判斷顯示：如果有專屬贈品 (d.gift) 就顯示並標示(專屬)，沒有的話就顯示設定檔的預設贈品
+        let displayGift = d.gift ? `${d.gift} <span style="font-size:10px; color:#F07654;">(專屬)</span>` : defaultGift;
 
-        // 🔥 修正 2：清乾淨多餘重複欄位，確保精準對齊 8 個標頭
+        // 🔥 判斷按鈕：如果已兌換或已過期，就給他一個「重設」的按鈕，如果是未兌換就空著
+        let actionBtn = (d.status === '已兌換' || d.status === '已過期') 
+          ? `<button class="btn-reset" onclick="resetSingleTicket('${d.id}')">↻ 復原未兌換</button>` 
+          : `-`;
+
         return `
           <tr>
             <td style="font-family:monospace; font-size:15px; font-weight:bold; color:var(--text-main);">${d.phone || ''}</td>
             <td style="font-weight:bold;">${d.name || ''}</td>
             <td style="color:#F07654;">${d.social_id || '未提供'}</td>
-            <td style="font-weight:bold; color:#3FBF8F;">${d.gift || '預設'}</td>
+            <td style="font-weight:bold; color:#3FBF8F;">${displayGift}</td>
             <td>${statusBadge}</td>
             <td style="font-weight:bold; color:var(--sidebar-bg);">${d.store || '-'}</td>
             <td class="time-text">${d.redeemTime || '-'}</td>
             <td class="time-text">${d.timestamp || '-'}</td>
+            <td>${actionBtn}</td>
           </tr>
         `;
       }).join('');
@@ -436,12 +475,14 @@
     window.exportExcel = function() {
       if (allData.length === 0) return alert('⚠️ 目前沒有資料可以匯出喔！');
       const act = document.getElementById('act-select').value;
+      const defaultGift = globalPosConfig[act]?.gift || '預設活動贈品';
+
       const exportArr = allData.map(d => ({
         "手機號碼": d.phone,
         "顧客姓名": d.name,
         "社群帳號": d.social_id || '未提供',
-        // 🔥 修正 3：加入專屬贈品到 Excel 匯出陣列
-        "專屬贈品": d.gift || '預設活動贈品',
+        // 🔥 讓 Excel 匯出也能顯示真正的預設或專屬贈品
+        "兌換品項": d.gift || defaultGift,
         "兌換狀態": d.status || '未兌換',
         "核銷門市": d.store || '',
         "核銷時間": d.redeemTime || '',
@@ -527,6 +568,10 @@
           
           import("./config.js?v=" + new Date().getTime()).then((module) => {
             const EVENT_CONFIG = module.EVENT_CONFIG;
+            
+            // 🔥 儲存 POS_CONFIG 給整個網頁使用
+            globalPosConfig = module.POS_CONFIG; 
+            
             const adminSelect = document.getElementById('act-select');
             adminSelect.innerHTML = '';
             for (const actName in EVENT_CONFIG) {
