@@ -30,7 +30,14 @@
   --radius:1.25rem;
 }
 *{box-sizing:border-box;margin:0;padding:0;border-color:var(--border)}
-html,body{height:100%}
+
+/* 🚀 修正 1：鎖定螢幕寬度，隱藏橫向卷軸，解決手機版歪一邊的問題 */
+html,body{
+  height:100%;
+  width:100vw;
+  overflow-x:hidden;
+}
+
 body{
   background:var(--background);color:var(--foreground);
   font-family:"Space Grotesk","Noto Sans TC",system-ui,sans-serif;
@@ -178,7 +185,8 @@ button:disabled{opacity:.5;cursor:not-allowed}
         <div class="block">
           <h2 class="label">● 掃描 / 查詢</h2>
           <div class="searchbar">
-            <input id="phone" inputmode="numeric" placeholder="輸入兌換手機號碼" />
+            <!-- 🚀 修正 2：更改 type 為 tel，支援市話含 '-' 的輸入，放寬到 15 碼 -->
+            <input id="phone" type="tel" placeholder="輸入手機或市話 (例:02-1234567)" oninput="this.value=this.value.replace(/[^\d\-]/g,'').slice(0,15)" />
             <button class="icon-btn" id="btn-scan" aria-label="掃描 QR Code">📷</button>
             <button class="primary-btn" id="btn-check">查詢</button>
           </div>
@@ -375,7 +383,8 @@ async function startScan(){
     { facingMode: "environment" },
     { fps: 10, qrbox: 250 },
     (txt) => {
-      const digits = txt.replace(/\D/g, "");
+      // 🚀 修正 3：讓掃碼器帶進來的值，也允許包含橫槓 (-)
+      const digits = txt.replace(/[^\d\-]/g, "");
       $("phone").value = digits;
       stopScan();
       check(digits);
