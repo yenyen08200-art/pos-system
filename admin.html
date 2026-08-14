@@ -193,7 +193,6 @@
 
       <div class="table-toolbar">
         <span id="result-count">顯示 0 筆結果</span>
-        <!-- 🔥 修改：加入防抖機制 -->
         <input id="search-box" class="search-box" type="text" placeholder="🔍 搜尋手機號碼或姓名..." oninput="debounceRenderTable()">
       </div>
 
@@ -204,6 +203,8 @@
               <th onclick="setSort('phone')">📱 手機號碼 <span class="sort-icon" id="sort-phone">▼</span></th>
               <th onclick="setSort('name')">👤 顧客姓名 <span class="sort-icon" id="sort-name">▼</span></th>
               <th onclick="setSort('social_id')">🔗 社群帳號 <span class="sort-icon" id="sort-social_id">▼</span></th>
+              <!-- 🔥 修正 1：加上專屬贈品標題 -->
+              <th onclick="setSort('gift')">🎁 專屬贈品 <span class="sort-icon" id="sort-gift">▼</span></th>
               <th onclick="setSort('status')">⚡ 狀態 <span class="sort-icon" id="sort-status">▼</span></th>
               <th onclick="setSort('store')">📌 核銷門市 <span class="sort-icon" id="sort-store">▼</span></th>
               <th onclick="setSort('redeemTime')">🕒 核銷時間 <span class="sort-icon" id="sort-redeemTime">▼</span></th>
@@ -217,7 +218,6 @@
   </main>
 
   <script type="module">
-    // 🔥 引入 limit 保護讀取額度
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getFirestore, collection, onSnapshot, doc, updateDoc, query, limit } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
     import { getAuth, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
@@ -273,13 +273,12 @@
       });
     };
 
-    // 🔥 防抖搜尋機制 (Debounce)
     let searchTimer = null;
     window.debounceRenderTable = function() {
       clearTimeout(searchTimer);
       searchTimer = setTimeout(() => {
         window.renderTable();
-      }, 300); // 停頓 0.3 秒才搜尋
+      }, 300);
     };
 
     window.fetchData = function() {
@@ -289,9 +288,8 @@
       const tbody = document.getElementById('table-body');
       
       if (unsubscribeSnapshot) unsubscribeSnapshot();
-      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding: 40px; color: #8A93A5;">📡 與資料庫即時連線中...</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding: 40px; color: #8A93A5;">📡 與資料庫即時連線中...</td></tr>';
       
-      // 🔥 加上 limit(500) 保護讀取額度
       const q = query(collection(db, act), limit(500));
 
       unsubscribeSnapshot = onSnapshot(q, (querySnapshot) => {
@@ -326,7 +324,7 @@
         window.renderTable(); 
       }, (error) => {
         console.error("即時監聽失敗:", error);
-        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding: 40px; color: red;">連線中斷，請確認網路連線。</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding: 40px; color: red;">連線中斷，請確認網路連線。</td></tr>';
       });
     };
 
@@ -410,7 +408,7 @@
       document.getElementById('result-count').innerText = `顯示 ${filteredData.length} 筆結果`;
 
       if (filteredData.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding: 40px; color: #F07654; font-weight: bold;">找不到符合的資料 🥲</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding: 40px; color: #F07654; font-weight: bold;">找不到符合的資料 🥲</td></tr>';
         return;
       }
 
@@ -419,11 +417,13 @@
         if (d.status === '已兌換') statusBadge = `<span class="status-yes">已兌換</span>`; 
         if (d.status === '已過期') statusBadge = `<span class="status-expired">已過期</span>`; 
 
+        // 🔥 修正 2：清乾淨多餘重複欄位，確保精準對齊 8 個標頭
         return `
           <tr>
             <td style="font-family:monospace; font-size:15px; font-weight:bold; color:var(--text-main);">${d.phone || ''}</td>
             <td style="font-weight:bold;">${d.name || ''}</td>
             <td style="color:#F07654;">${d.social_id || '未提供'}</td>
+            <td style="font-weight:bold; color:#3FBF8F;">${d.gift || '預設'}</td>
             <td>${statusBadge}</td>
             <td style="font-weight:bold; color:var(--sidebar-bg);">${d.store || '-'}</td>
             <td class="time-text">${d.redeemTime || '-'}</td>
@@ -440,6 +440,8 @@
         "手機號碼": d.phone,
         "顧客姓名": d.name,
         "社群帳號": d.social_id || '未提供',
+        // 🔥 修正 3：加入專屬贈品到 Excel 匯出陣列
+        "專屬贈品": d.gift || '預設活動贈品',
         "兌換狀態": d.status || '未兌換',
         "核銷門市": d.store || '',
         "核銷時間": d.redeemTime || '',
