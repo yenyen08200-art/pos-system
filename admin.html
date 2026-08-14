@@ -40,7 +40,9 @@
     .btn-logout{width:100%;background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.12);padding:12px;border-radius:999px;font-weight:700;font-size:14px;cursor:pointer;transition:.2s}
     .btn-logout:hover{background:var(--accent);border-color:var(--accent)}
 
-    /* Main */
+    /* Layouts (View Switching) */
+    .view-section { display: none; }
+    .view-section.active { display: block; }
     #main-app{flex:1;padding:40px;display:none;overflow-y:auto;height:100vh}
     .container{max-width:1200px;margin:0 auto}
 
@@ -49,6 +51,7 @@
     .live-badge{background:var(--accent);color:#fff;font-size:10px;font-weight:800;padding:5px 10px;border-radius:999px;animation:pulse 1.5s infinite}
     @keyframes pulse{0%,100%{opacity:1}50%{opacity:.45}}
 
+    /* Dashboard UI */
     .controls{display:flex;gap:10px;align-items:center}
     .controls select,.controls button{padding:11px 20px;font-size:14px;border-radius:999px;border:none;outline:none;font-weight:700;cursor:pointer;transition:.2s}
     .controls select{background:#fff;color:var(--text-main);box-shadow:var(--shadow)}
@@ -56,8 +59,6 @@
     .btn-expire:hover{color:var(--accent)}
     .btn-export{background:var(--sidebar-bg);color:#fff}
     .btn-export:hover{background:#2A2D38}
-
-    /* Stat cards */
     .dashboard{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:20px;margin-bottom:24px}
     .stat-card{background:var(--card-bg);padding:26px;border-radius:var(--radius);box-shadow:var(--shadow)}
     .stat-card h3{margin:0 0 10px;color:var(--text-sub);font-size:13px;font-weight:600}
@@ -68,18 +69,13 @@
     .stat-card.c-redeemed .num{color:var(--green)}
     .stat-card.c-unredeemed .num{color:var(--accent)}
     .stat-card.c-expired .num{color:var(--gray)}
-
-    /* Charts */
     .charts-wrapper{display:flex;gap:20px;margin-bottom:24px;flex-wrap:wrap}
     .chart-box{background:var(--card-bg);padding:26px;border-radius:var(--radius);box-shadow:var(--shadow);flex:1;min-width:320px}
     .chart-box h3{margin:0 0 18px;font-size:15px;font-weight:800}
     .chart-canvas{height:260px}
-
-    /* Table */
     .table-toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;gap:12px;flex-wrap:wrap}
     .table-toolbar #result-count{color:var(--text-sub);font-size:13px;font-weight:600}
     .search-box{padding:12px 18px;border-radius:999px;border:none;font-size:14px;width:300px;outline:none;background:#fff;box-shadow:var(--shadow);color:var(--text-main)}
-
     .table-container{background:var(--card-bg);border-radius:var(--radius);box-shadow:var(--shadow);overflow:auto;max-height:52vh;padding:8px}
     table{width:100%;border-collapse:separate;border-spacing:0 4px;min-width:880px}
     th,td{padding:14px 18px;text-align:left;border:none}
@@ -95,31 +91,33 @@
     .status-no{color:var(--accent);font-weight:800;background:rgba(240,118,84,.12);padding:5px 12px;border-radius:999px;font-size:12px}
     .status-expired{color:#8A93A5;font-weight:800;background:rgba(138,147,165,.12);padding:5px 12px;border-radius:999px;font-size:12px}
     .time-text{font-size:13px;color:var(--text-sub)}
-
-    /* 🔥 新增：重設按鈕樣式 */
     .btn-reset { background: rgba(240,118,84,.1); border: 1px solid rgba(240,118,84,.3); color: var(--accent); font-size: 12px; font-weight: 700; padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: 0.2s; white-space: nowrap; }
     .btn-reset:hover { background: var(--accent); color: #fff; }
 
-    @media (max-width:900px){
-      .dashboard{grid-template-columns:1fr 1fr}
-    }
+    /* 🔥 Config Manager UI */
+    .config-card { background: var(--card-bg); padding: 30px; border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 24px; }
+    .config-card h2 { margin: 0 0 20px; font-size: 20px; display: flex; justify-content: space-between; align-items: center; }
+    .config-card .desc { font-size: 14px; color: var(--text-sub); margin-bottom: 20px; }
+    .form-group { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+    .form-group input { flex: 1; min-width: 200px; padding: 12px 16px; border: 1px solid #E6EAF0; border-radius: 12px; outline: none; background: #F7F9FB; font-size: 14px; }
+    .form-group input:focus { border-color: var(--accent); background: #fff; }
+    .btn-primary { background: var(--accent); color: #fff; border: none; padding: 12px 24px; border-radius: 12px; font-weight: 700; cursor: pointer; transition: 0.2s; }
+    .btn-primary:hover { filter: brightness(1.1); }
+    .btn-danger { background: rgba(240,118,84,.1); color: var(--accent); border: none; padding: 8px 16px; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 12px; }
+    .btn-danger:hover { background: var(--accent); color: #fff; }
+    .item-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+    .item-li { display: flex; justify-content: space-between; align-items: center; padding: 16px; background: #F7F9FB; border-radius: 12px; border: 1px solid #E6EAF0; }
+    .item-info strong { font-size: 16px; color: var(--text-main); display: block; margin-bottom: 4px; }
+    .item-info span { font-size: 13px; color: var(--text-sub); }
+    
     @media (max-width:768px){
       body{flex-direction:column}
-      .sidebar{width:100%;flex:none;height:auto;position:relative;flex-direction:row;align-items:center;justify-content:space-between;padding:14px 18px}
+      .sidebar{width:100%;flex:none;height:auto;position:relative;flex-direction:row;align-items:center;justify-content:space-between;padding:14px 18px; z-index: 100;}
       .sidebar-brand p{display:none}
-      .sidebar-menu{display:none}
+      .sidebar-menu{display:none;}
       .sidebar-footer{margin:0;padding:0}
       .btn-logout{width:auto;padding:10px 18px}
       #main-app{padding:16px;height:auto}
-      .header{align-items:flex-start}
-      h1{font-size:22px}
-      .controls{width:100%;flex-wrap:wrap}
-      .controls select{flex-basis:100%}
-      .controls button{flex:1}
-      .dashboard{grid-template-columns:1fr 1fr;gap:12px}
-      .stat-card{padding:18px}
-      .stat-card.c-total .num{font-size:34px}
-      .search-box{width:100%}
     }
   </style>
 </head>
@@ -142,10 +140,9 @@
       <h2>德州小騎士</h2>
       <p>後台控制室</p>
     </div>
-    <nav class="sidebar-menu">
-      <div class="sidebar-item active">📊 電子兌換卷儀表板</div>
-      <div class="sidebar-item" onclick="alert('分店管理與權限設定功能開發中...')">🏪 門市管理中心</div>
-      <div class="sidebar-item" onclick="alert('行銷推播與名單分析功能開發中...')">🎯 行銷資產管理</div>
+    <nav class="sidebar-menu" style="display:flex;">
+      <div class="sidebar-item active" onclick="switchView('dashboard', this)">📊 電子兌換卷儀表板</div>
+      <div class="sidebar-item" onclick="switchView('config-ui', this)">⚙️ 系統設定中心 (雲端)</div>
     </nav>
     <div class="sidebar-footer">
       <button class="btn-logout" onclick="logout()">登出</button>
@@ -154,76 +151,118 @@
 
   <main id="main-app">
     <div class="container">
-      <div class="header">
-        <div class="header-title-area">
-          <h1>電子兌換卷儀表板 <span class="live-badge">LIVE 監控中</span></h1>
+      
+      <!-- ================= 視圖 1：儀表板 (原本的功能) ================= -->
+      <div id="view-dashboard" class="view-section active">
+        <div class="header">
+          <div class="header-title-area">
+            <h1>電子兌換卷儀表板 <span class="live-badge">LIVE 監控中</span></h1>
+          </div>
+          <div class="controls">
+            <select id="act-select" onchange="fetchData()"></select>
+            <button class="btn-expire" onclick="expireTickets()">🧹 結算過期</button>
+            <button class="btn-export" onclick="exportExcel()">📥 匯出 Excel</button>
+          </div>
         </div>
-        <div class="controls">
-          <select id="act-select" onchange="fetchData()"></select>
-          <button class="btn-expire" onclick="expireTickets()">🧹 結算過期</button>
-          <button class="btn-export" onclick="exportExcel()">📥 匯出 Excel</button>
+
+        <div class="dashboard">
+          <div class="stat-card c-total">
+            <h3>總發行張數 (近500筆)</h3>
+            <div class="num" id="total-count">0</div>
+          </div>
+          <div class="stat-card c-redeemed">
+            <h3>已核銷</h3>
+            <div class="num" id="redeemed-count">0</div>
+          </div>
+          <div class="stat-card c-unredeemed">
+            <h3>待核銷</h3>
+            <div class="num" id="unredeemed-count">0</div>
+          </div>
+          <div class="stat-card c-expired">
+            <h3>已過期</h3>
+            <div class="num" id="expired-count">0</div>
+          </div>
+        </div>
+
+        <div class="charts-wrapper">
+          <div class="chart-box">
+            <h3>🏆 各門市核銷分佈</h3>
+            <div class="chart-canvas"><canvas id="storeChart"></canvas></div>
+          </div>
+          <div class="chart-box">
+            <h3>⚡ 總體兌換狀態比例</h3>
+            <div class="chart-canvas"><canvas id="statusChart"></canvas></div>
+          </div>
+        </div>
+
+        <div class="table-toolbar">
+          <span id="result-count">顯示 0 筆結果</span>
+          <input id="search-box" class="search-box" type="text" placeholder="🔍 搜尋手機號碼或姓名..." oninput="debounceRenderTable()">
+        </div>
+
+        <div class="table-container">
+          <table id="data-table">
+            <thead>
+              <tr>
+                <th onclick="setSort('phone')">📱 手機號碼 <span class="sort-icon" id="sort-phone">▼</span></th>
+                <th onclick="setSort('name')">👤 顧客姓名 <span class="sort-icon" id="sort-name">▼</span></th>
+                <th onclick="setSort('social_id')">🔗 社群帳號 <span class="sort-icon" id="sort-social_id">▼</span></th>
+                <th onclick="setSort('gift')">🎁 兌換品項 <span class="sort-icon" id="sort-gift">▼</span></th>
+                <th onclick="setSort('status')">⚡ 狀態 <span class="sort-icon" id="sort-status">▼</span></th>
+                <th onclick="setSort('store')">📌 核銷門市 <span class="sort-icon" id="sort-store">▼</span></th>
+                <th onclick="setSort('redeemTime')">🕒 核銷時間 <span class="sort-icon" id="sort-redeemTime">▼</span></th>
+                <th onclick="setSort('timestamp')">📅 領券時間 <span class="sort-icon" id="sort-timestamp">▼</span></th>
+                <th>⚙️ 管理操作</th>
+              </tr>
+            </thead>
+            <tbody id="table-body"></tbody>
+          </table>
         </div>
       </div>
 
-      <div class="dashboard">
-        <div class="stat-card c-total">
-          <h3>總發行張數 (近500筆)</h3>
-          <div class="num" id="total-count">0</div>
+      <!-- ================= 視圖 2：系統設定中心 (改為直連 Firebase) ================= -->
+      <div id="view-config-ui" class="view-section">
+        <div class="header">
+          <h1>⚙️ 系統設定中心 (全雲端同步)</h1>
         </div>
-        <div class="stat-card c-redeemed">
-          <h3>已核銷</h3>
-          <div class="num" id="redeemed-count">0</div>
+        
+        <div class="config-card">
+          <h2>🏪 門市清單管理</h2>
+          <p class="desc">新增或刪除門市，全台 POS 系統會自動同步更新。</p>
+          <div class="form-group">
+            <input type="text" id="new-store-name" placeholder="輸入新門市名稱 (例: 巨蛋門市)">
+            <button class="btn-primary" onclick="addStore()">➕ 新增門市</button>
+          </div>
+          <ul class="item-list" id="ui-store-list"></ul>
         </div>
-        <div class="stat-card c-unredeemed">
-          <h3>待核銷</h3>
-          <div class="num" id="unredeemed-count">0</div>
+
+        <div class="config-card">
+          <h2>🎯 行銷活動與密碼管理</h2>
+          <p class="desc">設定領券前台的通關密語，以及門市 POS 核銷時要顯示的預設贈品。</p>
+          <div class="form-group">
+            <input type="text" id="new-act-name" placeholder="活動名稱 (例: 聖誕節活動)">
+            <input type="text" id="new-act-pwd" placeholder="通關密語 (例: XMAS99)">
+            <input type="text" id="new-act-gift" placeholder="預設贈品 (例: 雞腿一支)">
+            <input type="text" id="new-act-stores" placeholder="限定門市 (填 ALL 或 成功門市,左車門市)" value="ALL">
+            <button class="btn-primary" onclick="addEvent()">➕ 新增活動</button>
+          </div>
+          <ul class="item-list" id="ui-event-list"></ul>
         </div>
-        <div class="stat-card c-expired">
-          <h3>已過期</h3>
-          <div class="num" id="expired-count">0</div>
+
+        <div class="config-card" style="border: 2px solid var(--accent); background: rgba(240,118,84,0.02);">
+          <h2>💾 同步至資料庫 (取代 config.js)</h2>
+          <p class="desc">在上方完成所有設定後，點擊下方按鈕，所有設定將立刻寫入 Firebase，全台門市與領券前台瞬間生效！</p>
+          <button id="save-cloud-btn" class="btn-primary" style="width:100%; font-size:18px; padding: 16px;" onclick="saveConfigToCloud()">💾 儲存所有設定至雲端 (即時生效)</button>
         </div>
       </div>
 
-      <div class="charts-wrapper">
-        <div class="chart-box">
-          <h3>🏆 各門市核銷分佈</h3>
-          <div class="chart-canvas"><canvas id="storeChart"></canvas></div>
-        </div>
-        <div class="chart-box">
-          <h3>⚡ 總體兌換狀態比例</h3>
-          <div class="chart-canvas"><canvas id="statusChart"></canvas></div>
-        </div>
-      </div>
-
-      <div class="table-toolbar">
-        <span id="result-count">顯示 0 筆結果</span>
-        <input id="search-box" class="search-box" type="text" placeholder="🔍 搜尋手機號碼或姓名..." oninput="debounceRenderTable()">
-      </div>
-
-      <div class="table-container">
-        <table id="data-table">
-          <thead>
-            <tr>
-              <th onclick="setSort('phone')">📱 手機號碼 <span class="sort-icon" id="sort-phone">▼</span></th>
-              <th onclick="setSort('name')">👤 顧客姓名 <span class="sort-icon" id="sort-name">▼</span></th>
-              <th onclick="setSort('social_id')">🔗 社群帳號 <span class="sort-icon" id="sort-social_id">▼</span></th>
-              <th onclick="setSort('gift')">🎁 兌換品項 <span class="sort-icon" id="sort-gift">▼</span></th>
-              <th onclick="setSort('status')">⚡ 狀態 <span class="sort-icon" id="sort-status">▼</span></th>
-              <th onclick="setSort('store')">📌 核銷門市 <span class="sort-icon" id="sort-store">▼</span></th>
-              <th onclick="setSort('redeemTime')">🕒 核銷時間 <span class="sort-icon" id="sort-redeemTime">▼</span></th>
-              <th onclick="setSort('timestamp')">📅 領券時間 <span class="sort-icon" id="sort-timestamp">▼</span></th>
-              <th>⚙️ 管理操作</th> <!-- 🔥 新增操作欄位 -->
-            </tr>
-          </thead>
-          <tbody id="table-body"></tbody>
-        </table>
-      </div>
     </div>
   </main>
 
   <script type="module">
+    // 🔥 新增匯入 getDoc, setDoc 為了讀寫雲端設定
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getFirestore, collection, onSnapshot, doc, updateDoc, query, limit } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getFirestore, collection, onSnapshot, doc, getDoc, setDoc, updateDoc, query, limit } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
     import { getAuth, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
     const firebaseConfig = {
@@ -249,9 +288,160 @@
     let unsubscribeSnapshot = null; 
     const adminEmails = ["yenyen08200@gmail.com", "admin@gmail.com"];
     
-    // 🔥 全域變數：用來存放從 config.js 抓出來的 POS 贈品資料
+    // 🔥 全域變數：準備存放從雲端抓下來的設定
     let globalPosConfig = {};
+    let globalEventConfig = {};
+    let globalStoreList = [];
 
+    // --- 視圖切換 ---
+    window.switchView = function(viewId, element) {
+      document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+      document.getElementById('view-' + viewId).classList.add('active');
+      document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
+      element.classList.add('active');
+    };
+
+    // --- Config UI 管理邏輯 (改為雲端架構) ---
+    function renderConfigUI() {
+      const storeListEl = document.getElementById('ui-store-list');
+      storeListEl.innerHTML = globalStoreList.map((store, idx) => `
+        <li class="item-li">
+          <div class="item-info"><strong>🏪 ${store}</strong></div>
+          <button class="btn-danger" onclick="deleteStore(${idx})">刪除</button>
+        </li>
+      `).join('');
+
+      const eventListEl = document.getElementById('ui-event-list');
+      eventListEl.innerHTML = Object.keys(globalEventConfig).map(actName => {
+        const pwd = globalEventConfig[actName];
+        const giftInfo = globalPosConfig[actName];
+        const giftStr = giftInfo ? giftInfo.gift : "無設定";
+        let storesStr = giftInfo ? giftInfo.stores : "ALL";
+        if(Array.isArray(storesStr)) storesStr = storesStr.join(', ');
+        
+        return `
+        <li class="item-li">
+          <div class="item-info">
+            <strong>🎯 ${actName}</strong>
+            <span>密語: <code>${pwd}</code> | 贈品: ${giftStr} | 限定門市: ${storesStr}</span>
+          </div>
+          <button class="btn-danger" onclick="deleteEvent('${actName}')">刪除</button>
+        </li>
+        `;
+      }).join('');
+    }
+
+    window.addStore = function() {
+      const input = document.getElementById('new-store-name');
+      const val = input.value.trim();
+      if(!val) return;
+      if(globalStoreList.includes(val)) return alert("門市已存在！");
+      globalStoreList.push(val);
+      input.value = '';
+      renderConfigUI();
+    };
+    
+    window.deleteStore = function(idx) {
+      if(confirm("確定刪除此門市？\n(記得操作完要按最下方的『儲存至雲端』才會生效喔)")) {
+        globalStoreList.splice(idx, 1);
+        renderConfigUI();
+      }
+    };
+
+    window.addEvent = function() {
+      const name = document.getElementById('new-act-name').value.trim();
+      const pwd = document.getElementById('new-act-pwd').value.trim();
+      const gift = document.getElementById('new-act-gift').value.trim();
+      let stores = document.getElementById('new-act-stores').value.trim();
+      if(!name || !pwd || !gift || !stores) return alert("請完整填寫活動資料！");
+      if(stores !== "ALL") stores = stores.split(',').map(s => s.trim());
+
+      globalEventConfig[name] = pwd;
+      globalPosConfig[name] = { gift: gift, stores: stores };
+      
+      document.getElementById('new-act-name').value = '';
+      document.getElementById('new-act-pwd').value = '';
+      document.getElementById('new-act-gift').value = '';
+      document.getElementById('new-act-stores').value = 'ALL';
+      renderConfigUI();
+    };
+
+    window.deleteEvent = function(actName) {
+      if(confirm(`確定刪除活動「${actName}」？\n(記得操作完要按最下方的『儲存至雲端』才會生效喔)`)) {
+        delete globalEventConfig[actName];
+        delete globalPosConfig[actName];
+        renderConfigUI();
+      }
+    };
+
+    // 🔥 核心功能：直接把設定寫進 Firebase 雲端！
+    window.saveConfigToCloud = async function() {
+      if(!confirm("⚠️ 確定要將設定寫入資料庫嗎？\n按下確定後，全台門市 POS 與前台領券系統將立刻套用新設定！")) return;
+      
+      const btn = document.getElementById('save-cloud-btn');
+      btn.innerText = "⏳ 雲端同步中...";
+      btn.disabled = true;
+
+      try {
+        const configRef = doc(db, "system", "config");
+        await setDoc(configRef, {
+          EVENT_CONFIG: globalEventConfig,
+          STORE_LIST: globalStoreList,
+          POS_CONFIG: globalPosConfig,
+          lastUpdated: new Date().toLocaleString()
+        });
+        
+        alert("✅ 系統設定已成功同步至雲端！");
+        
+        // 更新左上角的下拉選單 (確保剛新增的活動立刻可以查報表)
+        populateAdminDropdown();
+        
+      } catch (error) {
+        console.error("寫入雲端設定失敗:", error);
+        alert("❌ 同步失敗，請檢查權限或網路狀態。");
+      } finally {
+        btn.innerText = "💾 儲存所有設定至雲端 (即時生效)";
+        btn.disabled = false;
+      }
+    };
+
+    // --- 抓取雲端設定檔 (取代原本 import config.js) ---
+    async function fetchSystemConfig() {
+      try {
+        const configSnap = await getDoc(doc(db, "system", "config"));
+        if (configSnap.exists()) {
+          const data = configSnap.data();
+          globalEventConfig = data.EVENT_CONFIG || {};
+          globalStoreList = data.STORE_LIST || [];
+          globalPosConfig = data.POS_CONFIG || {};
+        } else {
+          console.log("雲端沒有設定檔，將以空資料初始化。");
+        }
+        
+        renderConfigUI();
+        populateAdminDropdown();
+        
+      } catch (error) {
+        console.error("抓取雲端設定失敗:", error);
+        alert("無法讀取系統設定，請重新整理頁面！");
+      }
+    }
+
+    function populateAdminDropdown() {
+      const adminSelect = document.getElementById('act-select');
+      adminSelect.innerHTML = '';
+      for (const actName in globalEventConfig) {
+        const opt = document.createElement('option');
+        opt.value = actName;
+        opt.text = actName;
+        adminSelect.appendChild(opt);
+      }
+      if (adminSelect.options.length > 0) {
+        window.fetchData(); 
+      }
+    }
+
+    // --- 系統登入與資料表邏輯保持不變 ---
     window.login = function() {
       const email = document.getElementById('email').value;
       const pwd = document.getElementById('pwd').value;
@@ -283,9 +473,7 @@
     let searchTimer = null;
     window.debounceRenderTable = function() {
       clearTimeout(searchTimer);
-      searchTimer = setTimeout(() => {
-        window.renderTable();
-      }, 300);
+      searchTimer = setTimeout(() => { window.renderTable(); }, 300);
     };
 
     window.fetchData = function() {
@@ -298,35 +486,23 @@
       tbody.innerHTML = '<tr><td colspan="9" style="text-align:center; padding: 40px; color: #8A93A5;">📡 與資料庫即時連線中...</td></tr>';
       
       const q = query(collection(db, act), limit(500));
-
       unsubscribeSnapshot = onSnapshot(q, (querySnapshot) => {
         allData = [];
-        let redeemedCount = 0;
-        let expiredCount = 0; 
-        let storeStats = {}; 
+        let redeemedCount = 0; let expiredCount = 0; let storeStats = {}; 
 
         querySnapshot.forEach((doc) => {
-          const d = doc.data();
-          d.id = doc.id; 
-          allData.push(d);
-          
+          const d = doc.data(); d.id = doc.id; allData.push(d);
           if (d.status === "已兌換") {
             redeemedCount++;
-            if (d.store) {
-              storeStats[d.store] = (storeStats[d.store] || 0) + 1;
-            }
-          } else if (d.status === "已過期") {
-            expiredCount++; 
-          }
+            if (d.store) { storeStats[d.store] = (storeStats[d.store] || 0) + 1; }
+          } else if (d.status === "已過期") { expiredCount++; }
         });
 
         const unredeemedCount = allData.length - redeemedCount - expiredCount; 
-        
         document.getElementById('total-count').innerText = allData.length;
         document.getElementById('redeemed-count').innerText = redeemedCount;
         document.getElementById('unredeemed-count').innerText = unredeemedCount;
         document.getElementById('expired-count').innerText = expiredCount; 
-
         drawCharts(storeStats, redeemedCount, unredeemedCount, expiredCount); 
         window.renderTable(); 
       }, (error) => {
@@ -335,22 +511,12 @@
       });
     };
 
-    // 🔥 新增：獨立重設單一客人的核銷狀態！
     window.resetSingleTicket = async function(phone) {
       const act = document.getElementById('act-select').value;
-      if (!confirm(`⚠️ 確定要將手機號碼「${phone}」的憑證重設為【未兌換】嗎？\n(此操作將清空他的核銷門市與時間紀錄)`)) {
-        return;
-      }
+      if (!confirm(`⚠️ 確定要將手機號碼「${phone}」的憑證重設為【未兌換】嗎？\n(此操作將清空他的核銷門市與時間紀錄)`)) return;
       try {
-        const docRef = doc(db, act, phone);
-        await updateDoc(docRef, {
-          status: "", 
-          store: "", 
-          redeemTime: ""
-        });
-        // 由於我們有 onSnapshot，資料庫改完畫面會瞬間自己更新，不用額外寫 alert
+        await updateDoc(doc(db, act, phone), { status: "", store: "", redeemTime: "" });
       } catch (error) {
-        console.error("重設失敗:", error);
         alert("重設失敗，請檢查權限或連線。");
       }
     };
@@ -359,55 +525,34 @@
       const actSelect = document.getElementById('act-select');
       if (!actSelect || !actSelect.value) return;
       const act = actSelect.value;
-
       const confirmText = prompt(`⚠️ 警告：此操作不可逆！\n\n您確定要把「${act}」所有【未兌換】的票券強制設為【已過期】嗎？\n\n如果確定，請在下方輸入「結算」兩個字：`);
-      if (confirmText !== "結算") {
-        alert("操作已取消。");
-        return;
-      }
+      if (confirmText !== "結算") return alert("操作已取消。");
 
       try {
         const btn = document.querySelector('.btn-expire');
-        btn.innerText = "處理中...";
-        btn.disabled = true;
+        btn.innerText = "處理中..."; btn.disabled = true;
 
         const unredeemedDocs = allData.filter(d => !d.status || d.status === "未兌換");
-        
         if (unredeemedDocs.length === 0) {
           alert("🎉 目前沒有任何【未兌換】的票券可以結算！");
         } else {
-          let updated = 0;
-          const updatePromises = [];
-          
+          let updated = 0; const updatePromises = [];
           unredeemedDocs.forEach((d) => {
-            const docRef = doc(db, act, d.id);
-            const p = updateDoc(docRef, {
-              status: "已過期",
-              redeemTime: "活動結束，逾期未換"
-            });
-            updatePromises.push(p);
-            updated++;
+            const p = updateDoc(doc(db, act, d.id), { status: "已過期", redeemTime: "活動結束，逾期未換" });
+            updatePromises.push(p); updated++;
           });
-
           await Promise.all(updatePromises);
           alert(`✅ 結算完成！\n總共將 ${updated} 筆票券設為已過期。`);
         }
-
-        btn.innerText = "🧹 結算過期";
-        btn.disabled = false;
-
+        btn.innerText = "🧹 結算過期"; btn.disabled = false;
       } catch (error) {
-        console.error("結算失敗:", error);
         alert("結算失敗，請檢查網路連線或權限設定。");
-        document.querySelector('.btn-expire').innerText = "🧹 結算過期";
-        document.querySelector('.btn-expire').disabled = false;
+        document.querySelector('.btn-expire').innerText = "🧹 結算過期"; document.querySelector('.btn-expire').disabled = false;
       }
     };
 
     window.setSort = function(col) {
-      if (sortCol === col) sortAsc = !sortAsc;
-      else { sortCol = col; sortAsc = true; }
-      
+      if (sortCol === col) sortAsc = !sortAsc; else { sortCol = col; sortAsc = true; }
       document.querySelectorAll('th').forEach(th => th.classList.remove('active'));
       document.querySelectorAll('.sort-icon').forEach(icon => icon.innerText = '▼');
       event.currentTarget.classList.add('active');
@@ -419,18 +564,11 @@
       const tbody = document.getElementById('table-body');
       const searchTerm = document.getElementById('search-box').value.trim().toLowerCase();
       const currentAct = document.getElementById('act-select').value;
-      
-      // 🔥 抓取這個活動在 config.js 裡設定的「預設贈品」
       const defaultGift = globalPosConfig[currentAct]?.gift || '預設活動贈品';
 
-      let filteredData = allData.filter(d => {
-        return (d.phone || '').toLowerCase().includes(searchTerm) ||
-               (d.name || '').toLowerCase().includes(searchTerm);
-      });
-
+      let filteredData = allData.filter(d => (d.phone || '').toLowerCase().includes(searchTerm) || (d.name || '').toLowerCase().includes(searchTerm));
       filteredData.sort((a, b) => {
-        let valA = a[sortCol] || '';
-        let valB = b[sortCol] || '';
+        let valA = a[sortCol] || ''; let valB = b[sortCol] || '';
         if (valA < valB) return sortAsc ? -1 : 1;
         if (valA > valB) return sortAsc ? 1 : -1;
         return 0;
@@ -439,8 +577,7 @@
       document.getElementById('result-count').innerText = `顯示 ${filteredData.length} 筆結果`;
 
       if (filteredData.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="9" style="text-align:center; padding: 40px; color: #F07654; font-weight: bold;">找不到符合的資料 🥲</td></tr>';
-        return;
+        tbody.innerHTML = '<tr><td colspan="9" style="text-align:center; padding: 40px; color: #F07654; font-weight: bold;">找不到符合的資料 🥲</td></tr>'; return;
       }
 
       tbody.innerHTML = filteredData.map(d => {
@@ -448,13 +585,9 @@
         if (d.status === '已兌換') statusBadge = `<span class="status-yes">已兌換</span>`; 
         if (d.status === '已過期') statusBadge = `<span class="status-expired">已過期</span>`; 
         
-        // 🔥 判斷顯示：如果有專屬贈品 (d.gift) 就顯示並標示(專屬)，沒有的話就顯示設定檔的預設贈品
         let displayGift = d.gift ? `${d.gift} <span style="font-size:10px; color:#F07654;">(專屬)</span>` : defaultGift;
-
-        // 🔥 判斷按鈕：如果已兌換或已過期，就給他一個「重設」的按鈕，如果是未兌換就空著
         let actionBtn = (d.status === '已兌換' || d.status === '已過期') 
-          ? `<button class="btn-reset" onclick="resetSingleTicket('${d.id}')">↻ 復原未兌換</button>` 
-          : `-`;
+          ? `<button class="btn-reset" onclick="resetSingleTicket('${d.id}')">↻ 復原未兌換</button>` : `-`;
 
         return `
           <tr>
@@ -478,21 +611,13 @@
       const defaultGift = globalPosConfig[act]?.gift || '預設活動贈品';
 
       const exportArr = allData.map(d => ({
-        "手機號碼": d.phone,
-        "顧客姓名": d.name,
-        "社群帳號": d.social_id || '未提供',
-        // 🔥 讓 Excel 匯出也能顯示真正的預設或專屬贈品
-        "兌換品項": d.gift || defaultGift,
-        "兌換狀態": d.status || '未兌換',
-        "核銷門市": d.store || '',
-        "核銷時間": d.redeemTime || '',
-        "領券時間": d.timestamp || ''
+        "手機號碼": d.phone, "顧客姓名": d.name, "社群帳號": d.social_id || '未提供',
+        "兌換品項": d.gift || defaultGift, "兌換狀態": d.status || '未兌換',
+        "核銷門市": d.store || '', "核銷時間": d.redeemTime || '', "領券時間": d.timestamp || ''
       }));
-      const ws = XLSX.utils.json_to_sheet(exportArr);
-      const wb = XLSX.utils.book_new();
+      const ws = XLSX.utils.json_to_sheet(exportArr); const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, "兌換名單");
-      const dateStr = new Date().toISOString().slice(0,10);
-      XLSX.writeFile(wb, `${act}_兌換報表_${dateStr}.xlsx`);
+      XLSX.writeFile(wb, `${act}_兌換報表_${new Date().toISOString().slice(0,10)}.xlsx`);
     };
 
     function drawCharts(storeStats, redeemed, unredeemed, expired) {
@@ -500,62 +625,20 @@
       if (statusChartInstance) statusChartInstance.destroy();
 
       const sortedStores = Object.entries(storeStats).sort((a, b) => b[1] - a[1]);
-      const storeLabels = sortedStores.map(s => s[0]);
-      const storeData = sortedStores.map(s => s[1]);
+      const storeLabels = sortedStores.map(s => s[0]); const storeData = sortedStores.map(s => s[1]);
 
       const ctxStore = document.getElementById('storeChart').getContext('2d');
       storeChartInstance = new Chart(ctxStore, {
         type: 'bar',
-        data: {
-          labels: storeLabels.length > 0 ? storeLabels : ['尚無資料'],
-          datasets: [{
-            label: '核銷數量',
-            data: storeData.length > 0 ? storeData : [0],
-            backgroundColor: '#F07654',
-            borderColor: '#F07654',
-            borderWidth: 1,
-            borderRadius: 8
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: { legend: { display: false } },
-          scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
-        }
+        data: { labels: storeLabels.length > 0 ? storeLabels : ['尚無資料'], datasets: [{ label: '核銷數量', data: storeData.length > 0 ? storeData : [0], backgroundColor: '#F07654', borderColor: '#F07654', borderWidth: 1, borderRadius: 8 }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
       });
 
       const ctxStatus = document.getElementById('statusChart').getContext('2d');
       statusChartInstance = new Chart(ctxStatus, {
         type: 'doughnut',
-        data: {
-          labels: ['已核銷', '待核銷', '已過期'],
-          datasets: [{
-            data: (redeemed === 0 && unredeemed === 0 && expired === 0) ? [0, 1, 0] : [redeemed, unredeemed, expired],
-            backgroundColor: ['#3FBF8F', '#F07654', '#B7BFCC'],
-            borderWidth: 0,
-            hoverOffset: 4
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          cutout: '70%',
-          plugins: {
-            legend: { position: 'bottom' },
-            tooltip: {
-              callbacks: {
-                label: function(context) {
-                  let label = context.label || '';
-                  let value = context.raw || 0;
-                  let total = context.chart._metasets[context.datasetIndex].total;
-                  let percentage = total > 0 ? Math.round((value / total) * 100) + '%' : '0%';
-                  return `${label}: ${value} 張 (${percentage})`;
-                }
-              }
-            }
-          }
-        }
+        data: { labels: ['已核銷', '待核銷', '已過期'], datasets: [{ data: (redeemed === 0 && unredeemed === 0 && expired === 0) ? [0, 1, 0] : [redeemed, unredeemed, expired], backgroundColor: ['#3FBF8F', '#F07654', '#B7BFCC'], borderWidth: 0, hoverOffset: 4 }] },
+        options: { responsive: true, maintainAspectRatio: false, cutout: '70%', plugins: { legend: { position: 'bottom' }, tooltip: { callbacks: { label: function(context) { let total = context.chart._metasets[context.datasetIndex].total; let percentage = total > 0 ? Math.round((context.raw / total) * 100) + '%' : '0%'; return `${context.label}: ${context.raw} 張 (${percentage})`; } } } } }
       });
     }
 
@@ -566,27 +649,8 @@
           document.getElementById('sidebar-nav').style.display = 'flex'; 
           document.getElementById('main-app').style.display = 'block';
           
-          import("./config.js?v=" + new Date().getTime()).then((module) => {
-            const EVENT_CONFIG = module.EVENT_CONFIG;
-            
-            // 🔥 儲存 POS_CONFIG 給整個網頁使用
-            globalPosConfig = module.POS_CONFIG; 
-            
-            const adminSelect = document.getElementById('act-select');
-            adminSelect.innerHTML = '';
-            for (const actName in EVENT_CONFIG) {
-              const opt = document.createElement('option');
-              opt.value = actName;
-              opt.text = actName;
-              adminSelect.appendChild(opt);
-            }
-            if (adminSelect.options.length > 0) {
-              window.fetchData(); 
-            }
-          }).catch((error) => {
-            console.error("無法載入 config.js", error);
-            alert("⚠️ 系統警告：找不到 config.js 檔案！\n\n1. 請確認已將 config.js 上傳至 GitHub。\n2. 請確認大小寫全小寫。\n3. GitHub Pages 可能正在快取，請等 1 分鐘後重整頁面。");
-          });
+          // 🔥 登入成功後，改為去 Firebase 抓取雲端設定檔
+          fetchSystemConfig();
 
         } else {
           alert(`❌ 權限不足！\n信箱 ${user.email} 非總部管理員。`);
