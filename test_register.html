@@ -100,13 +100,20 @@
     }
     .brand .mark::before,.brand .mark::after{content:"";width:26px;height:1px;background:linear-gradient(90deg,transparent,var(--brass))}
   h1 {
-      font-family: "Noto Sans TC", sans-serif; /* 強制優先使用思源黑體 */
-      font-size: 36px;
-      font-weight: 700; /* 加粗一點，外框才撐得起來 */
+      font-family: "Noto Sans TC", sans-serif;
+      font-size: 32px;
+      font-weight: 800; /* 加粗讓漸層更明顯 */
       margin: 0 0 8px;
-      letter-spacing: .1em;
-      color: transparent; /* 文字內部透明 */
-      -webkit-text-stroke: 1.5px var(--brass-deep); /* 德州小騎士的專屬深金色外框 */
+      letter-spacing: .15em;
+      
+      /* 🔥 拿掉外框，改成高級金屬漸層實心字 */
+      background: linear-gradient(135deg, var(--brass-light), var(--brass-deep));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      
+      /* 加上淡淡的金色發光陰影，增加立體感 */
+      filter: drop-shadow(0px 4px 8px rgba(185, 145, 90, 0.25));
+      -webkit-text-stroke: 0; /* 徹底消滅醜陋的鷹架外框 */
     }
     .subtitle{font-size:11.5px;color:var(--ink-soft);margin:0;letter-spacing:.32em;text-transform:uppercase}
 
