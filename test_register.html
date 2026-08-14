@@ -252,7 +252,8 @@
 
       <div class="field">
         <label for="phone">手機號碼</label>
-        <input id="phone" type="tel" inputmode="numeric" placeholder="09xxxxxxxx">
+        <!-- 🔥 加上了嚴格的數字過濾 oninput="this.value=this.value.replace(/\D/g,'').slice(0,10)" -->
+        <input id="phone" type="tel" inputmode="numeric" placeholder="例：0912345678 或 0212345678" oninput="this.value=this.value.replace(/\D/g,'').slice(0,10)">
       </div>
 
       <div class="secret">
@@ -339,7 +340,7 @@
   async function register() {
     const act=$('activity').value, name=$('name').value.trim(), soc=$('social_id').value.trim(), ph=$('phone').value.replace(/\D/g,''), cd=$('secret_code').value.trim();
     if(!name || !soc || ph.length<8 || !cd) return alert("⚠️ 請完整填寫資料與密語！");
-    if(!ph.startsWith('09')) return alert("⚠️ 請輸入 09 開頭的手機號碼！");
+    // 🔥 移除 09 開頭的限制，支援市話
     if(cd.toUpperCase() !== EVENT_SECRETS[act]) return alert("⚠️ 通關密語錯誤！");
 
     const docRef = doc(db, act, ph);
