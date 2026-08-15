@@ -120,7 +120,6 @@ button{font-family:inherit;cursor:pointer;}
 .act-btn.on .radio{border-color:var(--accent);background:var(--accent); box-shadow: 0 0 0 4px oklch(0.78 0.14 195/.2);}
 .empty{border:1px dashed var(--border);border-radius:14px;padding:24px;text-align:center;font-size:14px;color:var(--muted-foreground)}
 
-/* 🔥 電子券 / 實體券 模式切換樣式 */
 .mode-switch { display: flex; gap: 8px; margin-bottom: 16px; padding: 6px; background: var(--secondary); border-radius: 16px; }
 .mode-btn { flex: 1; padding: 12px; border-radius: 12px; border: none; background: transparent; color: var(--muted-foreground); font-weight: 700; font-size: 15px; transition: 0.2s; }
 .mode-btn.active { background: var(--card); color: var(--foreground); box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
@@ -147,7 +146,6 @@ button{font-family:inherit;cursor:pointer;}
 .primary-btn:active{transform:scale(.95)}
 button:disabled{opacity:.5;cursor:not-allowed}
 
-/* 全螢幕掃描器樣式 */
 #scan-area{
   position: fixed; inset: 0; z-index: 9999; 
   background: rgba(10, 12, 16, 0.95); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
@@ -379,7 +377,6 @@ button:disabled{opacity:.5;cursor:not-allowed}
         for (const a in POS_CONFIG) {
           const cfg = POS_CONFIG[a];
           
-          // 🔥 核心更新：過濾被下架的活動 (active === false)
           if (cfg.active === false) continue;
           
           if (cfg.stores === "ALL" || (Array.isArray(cfg.stores) && cfg.stores.includes(s))) {
@@ -498,17 +495,21 @@ button:disabled{opacity:.5;cursor:not-allowed}
       banner.innerHTML = "✅ 有效優惠券";
     }
 
+    // 🔥 核心修改區：精準帶出資料庫設定的餐點與資料
+    const defaultExpire = (POS_CONFIG[shownAct] && POS_CONFIG[shownAct].expireDate) ? POS_CONFIG[shownAct].expireDate : "無特別限制";
+    const expireStr = record.expireDate || defaultExpire;
+    const displayGift = record.gift || giftMap[shownAct] || "未設定餐點";
+
     $("v-phone").innerText = shownPhone;
     $("v-name").innerText = record.name || "—";
+    $("v-expire").innerText = expireStr;
     
     if (currentMode === 'physical') {
-        $("v-gift").innerHTML = `<span style="color:var(--muted-foreground)">請依照實體紙本券面標示發放</span>`;
+        $("v-social").innerText = record.social_id || "實體紙本憑證";
+        $("v-gift").innerHTML = `<span style="color:var(--primary);font-weight:900;font-size:22px;">${displayGift}</span> <span style="font-size:12px;color:var(--muted-foreground);display:block;margin-top:4px;">⚠️ 貼心防偽提示：請確認系統帶出之品項與紙本標示相符</span>`;
     } else {
-        const defaultExpire = (POS_CONFIG[shownAct] && POS_CONFIG[shownAct].expireDate) ? POS_CONFIG[shownAct].expireDate : "無特別限制";
-        const expireStr = record.expireDate || defaultExpire;
         $("v-social").innerText = record.social_id || "未提供";
-        $("v-expire").innerText = expireStr;
-        $("v-gift").innerText = record.gift || giftMap[shownAct] || "專屬活動贈品";
+        $("v-gift").innerText = displayGift;
     }
     
     $("btn-redeem").classList.toggle("hidden", isInvalid);
