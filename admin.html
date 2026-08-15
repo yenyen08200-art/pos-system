@@ -94,7 +94,7 @@
     .btn-reset { background: rgba(240,118,84,.1); border: 1px solid rgba(240,118,84,.3); color: var(--accent); font-size: 12px; font-weight: 700; padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: 0.2s; white-space: nowrap; }
     .btn-reset:hover { background: var(--accent); color: #fff; }
 
-    /* 🔥 UI Cards (Config, Issue, Lottery) */
+    /* 🔥 UI Cards */
     .config-card { background: var(--card-bg); padding: 30px; border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 24px; }
     .config-card h2 { margin: 0 0 20px; font-size: 20px; display: flex; justify-content: space-between; align-items: center; }
     .config-card .desc { font-size: 14px; color: var(--text-sub); margin-bottom: 20px; line-height: 1.5;}
@@ -169,7 +169,6 @@
           </div>
           <div class="controls">
             <select id="act-select" onchange="fetchData()"></select>
-            <!-- 移除了原本的建檔按鈕，讓版面更乾淨 -->
             <button class="btn-expire" onclick="expireTickets()">🧹 智慧結算過期</button>
             <button class="btn-export" onclick="exportExcel()">📥 匯出 Excel</button>
           </div>
@@ -221,6 +220,8 @@
                 <th onclick="setSort('status')">⚡ 狀態 <span class="sort-icon" id="sort-status">▼</span></th>
                 <th onclick="setSort('store')">📌 核銷門市 <span class="sort-icon" id="sort-store">▼</span></th>
                 <th onclick="setSort('redeemTime')">🕒 核銷時間 <span class="sort-icon" id="sort-redeemTime">▼</span></th>
+                <!-- 🔥 新增：使用期限標頭 -->
+                <th onclick="setSort('expireDate')">⏳ 使用期限 <span class="sort-icon" id="sort-expireDate">▼</span></th>
                 <th onclick="setSort('timestamp')">📅 領券時間 <span class="sort-icon" id="sort-timestamp">▼</span></th>
                 <th>⚙️ 管理操作</th>
               </tr>
@@ -230,7 +231,7 @@
         </div>
       </div>
 
-      <!-- ================= 視圖 2：票券發放與建檔中心 (全新整合) ================= -->
+      <!-- ================= 視圖 2：票券發放與建檔中心 ================= -->
       <div id="view-issue-ui" class="view-section">
         <div class="header">
           <h1>🎟️ 票券發放與建檔中心</h1>
@@ -432,6 +433,13 @@
       document.getElementById('view-' + viewId).classList.add('active');
       document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
       element.classList.add('active');
+      
+      if (viewId === 'lottery-ui' || viewId === 'issue-ui') {
+        const actSelectHtml = document.getElementById('act-select').innerHTML;
+        if(document.getElementById('lottery-act')) document.getElementById('lottery-act').innerHTML = actSelectHtml;
+        if(document.getElementById('manual-act')) document.getElementById('manual-act').innerHTML = actSelectHtml;
+        if(document.getElementById('batch-act')) document.getElementById('batch-act').innerHTML = actSelectHtml;
+      }
     };
 
     function populateAdminDropdown() {
@@ -668,7 +676,7 @@
 
       let allLines = rawList.split('\n').map(p => p.trim()).filter(p => p !== '');
 
-      if (!act) return alert("⚠️ 請選擇活動！");
+      if (!act) return alert("⚠️ 請選擇寫入資料庫的活動！");
       if (allLines.length === 0) return alert("⚠️ 請貼上參加者名單！");
       if (isNaN(count) || count < 1) return alert("⚠️ 抽出人數必須大於 0！");
 
@@ -786,7 +794,7 @@
         const today = new Date();
         today.setHours(0,0,0,0);
 
-        // 用正則表達式尋找字串中的最後一個日期格式 (YYYY/MM/DD 或 YYYY-MM-DD)
+        // 尋找 YYYY/MM/DD 或 YYYY-MM-DD 格式
         const regex = /(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})/g;
 
         let updated = 0; const updatePromises = [];
@@ -802,7 +810,7 @@
               lastDate = new Date(match[1], parseInt(match[2])-1, match[3]);
           }
           
-          // 如果有抓到合法日期，且該日期小於今天
+          // 若該日期小於今天
           if (lastDate && lastDate < today) {
             const p = updateDoc(doc(db, act, d.id), { status: "已過期", redeemTime: "逾期未換 (系統自動結算)" });
             updatePromises.push(p); 
@@ -845,6 +853,7 @@
       const searchTerm = document.getElementById('search-box').value.trim().toLowerCase();
       const currentAct = document.getElementById('act-select').value;
       const defaultGift = globalPosConfig[currentAct]?.gift || '預設活動贈品';
+      const defaultExpire = globalPosConfig[currentAct]?.expireDate || "無特別限制";
 
       let filteredData = allData.filter(d => (d.phone || '').toLowerCase().includes(searchTerm) || (d.name || '').toLowerCase().includes(searchTerm));
       filteredData.sort((a, b) => {
@@ -857,7 +866,7 @@
       document.getElementById('result-count').innerText = `顯示 ${filteredData.length} 筆結果`;
 
       if (filteredData.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="9" style="text-align:center; padding: 40px; color: #F07654; font-weight: bold;">找不到資料 🥲</td></tr>'; return;
+        tbody.innerHTML = '<tr><td colspan="10" style="text-align:center; padding: 40px; color: #F07654; font-weight: bold;">找不到資料 🥲</td></tr>'; return;
       }
 
       tbody.innerHTML = filteredData.map(d => {
@@ -866,6 +875,8 @@
         if (d.status === '已過期') statusBadge = `<span class="status-expired">已過期</span>`; 
         
         let displayGift = d.gift ? `${d.gift} <span style="font-size:10px; color:#F07654;">(專屬)</span>` : defaultGift;
+        let displayExpire = d.expireDate || defaultExpire;
+        
         let actionBtn = (d.status === '已兌換' || d.status === '已過期') 
           ? `<button class="btn-reset" onclick="resetSingleTicket('${d.id}')">↻ 復原</button>` : `-`;
 
@@ -878,6 +889,7 @@
             <td>${statusBadge}</td>
             <td style="font-weight:bold; color:var(--sidebar-bg);">${d.store || '-'}</td>
             <td class="time-text">${d.redeemTime || '-'}</td>
+            <td style="font-weight:bold; color:var(--text-main);">${displayExpire}</td>
             <td class="time-text">${d.timestamp || '-'}</td>
             <td>${actionBtn}</td>
           </tr>
@@ -889,11 +901,13 @@
       if (allData.length === 0) return alert('⚠️ 目前沒有資料可以匯出！');
       const act = document.getElementById('act-select').value;
       const defaultGift = globalPosConfig[act]?.gift || '預設活動贈品';
+      const defaultExpire = globalPosConfig[act]?.expireDate || "無特別限制";
 
       const exportArr = allData.map(d => ({
         "兌換號碼": d.phone, "顧客姓名": d.name, "社群帳號": d.social_id || '未提供',
         "兌換品項": d.gift || defaultGift, "兌換狀態": d.status || '未兌換',
-        "核銷門市": d.store || '', "核銷時間": d.redeemTime || '', "領券時間": d.timestamp || ''
+        "核銷門市": d.store || '', "核銷時間": d.redeemTime || '', 
+        "使用期限": d.expireDate || defaultExpire, "領券時間": d.timestamp || ''
       }));
       const ws = XLSX.utils.json_to_sheet(exportArr); const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, "兌換名單");
