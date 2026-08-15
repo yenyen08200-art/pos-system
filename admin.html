@@ -99,7 +99,7 @@
     .config-card h2 { margin: 0 0 20px; font-size: 20px; display: flex; justify-content: space-between; align-items: center; }
     .config-card .desc { font-size: 14px; color: var(--text-sub); margin-bottom: 20px; }
     .form-group { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
-    .form-group input { flex: 1; min-width: 200px; padding: 12px 16px; border: 1px solid #E6EAF0; border-radius: 12px; outline: none; background: #F7F9FB; font-size: 14px; }
+    .form-group input { flex: 1; min-width: 140px; padding: 12px 16px; border: 1px solid #E6EAF0; border-radius: 12px; outline: none; background: #F7F9FB; font-size: 14px; }
     .form-group input:focus { border-color: var(--accent); background: #fff; }
     .btn-primary { background: var(--accent); color: #fff; border: none; padding: 12px 24px; border-radius: 12px; font-weight: 700; cursor: pointer; transition: 0.2s; }
     .btn-primary:hover { filter: brightness(1.1); }
@@ -159,8 +159,13 @@
         <input type="text" id="modal-social" placeholder="無則留空">
       </div>
       <div class="modal-field">
-        <label>🎁 專屬贈品 (選填，無則套用預設)</label>
+        <label>🎁 專屬贈品 (選填，無則套用活動預設)</label>
         <input type="text" id="modal-gift" placeholder="例：補償一號餐">
+      </div>
+      <!-- 🔥 新增：手動補單專屬期限 -->
+      <div class="modal-field">
+        <label>⏳ 使用期限 (選填，無則套用活動預設)</label>
+        <input type="text" id="modal-expire" placeholder="例：2026/12/31">
       </div>
       <div class="modal-actions">
         <button class="btn-cancel" onclick="closeManualModal()">取消</button>
@@ -206,7 +211,6 @@
           </div>
           <div class="controls">
             <select id="act-select" onchange="fetchData()"></select>
-            <!-- 🔥 新增手動補單按鈕 -->
             <button class="btn-export" style="background: var(--green);" onclick="openManualModal()">➕ 手動補單</button>
             <button class="btn-expire" onclick="expireTickets()">🧹 結算過期</button>
             <button class="btn-export" onclick="exportExcel()">📥 匯出 Excel</button>
@@ -286,12 +290,14 @@
 
         <div class="config-card">
           <h2>🎯 行銷活動與密碼管理</h2>
-          <p class="desc">設定領券前台的通關密語，以及門市 POS 核銷時要顯示的預設贈品。</p>
+          <p class="desc">設定領券前台的通關密語、預設贈品，以及使用期限。</p>
           <div class="form-group">
-            <input type="text" id="new-act-name" placeholder="活動名稱 (例: 聖誕節活動)">
-            <input type="text" id="new-act-pwd" placeholder="通關密語 (例: XMAS99)">
-            <input type="text" id="new-act-gift" placeholder="預設贈品 (例: 雞腿一支)">
-            <input type="text" id="new-act-stores" placeholder="限定門市 (填 ALL 或 成功門市,左車門市)" value="ALL">
+            <input type="text" id="new-act-name" placeholder="活動名稱 (例: 聖誕活動)">
+            <input type="text" id="new-act-pwd" placeholder="通關密語">
+            <input type="text" id="new-act-gift" placeholder="預設贈品">
+            <!-- 🔥 新增：活動全域期限 -->
+            <input type="text" id="new-act-expire" placeholder="使用期限 (例: 2026/12/31 或 無限制)">
+            <input type="text" id="new-act-stores" placeholder="限定門市 (ALL 或 指定門市)" value="ALL">
             <button class="btn-primary" onclick="addEvent()">➕ 新增活動</button>
           </div>
           <ul class="item-list" id="ui-event-list"></ul>
@@ -360,6 +366,8 @@
         const pwd = globalEventConfig[actName];
         const giftInfo = globalPosConfig[actName];
         const giftStr = giftInfo ? giftInfo.gift : "無設定";
+        // 🔥 顯示使用期限
+        const expireStr = giftInfo && giftInfo.expireDate ? giftInfo.expireDate : "無特別限制";
         let storesStr = giftInfo ? giftInfo.stores : "ALL";
         if(Array.isArray(storesStr)) storesStr = storesStr.join(', ');
         
@@ -367,7 +375,7 @@
         <li class="item-li">
           <div class="item-info">
             <strong>🎯 ${actName}</strong>
-            <span>密語: <code>${pwd}</code> | 贈品: ${giftStr} | 限定門市: ${storesStr}</span>
+            <span>密語: <code>${pwd}</code> | 贈品: ${giftStr} | 期限: ${expireStr} | 限定門市: ${storesStr}</span>
           </div>
           <button class="btn-danger" onclick="deleteEvent('${actName}')">刪除</button>
         </li>
@@ -396,16 +404,19 @@
       const name = document.getElementById('new-act-name').value.trim();
       const pwd = document.getElementById('new-act-pwd').value.trim();
       const gift = document.getElementById('new-act-gift').value.trim();
+      const expire = document.getElementById('new-act-expire').value.trim(); // 🔥 抓取期限
       let stores = document.getElementById('new-act-stores').value.trim();
+      
       if(!name || !pwd || !gift || !stores) return alert("請完整填寫活動資料！");
       if(stores !== "ALL") stores = stores.split(',').map(s => s.trim());
 
       globalEventConfig[name] = pwd;
-      globalPosConfig[name] = { gift: gift, stores: stores };
+      globalPosConfig[name] = { gift: gift, stores: stores, expireDate: expire || "無特別限制" }; // 🔥 儲存期限
       
       document.getElementById('new-act-name').value = '';
       document.getElementById('new-act-pwd').value = '';
       document.getElementById('new-act-gift').value = '';
+      document.getElementById('new-act-expire').value = ''; // 🔥 清空期限輸入框
       document.getElementById('new-act-stores').value = 'ALL';
       renderConfigUI();
     };
@@ -481,7 +492,6 @@
       }
     }
 
-    // 🔥 新增：小編手動補單邏輯
     window.openManualModal = function() {
       const actSelect = document.getElementById('modal-act');
       actSelect.innerHTML = document.getElementById('act-select').innerHTML;
@@ -495,6 +505,7 @@
       document.getElementById('modal-name').value = '';
       document.getElementById('modal-social').value = '';
       document.getElementById('modal-gift').value = '';
+      document.getElementById('modal-expire').value = ''; // 🔥 清空期限輸入框
     };
 
     window.submitManualTicket = async function() {
@@ -503,6 +514,7 @@
       const name = document.getElementById('modal-name').value.trim();
       const social = document.getElementById('modal-social').value.trim() || '後台補單';
       const gift = document.getElementById('modal-gift').value.trim();
+      const expire = document.getElementById('modal-expire').value.trim(); // 🔥 抓取專屬期限
 
       if(!act || !phone || !name) return alert("⚠️ 請填寫活動、號碼與姓名！");
 
@@ -521,7 +533,8 @@
           store: "",
           redeemTime: "",
           timestamp: new Date().toLocaleString(),
-          gift: gift || "" 
+          gift: gift || "",
+          expireDate: expire || "" // 🔥 寫入專屬期限
         });
         
         alert(`✅ 成功建立憑證給 ${name} (${phone})！`);
@@ -532,7 +545,6 @@
       }
     };
 
-    // --- 系統登入與資料表邏輯保持不變 ---
     window.login = function() {
       const email = document.getElementById('email').value;
       const pwd = document.getElementById('pwd').value;
