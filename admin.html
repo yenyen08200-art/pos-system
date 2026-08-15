@@ -125,7 +125,15 @@
     .item-info strong { font-size: 16px; color: var(--text-main); display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
     .item-info span { font-size: 13px; color: var(--text-sub); }
     
-    .result-box { margin-top: 16px; padding: 16px; background: rgba(63,191,143,.1); border: 1px solid rgba(63,191,143,.3); border-radius: 12px; font-size: 14px; display: none; max-height: 250px; overflow-y: auto; white-space: pre-wrap; font-family: monospace; line-height: 1.5;}
+    /* 🔥 QR Code 卡片區塊美化 */
+    .result-box { margin-top: 16px; padding: 20px; background: rgba(63,191,143,.05); border: 2px solid rgba(63,191,143,.2); border-radius: 16px; font-size: 14px; display: none; max-height: 600px; overflow-y: auto;}
+    .winner-card { display: flex; gap: 16px; background: #fff; padding: 16px; border-radius: 12px; margin-bottom: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid #E6EAF0; align-items: center; }
+    .winner-card img { width: 100px; height: 100px; border-radius: 8px; border: 1px solid #f0f0f0; }
+    .winner-info { flex: 1; overflow: hidden; }
+    .winner-info a { font-size: 16px; color: var(--accent); font-weight: 700; text-decoration: none; }
+    .winner-info a:hover { text-decoration: underline; }
+    .winner-comment { font-size: 13px; color: #8A93A5; margin: 6px 0 8px; line-height: 1.4; max-height: 40px; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+    .winner-code { font-weight: bold; font-size: 16px; color: var(--text-main); }
 
     @media (max-width:768px){
       body{flex-direction:column}
@@ -264,7 +272,7 @@
           <div class="form-group">
             <div class="field-block">
               <label>👤 顧客姓名</label>
-              <input type="text" id="manual-name" placeholder="輸入顧客姓名">
+              <input type="text" id="manual-name" placeholder="輸入顧客姓名 (或IG帳號)">
             </div>
             <div class="field-block">
               <label>🔗 社群帳號 (選填)</label>
@@ -322,7 +330,7 @@
         </div>
       </div>
 
-      <!-- ================= 視圖 3：社群抽獎發券中心 (超強 CSV 辨識版) ================= -->
+      <!-- ================= 視圖 3：社群抽獎發券中心 (超強版) ================= -->
       <div id="view-lottery-ui" class="view-section">
         <div class="header">
           <h1>🎉 社群留言抽獎中心</h1>
@@ -769,7 +777,7 @@
       }
     };
 
-    // ================= 🔥 超強升級：智慧 CSV / 記事本抽獎過濾引擎 =================
+    // ================= 🔥 超強升級：智慧 CSV 解析 + QR Code 產生 =================
     window.runLottery = async function() {
       const act = document.getElementById('lottery-act').value;
       const rawText = document.getElementById('lottery-raw-list').value.trim();
@@ -784,7 +792,7 @@
       if (!rawText) return alert("⚠️ 請貼上參加者名單！");
       if (isNaN(count) || count < 1) return alert("⚠️ 抽出人數必須大於 0！");
 
-      // 1. 智慧解析名單 (支援 CSV 或純文字)
+      // 1. 智慧解析 CSV 與過濾
       let candidateList = [];
       const lines = rawText.split('\n');
       
@@ -792,52 +800,49 @@
         let l = line.trim();
         if (!l) return;
         
-        // 排除標題列
+        // 排除 CSV 標題列
         if (l.includes('"user_name"') || l.includes('user_name')) return;
         
         let username = "";
         let comment = "";
 
-        // 如果是標準 CSV 格式 (含有引號逗號分隔)
         if (l.includes('","') || l.startsWith('"')) {
-            // 用正規化拆解 CSV 欄位
             const parts = l.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || [];
             const cleanParts = parts.map(p => p.replace(/^"|"$/g, '').trim());
             
-            // 根據外掛結構，通常第4欄是 user_name，第5欄是 comment
+            // CSV 預期格式，對應欄位
             if (cleanParts.length >= 5) {
-                username = cleanParts[3];
-                comment = cleanParts[4];
+                username = cleanParts[3]; // user_name 欄位
+                comment = cleanParts[4];  // comment 欄位
             } else if (cleanParts.length >= 2) {
                 username = cleanParts[0];
                 comment = cleanParts[1];
             }
         } else {
-            // 純文字/Tab 分隔處理
             const parts = l.split(/[\t\s]+/);
             username = parts[0] || "";
             comment = parts.slice(1).join(" ") || "";
         }
 
-        // 自動排除官方粉專帳號 (例如 tfc.1986)
+        // 避免小編帳號抽中自己
         if (username.includes("tfc.1986")) return;
 
         if (username) {
-            candidateList.push({ name: username.replace(/^@/, ''), comment: comment, raw: l });
+            // 清除可能多餘的 @
+            username = username.replace(/^@/, '');
+            candidateList.push({ name: username, comment: comment, raw: l });
         }
       });
 
       if (candidateList.length === 0) {
-          return alert("⚠️ 無法解析名單，請確認貼上的格式！");
+          return alert("⚠️ 無法解析名單，請確認貼上的格式是否正確！");
       }
 
-      // 2. 關鍵字過濾
       let validParticipants = candidateList;
       if (keyword !== "") {
         validParticipants = validParticipants.filter(item => (item.comment + " " + item.raw).includes(keyword));
       }
 
-      // 3. 標記人數過濾
       if (requiredTags > 0) {
         validParticipants = validParticipants.filter(item => {
             const atCount = (item.comment.match(/@/g) || []).length;
@@ -856,22 +861,24 @@
       btn.disabled = true;
 
       try {
-        // 洗牌演算法
         for (let i = validParticipants.length - 1; i > 0; i--) {
           const j = Math.floor(Math.random() * (i + 1));
           [validParticipants[i], validParticipants[j]] = [validParticipants[j], validParticipants[i]];
         }
         
         const winners = validParticipants.slice(0, count);
-        let resultText = `🎉 抽獎完成！從 ${validParticipants.length} 位合格者中抽出 ${count} 名：\n---------------------------------------\n`;
+        
+        // 渲染精美的 QR Code 卡片與可點擊 IG 連結
+        let resultHTML = `<h3 style="margin-top:0; color:var(--green); font-size:18px;">🎉 抽獎完成！抽出 ${count} 名得獎者：</h3>`;
         
         for (let i = 0; i < winners.length; i++) {
           const w = winners[i];
+          const winnerName = w.name; 
           const randomCode = "888" + Math.floor(10000 + Math.random() * 90000);
           
           await setDoc(doc(db, act, randomCode), {
-            name: w.name,
-            social_id: `@${w.name}`,
+            name: `@${winnerName}`, // 直接把名稱存為 IG 帳號方便店員核對
+            social_id: `@${winnerName}`,
             phone: randomCode, 
             status: "未兌換",
             store: "",
@@ -881,10 +888,23 @@
             expireDate: "" 
           });
           
-          resultText += `👑 得獎帳號：@${w.name}\n💬 留言內容：${w.comment}\n🎫 專屬兌換碼：[ ${randomCode} ]\n---------------------------------------\n`;
+          const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${randomCode}&margin=10`;
+          
+          resultHTML += `
+          <div class="winner-card">
+            <img src="${qrUrl}" alt="QR Code">
+            <div class="winner-info">
+              <!-- 🔥 可點擊的 IG 連結 -->
+              <a href="https://instagram.com/${winnerName}" target="_blank">👑 @${winnerName} 🔗</a>
+              <div class="winner-comment">💬 留言：${w.comment}</div>
+              <div class="winner-code">🎫 兌換碼：${randomCode}</div>
+            </div>
+          </div>`;
         }
         
-        resultBox.innerText = resultText + "\n💡 系統已自動將這 " + count + " 位得獎者的專屬號碼建檔！\n👉 請將兌換碼回覆給得獎者，請他們至門市出示號碼即可核銷！";
+        resultHTML += `<div style="font-size:13px; color:var(--text-main); margin-top:20px; font-weight:bold; line-height:1.6;">💡 貼心提示：<br>1. 您可以點擊藍色帳號連結，直接前往得獎者的 IG 首頁。<br>2. 對著上方的 QR Code 點擊「滑鼠右鍵 ➜ 複製圖片」，即可直接貼到私訊傳給得獎者！</div>`;
+        
+        resultBox.innerHTML = resultHTML;
         resultBox.style.display = 'block';
         btn.innerText = "✅ 抽獎與建檔完畢";
       } catch(e) {
