@@ -264,9 +264,7 @@
         <input id="social_id" type="text" placeholder="IG / FB 帳號">
       </div>
       <div class="field">
-        <!-- 🔥 標籤改為：限 09 開頭 -->
         <label for="phone">手機號碼 (限 09 開頭)</label>
-        <!-- 🔥 雙重防呆設計：不是 0 開頭、第二碼不是 9 就會自動清空，並限制 10 碼 -->
         <input id="phone" type="tel" inputmode="numeric" placeholder="例：0912345678" oninput="
           let v = this.value.replace(/\D/g,''); 
           if(v.length > 0 && v[0] !== '0') v = ''; 
@@ -408,7 +406,6 @@
     const act=$('activity').value, name=$('name').value.trim(), soc=$('social_id').value.trim(), ph=$('phone').value.replace(/\D/g,''), cd=$('secret_code').value.trim();
     if(!act) return alert("⚠️ 系統載入中，請稍候！");
     
-    // 🔥 送出時再次嚴格把關：不滿 10 碼或不是 09 開頭直接擋下來
     if(ph.length !== 10 || !ph.startsWith('09')) return alert("⚠️ 為了配合日後的安全驗證，手機號碼必須為「09 開頭且滿 10 碼數字」！\n(本系統不支援市話填單)");
     
     if(!name || !soc || !cd) return alert("⚠️ 請完整填寫資料與密語！");
@@ -466,6 +463,8 @@
     $('r-name').innerText = name; 
     $('r-social').innerText = soc; 
     $('r-phone').innerText = ph;
+    
+    // 先給預設值
     $('r-gift').innerText = customGift || (POS_CONFIG[act] ? POS_CONFIG[act].gift : "專屬活動贈品");
     $('r-expire').innerText = (POS_CONFIG[act] && POS_CONFIG[act].expireDate) ? POS_CONFIG[act].expireDate : "無特別限制";
 
@@ -477,10 +476,14 @@
     });
 
     if(unsubscribe) unsubscribe();
+    // 🔥 利用即時監聽來自動抓取資料庫裡「真正的」客製化贈品或期限
     unsubscribe = onSnapshot(doc(db, act, ph), (docSnap) => {
       if (docSnap.exists()) {
         const data = docSnap.data();
         setUI(data.status === "已兌換");
+        
+        if (data.gift) $('r-gift').innerText = data.gift;
+        if (data.expireDate) $('r-expire').innerText = data.expireDate;
       }
     });
   }
