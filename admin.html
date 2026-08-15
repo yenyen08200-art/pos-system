@@ -97,10 +97,6 @@
     .btn-del-record { background: #fef2f2; border: 1px solid #fecaca; color: #ef4444; font-size: 12px; font-weight: 700; padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: 0.2s; white-space: nowrap; }
     .btn-del-record:hover { background: #ef4444; color: #fff; }
     
-    .btn-status-toggle { font-size: 12px; font-weight: 700; padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: 0.2s; white-space: nowrap; border:none;}
-    .btn-status-toggle.off { background: var(--sidebar-bg); color: #fff; }
-    .btn-status-toggle.off:hover { background: #333; }
-
     /* 🔥 UI Cards */
     .config-card { background: var(--card-bg); padding: 30px; border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 24px; }
     .config-card h2 { margin: 0 0 20px; font-size: 20px; display: flex; justify-content: space-between; align-items: center; }
@@ -115,8 +111,8 @@
 
     .btn-primary { background: var(--accent); color: #fff; border: none; padding: 12px 24px; border-radius: 12px; font-weight: 700; cursor: pointer; transition: 0.2s; }
     .btn-primary:hover { filter: brightness(1.1); }
-    .btn-danger { background: rgba(240,118,84,.1); color: var(--accent); border: none; padding: 8px 16px; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 12px; }
-    .btn-danger:hover { background: var(--accent); color: #fff; }
+    .btn-danger { background: #fef2f2; color: #ef4444; border: 1px solid #fecaca; padding: 8px 16px; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 12px; transition: .2s;}
+    .btn-danger:hover { background: #ef4444; color: #fff; }
     .btn-cancel { background: #F4F6F8; color: var(--text-main); border: none; padding: 12px 24px; border-radius: 12px; font-weight: 700; cursor: pointer; transition: .2s;}
     .btn-cancel:hover { background: #E6EAF0; }
     
@@ -125,7 +121,22 @@
     .item-info strong { font-size: 16px; color: var(--text-main); display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
     .item-info span { font-size: 13px; color: var(--text-sub); }
     
-    /* 🔥 QR Code 卡片區塊美化 */
+    /* 🔥 Kebab Dropdown Menu (優化選單) */
+    .kebab-dropdown { position: relative; flex-shrink: 0; margin-left: 16px; }
+    .kebab-dropdown summary { list-style: none; background: #fff; border: 1px solid #E6EAF0; font-size: 20px; font-weight: bold; color: var(--text-sub); cursor: pointer; width: 44px; height: 44px; border-radius: 12px; transition: .2s; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,0.02); }
+    .kebab-dropdown summary::-webkit-details-marker { display: none; }
+    .kebab-dropdown summary:hover { background: #F4F6F8; color: var(--accent); border-color: #D1D5DB; }
+    .kebab-dropdown[open] summary { background: var(--text-main); color: #fff; border-color: var(--text-main); }
+    
+    .kebab-menu { position: absolute; right: 0; top: calc(100% + 8px); background: #fff; border: 1px solid #E6EAF0; border-radius: 14px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); width: 160px; display: flex; flex-direction: column; overflow: hidden; z-index: 1000; animation: fade-in-kebab 0.2s cubic-bezier(0.2, 0.8, 0.2, 1); }
+    @keyframes fade-in-kebab { from { opacity: 0; transform: translateY(-10px) scale(0.95); transform-origin: top right; } to { opacity: 1; transform: translateY(0) scale(1); transform-origin: top right; } }
+    
+    .kebab-menu button { text-align: left; padding: 14px 18px; background: transparent; border: none; border-radius: 0; font-size: 14px; font-weight: 600; color: var(--text-main); transition: .2s; display: flex; align-items: center; gap: 10px; width: 100%; cursor: pointer;}
+    .kebab-menu button:hover { background: #F7F9FB; color: var(--accent); }
+    .kebab-menu button.danger { color: #ef4444; border-top: 1px solid #F1F3F7; }
+    .kebab-menu button.danger:hover { background: #fef2f2; color: #ef4444; }
+
+    /* QR Code 卡片區塊美化 */
     .result-box { margin-top: 16px; padding: 20px; background: rgba(63,191,143,.05); border: 2px solid rgba(63,191,143,.2); border-radius: 16px; font-size: 14px; display: none; max-height: 600px; overflow-y: auto;}
     .winner-card { display: flex; gap: 16px; background: #fff; padding: 16px; border-radius: 12px; margin-bottom: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid #E6EAF0; align-items: center; }
     .winner-card img { width: 100px; height: 100px; border-radius: 8px; border: 1px solid #f0f0f0; }
@@ -419,6 +430,8 @@
           </div>
           <button id="btn-add-act" class="btn-primary" style="width:100%" onclick="addOrUpdateEvent()">➕ 快速建立活動</button>
           <button id="btn-cancel-edit" class="btn-cancel" style="width:100%; display:none; margin-top:10px;" onclick="cancelEditEvent()">❌ 取消編輯</button>
+          
+          <!-- 🔥 升級為超乾淨的 Kebab Menu 下拉選單 -->
           <ul class="item-list" id="ui-event-list" style="margin-top: 20px;"></ul>
         </div>
 
@@ -465,6 +478,13 @@
     let globalStoreList = [];
     let editingActName = null; 
 
+    // 🔥 點擊畫面其他地方自動收起 Kebab Menu
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('.kebab-dropdown')) {
+        document.querySelectorAll('.kebab-dropdown[open]').forEach(d => d.removeAttribute('open'));
+      }
+    });
+
     window.switchView = function(viewId, element) {
       document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
       document.getElementById('view-' + viewId).classList.add('active');
@@ -500,7 +520,7 @@
       document.getElementById('ui-store-list').innerHTML = globalStoreList.map((store, idx) => `
         <li class="item-li">
           <div class="item-info"><strong>🏪 ${store}</strong></div>
-          <button class="btn-danger" onclick="deleteStore(${idx})">刪除</button>
+          <button class="btn-danger" style="background:#fef2f2; color:#ef4444; border:1px solid #fecaca;" onclick="deleteStore(${idx})">🗑️ 刪除</button>
         </li>
       `).join('');
 
@@ -518,20 +538,21 @@
             ? '<span style="color:var(--green);font-size:12px;">[🟢 顯示中]</span>' 
             : '<span style="color:var(--gray);font-size:12px;">[⚫ 已下架]</span>';
             
-        const toggleBtn = `<button class="btn-status-toggle ${isActive ? 'off' : ''}" style="margin-right:8px;" onclick="toggleEventStatus('${actName}')">${isActive ? '⬇️ 隱藏下架' : '⬆️ 重新上架'}</button>`;
-        const editBtn = `<button class="btn-reset" style="margin-right:8px; border-color:#8A93A5; color:#8A93A5;" onclick="editEvent('${actName}')">✏️ 編輯</button>`;
-
+        // 🔥 將複雜按鈕改為超俐落的 Kebab Dropdown (⋮)
         return `
         <li class="item-li">
           <div class="item-info">
             <strong>🎯 ${actName} ${statusBadge}</strong>
             <span>密語: <code>${pwd}</code> | 贈品: ${giftStr} | 期限: ${expireStr} | 限定門市: ${storesStr}</span>
           </div>
-          <div class="action-group">
-            ${editBtn}
-            ${toggleBtn}
-            <button class="btn-danger" onclick="deleteEvent('${actName}')">🗑️ 刪除</button>
-          </div>
+          <details class="kebab-dropdown">
+            <summary>⋮</summary>
+            <div class="kebab-menu">
+              <button onclick="editEvent('${actName}')">✏️ 編輯設定</button>
+              <button onclick="toggleEventStatus('${actName}')">${isActive ? '⬇️ 隱藏下架' : '⬆️ 重新上架'}</button>
+              <button class="danger" onclick="deleteEvent('${actName}')">🗑️ 刪除活動</button>
+            </div>
+          </details>
         </li>
         `;
       }).join('');
@@ -777,7 +798,7 @@
       }
     };
 
-    // ================= 🔥 超強升級：智慧 CSV 解析 + QR Code 產生 =================
+    // ================= 🔥 社群抽獎解析 + QR Code 產生引擎 =================
     window.runLottery = async function() {
       const act = document.getElementById('lottery-act').value;
       const rawText = document.getElementById('lottery-raw-list').value.trim();
@@ -792,7 +813,7 @@
       if (!rawText) return alert("⚠️ 請貼上參加者名單！");
       if (isNaN(count) || count < 1) return alert("⚠️ 抽出人數必須大於 0！");
 
-      // 1. 智慧解析 CSV 與過濾
+      // 1. 智慧解析 CSV
       let candidateList = [];
       const lines = rawText.split('\n');
       
@@ -800,7 +821,6 @@
         let l = line.trim();
         if (!l) return;
         
-        // 排除 CSV 標題列
         if (l.includes('"user_name"') || l.includes('user_name')) return;
         
         let username = "";
@@ -810,10 +830,9 @@
             const parts = l.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || [];
             const cleanParts = parts.map(p => p.replace(/^"|"$/g, '').trim());
             
-            // CSV 預期格式，對應欄位
             if (cleanParts.length >= 5) {
-                username = cleanParts[3]; // user_name 欄位
-                comment = cleanParts[4];  // comment 欄位
+                username = cleanParts[3]; 
+                comment = cleanParts[4];  
             } else if (cleanParts.length >= 2) {
                 username = cleanParts[0];
                 comment = cleanParts[1];
@@ -824,11 +843,9 @@
             comment = parts.slice(1).join(" ") || "";
         }
 
-        // 避免小編帳號抽中自己
         if (username.includes("tfc.1986")) return;
 
         if (username) {
-            // 清除可能多餘的 @
             username = username.replace(/^@/, '');
             candidateList.push({ name: username, comment: comment, raw: l });
         }
@@ -868,7 +885,6 @@
         
         const winners = validParticipants.slice(0, count);
         
-        // 渲染精美的 QR Code 卡片與可點擊 IG 連結
         let resultHTML = `<h3 style="margin-top:0; color:var(--green); font-size:18px;">🎉 抽獎完成！抽出 ${count} 名得獎者：</h3>`;
         
         for (let i = 0; i < winners.length; i++) {
@@ -877,7 +893,7 @@
           const randomCode = "888" + Math.floor(10000 + Math.random() * 90000);
           
           await setDoc(doc(db, act, randomCode), {
-            name: `@${winnerName}`, // 直接把名稱存為 IG 帳號方便店員核對
+            name: `@${winnerName}`, // 儲存 IG 帳號作為姓名
             social_id: `@${winnerName}`,
             phone: randomCode, 
             status: "未兌換",
@@ -902,7 +918,7 @@
           </div>`;
         }
         
-        resultHTML += `<div style="font-size:13px; color:var(--text-main); margin-top:20px; font-weight:bold; line-height:1.6;">💡 貼心提示：<br>1. 您可以點擊藍色帳號連結，直接前往得獎者的 IG 首頁。<br>2. 對著上方的 QR Code 點擊「滑鼠右鍵 ➜ 複製圖片」，即可直接貼到私訊傳給得獎者！</div>`;
+        resultHTML += `<div style="font-size:13px; color:var(--text-main); margin-top:20px; font-weight:bold; line-height:1.6;">💡 貼心提示：<br>1. 您可以點擊藍色帳號連結，直接前往得獎者的 IG 首頁發送私訊。<br>2. 對著上方的 QR Code 點擊「滑鼠右鍵 ➜ 複製圖片」，即可直接貼到私訊傳給得獎者！</div>`;
         
         resultBox.innerHTML = resultHTML;
         resultBox.style.display = 'block';
