@@ -256,12 +256,16 @@ button:disabled{opacity:.5;cursor:not-allowed}
         </div>
         <div id="detail" class="detail hidden">
           <div id="banner" class="banner ok rise"></div>
+          
+          <!-- 🔥 修改排版：加入使用期限，並將兌換餐點改為橫跨滿版 -->
           <div class="cards">
             <div class="info"><div class="k">📱 兌換手機</div><div class="v mono" id="v-phone">—</div></div>
             <div class="info"><div class="k">👤 顧客姓名</div><div class="v" id="v-name">—</div></div>
             <div class="info"><div class="k">🔗 社群帳號</div><div class="v" id="v-social">—</div></div>
-            <div class="info hl"><div class="k">🎁 兌換餐點</div><div class="v" id="v-gift">—</div></div>
+            <div class="info"><div class="k">⏳ 使用期限</div><div class="v" id="v-expire">—</div></div>
+            <div class="info hl" style="grid-column: 1 / -1;"><div class="k">🎁 兌換餐點</div><div class="v" id="v-gift">—</div></div>
           </div>
+
           <div class="actions">
             <button class="redeem" id="btn-redeem">✔ 確認核銷優惠</button>
             <button class="undo hidden" id="btn-undo">⚡ 撤銷 (5s)</button>
@@ -309,7 +313,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
   let store = "", act = "", shownPhone = "", shownAct = "", record = null;
   let scanner = null, uTimer = null, busy = false;
 
-  // 🔥 初始化：從雲端抓取系統設定（取代 config.js）
+  // 🔥 初始化：從雲端抓取系統設定
   async function initPOS() {
     try {
       const configSnap = await getDoc(doc(db, "system", "config"));
@@ -322,7 +326,6 @@ button:disabled{opacity:.5;cursor:not-allowed}
         return;
       }
 
-      // 建立對應對照表
       evMap = {};
       STORE_LIST.forEach(s => {
         evMap[s] = [];
@@ -444,10 +447,16 @@ button:disabled{opacity:.5;cursor:not-allowed}
       banner.innerHTML = "✅ 有效優惠券";
     }
 
+    // 🔥 抓取期限：如果客人有專屬期限就顯示專屬的，沒有就抓活動預設的，都沒有顯示無限制
+    const defaultExpire = (POS_CONFIG[shownAct] && POS_CONFIG[shownAct].expireDate) ? POS_CONFIG[shownAct].expireDate : "無特別限制";
+    const expireStr = record.expireDate || defaultExpire;
+
     $("v-phone").innerText = shownPhone;
     $("v-name").innerText = record.name || "—";
     $("v-social").innerText = record.social_id || "未提供";
+    $("v-expire").innerText = expireStr;
     $("v-gift").innerText = record.gift || giftMap[shownAct] || "專屬活動贈品";
+    
     $("btn-redeem").classList.toggle("hidden", isInvalid);
   }
 
