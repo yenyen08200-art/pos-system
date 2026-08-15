@@ -91,11 +91,15 @@
     .status-no{color:var(--accent);font-weight:800;background:rgba(240,118,84,.12);padding:5px 12px;border-radius:999px;font-size:12px}
     .status-expired{color:#8A93A5;font-weight:800;background:rgba(138,147,165,.12);padding:5px 12px;border-radius:999px;font-size:12px}
     .time-text{font-size:13px;color:var(--text-sub)}
-    .action-group { display: flex; gap: 8px; flex-wrap: nowrap; }
+    .action-group { display: flex; gap: 8px; flex-wrap: nowrap; align-items: center; }
     .btn-reset { background: rgba(240,118,84,.1); border: 1px solid rgba(240,118,84,.3); color: var(--accent); font-size: 12px; font-weight: 700; padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: 0.2s; white-space: nowrap; }
     .btn-reset:hover { background: var(--accent); color: #fff; }
     .btn-del-record { background: #fef2f2; border: 1px solid #fecaca; color: #ef4444; font-size: 12px; font-weight: 700; padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: 0.2s; white-space: nowrap; }
     .btn-del-record:hover { background: #ef4444; color: #fff; }
+    
+    .btn-status-toggle { font-size: 12px; font-weight: 700; padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: 0.2s; white-space: nowrap; border:none;}
+    .btn-status-toggle.off { background: var(--sidebar-bg); color: #fff; }
+    .btn-status-toggle.off:hover { background: #333; }
 
     /* 🔥 UI Cards */
     .config-card { background: var(--card-bg); padding: 30px; border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 24px; }
@@ -115,7 +119,7 @@
     
     .item-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
     .item-li { display: flex; justify-content: space-between; align-items: center; padding: 16px; background: #F7F9FB; border-radius: 12px; border: 1px solid #E6EAF0; }
-    .item-info strong { font-size: 16px; color: var(--text-main); display: block; margin-bottom: 4px; }
+    .item-info strong { font-size: 16px; color: var(--text-main); display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
     .item-info span { font-size: 13px; color: var(--text-sub); }
     
     .result-box { margin-top: 16px; padding: 16px; background: rgba(63,191,143,.1); border: 1px solid rgba(63,191,143,.3); border-radius: 12px; font-size: 14px; display: none; max-height: 250px; overflow-y: auto; white-space: pre-wrap; font-family: monospace; line-height: 1.5;}
@@ -461,7 +465,12 @@
 
     function populateAdminDropdown() {
       const acts = Object.keys(globalEventConfig);
-      const html = acts.map(a => `<option value="${a}">${a}</option>`).join('');
+      // 下拉選單顯示時，判斷是否為已下架，給予提示
+      const html = acts.map(a => {
+        const isActive = globalPosConfig[a]?.active !== false;
+        const displayText = isActive ? a : `${a} (已下架)`;
+        return `<option value="${a}">${displayText}</option>`;
+      }).join('');
       
       const targetIds = ['act-select', 'manual-act', 'batch-act', 'lottery-act'];
       targetIds.forEach(id => {
@@ -486,16 +495,27 @@
         const giftInfo = globalPosConfig[actName];
         const giftStr = giftInfo ? giftInfo.gift : "無設定";
         const expireStr = giftInfo && giftInfo.expireDate ? giftInfo.expireDate : "無特別限制";
+        const isActive = giftInfo && giftInfo.active !== false; // 預設為 true
+        
         let storesStr = giftInfo ? giftInfo.stores : "ALL";
         if(Array.isArray(storesStr)) storesStr = storesStr.join(', ');
         
+        const statusBadge = isActive 
+            ? '<span style="color:var(--green);font-size:12px;">[🟢 顯示中]</span>' 
+            : '<span style="color:var(--gray);font-size:12px;">[⚫ 已下架]</span>';
+            
+        const toggleBtn = `<button class="btn-status-toggle ${isActive ? 'off' : ''}" style="margin-right:8px;" onclick="toggleEventStatus('${actName}')">${isActive ? '⬇️ 隱藏下架' : '⬆️ 重新上架'}</button>`;
+
         return `
         <li class="item-li">
           <div class="item-info">
-            <strong>🎯 ${actName}</strong>
+            <strong>🎯 ${actName} ${statusBadge}</strong>
             <span>密語: <code>${pwd}</code> | 贈品: ${giftStr} | 期限: ${expireStr} | 限定門市: ${storesStr}</span>
           </div>
-          <button class="btn-danger" onclick="deleteEvent('${actName}')">刪除</button>
+          <div class="action-group">
+            ${toggleBtn}
+            <button class="btn-danger" onclick="deleteEvent('${actName}')">🗑️ 刪除</button>
+          </div>
         </li>
         `;
       }).join('');
@@ -532,7 +552,8 @@
       globalPosConfig[name] = { 
         gift: gift || "依實體券面標示發放", 
         stores: stores, 
-        expireDate: expire || "無特別限制" 
+        expireDate: expire || "無特別限制",
+        active: true // 🔥 新增時預設為上架狀態
       }; 
       
       document.getElementById('new-act-name').value = '';
@@ -551,8 +572,22 @@
       }
     };
 
+    // 🔥 新增：切換上/下架狀態
+    window.toggleEventStatus = function(actName) {
+      if(!globalPosConfig[actName]) return;
+      if (globalPosConfig[actName].active === false) {
+          globalPosConfig[actName].active = true;
+      } else {
+          globalPosConfig[actName].active = false;
+      }
+      renderConfigUI();
+      // 提示使用者需要儲存
+      document.getElementById('save-cloud-btn').style.background = "#FF3366";
+      document.getElementById('save-cloud-btn').innerText = "⚠️ 設定已修改，請點此儲存至雲端！";
+    };
+
     window.saveConfigToCloud = async function() {
-      if(!confirm("⚠️ 確定要將設定寫入資料庫嗎？\n按下確定後，全台門市 POS 與前台系統將立刻套用新設定！")) return;
+      if(!confirm("⚠️ 確定要將設定寫入資料庫嗎？\n按下確定後，全台門市 POS 將立刻套用最新上下架設定！")) return;
       
       const btn = document.getElementById('save-cloud-btn');
       btn.innerText = "⏳ 雲端同步中...";
@@ -568,6 +603,7 @@
         });
         
         alert("✅ 系統設定已成功同步至雲端！");
+        btn.style.background = "var(--accent)";
         populateAdminDropdown();
       } catch (error) {
         console.error(error);
@@ -860,7 +896,6 @@
       await updateDoc(doc(db, act, phone), { status: "未兌換", store: "", redeemTime: "" });
     };
 
-    // 🔥 新增：刪除單筆資料功能
     window.deleteSingleTicket = async function(phone) {
       const act = document.getElementById('act-select').value;
       if (!confirm(`🚨 警告：您即將永久刪除「${phone}」的憑證資料！\n刪除後將無法復原，確定要刪除嗎？`)) return;
@@ -910,7 +945,6 @@
         let displayGift = d.gift ? `${d.gift} <span style="font-size:10px; color:#F07654;">(專屬)</span>` : defaultGift;
         let displayExpire = d.expireDate || defaultExpire;
         
-        // 修改操作按鈕區：加入刪除按鈕
         let actionBtnHTML = `<div class="action-group">`;
         if (d.status === '已兌換' || d.status === '已過期') {
             actionBtnHTML += `<button class="btn-reset" onclick="resetSingleTicket('${d.id}')">↻ 復原</button>`;
