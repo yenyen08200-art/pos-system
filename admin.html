@@ -76,10 +76,12 @@
     .table-toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;gap:12px;flex-wrap:wrap}
     .table-toolbar #result-count{color:var(--text-sub);font-size:13px;font-weight:600}
     .search-box{padding:12px 18px;border-radius:999px;border:none;font-size:14px;width:300px;outline:none;background:#fff;box-shadow:var(--shadow);color:var(--text-main)}
-    .table-container{background:var(--card-bg);border-radius:var(--radius);box-shadow:var(--shadow);overflow:auto;max-height:52vh;padding:8px}
+    
+    /* 🔥 Table Container: 增加底部 padding 防止 Kebab menu 被切掉 */
+    .table-container{background:var(--card-bg);border-radius:var(--radius);box-shadow:var(--shadow);overflow:auto;max-height:52vh;padding:8px; padding-bottom: 120px;}
     table{width:100%;border-collapse:separate;border-spacing:0 4px;min-width:980px}
     th,td{padding:14px 18px;text-align:left;border:none}
-    th{background:#F5F7FA;color:var(--text-sub);font-weight:700;font-size:12.5px;position:sticky;top:0;cursor:pointer;user-select:none;white-space:nowrap;z-index:1}
+    th{background:#F5F7FA;color:var(--text-sub);font-weight:700;font-size:12.5px;position:sticky;top:0;cursor:pointer;user-select:none;white-space:nowrap;z-index:10}
     th:first-child{border-radius:12px 0 0 12px}
     th:last-child{border-radius:0 12px 12px 0}
     th .sort-icon{color:var(--gray);margin-left:6px;font-size:10px}
@@ -91,12 +93,20 @@
     .status-no{color:var(--accent);font-weight:800;background:rgba(240,118,84,.12);padding:5px 12px;border-radius:999px;font-size:12px}
     .status-expired{color:#8A93A5;font-weight:800;background:rgba(138,147,165,.12);padding:5px 12px;border-radius:999px;font-size:12px}
     .time-text{font-size:13px;color:var(--text-sub)}
-    .action-group { display: flex; gap: 8px; flex-wrap: nowrap; align-items: center; }
-    .btn-reset { background: rgba(240,118,84,.1); border: 1px solid rgba(240,118,84,.3); color: var(--accent); font-size: 12px; font-weight: 700; padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: 0.2s; white-space: nowrap; }
-    .btn-reset:hover { background: var(--accent); color: #fff; }
-    .btn-del-record { background: #fef2f2; border: 1px solid #fecaca; color: #ef4444; font-size: 12px; font-weight: 700; padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: 0.2s; white-space: nowrap; }
-    .btn-del-record:hover { background: #ef4444; color: #fff; }
-    
+
+    /* 🔥 Kebab Dropdown Menu (共用下拉選單樣式) */
+    .kebab-dropdown { position: relative; flex-shrink: 0; }
+    .kebab-dropdown summary { list-style: none; background: #fff; border: 1px solid #E6EAF0; font-size: 20px; font-weight: bold; color: var(--text-sub); cursor: pointer; width: 44px; height: 44px; border-radius: 12px; transition: .2s; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,0.02); }
+    .kebab-dropdown summary::-webkit-details-marker { display: none; }
+    .kebab-dropdown summary:hover { background: #F4F6F8; color: var(--accent); border-color: #D1D5DB; }
+    .kebab-dropdown[open] summary { background: var(--text-main); color: #fff; border-color: var(--text-main); }
+    .kebab-menu { position: absolute; right: 0; top: calc(100% + 8px); background: #fff; border: 1px solid #E6EAF0; border-radius: 14px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); width: 170px; display: flex; flex-direction: column; overflow: hidden; z-index: 9999; animation: fade-in-kebab 0.2s cubic-bezier(0.2, 0.8, 0.2, 1); }
+    @keyframes fade-in-kebab { from { opacity: 0; transform: translateY(-10px) scale(0.95); transform-origin: top right; } to { opacity: 1; transform: translateY(0) scale(1); transform-origin: top right; } }
+    .kebab-menu button { text-align: left; padding: 14px 18px; background: transparent; border: none; border-radius: 0; font-size: 14px; font-weight: 600; color: var(--text-main); transition: .2s; display: flex; align-items: center; gap: 10px; width: 100%; cursor: pointer;}
+    .kebab-menu button:hover { background: #F7F9FB; color: var(--accent); }
+    .kebab-menu button.danger { color: #ef4444; border-top: 1px solid #F1F3F7; }
+    .kebab-menu button.danger:hover { background: #fef2f2; color: #ef4444; }
+
     /* 🔥 UI Cards */
     .config-card { background: var(--card-bg); padding: 30px; border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 24px; }
     .config-card h2 { margin: 0 0 20px; font-size: 20px; display: flex; justify-content: space-between; align-items: center; }
@@ -111,8 +121,8 @@
 
     .btn-primary { background: var(--accent); color: #fff; border: none; padding: 12px 24px; border-radius: 12px; font-weight: 700; cursor: pointer; transition: 0.2s; }
     .btn-primary:hover { filter: brightness(1.1); }
-    .btn-danger { background: #fef2f2; color: #ef4444; border: 1px solid #fecaca; padding: 8px 16px; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 12px; transition: .2s;}
-    .btn-danger:hover { background: #ef4444; color: #fff; }
+    .btn-danger { background: rgba(240,118,84,.1); color: var(--accent); border: none; padding: 8px 16px; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 12px; }
+    .btn-danger:hover { background: var(--accent); color: #fff; }
     .btn-cancel { background: #F4F6F8; color: var(--text-main); border: none; padding: 12px 24px; border-radius: 12px; font-weight: 700; cursor: pointer; transition: .2s;}
     .btn-cancel:hover { background: #E6EAF0; }
     
@@ -121,22 +131,7 @@
     .item-info strong { font-size: 16px; color: var(--text-main); display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
     .item-info span { font-size: 13px; color: var(--text-sub); }
     
-    /* 🔥 Kebab Dropdown Menu (優化選單) */
-    .kebab-dropdown { position: relative; flex-shrink: 0; margin-left: 16px; }
-    .kebab-dropdown summary { list-style: none; background: #fff; border: 1px solid #E6EAF0; font-size: 20px; font-weight: bold; color: var(--text-sub); cursor: pointer; width: 44px; height: 44px; border-radius: 12px; transition: .2s; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,0.02); }
-    .kebab-dropdown summary::-webkit-details-marker { display: none; }
-    .kebab-dropdown summary:hover { background: #F4F6F8; color: var(--accent); border-color: #D1D5DB; }
-    .kebab-dropdown[open] summary { background: var(--text-main); color: #fff; border-color: var(--text-main); }
-    
-    .kebab-menu { position: absolute; right: 0; top: calc(100% + 8px); background: #fff; border: 1px solid #E6EAF0; border-radius: 14px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); width: 160px; display: flex; flex-direction: column; overflow: hidden; z-index: 1000; animation: fade-in-kebab 0.2s cubic-bezier(0.2, 0.8, 0.2, 1); }
-    @keyframes fade-in-kebab { from { opacity: 0; transform: translateY(-10px) scale(0.95); transform-origin: top right; } to { opacity: 1; transform: translateY(0) scale(1); transform-origin: top right; } }
-    
-    .kebab-menu button { text-align: left; padding: 14px 18px; background: transparent; border: none; border-radius: 0; font-size: 14px; font-weight: 600; color: var(--text-main); transition: .2s; display: flex; align-items: center; gap: 10px; width: 100%; cursor: pointer;}
-    .kebab-menu button:hover { background: #F7F9FB; color: var(--accent); }
-    .kebab-menu button.danger { color: #ef4444; border-top: 1px solid #F1F3F7; }
-    .kebab-menu button.danger:hover { background: #fef2f2; color: #ef4444; }
-
-    /* QR Code 卡片區塊美化 */
+    /* 🔥 QR Code 卡片區塊 */
     .result-box { margin-top: 16px; padding: 20px; background: rgba(63,191,143,.05); border: 2px solid rgba(63,191,143,.2); border-radius: 16px; font-size: 14px; display: none; max-height: 600px; overflow-y: auto;}
     .winner-card { display: flex; gap: 16px; background: #fff; padding: 16px; border-radius: 12px; margin-bottom: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid #E6EAF0; align-items: center; }
     .winner-card img { width: 100px; height: 100px; border-radius: 8px; border: 1px solid #f0f0f0; }
@@ -145,6 +140,11 @@
     .winner-info a:hover { text-decoration: underline; }
     .winner-comment { font-size: 13px; color: #8A93A5; margin: 6px 0 8px; line-height: 1.4; max-height: 40px; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
     .winner-code { font-weight: bold; font-size: 16px; color: var(--text-main); }
+
+    /* 🔥 獨立 QR Code 顯示彈窗 */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(26,28,36,0.7); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 2000; }
+    .modal-card { background: var(--card-bg); padding: 32px; border-radius: var(--radius); width: 90%; max-width: 360px; box-shadow: 0 20px 50px rgba(0,0,0,0.3); text-align: center;}
+    .modal-card h2 { margin: 0 0 16px; font-size: 22px; color: var(--accent); }
 
     @media (max-width:768px){
       body{flex-direction:column}
@@ -158,6 +158,17 @@
   </style>
 </head>
 <body>
+
+  <!-- 🔥 獨立 QR Code 彈出視窗 (萬用顯示器) -->
+  <div class="modal-overlay" id="qr-modal">
+    <div class="modal-card">
+      <h2 id="qr-modal-title">🎫 專屬兌換碼</h2>
+      <p id="qr-modal-name" style="font-size: 16px; font-weight: bold; margin-bottom: 20px; color: var(--text-main);"></p>
+      <img id="qr-modal-img" src="" alt="QR Code" style="width: 220px; height: 220px; border-radius: 12px; border: 1px solid #E6EAF0; margin: 0 auto 20px; box-shadow: 0 8px 20px rgba(0,0,0,0.08);">
+      <p id="qr-modal-code" style="font-size: 28px; font-weight: 900; letter-spacing: 2px; margin-bottom: 24px; color: var(--primary);"></p>
+      <button class="btn-cancel" style="width:100%;" onclick="closeQrModal()">關閉視窗</button>
+    </div>
+  </div>
 
   <div id="login-screen">
     <div class="login-card">
@@ -267,7 +278,7 @@
 
         <div class="config-card">
           <h2>🛠️ 小編手動補單 (免驗證)</h2>
-          <p class="desc">針對客訴補償、特殊 VIP 發券使用。建立後系統會直接產生一筆憑證。</p>
+          <p class="desc">針對客訴補償、特殊 VIP 發券使用。建立後系統會直接產生一筆憑證，並彈出 QR Code！</p>
           
           <div class="form-group">
             <div class="field-block">
@@ -301,7 +312,7 @@
               <input type="text" id="manual-expire" placeholder="例：2026/12/31">
             </div>
           </div>
-          <button class="btn-primary" style="width:100%; padding:14px; font-size:16px;" onclick="submitManualTicket()">確認發券</button>
+          <button class="btn-primary" style="width:100%; padding:14px; font-size:16px;" onclick="submitManualTicket()">✅ 確認發券並產生 QR Code</button>
         </div>
 
         <div class="config-card">
@@ -341,7 +352,7 @@
         </div>
       </div>
 
-      <!-- ================= 視圖 3：社群抽獎發券中心 (超強版) ================= -->
+      <!-- ================= 視圖 3：社群抽獎發券中心 ================= -->
       <div id="view-lottery-ui" class="view-section">
         <div class="header">
           <h1>🎉 社群留言抽獎中心</h1>
@@ -431,7 +442,6 @@
           <button id="btn-add-act" class="btn-primary" style="width:100%" onclick="addOrUpdateEvent()">➕ 快速建立活動</button>
           <button id="btn-cancel-edit" class="btn-cancel" style="width:100%; display:none; margin-top:10px;" onclick="cancelEditEvent()">❌ 取消編輯</button>
           
-          <!-- 🔥 升級為超乾淨的 Kebab Menu 下拉選單 -->
           <ul class="item-list" id="ui-event-list" style="margin-top: 20px;"></ul>
         </div>
 
@@ -478,13 +488,28 @@
     let globalStoreList = [];
     let editingActName = null; 
 
-    // 🔥 點擊畫面其他地方自動收起 Kebab Menu
+    // 🔥 全域點擊隱藏下拉選單
     document.addEventListener('click', function(e) {
       if (!e.target.closest('.kebab-dropdown')) {
         document.querySelectorAll('.kebab-dropdown[open]').forEach(d => d.removeAttribute('open'));
       }
     });
 
+    // 🔥 萬用 QR Code 呼叫器
+    window.showQrCode = function(phone, name, isNew = false) {
+      const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${phone}&margin=10`;
+      document.getElementById('qr-modal-title').innerHTML = isNew ? '🎉 發券成功' : '🎫 專屬兌換碼';
+      document.getElementById('qr-modal-name').innerText = `👤 ${name}`;
+      document.getElementById('qr-modal-code').innerText = phone;
+      document.getElementById('qr-modal-img').src = qrUrl;
+      document.getElementById('qr-modal').style.display = 'flex';
+    };
+
+    window.closeQrModal = function() {
+      document.getElementById('qr-modal').style.display = 'none';
+    };
+
+    // ================= 畫面切換與同步 =================
     window.switchView = function(viewId, element) {
       document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
       document.getElementById('view-' + viewId).classList.add('active');
@@ -538,7 +563,6 @@
             ? '<span style="color:var(--green);font-size:12px;">[🟢 顯示中]</span>' 
             : '<span style="color:var(--gray);font-size:12px;">[⚫ 已下架]</span>';
             
-        // 🔥 將複雜按鈕改為超俐落的 Kebab Dropdown (⋮)
         return `
         <li class="item-li">
           <div class="item-info">
@@ -737,12 +761,15 @@
           expireDate: expire || ""
         });
         
-        alert(`✅ 成功建立憑證給 ${name} (${phone})！`);
+        // 🔥 呼叫 QR Code 萬用彈窗 (並清除輸入框)
         document.getElementById('manual-phone').value = '';
         document.getElementById('manual-name').value = '';
         document.getElementById('manual-social').value = '';
         document.getElementById('manual-gift').value = '';
         document.getElementById('manual-expire').value = ''; 
+        
+        window.showQrCode(phone, name, true); // true 代表是新建立的發券成功
+
       } catch(e) {
         console.error(e);
         alert("❌ 發送失敗，請檢查權限設定。");
@@ -1036,7 +1063,6 @@
       if (!confirm(`🚨 警告：您即將永久刪除「${phone}」的憑證資料！\n刪除後將無法復原，確定要刪除嗎？`)) return;
       try {
         await deleteDoc(doc(db, act, phone));
-        alert(`✅ 已成功刪除 ${phone} 的資料。`);
       } catch (error) {
         alert("刪除失敗，請檢查權限或連線狀態。");
       }
@@ -1080,11 +1106,23 @@
         let displayGift = d.gift ? `${d.gift} <span style="font-size:10px; color:#F07654;">(專屬)</span>` : defaultGift;
         let displayExpire = d.expireDate || defaultExpire;
         
-        let actionBtnHTML = `<div class="action-group">`;
+        // 🔥 表格操作按鈕全面改為 Kebab Menu (點點選單)
+        let actionBtnHTML = `
+          <details class="kebab-dropdown">
+            <summary>⋮</summary>
+            <div class="kebab-menu">
+              <button onclick="showQrCode('${d.phone}', '${d.name}')">📱 顯示 QR Code</button>
+        `;
+        
         if (d.status === '已兌換' || d.status === '已過期') {
-            actionBtnHTML += `<button class="btn-reset" onclick="resetSingleTicket('${d.id}')">↻ 復原</button>`;
+            actionBtnHTML += `<button onclick="resetSingleTicket('${d.id}')">↻ 復原未兌換狀態</button>`;
         }
-        actionBtnHTML += `<button class="btn-del-record" onclick="deleteSingleTicket('${d.id}')">🗑️ 刪除</button></div>`;
+        
+        actionBtnHTML += `
+              <button class="danger" onclick="deleteSingleTicket('${d.id}')">🗑️ 刪除紀錄</button>
+            </div>
+          </details>
+        `;
 
         return `
           <tr>
