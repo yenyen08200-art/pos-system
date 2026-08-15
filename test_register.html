@@ -26,7 +26,6 @@
       margin:0;padding:28px 16px 60px;
       font-family:"Inter","Noto Sans TC",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
       color:var(--ink);
-      
       background:
         radial-gradient(120% 80% at 20% 0%, rgba(166, 193, 238, 0.7) 0%, transparent 60%),
         radial-gradient(110% 90% at 80% 100%, rgba(246, 211, 101, 0.5) 0%, transparent 70%),
@@ -87,7 +86,6 @@
     }
     .brand .mark::before,.brand .mark::after{content:"";width:26px;height:1px;background:linear-gradient(90deg,transparent,var(--brass))}
     
-    /* 🔥 修改：絕美金屬漸層實心字體 */
     h1 {
       font-family: "Noto Sans TC", sans-serif;
       font-size: 32px;
@@ -129,7 +127,7 @@
     input::placeholder{color:rgba(90,96,88,.6);font-weight:400}
 
     .secret{
-      margin:26px 0 28px;padding:22px 18px;border-radius:22px;text-align:center;
+      margin:26px 0 20px;padding:22px 18px;border-radius:22px;text-align:center;
       background:linear-gradient(160deg,rgba(255,255,255,.45),rgba(255,255,255,.2));
       border:1px solid rgba(220,187,132,.6);
       box-shadow:inset 0 1px 0 rgba(255,255,255,.8),0 0 24px -12px rgba(185,145,90,.6);
@@ -139,6 +137,14 @@
     #secret_code{
       text-align:center;font-size:20px;font-weight:600;letter-spacing:.42em;
       text-transform:uppercase;color:var(--brass-deep);background:rgba(255,255,255,.5);
+    }
+    
+    .warning-text {
+      position: relative; z-index: 2;
+      font-size: 11px; color: #d64545; text-align: center; font-weight: 700;
+      margin-bottom: 20px; padding: 10px; border-radius: 10px;
+      background: rgba(214, 69, 69, 0.1); border: 1px solid rgba(214, 69, 69, 0.2);
+      letter-spacing: 0.05em;
     }
 
     button{
@@ -168,7 +174,6 @@
     .switch-btn:hover{background:rgba(255,255,255,.55);transform:translateY(-2px)}
     .switch-btn:active{transform:scale(.975)}
 
-    /* 🔥 新增代領按鈕專用樣式 */
     .family-btn {
       margin-top:12px; color: var(--brass-deep); background: rgba(185,145,90,.1);
       border: 1px dashed rgba(185,145,90,.5); backdrop-filter: blur(10px);
@@ -259,11 +264,13 @@
         <input id="social_id" type="text" placeholder="IG / FB 帳號">
       </div>
       <div class="field">
-        <label for="phone">手機號碼</label>
-        <!-- 🔥 修改：嚴格防呆設計，強迫 0 開頭且最多 10 碼 -->
+        <!-- 🔥 標籤改為：限 09 開頭 -->
+        <label for="phone">手機號碼 (限 09 開頭)</label>
+        <!-- 🔥 雙重防呆設計：不是 0 開頭、第二碼不是 9 就會自動清空，並限制 10 碼 -->
         <input id="phone" type="tel" inputmode="numeric" placeholder="例：0912345678" oninput="
           let v = this.value.replace(/\D/g,''); 
           if(v.length > 0 && v[0] !== '0') v = ''; 
+          if(v.length > 1 && v[1] !== '9') v = '0';
           this.value = v.slice(0,10);
         ">
       </div>
@@ -271,6 +278,11 @@
         <label for="secret_code">通關密語</label>
         <input id="secret_code" type="text" placeholder="＊＊＊＊＊">
       </div>
+      
+      <div class="warning-text">
+        ⚠️ 門市核銷將嚴格核對「本人社群畫面」<br>偽造帳號或非本人將拒絕兌換！
+      </div>
+
       <button class="submit-btn" id="btn-submit" onclick="register()">領取專屬兌換卷</button>
     </section>
 
@@ -287,7 +299,6 @@
 
       <div class="info-list">
         <div class="info-row"><strong>兌換活動項目</strong><span id="r-act"></span></div>
-        <!-- 🔥 新增：顯示贈品與期限 -->
         <div class="info-row"><strong>🎁 兌換餐點</strong><span id="r-gift" class="gift-text"></span></div>
         <div class="info-row"><strong>⏳ 使用期限</strong><span id="r-expire"></span></div>
         <div class="info-row"><strong>社群暱稱</strong><span id="r-name"></span></div>
@@ -296,7 +307,6 @@
       </div>
       
       <button class="switch-btn" onclick="switchAct()">🔄 切換 / 領取其他活動</button>
-      <!-- 🔥 新增：幫親友代領按鈕 -->
       <button class="family-btn" onclick="refillForFamily()">➕ 幫親友代領 (重新填單)</button>
     </section>
 
@@ -323,7 +333,7 @@
   const $ = id => document.getElementById(id);
   let unsubscribe = null;
   let EVENT_SECRETS = {}; 
-  let POS_CONFIG = {}; // 🔥 新增：儲存活動贈品與期限
+  let POS_CONFIG = {}; 
 
   const urlParams = new URLSearchParams(window.location.search);
   const customGift = urlParams.get('gift') || "";
@@ -340,7 +350,7 @@
       if (configSnap.exists()) {
         const data = configSnap.data();
         EVENT_SECRETS = data.EVENT_CONFIG || {};
-        POS_CONFIG = data.POS_CONFIG || {}; // 🔥 抓取贈品設定
+        POS_CONFIG = data.POS_CONFIG || {}; 
       } else {
         $('activity').innerHTML = '<option value="">⚠️ 系統設定讀取失敗</option>';
         return;
@@ -369,7 +379,7 @@
     if(!act) return;
     const phone = localStorage.getItem(`p_${act}_phone`);
     if(phone) {
-      if(!isInit) alert(`💡 您已領過「${act}」！為您顯示憑證。`);
+      if(!isInit) alert(`💡 系統偵測到您已領取過「${act}」！已為您載入憑證。`);
       renderTicket(act, localStorage.getItem(`p_${act}_name`), localStorage.getItem(`p_${act}_social`), phone);
     } else {
       if(unsubscribe) unsubscribe();
@@ -386,13 +396,10 @@
     else { sel.value = Array.from(sel.options).find(o => o.value !== current).value; checkSaved(true); }
   }
 
-  // 🔥 新增：幫親友代領 (清除記憶)
   function refillForFamily() {
     const act = $('activity').value;
-    if(confirm("確定要幫親友代領嗎？\n\n⚠️ 系統將暫時忘記您的資料。\n⚠️ 請務必輸入【親友的真實電話號碼】，否則會覆蓋掉您自己的憑證喔！")) {
+    if(confirm("確定要幫親友代領嗎？\n\n⚠️ 系統將暫時隱藏您的畫面，回到空白表單。\n⚠️ 請務必輸入【親友的真實電話】，若輸入原本已領過的號碼，系統只會再次顯示舊憑證喔！")) {
       localStorage.removeItem(`p_${act}_phone`);
-      localStorage.removeItem(`p_${act}_name`);
-      localStorage.removeItem(`p_${act}_social`);
       checkSaved(true);
     }
   }
@@ -401,10 +408,16 @@
     const act=$('activity').value, name=$('name').value.trim(), soc=$('social_id').value.trim(), ph=$('phone').value.replace(/\D/g,''), cd=$('secret_code').value.trim();
     if(!act) return alert("⚠️ 系統載入中，請稍候！");
     
-    // 🔥 檢查電話是否符合台灣市話/手機長度規範 (至少 9 碼，前面已限制最多 10 碼且 0 開頭)
-    if(ph.length < 9 || !ph.startsWith('0')) return alert("⚠️ 手機或市話號碼格式不正確 (需為 0 開頭，且至少 9 碼)！");
+    // 🔥 送出時再次嚴格把關：不滿 10 碼或不是 09 開頭直接擋下來
+    if(ph.length !== 10 || !ph.startsWith('09')) return alert("⚠️ 為了配合日後的安全驗證，手機號碼必須為「09 開頭且滿 10 碼數字」！\n(本系統不支援市話填單)");
+    
     if(!name || !soc || !cd) return alert("⚠️ 請完整填寫資料與密語！");
     if(cd.toUpperCase() !== EVENT_SECRETS[act]) return alert("⚠️ 通關密語錯誤！");
+
+    let claimCount = parseInt(localStorage.getItem(`p_count_${act}`) || "0");
+    if(claimCount >= 3) {
+      return alert("🛑 為了維護活動公平性，同一台設備最多只能領取 3 次兌換券喔！請請親友使用自己的手機操作。");
+    }
 
     const btn = $('btn-submit');
     btn.disabled = true;
@@ -420,6 +433,8 @@
         });
         confetti({particleCount:80, spread:70});
 
+        localStorage.setItem(`p_count_${act}`, claimCount + 1);
+        
         localStorage.setItem(`p_${act}_phone`, ph);
         localStorage.setItem(`p_${act}_name`, name);
         localStorage.setItem(`p_${act}_social`, soc);
@@ -427,7 +442,7 @@
 
       } else {
         const data = docSnap.data();
-        alert("💡 此號碼已領取過此活動憑證！為您載入原始資料。");
+        alert("💡 哎呀！這個電話號碼已經有領取紀錄囉！為您重新載入原本的憑證。");
 
         localStorage.setItem(`p_${act}_phone`, ph);
         localStorage.setItem(`p_${act}_name`, data.name);
@@ -447,7 +462,6 @@
     $('form-section').style.display = 'none';
     $('ticket-card').style.display = 'block';
     
-    // 🔥 動態顯示贈品與使用期限
     $('r-act').innerText = act; 
     $('r-name').innerText = name; 
     $('r-social').innerText = soc; 
