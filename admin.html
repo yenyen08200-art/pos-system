@@ -94,38 +94,28 @@
     .btn-reset { background: rgba(240,118,84,.1); border: 1px solid rgba(240,118,84,.3); color: var(--accent); font-size: 12px; font-weight: 700; padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: 0.2s; white-space: nowrap; }
     .btn-reset:hover { background: var(--accent); color: #fff; }
 
-    /* 🔥 Config UI */
+    /* 🔥 UI Cards (Config, Issue, Lottery) */
     .config-card { background: var(--card-bg); padding: 30px; border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 24px; }
     .config-card h2 { margin: 0 0 20px; font-size: 20px; display: flex; justify-content: space-between; align-items: center; }
-    .config-card .desc { font-size: 14px; color: var(--text-sub); margin-bottom: 20px; }
+    .config-card .desc { font-size: 14px; color: var(--text-sub); margin-bottom: 20px; line-height: 1.5;}
     .form-group { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
-    .form-group input { flex: 1; min-width: 140px; padding: 12px 16px; border: 1px solid #E6EAF0; border-radius: 12px; outline: none; background: #F7F9FB; font-size: 14px; }
-    .form-group input:focus { border-color: var(--accent); background: #fff; }
+    .form-group input, .form-group select, .form-group textarea { flex: 1; min-width: 140px; padding: 12px 16px; border: 1px solid #E6EAF0; border-radius: 12px; outline: none; background: #F7F9FB; font-size: 14px; font-family: inherit;}
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--accent); background: #fff; }
+    
+    .field-block { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+    .field-block label { font-size: 13px; font-weight: bold; color: var(--text-sub); }
+
     .btn-primary { background: var(--accent); color: #fff; border: none; padding: 12px 24px; border-radius: 12px; font-weight: 700; cursor: pointer; transition: 0.2s; }
     .btn-primary:hover { filter: brightness(1.1); }
     .btn-danger { background: rgba(240,118,84,.1); color: var(--accent); border: none; padding: 8px 16px; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 12px; }
     .btn-danger:hover { background: var(--accent); color: #fff; }
+    
     .item-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
     .item-li { display: flex; justify-content: space-between; align-items: center; padding: 16px; background: #F7F9FB; border-radius: 12px; border: 1px solid #E6EAF0; }
     .item-info strong { font-size: 16px; color: var(--text-main); display: block; margin-bottom: 4px; }
     .item-info span { font-size: 13px; color: var(--text-sub); }
-
-    /* 🔥 Modal 通用樣式 */
-    .modal-overlay { position: fixed; inset: 0; background: rgba(26,28,36,0.6); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 2000; }
-    .modal-card { background: var(--card-bg); padding: 32px; border-radius: var(--radius); width: 90%; max-width: 440px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); max-height: 90vh; overflow-y: auto;}
-    .modal-card h2 { margin: 0 0 20px; font-size: 20px; }
-    .modal-field { margin-bottom: 16px; }
-    .modal-field label { display: block; font-size: 13px; font-weight: 700; color: var(--text-sub); margin-bottom: 8px; }
-    .modal-field input, .modal-field select, .modal-field textarea { width: 100%; padding: 12px; border: 1px solid #E6EAF0; border-radius: 12px; outline: none; background: #F7F9FB; font-family: inherit;}
-    .modal-field input:focus, .modal-field select:focus, .modal-field textarea:focus { border-color: var(--accent); background: #fff; }
-    .modal-actions { display: flex; gap: 12px; margin-top: 24px; }
-    .modal-actions button { flex: 1; padding: 12px; border-radius: 12px; font-weight: 700; border: none; cursor: pointer; transition: .2s; }
-    .btn-cancel { background: #F4F6F8; color: var(--text-main); }
-    .btn-cancel:hover { background: #E6EAF0; }
-    .btn-confirm { background: var(--accent); color: #fff; }
-    .btn-confirm:hover { filter: brightness(1.1); }
     
-    .result-box { margin-top: 16px; padding: 12px; background: rgba(63,191,143,.1); border: 1px solid rgba(63,191,143,.3); border-radius: 12px; font-size: 13px; display: none; max-height: 150px; overflow-y: auto; white-space: pre-wrap;}
+    .result-box { margin-top: 16px; padding: 16px; background: rgba(63,191,143,.1); border: 1px solid rgba(63,191,143,.3); border-radius: 12px; font-size: 14px; display: none; max-height: 250px; overflow-y: auto; white-space: pre-wrap; font-family: monospace; line-height: 1.5;}
 
     @media (max-width:768px){
       body{flex-direction:column}
@@ -139,112 +129,6 @@
   </style>
 </head>
 <body>
-
-  <!-- 手動補單 Modal -->
-  <div class="modal-overlay" id="manual-modal">
-    <div class="modal-card">
-      <h2>🛠️ 小編手動補單 (免驗證)</h2>
-      <div class="modal-field">
-        <label>🎯 選擇活動</label>
-        <select id="modal-act"></select>
-      </div>
-      <div class="modal-field">
-        <label>📱 顧客號碼 (可填市話或任意號碼)</label>
-        <input type="text" id="modal-phone" placeholder="例：02-1234567">
-      </div>
-      <div class="modal-field">
-        <label>👤 顧客姓名</label>
-        <input type="text" id="modal-name" placeholder="輸入顧客姓名">
-      </div>
-      <div class="modal-field">
-        <label>🔗 社群帳號 (選填)</label>
-        <input type="text" id="modal-social" placeholder="無則留空">
-      </div>
-      <div class="modal-field">
-        <label>🎁 專屬贈品 (選填，無則套用活動預設)</label>
-        <input type="text" id="modal-gift" placeholder="例：補償一號餐">
-      </div>
-      <div class="modal-field">
-        <label>⏳ 使用期限 (選填，無則套用活動預設)</label>
-        <input type="text" id="modal-expire" placeholder="例：2026/12/31">
-      </div>
-      <div class="modal-actions">
-        <button class="btn-cancel" onclick="closeManualModal()">取消</button>
-        <button class="btn-confirm" onclick="submitManualTicket()">確認發券</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- 社群抽獎 Modal -->
-  <div class="modal-overlay" id="lottery-modal">
-    <div class="modal-card">
-      <h2>🎉 社群留言抽獎中心</h2>
-      <p style="font-size: 13px; color: var(--text-sub); margin-top:-10px; margin-bottom:16px;">貼上留言名單，系統將自動抽出得獎者，並產生可兌換的專屬憑證號碼。</p>
-      <div class="modal-field">
-        <label>🎯 發派至哪個活動？</label>
-        <select id="lottery-act"></select>
-      </div>
-      <div class="modal-field">
-        <label>📋 貼上參加者名單 (每行一個)</label>
-        <textarea id="lottery-list" rows="5" placeholder="王小明&#10;陳大頭&#10;@mary_123"></textarea>
-      </div>
-      <div class="modal-field" style="display:flex; gap:10px;">
-        <div style="flex:1;">
-          <label>🏆 抽出人數</label>
-          <input type="number" id="lottery-count" value="1" min="1">
-        </div>
-        <div style="flex:1;">
-          <label>🎁 專屬贈品 (選填)</label>
-          <input type="text" id="lottery-gift" placeholder="同預設">
-        </div>
-      </div>
-      <div id="lottery-result" class="result-box"></div>
-      <div class="modal-actions">
-        <button class="btn-cancel" onclick="closeLotteryModal()">關閉</button>
-        <button class="btn-confirm" id="btn-run-lottery" onclick="runLottery()">開始抽獎</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- 🔥 新增：實體券批次建檔 Modal -->
-  <div class="modal-overlay" id="batch-modal">
-    <div class="modal-card">
-      <h2>🎫 實體券批次產生器</h2>
-      <p style="font-size: 13px; color: var(--text-sub); margin-top:-10px; margin-bottom:16px;">自動產生連續的流水號並寫入資料庫，未建檔的實體券將無法在門市核銷。</p>
-      <div class="modal-field">
-        <label>🎯 綁定實體券活動</label>
-        <select id="batch-act"></select>
-      </div>
-      <div class="modal-field" style="display:flex; gap:10px;">
-        <div style="flex:1;">
-          <label>🔤 流水號前綴 (選填)</label>
-          <input type="text" id="batch-prefix" placeholder="例：A">
-        </div>
-        <div style="flex:1;">
-          <label>🔢 數字位數</label>
-          <input type="number" id="batch-pad" value="3" min="1" placeholder="例：3 (代表 001)">
-        </div>
-      </div>
-      <div class="modal-field" style="display:flex; gap:10px;">
-        <div style="flex:1;">
-          <label>▶️ 起始號碼</label>
-          <input type="number" id="batch-start" value="1" min="1">
-        </div>
-        <div style="flex:1;">
-          <label>⏹️ 結束號碼</label>
-          <input type="number" id="batch-end" value="100" min="1">
-        </div>
-      </div>
-      <div class="modal-field">
-        <label>🎁 兌換品項設定</label>
-        <input type="text" id="batch-gift" value="依實體券面標示發放" placeholder="給店員看的提示">
-      </div>
-      <div class="modal-actions">
-        <button class="btn-cancel" onclick="closeBatchModal()">取消</button>
-        <button class="btn-confirm" id="btn-run-batch" onclick="runBatch()">🚀 開始批次建檔</button>
-      </div>
-    </div>
-  </div>
 
   <div id="login-screen">
     <div class="login-card">
@@ -265,6 +149,8 @@
     </div>
     <nav class="sidebar-menu" style="display:flex;">
       <div class="sidebar-item active" onclick="switchView('dashboard', this)">📊 電子兌換卷儀表板</div>
+      <div class="sidebar-item" onclick="switchView('issue-ui', this)">🎟️ 票券發放與建檔</div>
+      <div class="sidebar-item" onclick="switchView('lottery-ui', this)">🎉 社群抽獎發券中心</div>
       <div class="sidebar-item" onclick="switchView('config-ui', this)">⚙️ 系統設定中心 (雲端)</div>
     </nav>
     <div class="sidebar-footer">
@@ -283,11 +169,8 @@
           </div>
           <div class="controls">
             <select id="act-select" onchange="fetchData()"></select>
-            <!-- 🔥 新增：實體券批次按鈕 -->
-            <button class="btn-export" style="background: var(--sidebar-bg);" onclick="openBatchModal()">🎫 實體券建檔</button>
-            <button class="btn-export" style="background: var(--accent);" onclick="openLotteryModal()">🎉 社群抽獎</button>
-            <button class="btn-export" style="background: var(--green);" onclick="openManualModal()">➕ 手動補單</button>
-            <button class="btn-expire" onclick="expireTickets()">🧹 結算過期</button>
+            <!-- 移除了原本的建檔按鈕，讓版面更乾淨 -->
+            <button class="btn-expire" onclick="expireTickets()">🧹 智慧結算過期</button>
             <button class="btn-export" onclick="exportExcel()">📥 匯出 Excel</button>
           </div>
         </div>
@@ -347,7 +230,131 @@
         </div>
       </div>
 
-      <!-- ================= 視圖 2：系統設定中心 ================= -->
+      <!-- ================= 視圖 2：票券發放與建檔中心 (全新整合) ================= -->
+      <div id="view-issue-ui" class="view-section">
+        <div class="header">
+          <h1>🎟️ 票券發放與建檔中心</h1>
+        </div>
+
+        <div class="config-card">
+          <h2>🛠️ 小編手動補單 (免驗證)</h2>
+          <p class="desc">針對客訴補償、特殊 VIP 發券使用。建立後系統會直接產生一筆憑證。</p>
+          
+          <div class="form-group">
+            <div class="field-block">
+              <label>🎯 寫入活動資料庫</label>
+              <select id="manual-act"></select>
+            </div>
+            <div class="field-block">
+              <label>📱 顧客號碼 (可填市話或任意號碼)</label>
+              <input type="text" id="manual-phone" placeholder="例：02-1234567">
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <div class="field-block">
+              <label>👤 顧客姓名</label>
+              <input type="text" id="manual-name" placeholder="輸入顧客姓名">
+            </div>
+            <div class="field-block">
+              <label>🔗 社群帳號 (選填)</label>
+              <input type="text" id="manual-social" placeholder="無則留空">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <div class="field-block">
+              <label>🎁 專屬贈品 (選填，無則同活動預設)</label>
+              <input type="text" id="manual-gift" placeholder="例：補償一號餐">
+            </div>
+            <div class="field-block">
+              <label>⏳ 使用期限 (選填，無則同活動預設)</label>
+              <input type="text" id="manual-expire" placeholder="例：2026/12/31">
+            </div>
+          </div>
+          <button class="btn-primary" style="width:100%; padding:14px; font-size:16px;" onclick="submitManualTicket()">確認發券</button>
+        </div>
+
+        <div class="config-card">
+          <h2>🎫 實體券批次建檔器</h2>
+          <p class="desc">自動產生連續的流水號並寫入資料庫。門市 POS 將阻擋「未在此建檔過」的偽造實體券。</p>
+          
+          <div class="form-group">
+            <div class="field-block">
+              <label>🎯 綁定實體券活動</label>
+              <select id="batch-act"></select>
+            </div>
+            <div class="field-block">
+              <label>🎁 兌換品項設定</label>
+              <input type="text" id="batch-gift" value="依實體券面標示發放" placeholder="給店員看的提示">
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <div class="field-block">
+              <label>🔤 流水號前綴 (選填)</label>
+              <input type="text" id="batch-prefix" placeholder="例：A">
+            </div>
+            <div class="field-block">
+              <label>🔢 數字位數</label>
+              <input type="number" id="batch-pad" value="3" min="1" placeholder="例：3 (代表 001)">
+            </div>
+            <div class="field-block">
+              <label>▶️ 起始號碼</label>
+              <input type="number" id="batch-start" value="1" min="1">
+            </div>
+            <div class="field-block">
+              <label>⏹️ 結束號碼</label>
+              <input type="number" id="batch-end" value="100" min="1">
+            </div>
+          </div>
+          <button id="btn-run-batch" class="btn-primary" style="width:100%; padding:14px; font-size:16px; background:var(--sidebar-bg);" onclick="runBatch()">🚀 開始批次建檔</button>
+        </div>
+      </div>
+
+      <!-- ================= 視圖 3：社群抽獎發券中心 ================= -->
+      <div id="view-lottery-ui" class="view-section">
+        <div class="header">
+          <h1>🎉 社群留言抽獎中心</h1>
+        </div>
+        
+        <div class="config-card">
+          <h2>🎯 第一步：貼上留言名單</h2>
+          <p class="desc">利用免費的匯出工具（如 IG Comment Export 等擴充功能），將 Excel 中的「帳號」與「留言內容」直接複製並貼在下方。</p>
+          <div class="form-group">
+            <textarea id="lottery-raw-list" rows="8" style="width:100%; padding:16px;" placeholder="貼上名單格式範例 (可直接從 Excel 貼上兩欄)：&#10;@wang123  我爸超帥，帶他吃炸雞！&#10;@mary_77  父親節快樂！&#10;@john_do  我爸超帥選我選我"></textarea>
+          </div>
+        </div>
+
+        <div class="config-card">
+          <h2>⚙️ 第二步：設定過濾條件與抽出人數</h2>
+          <div class="form-group">
+            <div class="field-block">
+              <label>🔍 留言必須包含 (過濾關鍵字，留空則全抽)</label>
+              <input type="text" id="lottery-keyword" placeholder="例：我爸超帥">
+            </div>
+            <div class="field-block" style="flex:0.5;">
+              <label>🏆 預計抽出人數</label>
+              <input type="number" id="lottery-count" value="10" min="1">
+            </div>
+          </div>
+          <div class="form-group">
+            <div class="field-block">
+              <label>🎯 寫入活動資料庫</label>
+              <select id="lottery-act"></select>
+            </div>
+            <div class="field-block">
+              <label>🎁 抽獎專屬贈品 (選填，無則同預設)</label>
+              <input type="text" id="lottery-gift" placeholder="例：父親節免費雙人餐">
+            </div>
+          </div>
+          <button id="btn-run-lottery" class="btn-primary" style="width:100%; font-size:18px; padding: 16px;" onclick="runLottery()">🚀 開始過濾並抽出得獎者</button>
+          
+          <div id="lottery-result" class="result-box"></div>
+        </div>
+      </div>
+
+      <!-- ================= 視圖 4：系統設定中心 ================= -->
       <div id="view-config-ui" class="view-section">
         <div class="header">
           <h1>⚙️ 系統設定中心 (全雲端同步)</h1>
@@ -419,6 +426,7 @@
     let globalEventConfig = {};
     let globalStoreList = [];
 
+    // ================= 畫面切換與同步 =================
     window.switchView = function(viewId, element) {
       document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
       document.getElementById('view-' + viewId).classList.add('active');
@@ -426,17 +434,29 @@
       element.classList.add('active');
     };
 
+    function populateAdminDropdown() {
+      const acts = Object.keys(globalEventConfig);
+      const html = acts.map(a => `<option value="${a}">${a}</option>`).join('');
+      
+      const targetIds = ['act-select', 'manual-act', 'batch-act', 'lottery-act'];
+      targetIds.forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.innerHTML = html;
+      });
+      
+      if (acts.length > 0) window.fetchData(); 
+    }
+
+    // ================= 系統設定區 =================
     function renderConfigUI() {
-      const storeListEl = document.getElementById('ui-store-list');
-      storeListEl.innerHTML = globalStoreList.map((store, idx) => `
+      document.getElementById('ui-store-list').innerHTML = globalStoreList.map((store, idx) => `
         <li class="item-li">
           <div class="item-info"><strong>🏪 ${store}</strong></div>
           <button class="btn-danger" onclick="deleteStore(${idx})">刪除</button>
         </li>
       `).join('');
 
-      const eventListEl = document.getElementById('ui-event-list');
-      eventListEl.innerHTML = Object.keys(globalEventConfig).map(actName => {
+      document.getElementById('ui-event-list').innerHTML = Object.keys(globalEventConfig).map(actName => {
         const pwd = globalEventConfig[actName];
         const giftInfo = globalPosConfig[actName];
         const giftStr = giftInfo ? giftInfo.gift : "無設定";
@@ -467,7 +487,7 @@
     };
     
     window.deleteStore = function(idx) {
-      if(confirm("確定刪除此門市？\n(記得操作完要按最下方的『儲存至雲端』才會生效喔)")) {
+      if(confirm("確定刪除此門市？\n(記得操作完要按下『儲存至雲端』才會生效喔)")) {
         globalStoreList.splice(idx, 1);
         renderConfigUI();
       }
@@ -495,7 +515,7 @@
     };
 
     window.deleteEvent = function(actName) {
-      if(confirm(`確定刪除活動「${actName}」？\n(記得操作完要按最下方的『儲存至雲端』才會生效喔)`)) {
+      if(confirm(`確定刪除活動「${actName}」？\n(記得操作完要按下『儲存至雲端』才會生效喔)`)) {
         delete globalEventConfig[actName];
         delete globalPosConfig[actName];
         renderConfigUI();
@@ -503,7 +523,7 @@
     };
 
     window.saveConfigToCloud = async function() {
-      if(!confirm("⚠️ 確定要將設定寫入資料庫嗎？\n按下確定後，全台門市 POS 與前台領券系統將立刻套用新設定！")) return;
+      if(!confirm("⚠️ 確定要將設定寫入資料庫嗎？\n按下確定後，全台門市 POS 與前台系統將立刻套用新設定！")) return;
       
       const btn = document.getElementById('save-cloud-btn');
       btn.innerText = "⏳ 雲端同步中...";
@@ -520,10 +540,9 @@
         
         alert("✅ 系統設定已成功同步至雲端！");
         populateAdminDropdown();
-        
       } catch (error) {
-        console.error("寫入雲端設定失敗:", error);
-        alert("❌ 同步失敗，請檢查權限或網路狀態。");
+        console.error(error);
+        alert("❌ 同步失敗，請檢查網路狀態。");
       } finally {
         btn.innerText = "💾 儲存所有設定至雲端 (即時生效)";
         btn.disabled = false;
@@ -538,57 +557,22 @@
           globalEventConfig = data.EVENT_CONFIG || {};
           globalStoreList = data.STORE_LIST || [];
           globalPosConfig = data.POS_CONFIG || {};
-        } else {
-          console.log("雲端沒有設定檔，將以空資料初始化。");
         }
-        
         renderConfigUI();
         populateAdminDropdown();
-        
       } catch (error) {
-        console.error("抓取雲端設定失敗:", error);
         alert("無法讀取系統設定，請重新整理頁面！");
       }
     }
 
-    function populateAdminDropdown() {
-      const adminSelect = document.getElementById('act-select');
-      adminSelect.innerHTML = '';
-      for (const actName in globalEventConfig) {
-        const opt = document.createElement('option');
-        opt.value = actName;
-        opt.text = actName;
-        adminSelect.appendChild(opt);
-      }
-      if (adminSelect.options.length > 0) {
-        window.fetchData(); 
-      }
-    }
-
-    // ================= 手動補單 =================
-    window.openManualModal = function() {
-      const actSelect = document.getElementById('modal-act');
-      actSelect.innerHTML = document.getElementById('act-select').innerHTML;
-      actSelect.value = document.getElementById('act-select').value;
-      document.getElementById('manual-modal').style.display = 'flex';
-    };
-
-    window.closeManualModal = function() {
-      document.getElementById('manual-modal').style.display = 'none';
-      document.getElementById('modal-phone').value = '';
-      document.getElementById('modal-name').value = '';
-      document.getElementById('modal-social').value = '';
-      document.getElementById('modal-gift').value = '';
-      document.getElementById('modal-expire').value = ''; 
-    };
-
+    // ================= 票券發放與建檔區 =================
     window.submitManualTicket = async function() {
-      const act = document.getElementById('modal-act').value;
-      const phone = document.getElementById('modal-phone').value.trim();
-      const name = document.getElementById('modal-name').value.trim();
-      const social = document.getElementById('modal-social').value.trim() || '後台補單';
-      const gift = document.getElementById('modal-gift').value.trim();
-      const expire = document.getElementById('modal-expire').value.trim(); 
+      const act = document.getElementById('manual-act').value;
+      const phone = document.getElementById('manual-phone').value.trim();
+      const name = document.getElementById('manual-name').value.trim();
+      const social = document.getElementById('manual-social').value.trim() || '後台手動補單';
+      const gift = document.getElementById('manual-gift').value.trim();
+      const expire = document.getElementById('manual-expire').value.trim(); 
 
       if(!act || !phone || !name) return alert("⚠️ 請填寫活動、號碼與姓名！");
 
@@ -596,7 +580,7 @@
         const docRef = doc(db, act, phone);
         const snap = await getDoc(docRef);
         if(snap.exists()) {
-           if(!confirm(`⚠️ 號碼 ${phone} 在此活動已有紀錄，確定要覆蓋掉舊憑證嗎？`)) return;
+           if(!confirm(`⚠️ 號碼 ${phone} 在此活動已有紀錄，確定要覆蓋嗎？`)) return;
         }
 
         await setDoc(docRef, {
@@ -612,25 +596,15 @@
         });
         
         alert(`✅ 成功建立憑證給 ${name} (${phone})！`);
-        closeManualModal();
+        document.getElementById('manual-phone').value = '';
+        document.getElementById('manual-name').value = '';
+        document.getElementById('manual-social').value = '';
+        document.getElementById('manual-gift').value = '';
+        document.getElementById('manual-expire').value = ''; 
       } catch(e) {
         console.error(e);
-        alert("❌ 發送失敗，請檢查網路連線或權限設定。");
+        alert("❌ 發送失敗，請檢查權限設定。");
       }
-    };
-
-    // ================= 🔥 實體券批次建檔 =================
-    window.openBatchModal = function() {
-      const actSelect = document.getElementById('batch-act');
-      actSelect.innerHTML = document.getElementById('act-select').innerHTML;
-      actSelect.value = document.getElementById('act-select').value;
-      document.getElementById('batch-modal').style.display = 'flex';
-    };
-
-    window.closeBatchModal = function() {
-      document.getElementById('batch-modal').style.display = 'none';
-      document.getElementById('btn-run-batch').disabled = false;
-      document.getElementById('btn-run-batch').innerText = '🚀 開始批次建檔';
     };
 
     window.runBatch = async function() {
@@ -643,12 +617,12 @@
       const btn = document.getElementById('btn-run-batch');
 
       if(!act) return alert("⚠️ 請選擇活動！");
-      if(isNaN(start) || isNaN(end) || start > end) return alert("⚠️ 起始與結束號碼設定錯誤！");
-      if((end - start) > 2000) return alert("⚠️ 為了系統穩定，一次最多產生 2000 筆！");
+      if(isNaN(start) || isNaN(end) || start > end) return alert("⚠️ 號碼設定錯誤！");
+      if((end - start) > 2000) return alert("⚠️ 一次最多產生 2000 筆！");
 
-      if(!confirm(`⚠️ 即將產生 ${end - start + 1} 筆實體券資料寫入「${act}」\n號碼範圍：${prefix}${String(start).padStart(pad, '0')} ~ ${prefix}${String(end).padStart(pad, '0')}\n確定執行嗎？`)) return;
+      if(!confirm(`⚠️ 即將產生 ${end - start + 1} 筆實體券\n號碼範圍：${prefix}${String(start).padStart(pad, '0')} ~ ${prefix}${String(end).padStart(pad, '0')}\n確定執行嗎？`)) return;
 
-      btn.innerText = "⏳ 批次寫入資料庫中...";
+      btn.innerText = "⏳ 批次寫入中...";
       btn.disabled = true;
 
       try {
@@ -673,67 +647,65 @@
         
         await Promise.all(promises);
         alert(`✅ 批次建檔完成！成功寫入 ${promises.length} 筆資料。`);
-        closeBatchModal();
       } catch(e) {
         console.error(e);
-        alert("❌ 批次建檔發生錯誤，請檢查網路連線或權限設定。");
+        alert("❌ 批次建檔發生錯誤。");
+      } finally {
         btn.innerText = "🚀 開始批次建檔";
         btn.disabled = false;
       }
     };
 
-    // ================= 社群抽獎 =================
-    window.openLotteryModal = function() {
-      const actSelect = document.getElementById('lottery-act');
-      actSelect.innerHTML = document.getElementById('act-select').innerHTML;
-      actSelect.value = document.getElementById('act-select').value;
-      document.getElementById('lottery-result').style.display = 'none';
-      document.getElementById('lottery-modal').style.display = 'flex';
-    };
-
-    window.closeLotteryModal = function() {
-      document.getElementById('lottery-modal').style.display = 'none';
-      document.getElementById('lottery-list').value = '';
-      document.getElementById('lottery-count').value = '1';
-      document.getElementById('lottery-gift').value = '';
-      document.getElementById('lottery-result').innerHTML = '';
-      document.getElementById('btn-run-lottery').disabled = false;
-      document.getElementById('btn-run-lottery').innerText = '開始抽獎';
-    };
-
+    // ================= 社群抽獎過濾引擎 =================
     window.runLottery = async function() {
       const act = document.getElementById('lottery-act').value;
-      const rawList = document.getElementById('lottery-list').value;
+      const rawList = document.getElementById('lottery-raw-list').value;
+      const keyword = document.getElementById('lottery-keyword').value.trim();
       const count = parseInt(document.getElementById('lottery-count').value, 10);
       const gift = document.getElementById('lottery-gift').value.trim();
       const btn = document.getElementById('btn-run-lottery');
+      const resultBox = document.getElementById('lottery-result');
 
-      let participants = rawList.split('\n').map(p => p.trim()).filter(p => p !== '');
+      let allLines = rawList.split('\n').map(p => p.trim()).filter(p => p !== '');
 
       if (!act) return alert("⚠️ 請選擇活動！");
-      if (participants.length === 0) return alert("⚠️ 參加者名單不能為空！");
+      if (allLines.length === 0) return alert("⚠️ 請貼上參加者名單！");
       if (isNaN(count) || count < 1) return alert("⚠️ 抽出人數必須大於 0！");
-      if (count > participants.length) return alert("⚠️ 抽出人數大於名單總人數！");
 
-      btn.innerText = "⏳ 抽獎中並寫入資料庫...";
+      // 關鍵字過濾
+      let validParticipants = allLines;
+      if (keyword !== "") {
+        validParticipants = allLines.filter(line => line.includes(keyword));
+      }
+
+      if (validParticipants.length === 0) {
+          return alert(`⚠️ 找不到包含關鍵字「${keyword}」的留言！`);
+      }
+      if (count > validParticipants.length) {
+          return alert(`⚠️ 符合資格的只有 ${validParticipants.length} 人，您要抽 ${count} 人。\n請降低抽出人數！`);
+      }
+
+      btn.innerText = "⏳ 抽獎與寫入中...";
       btn.disabled = true;
 
       try {
-        for (let i = participants.length - 1; i > 0; i--) {
+        // 洗牌
+        for (let i = validParticipants.length - 1; i > 0; i--) {
           const j = Math.floor(Math.random() * (i + 1));
-          [participants[i], participants[j]] = [participants[j], participants[i]];
+          [validParticipants[i], validParticipants[j]] = [validParticipants[j], validParticipants[i]];
         }
         
-        const winners = participants.slice(0, count);
-        let resultText = "🎉 抽獎完成！以下為中獎名單與專屬兌換碼：\n------------------------\n";
+        const winners = validParticipants.slice(0, count);
+        let resultText = `🎉 恭喜！已從 ${validParticipants.length} 位符合資格者中抽出 ${count} 名：\n\n`;
         
         for (let i = 0; i < winners.length; i++) {
-          const winnerName = winners[i];
+          const winnerRawText = winners[i];
+          const winnerName = winnerRawText.substring(0, 15) + (winnerRawText.length > 15 ? "..." : ""); 
           const randomCode = "888" + Math.floor(10000 + Math.random() * 90000);
           
           await setDoc(doc(db, act, randomCode), {
             name: winnerName,
-            social_id: "社群抽獎匯入",
+            social_id: "社群留言中獎者",
             phone: randomCode, 
             status: "未兌換",
             store: "",
@@ -743,57 +715,20 @@
             expireDate: "" 
           });
           
-          resultText += `得獎者：${winnerName} ➡️ 專屬兌換碼：${randomCode}\n`;
+          resultText += `👑 得獎者：${winnerName}\n🎫 專屬兌換碼：[ ${randomCode} ]\n-----------------------\n`;
         }
         
-        const resultBox = document.getElementById('lottery-result');
-        resultBox.innerText = resultText + "------------------------\n💡 請將兌換碼回覆給得獎者，請他們至門市出示此號碼即可核銷！";
+        resultBox.innerText = resultText + "\n💡 系統已自動將上述號碼建檔！\n👉 請將兌換碼發給得獎者至門市核銷。";
         resultBox.style.display = 'block';
-        btn.innerText = "✅ 抽獎發放完畢";
-
+        btn.innerText = "✅ 抽獎與建檔完畢";
       } catch(e) {
-        console.error(e);
-        alert("❌ 抽獎或建檔失敗，請檢查權限或網路狀態。");
-        btn.innerText = "開始抽獎";
+        alert("❌ 抽獎失敗，請檢查權限。");
+        btn.innerText = "🚀 開始過濾並抽出得獎者";
         btn.disabled = false;
       }
     };
 
-    // ================= 一般功能區 =================
-    window.login = function() {
-      const email = document.getElementById('email').value;
-      const pwd = document.getElementById('pwd').value;
-      const btn = document.getElementById('login-btn');
-      if(!email || !pwd) return alert("⚠️ 請輸入帳號與密碼！");
-      btn.innerText = "驗證中...";
-      btn.disabled = true;
-      signInWithEmailAndPassword(auth, email, pwd)
-        .then(() => { btn.innerText = "安全登入"; btn.disabled = false; })
-        .catch((error) => { alert("❌ 帳號密碼登入失敗！"); btn.innerText = "安全登入"; btn.disabled = false; });
-    };
-
-    window.loginWithGoogle = function() {
-      const btn = document.getElementById('google-btn');
-      btn.innerText = "驗證中...";
-      btn.disabled = true;
-      signInWithPopup(auth, googleProvider)
-        .then(() => { btn.innerText = "🌐 使用 Google 帳號登入"; btn.disabled = false; })
-        .catch((error) => { alert("❌ Google 登入失敗！"); btn.innerText = "🌐 使用 Google 帳號登入"; btn.disabled = false; });
-    };
-
-    window.logout = function() {
-      signOut(auth).then(() => {
-        document.getElementById('email').value = "";
-        document.getElementById('pwd').value = "";
-      });
-    };
-
-    let searchTimer = null;
-    window.debounceRenderTable = function() {
-      clearTimeout(searchTimer);
-      searchTimer = setTimeout(() => { window.renderTable(); }, 300);
-    };
-
+    // ================= 儀表板 & 智慧結算過期 =================
     window.fetchData = function() {
       const actSelect = document.getElementById('act-select');
       if (!actSelect || !actSelect.value) return;
@@ -824,49 +759,76 @@
         drawCharts(storeStats, redeemedCount, unredeemedCount, expiredCount); 
         window.renderTable(); 
       }, (error) => {
-        console.error("即時監聽失敗:", error);
         tbody.innerHTML = '<tr><td colspan="9" style="text-align:center; padding: 40px; color: red;">連線中斷，請確認網路連線。</td></tr>';
       });
     };
 
-    window.resetSingleTicket = async function(phone) {
-      const act = document.getElementById('act-select').value;
-      if (!confirm(`⚠️ 確定要將兌換號碼「${phone}」的憑證重設為【未兌換】嗎？\n(此操作將清空他的核銷門市與時間紀錄)`)) return;
-      try {
-        await updateDoc(doc(db, act, phone), { status: "未兌換", store: "", redeemTime: "" });
-      } catch (error) {
-        alert("重設失敗，請檢查權限或連線。");
-      }
-    };
-
+    // 🔥 全新：智慧日期比對結算引擎
     window.expireTickets = async function() {
       const actSelect = document.getElementById('act-select');
       if (!actSelect || !actSelect.value) return;
       const act = actSelect.value;
-      const confirmText = prompt(`⚠️ 警告：此操作不可逆！\n\n您確定要把「${act}」所有【未兌換】的票券強制設為【已過期】嗎？\n\n如果確定，請在下方輸入「結算」兩個字：`);
-      if (confirmText !== "結算") return alert("操作已取消。");
+      const defaultExpire = globalPosConfig[act]?.expireDate || "";
+
+      if(!confirm(`💡 智慧結算系統\n\n系統將自動掃描「${act}」中所有【未兌換】的憑證，並比對其「使用期限」。\n\n若期限日期早於今天，系統會自動將其設為【已過期】。\n(未設定日期或實體券不受影響)\n\n確定要開始掃描並結算嗎？`)) return;
 
       try {
         const btn = document.querySelector('.btn-expire');
-        btn.innerText = "處理中..."; btn.disabled = true;
+        btn.innerText = "掃描結算中..."; btn.disabled = true;
 
         const unredeemedDocs = allData.filter(d => !d.status || d.status === "未兌換");
         if (unredeemedDocs.length === 0) {
           alert("🎉 目前沒有任何【未兌換】的票券可以結算！");
-        } else {
-          let updated = 0; const updatePromises = [];
-          unredeemedDocs.forEach((d) => {
-            const p = updateDoc(doc(db, act, d.id), { status: "已過期", redeemTime: "活動結束，逾期未換" });
-            updatePromises.push(p); updated++;
-          });
-          await Promise.all(updatePromises);
-          alert(`✅ 結算完成！\n總共將 ${updated} 筆票券設為已過期。`);
+          btn.innerText = "🧹 智慧結算過期"; btn.disabled = false;
+          return;
         }
-        btn.innerText = "🧹 結算過期"; btn.disabled = false;
+
+        const today = new Date();
+        today.setHours(0,0,0,0);
+
+        // 用正則表達式尋找字串中的最後一個日期格式 (YYYY/MM/DD 或 YYYY-MM-DD)
+        const regex = /(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})/g;
+
+        let updated = 0; const updatePromises = [];
+        
+        unredeemedDocs.forEach((d) => {
+          const expStr = d.expireDate || defaultExpire;
+          if (!expStr) return; 
+          
+          let match;
+          let lastDate = null;
+          
+          while ((match = regex.exec(expStr)) !== null) {
+              lastDate = new Date(match[1], parseInt(match[2])-1, match[3]);
+          }
+          
+          // 如果有抓到合法日期，且該日期小於今天
+          if (lastDate && lastDate < today) {
+            const p = updateDoc(doc(db, act, d.id), { status: "已過期", redeemTime: "逾期未換 (系統自動結算)" });
+            updatePromises.push(p); 
+            updated++;
+          }
+        });
+        
+        if (updatePromises.length > 0) {
+            await Promise.all(updatePromises);
+            alert(`✅ 結算完成！\n總共掃描到 ${updated} 筆已逾期的票券，並已自動設為【已過期】。`);
+        } else {
+            alert(`✅ 掃描完成！\n目前沒有發現任何超過期限的票券喔！`);
+        }
+        
+        btn.innerText = "🧹 智慧結算過期"; btn.disabled = false;
       } catch (error) {
-        alert("結算失敗，請檢查網路連線或權限設定。");
-        document.querySelector('.btn-expire').innerText = "🧹 結算過期"; document.querySelector('.btn-expire').disabled = false;
+        alert("結算失敗，請檢查網路連線。");
+        document.querySelector('.btn-expire').innerText = "🧹 智慧結算過期"; 
+        document.querySelector('.btn-expire').disabled = false;
       }
+    };
+
+    window.resetSingleTicket = async function(phone) {
+      const act = document.getElementById('act-select').value;
+      if (!confirm(`⚠️ 確定要將兌換號碼「${phone}」重設為【未兌換】嗎？\n(將清空核銷門市與時間紀錄)`)) return;
+      await updateDoc(doc(db, act, phone), { status: "未兌換", store: "", redeemTime: "" });
     };
 
     window.setSort = function(col) {
@@ -895,7 +857,7 @@
       document.getElementById('result-count').innerText = `顯示 ${filteredData.length} 筆結果`;
 
       if (filteredData.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="9" style="text-align:center; padding: 40px; color: #F07654; font-weight: bold;">找不到符合的資料 🥲</td></tr>'; return;
+        tbody.innerHTML = '<tr><td colspan="9" style="text-align:center; padding: 40px; color: #F07654; font-weight: bold;">找不到資料 🥲</td></tr>'; return;
       }
 
       tbody.innerHTML = filteredData.map(d => {
@@ -905,7 +867,7 @@
         
         let displayGift = d.gift ? `${d.gift} <span style="font-size:10px; color:#F07654;">(專屬)</span>` : defaultGift;
         let actionBtn = (d.status === '已兌換' || d.status === '已過期') 
-          ? `<button class="btn-reset" onclick="resetSingleTicket('${d.id}')">↻ 復原未兌換</button>` : `-`;
+          ? `<button class="btn-reset" onclick="resetSingleTicket('${d.id}')">↻ 復原</button>` : `-`;
 
         return `
           <tr>
@@ -924,9 +886,9 @@
     };
 
     window.exportExcel = function() {
-      if (allData.length === 0) return alert('⚠️ 目前沒有資料可以匯出喔！');
+      if (allData.length === 0) return alert('⚠️ 目前沒有資料可以匯出！');
       const act = document.getElementById('act-select').value;
-      const defaultGift = globalPosConfig[currentAct]?.gift || '預設活動贈品';
+      const defaultGift = globalPosConfig[act]?.gift || '預設活動贈品';
 
       const exportArr = allData.map(d => ({
         "兌換號碼": d.phone, "顧客姓名": d.name, "社群帳號": d.social_id || '未提供',
@@ -949,31 +911,49 @@
       storeChartInstance = new Chart(ctxStore, {
         type: 'bar',
         data: { labels: storeLabels.length > 0 ? storeLabels : ['尚無資料'], datasets: [{ label: '核銷數量', data: storeData.length > 0 ? storeData : [0], backgroundColor: '#F07654', borderColor: '#F07654', borderWidth: 1, borderRadius: 8 }] },
-        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
       });
 
       const ctxStatus = document.getElementById('statusChart').getContext('2d');
       statusChartInstance = new Chart(ctxStatus, {
         type: 'doughnut',
-        data: { labels: ['已核銷', '待核銷', '已過期'], datasets: [{ data: (redeemed === 0 && unredeemed === 0 && expired === 0) ? [0, 1, 0] : [redeemed, unredeemed, expired], backgroundColor: ['#3FBF8F', '#F07654', '#B7BFCC'], borderWidth: 0, hoverOffset: 4 }] },
-        options: { responsive: true, maintainAspectRatio: false, cutout: '70%', plugins: { legend: { position: 'bottom' }, tooltip: { callbacks: { label: function(context) { let total = context.chart._metasets[context.datasetIndex].total; let percentage = total > 0 ? Math.round((context.raw / total) * 100) + '%' : '0%'; return `${context.label}: ${context.raw} 張 (${percentage})`; } } } } }
+        data: { labels: ['已核銷', '待核銷', '已過期'], datasets: [{ data: (redeemed === 0 && unredeemed === 0 && expired === 0) ? [0, 1, 0] : [redeemed, unredeemed, expired], backgroundColor: ['#3FBF8F', '#F07654', '#B7BFCC'], borderWidth: 0 }] },
+        options: { responsive: true, maintainAspectRatio: false, cutout: '70%', plugins: { legend: { position: 'bottom' } } }
       });
     }
 
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        if (adminEmails.includes(user.email)) {
-          document.getElementById('login-screen').style.display = 'none';
-          document.getElementById('sidebar-nav').style.display = 'flex'; 
-          document.getElementById('main-app').style.display = 'block';
-          
-          fetchSystemConfig();
+    // ================= 登入驗證 =================
+    window.login = function() {
+      const email = document.getElementById('email').value;
+      const pwd = document.getElementById('pwd').value;
+      if(!email || !pwd) return alert("⚠️ 請輸入帳號與密碼！");
+      document.getElementById('login-btn').innerText = "驗證中...";
+      signInWithEmailAndPassword(auth, email, pwd).catch(() => { 
+        alert("❌ 登入失敗"); 
+        document.getElementById('login-btn').innerText = "安全登入"; 
+      });
+    };
 
-        } else {
-          alert(`❌ 權限不足！\n信箱 ${user.email} 非總部管理員。`);
-          signOut(auth); 
-        }
+    window.loginWithGoogle = function() {
+      document.getElementById('google-btn').innerText = "驗證中...";
+      signInWithPopup(auth, googleProvider).catch(() => { 
+        alert("❌ Google 登入失敗"); 
+        document.getElementById('google-btn').innerText = "🌐 使用 Google 帳號登入"; 
+      });
+    };
+
+    window.logout = function() {
+      signOut(auth);
+    };
+
+    onAuthStateChanged(auth, (user) => {
+      if (user && adminEmails.includes(user.email)) {
+        document.getElementById('login-screen').style.display = 'none';
+        document.getElementById('sidebar-nav').style.display = 'flex'; 
+        document.getElementById('main-app').style.display = 'block';
+        fetchSystemConfig();
       } else {
+        if(user) { alert("❌ 權限不足"); signOut(auth); }
         document.getElementById('sidebar-nav').style.display = 'none';
         document.getElementById('main-app').style.display = 'none';
         document.getElementById('login-screen').style.display = 'flex';
