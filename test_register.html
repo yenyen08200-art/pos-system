@@ -7,7 +7,7 @@
   <link rel="apple-touch-icon" href="icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
   <style>
@@ -27,7 +27,6 @@
       font-family:"Inter","Noto Sans TC",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
       color:var(--ink);
       
-      /* 🔥 淺藍色至金色的漸層基底 */
       background:
         radial-gradient(120% 80% at 20% 0%, rgba(166, 193, 238, 0.7) 0%, transparent 60%),
         radial-gradient(110% 90% at 80% 100%, rgba(246, 211, 101, 0.5) 0%, transparent 70%),
@@ -38,7 +37,6 @@
       font-weight:400;letter-spacing:.01em;
     }
     
-    /* 質感雜訊顆粒 */
     body::before{
       content:"";position:fixed;inset:-50%;z-index:0;pointer-events:none;opacity:.4;
       background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/><feColorMatrix type='saturate' values='0'/></filter><rect width='160' height='160' filter='url(%23n)' opacity='.5'/></svg>");
@@ -49,31 +47,20 @@
       40%{transform:translate3d(5px,-6px,0)}60%{transform:translate3d(-4px,-3px,0)}80%{transform:translate3d(6px,5px,0)}
     }
     
-    /* 🔥 右上角金色呼吸光效 */
     body::after{
       content:"";position:fixed;width:500px;height:500px;top:-100px;right:-100px;z-index:0;
       border-radius:50%;filter:blur(90px);pointer-events:none;
       background:radial-gradient(circle, rgba(246, 211, 101, 0.65), transparent 70%);
       animation:breathe-gold 5s ease-in-out infinite alternate;
     }
-    
-    /* 🔥 左下角淺藍色呼吸光效 */
     .blue-glow {
       position:fixed;width:550px;height:550px;bottom:-150px;left:-150px;z-index:0;
       border-radius:50%;filter:blur(100px);pointer-events:none;
       background:radial-gradient(circle, rgba(166, 193, 238, 0.75), transparent 70%);
       animation:breathe-blue 6s ease-in-out infinite alternate;
     }
-
-    /* 呼吸光效動畫設定 */
-    @keyframes breathe-gold {
-      0% { opacity: 0.3; transform: scale(0.85); }
-      100% { opacity: 0.85; transform: scale(1.15); }
-    }
-    @keyframes breathe-blue {
-      0% { opacity: 0.85; transform: scale(1.15); }
-      100% { opacity: 0.3; transform: scale(0.85); }
-    }
+    @keyframes breathe-gold { 0% { opacity: 0.3; transform: scale(0.85); } 100% { opacity: 0.85; transform: scale(1.15); } }
+    @keyframes breathe-blue { 0% { opacity: 0.85; transform: scale(1.15); } 100% { opacity: 0.3; transform: scale(0.85); } }
 
     .shell{width:100%;max-width:420px;position:relative;z-index:1;display:flex;flex-direction:column;gap:18px}
     .glass{
@@ -100,18 +87,21 @@
     }
     .brand .mark::before,.brand .mark::after{content:"";width:26px;height:1px;background:linear-gradient(90deg,transparent,var(--brass))}
     
+    /* 🔥 修改：絕美金屬漸層實心字體 */
     h1 {
       font-family: "Noto Sans TC", sans-serif;
-      font-size: 36px;
-      font-weight: 700; 
+      font-size: 32px;
+      font-weight: 800;
       margin: 0 0 8px;
-      letter-spacing: .1em;
-      color: transparent; 
-      -webkit-text-stroke: 1.5px var(--brass-deep); 
+      letter-spacing: .15em;
+      background: linear-gradient(135deg, var(--brass-light), var(--brass-deep));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0px 4px 8px rgba(185, 145, 90, 0.25));
+      -webkit-text-stroke: 0;
     }
     
     .subtitle{font-size:11.5px;color:var(--ink-soft);margin:0;letter-spacing:.32em;text-transform:uppercase}
-
     .meta{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(255,255,255,.4);margin-top:22px;border-radius:18px;overflow:hidden;border:1px solid rgba(255,255,255,.5)}
     .meta div{padding:12px 6px;background:rgba(255,255,255,.35);text-align:center}
     .meta span{display:block;font-size:9.5px;letter-spacing:.24em;color:var(--ink-soft);margin-bottom:5px}
@@ -171,12 +161,19 @@
     .submit-btn:disabled{filter:grayscale(60%);opacity:0.7;cursor:not-allowed;}
 
     .switch-btn{
-      margin-top:26px;color:var(--ink);background:rgba(255,255,255,.4);
+      margin-top:20px;color:var(--ink);background:rgba(255,255,255,.4);
       border:1px solid rgba(255,255,255,.65);backdrop-filter:blur(14px);font-weight:500;
       box-shadow:0 12px 28px -20px rgba(35,42,35,.6),inset 0 1px 0 rgba(255,255,255,.8);
     }
     .switch-btn:hover{background:rgba(255,255,255,.55);transform:translateY(-2px)}
     .switch-btn:active{transform:scale(.975)}
+
+    /* 🔥 新增代領按鈕專用樣式 */
+    .family-btn {
+      margin-top:12px; color: var(--brass-deep); background: rgba(185,145,90,.1);
+      border: 1px dashed rgba(185,145,90,.5); backdrop-filter: blur(10px);
+    }
+    .family-btn:hover { background: rgba(185,145,90,.2); border: 1px solid rgba(185,145,90,.6); }
 
     #ticket-card{text-align:center}
     .notice{
@@ -216,6 +213,7 @@
     .info-row:last-child{border-bottom:none;padding-bottom:0}
     .info-row strong{color:var(--ink-soft);font-weight:500;font-size:11px;letter-spacing:.16em;white-space:nowrap}
     .info-row span{font-weight:600;font-size:14.5px;text-align:right;word-break:break-all;min-width:0}
+    .gift-text { color: #8d6c3c !important; font-weight: 800 !important; }
     #r-phone{color:var(--brass-deep);font-size:16px;letter-spacing:.08em}
     .footnote{text-align:center;font-size:10px;letter-spacing:.3em;color:rgba(111,118,110,.75);text-transform:uppercase;padding-bottom:4px}
 
@@ -231,7 +229,6 @@
   </style>
 </head>
 <body>
-  <!-- 🔥 呼吸光效元素 -->
   <div class="blue-glow"></div>
 
   <main class="shell">
@@ -263,7 +260,12 @@
       </div>
       <div class="field">
         <label for="phone">手機號碼</label>
-        <input id="phone" type="tel" inputmode="numeric" placeholder="例：0912345678" oninput="this.value=this.value.replace(/\D/g,'').slice(0,10)">
+        <!-- 🔥 修改：嚴格防呆設計，強迫 0 開頭且最多 10 碼 -->
+        <input id="phone" type="tel" inputmode="numeric" placeholder="例：0912345678" oninput="
+          let v = this.value.replace(/\D/g,''); 
+          if(v.length > 0 && v[0] !== '0') v = ''; 
+          this.value = v.slice(0,10);
+        ">
       </div>
       <div class="secret">
         <label for="secret_code">通關密語</label>
@@ -285,18 +287,23 @@
 
       <div class="info-list">
         <div class="info-row"><strong>兌換活動項目</strong><span id="r-act"></span></div>
+        <!-- 🔥 新增：顯示贈品與期限 -->
+        <div class="info-row"><strong>🎁 兌換餐點</strong><span id="r-gift" class="gift-text"></span></div>
+        <div class="info-row"><strong>⏳ 使用期限</strong><span id="r-expire"></span></div>
         <div class="info-row"><strong>社群暱稱</strong><span id="r-name"></span></div>
         <div class="info-row"><strong>社群帳號</strong><span id="r-social"></span></div>
         <div class="info-row"><strong>手機號碼</strong><span id="r-phone"></span></div>
       </div>
-      <button class="switch-btn" onclick="switchAct()">切換／領取其他活動</button>
+      
+      <button class="switch-btn" onclick="switchAct()">🔄 切換 / 領取其他活動</button>
+      <!-- 🔥 新增：幫親友代領按鈕 -->
+      <button class="family-btn" onclick="refillForFamily()">➕ 幫親友代領 (重新填單)</button>
     </section>
 
     <p class="footnote">Texas Chick · Since 1987</p>
   </main>
 
 <script type="module">
-  // 🔥 改版重點：移除 import config.js，全面改用雲端讀取
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
   import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
@@ -315,27 +322,26 @@
 
   const $ = id => document.getElementById(id);
   let unsubscribe = null;
-  let EVENT_SECRETS = {}; // 準備存放從雲端抓下來的密碼設定
+  let EVENT_SECRETS = {}; 
+  let POS_CONFIG = {}; // 🔥 新增：儲存活動贈品與期限
 
-  // 🔥 抓取網址內的專屬贈品參數 (例如 ?gift=二號餐)
   const urlParams = new URLSearchParams(window.location.search);
   const customGift = urlParams.get('gift') || "";
-  
-  // 隱藏參數，讓網址保持乾淨
   if (window.location.search) { window.history.replaceState({}, document.title, window.location.pathname); }
 
   window.checkSaved = checkSaved;
   window.switchAct = switchAct;
   window.register = register;
+  window.refillForFamily = refillForFamily;
 
-  // 🔥 系統初始化：去 Firebase 抓設定檔
   async function initSystem() {
     try {
       const configSnap = await getDoc(doc(db, "system", "config"));
       if (configSnap.exists()) {
-        EVENT_SECRETS = configSnap.data().EVENT_CONFIG || {};
+        const data = configSnap.data();
+        EVENT_SECRETS = data.EVENT_CONFIG || {};
+        POS_CONFIG = data.POS_CONFIG || {}; // 🔥 抓取贈品設定
       } else {
-        console.error("找不到雲端設定檔");
         $('activity').innerHTML = '<option value="">⚠️ 系統設定讀取失敗</option>';
         return;
       }
@@ -356,7 +362,6 @@
     }
   }
 
-  // 網頁載入時立刻執行雲端讀取
   initSystem();
 
   function checkSaved(isInit=false) {
@@ -381,10 +386,24 @@
     else { sel.value = Array.from(sel.options).find(o => o.value !== current).value; checkSaved(true); }
   }
 
+  // 🔥 新增：幫親友代領 (清除記憶)
+  function refillForFamily() {
+    const act = $('activity').value;
+    if(confirm("確定要幫親友代領嗎？\n\n⚠️ 系統將暫時忘記您的資料。\n⚠️ 請務必輸入【親友的真實電話號碼】，否則會覆蓋掉您自己的憑證喔！")) {
+      localStorage.removeItem(`p_${act}_phone`);
+      localStorage.removeItem(`p_${act}_name`);
+      localStorage.removeItem(`p_${act}_social`);
+      checkSaved(true);
+    }
+  }
+
   async function register() {
     const act=$('activity').value, name=$('name').value.trim(), soc=$('social_id').value.trim(), ph=$('phone').value.replace(/\D/g,''), cd=$('secret_code').value.trim();
     if(!act) return alert("⚠️ 系統載入中，請稍候！");
-    if(!name || !soc || ph.length<8 || !cd) return alert("⚠️ 請完整填寫資料與密語！");
+    
+    // 🔥 檢查電話是否符合台灣市話/手機長度規範 (至少 9 碼，前面已限制最多 10 碼且 0 開頭)
+    if(ph.length < 9 || !ph.startsWith('0')) return alert("⚠️ 手機或市話號碼格式不正確 (需為 0 開頭，且至少 9 碼)！");
+    if(!name || !soc || !cd) return alert("⚠️ 請完整填寫資料與密語！");
     if(cd.toUpperCase() !== EVENT_SECRETS[act]) return alert("⚠️ 通關密語錯誤！");
 
     const btn = $('btn-submit');
@@ -396,7 +415,6 @@
       const docSnap = await getDoc(docRef);
 
       if(!docSnap.exists()) {
-        // 🔥 存入資料庫時，順便把 customGift 寫進去
         await setDoc(docRef, {
           name, social_id: soc, phone: ph, status: "", store: "", redeemTime: "", timestamp: new Date().toLocaleString(), gift: customGift
         });
@@ -409,7 +427,7 @@
 
       } else {
         const data = docSnap.data();
-        alert("💡 此號碼已領取過活動憑證！為您載入原始資料。");
+        alert("💡 此號碼已領取過此活動憑證！為您載入原始資料。");
 
         localStorage.setItem(`p_${act}_phone`, ph);
         localStorage.setItem(`p_${act}_name`, data.name);
@@ -428,7 +446,14 @@
   function renderTicket(act, name, soc, ph) {
     $('form-section').style.display = 'none';
     $('ticket-card').style.display = 'block';
-    $('r-act').innerText=act; $('r-name').innerText=name; $('r-social').innerText=soc; $('r-phone').innerText=ph;
+    
+    // 🔥 動態顯示贈品與使用期限
+    $('r-act').innerText = act; 
+    $('r-name').innerText = name; 
+    $('r-social').innerText = soc; 
+    $('r-phone').innerText = ph;
+    $('r-gift').innerText = customGift || (POS_CONFIG[act] ? POS_CONFIG[act].gift : "專屬活動贈品");
+    $('r-expire').innerText = (POS_CONFIG[act] && POS_CONFIG[act].expireDate) ? POS_CONFIG[act].expireDate : "無特別限制";
 
     new QRious({
       element: $('qr'),
@@ -456,4 +481,4 @@
   }
 </script>
 </body>
-</html>  
+</html>
