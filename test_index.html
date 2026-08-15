@@ -85,7 +85,6 @@ section.panel{padding:20px}
 .stores{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px; width: 100%;}
 @media(min-width:640px){.stores{grid-template-columns:repeat(3,minmax(0,1fr))}}
 
-/* 門市下拉選單樣式 */
 .custom-dropdown { position: relative; width: 100%; }
 .custom-dropdown summary {
   list-style: none; width: 100%; min-height: 64px; border-radius: 14px; border: 1px solid var(--border);
@@ -379,6 +378,10 @@ button:disabled{opacity:.5;cursor:not-allowed}
         evMap[s] = [];
         for (const a in POS_CONFIG) {
           const cfg = POS_CONFIG[a];
+          
+          // 🔥 核心更新：過濾被下架的活動 (active === false)
+          if (cfg.active === false) continue;
+          
           if (cfg.stores === "ALL" || (Array.isArray(cfg.stores) && cfg.stores.includes(s))) {
             evMap[s].push(a);
           }
@@ -499,7 +502,6 @@ button:disabled{opacity:.5;cursor:not-allowed}
     $("v-name").innerText = record.name || "—";
     
     if (currentMode === 'physical') {
-        // 實體券 UI 隱藏部分欄位，只顯示最精簡的提示
         $("v-gift").innerHTML = `<span style="color:var(--muted-foreground)">請依照實體紙本券面標示發放</span>`;
     } else {
         const defaultExpire = (POS_CONFIG[shownAct] && POS_CONFIG[shownAct].expireDate) ? POS_CONFIG[shownAct].expireDate : "無特別限制";
@@ -581,14 +583,12 @@ button:disabled{opacity:.5;cursor:not-allowed}
     try {
       const snap = await getDoc(doc(db, ac, ph));
       
-      // 🔥 嚴格檢查模式：無論是電子還是實體，資料庫一定要有紀錄
       if (snap.exists()){
         playAlert("scan");
         renderContent(snap.data(), ph, ac);
         return;
       }
       
-      // 電子券邏輯：如果當前活動找不到，去其他活動找找看
       const otherActs = (evMap[st] || []).filter((a) => a !== ac);
       let foundOtherData = null, foundOtherActName = "";
       for (const otherAct of otherActs){
@@ -610,7 +610,6 @@ button:disabled{opacity:.5;cursor:not-allowed}
         }
       } else {
         playAlert("error");
-        // 依照不同模式給予不同的錯誤提示
         if (currentMode === 'physical') {
             alert("❌ 查無此流水號！這張實體券尚未建檔或可能為偽造票券！");
         } else {
