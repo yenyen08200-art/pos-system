@@ -332,7 +332,7 @@
           <h2>🎯 第一步：貼上留言名單</h2>
           <p class="desc">利用免費的匯出工具（如 IG Comment Export 等擴充功能），將 Excel 中的「帳號」與「留言內容」直接複製並貼在下方。</p>
           <div class="form-group">
-            <textarea id="lottery-raw-list" rows="8" style="width:100%; padding:16px;" placeholder="貼上名單格式範例 (可直接從 Excel 貼上兩欄)：&#10;@wang123  我爸超帥，帶他吃炸雞！&#10;@mary_77  父親節快樂！&#10;@john_do  我爸超帥選我選我"></textarea>
+            <textarea id="lottery-raw-list" rows="8" style="width:100%; padding:16px;" placeholder="貼上名單格式範例 (可直接從 Excel 貼上兩欄)：&#10;@wang123  我爸超帥，帶他吃炸雞！&#10;@mary_77  父親節快樂！ @friend1 @friend2&#10;@john_do  我爸超帥選我選我"></textarea>
           </div>
         </div>
 
@@ -342,6 +342,11 @@
             <div class="field-block">
               <label>🔍 留言必須包含 (過濾關鍵字，留空則全抽)</label>
               <input type="text" id="lottery-keyword" placeholder="例：我爸超帥">
+            </div>
+            <!-- 🔥 新增：標記好友人數過濾 -->
+            <div class="field-block" style="flex:0.5;">
+              <label>👥 必須標記好友人數</label>
+              <input type="number" id="lottery-tags" value="0" min="0" placeholder="填0不限制">
             </div>
             <div class="field-block" style="flex:0.5;">
               <label>🏆 預計抽出人數</label>
@@ -451,9 +456,8 @@
     let globalPosConfig = {};
     let globalEventConfig = {};
     let globalStoreList = [];
-    let editingActName = null; // 追蹤正在編輯的活動
+    let editingActName = null; 
 
-    // ================= 畫面切換與同步 =================
     window.switchView = function(viewId, element) {
       document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
       document.getElementById('view-' + viewId).classList.add('active');
@@ -485,7 +489,6 @@
       if (acts.length > 0) window.fetchData(); 
     }
 
-    // ================= 系統設定區 =================
     function renderConfigUI() {
       document.getElementById('ui-store-list').innerHTML = globalStoreList.map((store, idx) => `
         <li class="item-li">
@@ -509,7 +512,6 @@
             : '<span style="color:var(--gray);font-size:12px;">[⚫ 已下架]</span>';
             
         const toggleBtn = `<button class="btn-status-toggle ${isActive ? 'off' : ''}" style="margin-right:8px;" onclick="toggleEventStatus('${actName}')">${isActive ? '⬇️ 隱藏下架' : '⬆️ 重新上架'}</button>`;
-        // 🔥 新增編輯按鈕
         const editBtn = `<button class="btn-reset" style="margin-right:8px; border-color:#8A93A5; color:#8A93A5;" onclick="editEvent('${actName}')">✏️ 編輯</button>`;
 
         return `
@@ -545,11 +547,10 @@
       }
     };
 
-    // 🔥 編輯與更新機制
     window.editEvent = function(actName) {
       editingActName = actName;
       document.getElementById('new-act-name').value = actName;
-      document.getElementById('new-act-name').disabled = true; // 鎖定名稱
+      document.getElementById('new-act-name').disabled = true; 
       document.getElementById('edit-lock-hint').style.display = 'inline';
       
       const pwd = globalEventConfig[actName];
@@ -565,7 +566,6 @@
       btn.style.background = "#3FBF8F";
       document.getElementById('btn-cancel-edit').style.display = 'block';
       
-      // 自動捲動到最上方方便填寫
       document.querySelector('.container').scrollIntoView({ behavior: 'smooth' });
     };
 
@@ -596,7 +596,6 @@
       if(!name || !stores) return alert("⚠️ 請至少填寫「活動名稱」與「限定門市」！");
       if(stores !== "ALL") stores = stores.split(',').map(s => s.trim());
 
-      // 保留原本的上下架狀態
       const isActive = globalPosConfig[name] ? globalPosConfig[name].active !== false : true;
 
       globalEventConfig[name] = pwd || "無 (實體券或後台專用)";
@@ -607,10 +606,9 @@
         active: isActive 
       }; 
       
-      cancelEditEvent(); // 清空欄位並解除鎖定
+      cancelEditEvent(); 
       renderConfigUI();
 
-      // 提醒儲存雲端
       document.getElementById('save-cloud-btn').style.background = "#FF3366";
       document.getElementById('save-cloud-btn').innerText = "⚠️ 設定已修改，請點此儲存至雲端！";
     };
@@ -772,11 +770,12 @@
       }
     };
 
-    // ================= 社群抽獎過濾引擎 =================
+    // ================= 🔥 升級版：社群抽獎過濾引擎 =================
     window.runLottery = async function() {
       const act = document.getElementById('lottery-act').value;
       const rawList = document.getElementById('lottery-raw-list').value;
       const keyword = document.getElementById('lottery-keyword').value.trim();
+      const requiredTags = parseInt(document.getElementById('lottery-tags').value, 10) || 0; // 🔥 讀取必須標記人數
       const count = parseInt(document.getElementById('lottery-count').value, 10);
       const gift = document.getElementById('lottery-gift').value.trim();
       const btn = document.getElementById('btn-run-lottery');
@@ -788,22 +787,32 @@
       if (allLines.length === 0) return alert("⚠️ 請貼上參加者名單！");
       if (isNaN(count) || count < 1) return alert("⚠️ 抽出人數必須大於 0！");
 
+      // 1. 關鍵字過濾
       let validParticipants = allLines;
       if (keyword !== "") {
-        validParticipants = allLines.filter(line => line.includes(keyword));
+        validParticipants = validParticipants.filter(line => line.includes(keyword));
+      }
+
+      // 2. 🔥 標記人數過濾 (@符號計算)
+      if (requiredTags > 0) {
+        validParticipants = validParticipants.filter(line => {
+            const atCount = (line.match(/@/g) || []).length;
+            return atCount >= requiredTags;
+        });
       }
 
       if (validParticipants.length === 0) {
-          return alert(`⚠️ 找不到包含關鍵字「${keyword}」的留言！`);
+          return alert(`⚠️ 找不到符合「關鍵字」且「標記滿 ${requiredTags} 人」的留言！`);
       }
       if (count > validParticipants.length) {
-          return alert(`⚠️ 符合資格的只有 ${validParticipants.length} 人，您要抽 ${count} 人。\n請降低抽出人數！`);
+          return alert(`⚠️ 條件過濾後符合資格的只有 ${validParticipants.length} 人，您卻要抽 ${count} 人。\n請降低抽出人數或放寬條件！`);
       }
 
       btn.innerText = "⏳ 抽獎與寫入中...";
       btn.disabled = true;
 
       try {
+        // 洗牌演算法確保隨機
         for (let i = validParticipants.length - 1; i > 0; i--) {
           const j = Math.floor(Math.random() * (i + 1));
           [validParticipants[i], validParticipants[j]] = [validParticipants[j], validParticipants[i]];
@@ -814,6 +823,7 @@
         
         for (let i = 0; i < winners.length; i++) {
           const winnerRawText = winners[i];
+          // 擷取前面最長15字作為名稱，避免把整串留言塞進名字欄位
           const winnerName = winnerRawText.substring(0, 15) + (winnerRawText.length > 15 ? "..." : ""); 
           const randomCode = "888" + Math.floor(10000 + Math.random() * 90000);
           
@@ -832,7 +842,7 @@
           resultText += `👑 得獎者：${winnerName}\n🎫 專屬兌換碼：[ ${randomCode} ]\n-----------------------\n`;
         }
         
-        resultBox.innerText = resultText + "\n💡 系統已自動將上述號碼建檔！\n👉 請將兌換碼發給得獎者至門市核銷。";
+        resultBox.innerText = resultText + "\n💡 系統已自動將上述號碼建檔！\n👉 追蹤資格需人工複查。無誤後請將兌換碼發給得獎者至門市核銷。";
         resultBox.style.display = 'block';
         btn.innerText = "✅ 抽獎與建檔完畢";
       } catch(e) {
