@@ -120,6 +120,7 @@ button{font-family:inherit;cursor:pointer;}
 .act-btn.on .radio{border-color:var(--accent);background:var(--accent); box-shadow: 0 0 0 4px oklch(0.78 0.14 195/.2);}
 .empty{border:1px dashed var(--border);border-radius:14px;padding:24px;text-align:center;font-size:14px;color:var(--muted-foreground)}
 
+/* 🔥 電子券 / 實體券 模式切換樣式 */
 .mode-switch { display: flex; gap: 8px; margin-bottom: 16px; padding: 6px; background: var(--secondary); border-radius: 16px; }
 .mode-btn { flex: 1; padding: 12px; border-radius: 12px; border: none; background: transparent; color: var(--muted-foreground); font-weight: 700; font-size: 15px; transition: 0.2s; }
 .mode-btn.active { background: var(--card); color: var(--foreground); box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
@@ -146,6 +147,7 @@ button{font-family:inherit;cursor:pointer;}
 .primary-btn:active{transform:scale(.95)}
 button:disabled{opacity:.5;cursor:not-allowed}
 
+/* 全螢幕掃描器樣式 */
 #scan-area{
   position: fixed; inset: 0; z-index: 9999; 
   background: rgba(10, 12, 16, 0.95); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
@@ -325,10 +327,12 @@ button:disabled{opacity:.5;cursor:not-allowed}
     $('mode-physical').classList.toggle('active', m === 'physical');
     $('phone').value = '';
     
+    // 🔥 確保兩種模式下，相機按鈕都顯示！
+    $('btn-scan').style.display = 'block';
+
     if (m === 'digital') {
       $('phone').type = 'tel';
       $('phone').placeholder = '輸入手機或市話 (例:02-1234567)';
-      $('btn-scan').style.display = 'block';
       $('btn-check').innerText = '查詢';
       $('placeholder-emoji').innerText = "🎟️";
       $('placeholder-title').innerText = "等待掃描顧客憑證";
@@ -339,11 +343,10 @@ button:disabled{opacity:.5;cursor:not-allowed}
     } else {
       $('phone').type = 'text';
       $('phone').placeholder = '輸入實體券流水號 (英文與數字)';
-      $('btn-scan').style.display = 'none';
       $('btn-check').innerText = '查詢 / 核銷';
       $('placeholder-emoji').innerText = "🎫";
       $('placeholder-title').innerText = "實體券快速核銷";
-      $('placeholder-desc').innerText = "請直接輸入實體券上的流水號，若該號碼未建檔將無法核銷。";
+      $('placeholder-desc').innerText = "掃描實體券 QR Code 或直接輸入流水號進行核銷。";
       $('label-phone').innerText = "🔢 實體流水號";
       $('info-social').style.display = 'none';
       $('info-expire').style.display = 'none';
@@ -495,7 +498,6 @@ button:disabled{opacity:.5;cursor:not-allowed}
       banner.innerHTML = "✅ 有效優惠券";
     }
 
-    // 🔥 核心修改區：精準帶出資料庫設定的餐點與資料
     const defaultExpire = (POS_CONFIG[shownAct] && POS_CONFIG[shownAct].expireDate) ? POS_CONFIG[shownAct].expireDate : "無特別限制";
     const expireStr = record.expireDate || defaultExpire;
     const displayGift = record.gift || giftMap[shownAct] || "未設定餐點";
@@ -561,10 +563,16 @@ button:disabled{opacity:.5;cursor:not-allowed}
       { facingMode: "environment" },
       { fps: 10, qrbox: 250 },
       (txt) => {
-        const digits = txt.replace(/[^\d\-]/g, "");
-        $("phone").value = digits;
+        // 🔥 根據當前模式切換掃描的過濾條件
+        let result = txt;
+        if (currentMode === 'digital') {
+            result = txt.replace(/[^\d\-]/g, ""); // 只留數字與連字號
+        } else {
+            result = txt.replace(/[^a-zA-Z0-9]/g, "").toUpperCase(); // 留英文數字並轉大寫
+        }
+        $("phone").value = result;
         stopScan();
-        check(digits);
+        check(result);
       },
       () => {}
     ).catch(() => alert("無相機權限或裝置不支援相機！"));
