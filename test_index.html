@@ -121,6 +121,11 @@ button{font-family:inherit;cursor:pointer;}
 .act-btn.on .radio{border-color:var(--accent);background:var(--accent); box-shadow: 0 0 0 4px oklch(0.78 0.14 195/.2);}
 .empty{border:1px dashed var(--border);border-radius:14px;padding:24px;text-align:center;font-size:14px;color:var(--muted-foreground)}
 
+/* 🔥 新增：電子券 / 實體券 模式切換樣式 */
+.mode-switch { display: flex; gap: 8px; margin-bottom: 16px; padding: 6px; background: var(--secondary); border-radius: 16px; }
+.mode-btn { flex: 1; padding: 12px; border-radius: 12px; border: none; background: transparent; color: var(--muted-foreground); font-weight: 700; font-size: 15px; transition: 0.2s; }
+.mode-btn.active { background: var(--card); color: var(--foreground); box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+
 .searchbar{display:flex;flex-direction:column;gap:10px; width: 100%;}
 .searchbar > button { width: 100%; }
 @media(min-width:640px){
@@ -239,8 +244,16 @@ button:disabled{opacity:.5;cursor:not-allowed}
 
         <div class="block">
           <h2 class="label">● 掃描 / 查詢</h2>
+          
+          <!-- 🔥 新增：雙模式切換按鈕 -->
+          <div class="mode-switch">
+            <button id="mode-digital" class="mode-btn active" onclick="setMode('digital')">📱 電子憑證</button>
+            <button id="mode-physical" class="mode-btn" onclick="setMode('physical')">🎫 實體流水號</button>
+          </div>
+
           <div class="searchbar">
-            <input id="phone" type="tel" placeholder="輸入手機或市話 (例:02-1234567)" oninput="this.value=this.value.replace(/[^\d\-]/g,'').slice(0,15)" />
+            <!-- 🔥 輸入框加入 oninput 即時判斷邏輯 -->
+            <input id="phone" type="tel" placeholder="輸入手機或市話 (例:02-1234567)" oninput="handleInput(this)" />
             <button class="icon-btn" id="btn-scan" aria-label="掃描 QR Code">📷</button>
             <button class="primary-btn" id="btn-check">查詢</button>
           </div>
@@ -250,16 +263,16 @@ button:disabled{opacity:.5;cursor:not-allowed}
       <!-- RIGHT -->
       <section class="panel rise right">
         <div id="placeholder" class="placeholder">
-          <div class="emoji">🎟️</div>
-          <p class="p1">等待掃描顧客憑證</p>
-          <p class="p2">選擇門市與活動後，掃描 QR Code 或輸入手機號碼即可帶出顧客資訊。</p>
+          <div class="emoji" id="placeholder-emoji">🎟️</div>
+          <p class="p1" id="placeholder-title">等待掃描顧客憑證</p>
+          <p class="p2" id="placeholder-desc">選擇門市與活動後，掃描 QR Code 或輸入手機號碼即可帶出顧客資訊。</p>
         </div>
         <div id="detail" class="detail hidden">
           <div id="banner" class="banner ok rise"></div>
           
-          <!-- 🔥 修改排版：加入使用期限，並將兌換餐點改為橫跨滿版 -->
           <div class="cards">
-            <div class="info"><div class="k">📱 兌換手機</div><div class="v mono" id="v-phone">—</div></div>
+            <!-- 標籤會隨著實體券或電子券動態改變 -->
+            <div class="info"><div class="k" id="label-phone">📱 兌換手機</div><div class="v mono" id="v-phone">—</div></div>
             <div class="info"><div class="k">👤 顧客姓名</div><div class="v" id="v-name">—</div></div>
             <div class="info"><div class="k">🔗 社群帳號</div><div class="v" id="v-social">—</div></div>
             <div class="info"><div class="k">⏳ 使用期限</div><div class="v" id="v-expire">—</div></div>
@@ -290,7 +303,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-  import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyBINQuYtYZA8RLfwm51AfGLTYj1TX_UcFo",
@@ -312,8 +325,49 @@ button:disabled{opacity:.5;cursor:not-allowed}
   const $ = (id) => document.getElementById(id);
   let store = "", act = "", shownPhone = "", shownAct = "", record = null;
   let scanner = null, uTimer = null, busy = false;
+  
+  // 🔥 新增：目前的操作模式 ('digital' 或 'physical')
+  let currentMode = 'digital';
 
-  // 🔥 初始化：從雲端抓取系統設定
+  // 🔥 切換模式 UI 邏輯
+  window.setMode = function(m) {
+    currentMode = m;
+    $('mode-digital').classList.toggle('active', m === 'digital');
+    $('mode-physical').classList.toggle('active', m === 'physical');
+    $('phone').value = '';
+    
+    if (m === 'digital') {
+      $('phone').type = 'tel';
+      $('phone').placeholder = '輸入手機或市話 (例:02-1234567)';
+      $('btn-scan').style.display = 'block';
+      $('btn-check').innerText = '查詢';
+      $('placeholder-emoji').innerText = "🎟️";
+      $('placeholder-title').innerText = "等待掃描顧客憑證";
+      $('placeholder-desc').innerText = "選擇門市與活動後，掃描 QR Code 或輸入手機號碼即可帶出顧客資訊。";
+      $('label-phone').innerText = "📱 兌換手機";
+    } else {
+      // 實體券模式
+      $('phone').type = 'text';
+      $('phone').placeholder = '輸入實體券流水號 (英文與數字)';
+      $('btn-scan').style.display = 'none'; // 實體券不需相機
+      $('btn-check').innerText = '查詢 / 核銷';
+      $('placeholder-emoji').innerText = "🎫";
+      $('placeholder-title').innerText = "實體券快速核銷";
+      $('placeholder-desc').innerText = "請直接輸入實體券上的流水號，系統將建立紀錄並核銷，防止重複使用。";
+      $('label-phone').innerText = "🔢 實體流水號";
+    }
+    nextCust();
+  };
+
+  // 🔥 處理輸入限制：電子券只能數字，實體券允許英文數字 (轉大寫)
+  window.handleInput = function(el) {
+    if (currentMode === 'digital') {
+      el.value = el.value.replace(/[^\d\-]/g,'').slice(0,15);
+    } else {
+      el.value = el.value.replace(/[^a-zA-Z0-9]/g,'').toUpperCase().slice(0,20);
+    }
+  };
+
   async function initPOS() {
     try {
       const configSnap = await getDoc(doc(db, "system", "config"));
@@ -367,7 +421,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
     busy = b;
     $("btn-check").disabled = b;
     $("btn-redeem").disabled = b;
-    $("btn-check").innerText = b ? "查詢中…" : "查詢";
+    $("btn-check").innerText = b ? "處理中…" : (currentMode === 'digital' ? "查詢" : "查詢 / 核銷");
   }
 
   function renderStores(){
@@ -444,10 +498,9 @@ button:disabled{opacity:.5;cursor:not-allowed}
     } else if (isExpired) {
       banner.innerHTML = "⚠️ 券已逾期失效<small>🕒 系統已結算過期</small>";
     } else {
-      banner.innerHTML = "✅ 有效優惠券";
+      banner.innerHTML = "✅ 有效優惠券" + (record.isTempPhysical ? " <small>尚未核銷，請點擊下方按鈕確認</small>" : "");
     }
 
-    // 🔥 抓取期限：如果客人有專屬期限就顯示專屬的，沒有就抓活動預設的，都沒有顯示無限制
     const defaultExpire = (POS_CONFIG[shownAct] && POS_CONFIG[shownAct].expireDate) ? POS_CONFIG[shownAct].expireDate : "無特別限制";
     const expireStr = record.expireDate || defaultExpire;
 
@@ -520,7 +573,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
   }
 
   async function check(overridePhone){
-    const ph = overridePhone || $("phone").value;
+    const ph = overridePhone || $("phone").value.trim();
     const st = store, ac = act;
     if (!st || !ac || !ph) return alert("⚠️ 資料未齊！");
 
@@ -528,11 +581,34 @@ button:disabled{opacity:.5;cursor:not-allowed}
     setBusy(true);
     try {
       const snap = await getDoc(doc(db, ac, ph));
+      
+      // 無論電子或實體，只要這組流水號/電話存在，就直接讀取
       if (snap.exists()){
         playAlert("scan");
         renderContent(snap.data(), ph, ac);
         return;
       }
+      
+      // 🔥 實體券專屬邏輯：如果流水號不存在，自動產生虛擬的待核銷憑證
+      if (currentMode === 'physical') {
+        playAlert("scan");
+        const defaultExpire = (POS_CONFIG[ac] && POS_CONFIG[ac].expireDate) ? POS_CONFIG[ac].expireDate : "實體券無特別限制";
+        
+        // 建立暫存的實體券檔案 (尚未存入資料庫)
+        const tempRecord = {
+            isTempPhysical: true, // 標記為暫存，等待按下核銷才會寫入
+            name: "實體券顧客",
+            social_id: "實體憑證 (無社群)",
+            phone: ph,
+            status: "未兌換",
+            gift: giftMap[ac] || "活動預設贈品",
+            expireDate: defaultExpire
+        };
+        renderContent(tempRecord, ph, ac);
+        return;
+      }
+
+      // 電子券邏輯：如果當前活動找不到，去其他活動找找看
       const otherActs = (evMap[st] || []).filter((a) => a !== ac);
       let foundOtherData = null, foundOtherActName = "";
       for (const otherAct of otherActs){
@@ -568,12 +644,32 @@ button:disabled{opacity:.5;cursor:not-allowed}
     const nowStr = d.getFullYear() + "/" + pad(d.getMonth()+1) + "/" + pad(d.getDate()) + " " +
                    pad(d.getHours()) + ":" + pad(d.getMinutes()) + ":" + pad(d.getSeconds());
     setBusy(true);
+    
     try {
-      await updateDoc(doc(db, ac, ph), { status: "已兌換", store: st, redeemTime: nowStr });
+      // 🔥 如果是剛建立的全新實體券 (暫存狀態)，核銷時直接用 setDoc 寫入資料庫
+      if (record && record.isTempPhysical) {
+          const newData = {
+            name: record.name,
+            social_id: record.social_id,
+            phone: ph,
+            status: "已兌換",
+            store: st,
+            redeemTime: nowStr,
+            timestamp: nowStr, // 領券與核銷時間相同
+            gift: record.gift,
+            expireDate: record.expireDate
+          };
+          await setDoc(doc(db, ac, ph), newData);
+          record = newData; // 取代掉暫存標籤
+      } else {
+          // 一般電子券或已建檔的，用 updateDoc 更新狀態
+          await updateDoc(doc(db, ac, ph), { status: "已兌換", store: st, redeemTime: nowStr });
+          record = Object.assign({}, record || {}, { status: "已兌換", store: st, redeemTime: nowStr });
+      }
     } finally {
       setBusy(false);
     }
-    record = Object.assign({}, record || {}, { status: "已兌換", store: st, redeemTime: nowStr });
+    
     renderRight();
     playAlert("success");
     if (window.confetti) confetti({ particleCount: 80, spread: 70 });
@@ -595,6 +691,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
     const ph = shownPhone, ac = act;
     setBusy(true);
     try {
+      // 撤銷時將狀態清空，這對於實體券也適用 (下次刷就變未兌換)
       await updateDoc(doc(db, ac, ph), { status: "", store: "", redeemTime: "" });
     } finally {
       setBusy(false);
