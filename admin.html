@@ -220,7 +220,6 @@
                 <th onclick="setSort('status')">⚡ 狀態 <span class="sort-icon" id="sort-status">▼</span></th>
                 <th onclick="setSort('store')">📌 核銷門市 <span class="sort-icon" id="sort-store">▼</span></th>
                 <th onclick="setSort('redeemTime')">🕒 核銷時間 <span class="sort-icon" id="sort-redeemTime">▼</span></th>
-                <!-- 🔥 新增：使用期限標頭 -->
                 <th onclick="setSort('expireDate')">⏳ 使用期限 <span class="sort-icon" id="sort-expireDate">▼</span></th>
                 <th onclick="setSort('timestamp')">📅 領券時間 <span class="sort-icon" id="sort-timestamp">▼</span></th>
                 <th>⚙️ 管理操作</th>
@@ -372,17 +371,32 @@
         </div>
 
         <div class="config-card">
-          <h2>🎯 行銷活動與密碼管理</h2>
-          <p class="desc">設定領券前台的通關密語、預設贈品，以及使用期限。</p>
+          <h2>🎯 行銷活動與資料夾管理</h2>
+          <p class="desc">建立抽獎活動或實體券分類。若為「實體券」，密碼與贈品欄位可直接留白，系統會自動填寫為免密碼。</p>
           <div class="form-group">
-            <input type="text" id="new-act-name" placeholder="活動名稱 (例: 聖誕活動)">
-            <input type="text" id="new-act-pwd" placeholder="通關密語">
-            <input type="text" id="new-act-gift" placeholder="預設贈品">
-            <input type="text" id="new-act-expire" placeholder="使用期限 (例: 2026/12/31 或 無限制)">
-            <input type="text" id="new-act-stores" placeholder="限定門市 (ALL 或 指定門市)" value="ALL">
-            <button class="btn-primary" onclick="addEvent()">➕ 新增活動</button>
+            <div class="field-block">
+              <label>活動/資料夾名稱</label>
+              <input type="text" id="new-act-name" placeholder="例: 【實體】一號餐兌換券">
+            </div>
+            <div class="field-block">
+              <label>通關密語 (實體券免填)</label>
+              <input type="text" id="new-act-pwd" placeholder="留白則為實體免密碼">
+            </div>
+            <div class="field-block">
+              <label>預設贈品 (實體券免填)</label>
+              <input type="text" id="new-act-gift" placeholder="留白則依實體券面">
+            </div>
+            <div class="field-block">
+              <label>使用期限 (選填)</label>
+              <input type="text" id="new-act-expire" placeholder="例: 2026/12/31">
+            </div>
+            <div class="field-block">
+              <label>限定門市</label>
+              <input type="text" id="new-act-stores" placeholder="預設 ALL" value="ALL">
+            </div>
           </div>
-          <ul class="item-list" id="ui-event-list"></ul>
+          <button class="btn-primary" style="width:100%" onclick="addEvent()">➕ 快速建立活動</button>
+          <ul class="item-list" id="ui-event-list" style="margin-top: 20px;"></ul>
         </div>
 
         <div class="config-card" style="border: 2px solid var(--accent); background: rgba(240,118,84,0.02);">
@@ -503,16 +517,21 @@
 
     window.addEvent = function() {
       const name = document.getElementById('new-act-name').value.trim();
-      const pwd = document.getElementById('new-act-pwd').value.trim();
-      const gift = document.getElementById('new-act-gift').value.trim();
+      let pwd = document.getElementById('new-act-pwd').value.trim();
+      let gift = document.getElementById('new-act-gift').value.trim();
       const expire = document.getElementById('new-act-expire').value.trim(); 
       let stores = document.getElementById('new-act-stores').value.trim();
       
-      if(!name || !pwd || !gift || !stores) return alert("請完整填寫活動資料！");
+      if(!name || !stores) return alert("⚠️ 請至少填寫「活動名稱」與「限定門市」！");
       if(stores !== "ALL") stores = stores.split(',').map(s => s.trim());
 
-      globalEventConfig[name] = pwd;
-      globalPosConfig[name] = { gift: gift, stores: stores, expireDate: expire || "無特別限制" }; 
+      // 🔥 智慧預設值：如果留白，系統自動填寫實體券/系統預設值
+      globalEventConfig[name] = pwd || "無 (實體券或後台專用)";
+      globalPosConfig[name] = { 
+        gift: gift || "依實體券面標示發放", 
+        stores: stores, 
+        expireDate: expire || "無特別限制" 
+      }; 
       
       document.getElementById('new-act-name').value = '';
       document.getElementById('new-act-pwd').value = '';
@@ -676,7 +695,7 @@
 
       let allLines = rawList.split('\n').map(p => p.trim()).filter(p => p !== '');
 
-      if (!act) return alert("⚠️ 請選擇寫入資料庫的活動！");
+      if (!act) return alert("⚠️ 請選擇活動！");
       if (allLines.length === 0) return alert("⚠️ 請貼上參加者名單！");
       if (isNaN(count) || count < 1) return alert("⚠️ 抽出人數必須大於 0！");
 
@@ -771,7 +790,7 @@
       });
     };
 
-    // 🔥 全新：智慧日期比對結算引擎
+    // 🔥 智慧日期比對結算引擎
     window.expireTickets = async function() {
       const actSelect = document.getElementById('act-select');
       if (!actSelect || !actSelect.value) return;
