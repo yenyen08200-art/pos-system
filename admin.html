@@ -108,6 +108,7 @@
     .form-group { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
     .form-group input, .form-group select, .form-group textarea { flex: 1; min-width: 140px; padding: 12px 16px; border: 1px solid #E6EAF0; border-radius: 12px; outline: none; background: #F7F9FB; font-size: 14px; font-family: inherit;}
     .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--accent); background: #fff; }
+    .form-group input:disabled { background: #E6EAF0; cursor: not-allowed; color: #8A93A5; }
     
     .field-block { flex: 1; display: flex; flex-direction: column; gap: 8px; }
     .field-block label { font-size: 13px; font-weight: bold; color: var(--text-sub); }
@@ -116,6 +117,8 @@
     .btn-primary:hover { filter: brightness(1.1); }
     .btn-danger { background: rgba(240,118,84,.1); color: var(--accent); border: none; padding: 8px 16px; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 12px; }
     .btn-danger:hover { background: var(--accent); color: #fff; }
+    .btn-cancel { background: #F4F6F8; color: var(--text-main); border: none; padding: 12px 24px; border-radius: 12px; font-weight: 700; cursor: pointer; transition: .2s;}
+    .btn-cancel:hover { background: #E6EAF0; }
     
     .item-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
     .item-li { display: flex; justify-content: space-between; align-items: center; padding: 16px; background: #F7F9FB; border-radius: 12px; border: 1px solid #E6EAF0; }
@@ -382,7 +385,7 @@
           <p class="desc">建立抽獎活動或實體券分類。若為「實體券」，密碼與贈品欄位可直接留白，系統會自動填寫為免密碼。</p>
           <div class="form-group">
             <div class="field-block">
-              <label>活動/資料夾名稱</label>
+              <label>活動/資料夾名稱 <span id="edit-lock-hint" style="color:red;display:none;">(編輯模式下不可改名)</span></label>
               <input type="text" id="new-act-name" placeholder="例: 【實體】一號餐兌換券">
             </div>
             <div class="field-block">
@@ -402,7 +405,8 @@
               <input type="text" id="new-act-stores" placeholder="預設 ALL" value="ALL">
             </div>
           </div>
-          <button class="btn-primary" style="width:100%" onclick="addEvent()">➕ 快速建立活動</button>
+          <button id="btn-add-act" class="btn-primary" style="width:100%" onclick="addOrUpdateEvent()">➕ 快速建立活動</button>
+          <button id="btn-cancel-edit" class="btn-cancel" style="width:100%; display:none; margin-top:10px;" onclick="cancelEditEvent()">❌ 取消編輯</button>
           <ul class="item-list" id="ui-event-list" style="margin-top: 20px;"></ul>
         </div>
 
@@ -447,6 +451,7 @@
     let globalPosConfig = {};
     let globalEventConfig = {};
     let globalStoreList = [];
+    let editingActName = null; // 追蹤正在編輯的活動
 
     // ================= 畫面切換與同步 =================
     window.switchView = function(viewId, element) {
@@ -465,7 +470,6 @@
 
     function populateAdminDropdown() {
       const acts = Object.keys(globalEventConfig);
-      // 下拉選單顯示時，判斷是否為已下架，給予提示
       const html = acts.map(a => {
         const isActive = globalPosConfig[a]?.active !== false;
         const displayText = isActive ? a : `${a} (已下架)`;
@@ -495,7 +499,7 @@
         const giftInfo = globalPosConfig[actName];
         const giftStr = giftInfo ? giftInfo.gift : "無設定";
         const expireStr = giftInfo && giftInfo.expireDate ? giftInfo.expireDate : "無特別限制";
-        const isActive = giftInfo && giftInfo.active !== false; // 預設為 true
+        const isActive = giftInfo && giftInfo.active !== false; 
         
         let storesStr = giftInfo ? giftInfo.stores : "ALL";
         if(Array.isArray(storesStr)) storesStr = storesStr.join(', ');
@@ -505,6 +509,8 @@
             : '<span style="color:var(--gray);font-size:12px;">[⚫ 已下架]</span>';
             
         const toggleBtn = `<button class="btn-status-toggle ${isActive ? 'off' : ''}" style="margin-right:8px;" onclick="toggleEventStatus('${actName}')">${isActive ? '⬇️ 隱藏下架' : '⬆️ 重新上架'}</button>`;
+        // 🔥 新增編輯按鈕
+        const editBtn = `<button class="btn-reset" style="margin-right:8px; border-color:#8A93A5; color:#8A93A5;" onclick="editEvent('${actName}')">✏️ 編輯</button>`;
 
         return `
         <li class="item-li">
@@ -513,6 +519,7 @@
             <span>密語: <code>${pwd}</code> | 贈品: ${giftStr} | 期限: ${expireStr} | 限定門市: ${storesStr}</span>
           </div>
           <div class="action-group">
+            ${editBtn}
             ${toggleBtn}
             <button class="btn-danger" onclick="deleteEvent('${actName}')">🗑️ 刪除</button>
           </div>
@@ -538,7 +545,48 @@
       }
     };
 
-    window.addEvent = function() {
+    // 🔥 編輯與更新機制
+    window.editEvent = function(actName) {
+      editingActName = actName;
+      document.getElementById('new-act-name').value = actName;
+      document.getElementById('new-act-name').disabled = true; // 鎖定名稱
+      document.getElementById('edit-lock-hint').style.display = 'inline';
+      
+      const pwd = globalEventConfig[actName];
+      document.getElementById('new-act-pwd').value = pwd === "無 (實體券或後台專用)" ? "" : pwd;
+      
+      const cfg = globalPosConfig[actName] || {};
+      document.getElementById('new-act-gift').value = cfg.gift === "依實體券面標示發放" ? "" : (cfg.gift || "");
+      document.getElementById('new-act-expire').value = cfg.expireDate === "無特別限制" ? "" : (cfg.expireDate || "");
+      document.getElementById('new-act-stores').value = Array.isArray(cfg.stores) ? cfg.stores.join(', ') : (cfg.stores || "ALL");
+
+      const btn = document.getElementById('btn-add-act');
+      btn.innerText = "💾 儲存修改內容";
+      btn.style.background = "#3FBF8F";
+      document.getElementById('btn-cancel-edit').style.display = 'block';
+      
+      // 自動捲動到最上方方便填寫
+      document.querySelector('.container').scrollIntoView({ behavior: 'smooth' });
+    };
+
+    window.cancelEditEvent = function() {
+      editingActName = null;
+      document.getElementById('new-act-name').value = '';
+      document.getElementById('new-act-name').disabled = false;
+      document.getElementById('edit-lock-hint').style.display = 'none';
+      
+      document.getElementById('new-act-pwd').value = '';
+      document.getElementById('new-act-gift').value = '';
+      document.getElementById('new-act-expire').value = ''; 
+      document.getElementById('new-act-stores').value = 'ALL';
+
+      const btn = document.getElementById('btn-add-act');
+      btn.innerText = "➕ 快速建立活動";
+      btn.style.background = "var(--accent)";
+      document.getElementById('btn-cancel-edit').style.display = 'none';
+    };
+
+    window.addOrUpdateEvent = function() {
       const name = document.getElementById('new-act-name').value.trim();
       let pwd = document.getElementById('new-act-pwd').value.trim();
       let gift = document.getElementById('new-act-gift').value.trim();
@@ -548,20 +596,23 @@
       if(!name || !stores) return alert("⚠️ 請至少填寫「活動名稱」與「限定門市」！");
       if(stores !== "ALL") stores = stores.split(',').map(s => s.trim());
 
+      // 保留原本的上下架狀態
+      const isActive = globalPosConfig[name] ? globalPosConfig[name].active !== false : true;
+
       globalEventConfig[name] = pwd || "無 (實體券或後台專用)";
       globalPosConfig[name] = { 
         gift: gift || "依實體券面標示發放", 
         stores: stores, 
         expireDate: expire || "無特別限制",
-        active: true // 🔥 新增時預設為上架狀態
+        active: isActive 
       }; 
       
-      document.getElementById('new-act-name').value = '';
-      document.getElementById('new-act-pwd').value = '';
-      document.getElementById('new-act-gift').value = '';
-      document.getElementById('new-act-expire').value = ''; 
-      document.getElementById('new-act-stores').value = 'ALL';
+      cancelEditEvent(); // 清空欄位並解除鎖定
       renderConfigUI();
+
+      // 提醒儲存雲端
+      document.getElementById('save-cloud-btn').style.background = "#FF3366";
+      document.getElementById('save-cloud-btn').innerText = "⚠️ 設定已修改，請點此儲存至雲端！";
     };
 
     window.deleteEvent = function(actName) {
@@ -569,10 +620,11 @@
         delete globalEventConfig[actName];
         delete globalPosConfig[actName];
         renderConfigUI();
+        document.getElementById('save-cloud-btn').style.background = "#FF3366";
+        document.getElementById('save-cloud-btn').innerText = "⚠️ 設定已修改，請點此儲存至雲端！";
       }
     };
 
-    // 🔥 新增：切換上/下架狀態
     window.toggleEventStatus = function(actName) {
       if(!globalPosConfig[actName]) return;
       if (globalPosConfig[actName].active === false) {
@@ -581,13 +633,12 @@
           globalPosConfig[actName].active = false;
       }
       renderConfigUI();
-      // 提示使用者需要儲存
       document.getElementById('save-cloud-btn').style.background = "#FF3366";
       document.getElementById('save-cloud-btn').innerText = "⚠️ 設定已修改，請點此儲存至雲端！";
     };
 
     window.saveConfigToCloud = async function() {
-      if(!confirm("⚠️ 確定要將設定寫入資料庫嗎？\n按下確定後，全台門市 POS 將立刻套用最新上下架設定！")) return;
+      if(!confirm("⚠️ 確定要將設定寫入資料庫嗎？\n按下確定後，全台門市 POS 將立刻套用最新設定！")) return;
       
       const btn = document.getElementById('save-cloud-btn');
       btn.innerText = "⏳ 雲端同步中...";
@@ -737,7 +788,6 @@
       if (allLines.length === 0) return alert("⚠️ 請貼上參加者名單！");
       if (isNaN(count) || count < 1) return alert("⚠️ 抽出人數必須大於 0！");
 
-      // 關鍵字過濾
       let validParticipants = allLines;
       if (keyword !== "") {
         validParticipants = allLines.filter(line => line.includes(keyword));
@@ -754,7 +804,6 @@
       btn.disabled = true;
 
       try {
-        // 洗牌
         for (let i = validParticipants.length - 1; i > 0; i--) {
           const j = Math.floor(Math.random() * (i + 1));
           [validParticipants[i], validParticipants[j]] = [validParticipants[j], validParticipants[i]];
@@ -828,7 +877,6 @@
       });
     };
 
-    // 🔥 智慧日期比對結算引擎
     window.expireTickets = async function() {
       const actSelect = document.getElementById('act-select');
       if (!actSelect || !actSelect.value) return;
@@ -851,7 +899,6 @@
         const today = new Date();
         today.setHours(0,0,0,0);
 
-        // 尋找 YYYY/MM/DD 或 YYYY-MM-DD 格式
         const regex = /(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})/g;
 
         let updated = 0; const updatePromises = [];
@@ -867,7 +914,6 @@
               lastDate = new Date(match[1], parseInt(match[2])-1, match[3]);
           }
           
-          // 若該日期小於今天
           if (lastDate && lastDate < today) {
             const p = updateDoc(doc(db, act, d.id), { status: "已過期", redeemTime: "逾期未換 (系統自動結算)" });
             updatePromises.push(p); 
