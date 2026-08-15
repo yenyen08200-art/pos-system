@@ -109,6 +109,21 @@
     .item-li { display: flex; justify-content: space-between; align-items: center; padding: 16px; background: #F7F9FB; border-radius: 12px; border: 1px solid #E6EAF0; }
     .item-info strong { font-size: 16px; color: var(--text-main); display: block; margin-bottom: 4px; }
     .item-info span { font-size: 13px; color: var(--text-sub); }
+
+    /* 🔥 手動補單 Modal 專屬樣式 */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(26,28,36,0.6); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 2000; }
+    .modal-card { background: var(--card-bg); padding: 32px; border-radius: var(--radius); width: 90%; max-width: 440px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
+    .modal-card h2 { margin: 0 0 20px; font-size: 20px; }
+    .modal-field { margin-bottom: 16px; }
+    .modal-field label { display: block; font-size: 13px; font-weight: 700; color: var(--text-sub); margin-bottom: 8px; }
+    .modal-field input, .modal-field select { width: 100%; padding: 12px; border: 1px solid #E6EAF0; border-radius: 12px; outline: none; background: #F7F9FB; }
+    .modal-field input:focus, .modal-field select:focus { border-color: var(--accent); background: #fff; }
+    .modal-actions { display: flex; gap: 12px; margin-top: 24px; }
+    .modal-actions button { flex: 1; padding: 12px; border-radius: 12px; font-weight: 700; border: none; cursor: pointer; transition: .2s; }
+    .btn-cancel { background: #F4F6F8; color: var(--text-main); }
+    .btn-cancel:hover { background: #E6EAF0; }
+    .btn-confirm { background: var(--accent); color: #fff; }
+    .btn-confirm:hover { filter: brightness(1.1); }
     
     @media (max-width:768px){
       body{flex-direction:column}
@@ -122,6 +137,37 @@
   </style>
 </head>
 <body>
+
+  <!-- 🔥 手動補單 Modal -->
+  <div class="modal-overlay" id="manual-modal">
+    <div class="modal-card">
+      <h2>🛠️ 小編手動補單 (免驗證)</h2>
+      <div class="modal-field">
+        <label>🎯 選擇活動</label>
+        <select id="modal-act"></select>
+      </div>
+      <div class="modal-field">
+        <label>📱 顧客號碼 (可填市話或任意號碼)</label>
+        <input type="text" id="modal-phone" placeholder="例：02-1234567">
+      </div>
+      <div class="modal-field">
+        <label>👤 顧客姓名</label>
+        <input type="text" id="modal-name" placeholder="輸入顧客姓名">
+      </div>
+      <div class="modal-field">
+        <label>🔗 社群帳號 (選填)</label>
+        <input type="text" id="modal-social" placeholder="無則留空">
+      </div>
+      <div class="modal-field">
+        <label>🎁 專屬贈品 (選填，無則套用預設)</label>
+        <input type="text" id="modal-gift" placeholder="例：補償一號餐">
+      </div>
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="closeManualModal()">取消</button>
+        <button class="btn-confirm" onclick="submitManualTicket()">確認發券</button>
+      </div>
+    </div>
+  </div>
 
   <div id="login-screen">
     <div class="login-card">
@@ -160,6 +206,8 @@
           </div>
           <div class="controls">
             <select id="act-select" onchange="fetchData()"></select>
+            <!-- 🔥 新增手動補單按鈕 -->
+            <button class="btn-export" style="background: var(--green);" onclick="openManualModal()">➕ 手動補單</button>
             <button class="btn-expire" onclick="expireTickets()">🧹 結算過期</button>
             <button class="btn-export" onclick="exportExcel()">📥 匯出 Excel</button>
           </div>
@@ -260,7 +308,6 @@
   </main>
 
   <script type="module">
-    // 🔥 新增匯入 getDoc, setDoc 為了讀寫雲端設定
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getFirestore, collection, onSnapshot, doc, getDoc, setDoc, updateDoc, query, limit } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
     import { getAuth, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
@@ -288,12 +335,10 @@
     let unsubscribeSnapshot = null; 
     const adminEmails = ["yenyen08200@gmail.com", "admin@gmail.com"];
     
-    // 🔥 全域變數：準備存放從雲端抓下來的設定
     let globalPosConfig = {};
     let globalEventConfig = {};
     let globalStoreList = [];
 
-    // --- 視圖切換 ---
     window.switchView = function(viewId, element) {
       document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
       document.getElementById('view-' + viewId).classList.add('active');
@@ -301,7 +346,6 @@
       element.classList.add('active');
     };
 
-    // --- Config UI 管理邏輯 (改為雲端架構) ---
     function renderConfigUI() {
       const storeListEl = document.getElementById('ui-store-list');
       storeListEl.innerHTML = globalStoreList.map((store, idx) => `
@@ -374,7 +418,6 @@
       }
     };
 
-    // 🔥 核心功能：直接把設定寫進 Firebase 雲端！
     window.saveConfigToCloud = async function() {
       if(!confirm("⚠️ 確定要將設定寫入資料庫嗎？\n按下確定後，全台門市 POS 與前台領券系統將立刻套用新設定！")) return;
       
@@ -392,8 +435,6 @@
         });
         
         alert("✅ 系統設定已成功同步至雲端！");
-        
-        // 更新左上角的下拉選單 (確保剛新增的活動立刻可以查報表)
         populateAdminDropdown();
         
       } catch (error) {
@@ -405,7 +446,6 @@
       }
     };
 
-    // --- 抓取雲端設定檔 (取代原本 import config.js) ---
     async function fetchSystemConfig() {
       try {
         const configSnap = await getDoc(doc(db, "system", "config"));
@@ -440,6 +480,57 @@
         window.fetchData(); 
       }
     }
+
+    // 🔥 新增：小編手動補單邏輯
+    window.openManualModal = function() {
+      const actSelect = document.getElementById('modal-act');
+      actSelect.innerHTML = document.getElementById('act-select').innerHTML;
+      actSelect.value = document.getElementById('act-select').value;
+      document.getElementById('manual-modal').style.display = 'flex';
+    };
+
+    window.closeManualModal = function() {
+      document.getElementById('manual-modal').style.display = 'none';
+      document.getElementById('modal-phone').value = '';
+      document.getElementById('modal-name').value = '';
+      document.getElementById('modal-social').value = '';
+      document.getElementById('modal-gift').value = '';
+    };
+
+    window.submitManualTicket = async function() {
+      const act = document.getElementById('modal-act').value;
+      const phone = document.getElementById('modal-phone').value.trim();
+      const name = document.getElementById('modal-name').value.trim();
+      const social = document.getElementById('modal-social').value.trim() || '後台補單';
+      const gift = document.getElementById('modal-gift').value.trim();
+
+      if(!act || !phone || !name) return alert("⚠️ 請填寫活動、號碼與姓名！");
+
+      try {
+        const docRef = doc(db, act, phone);
+        const snap = await getDoc(docRef);
+        if(snap.exists()) {
+           if(!confirm(`⚠️ 號碼 ${phone} 在此活動已有紀錄，確定要覆蓋掉舊憑證嗎？`)) return;
+        }
+
+        await setDoc(docRef, {
+          name: name,
+          social_id: social,
+          phone: phone,
+          status: "",
+          store: "",
+          redeemTime: "",
+          timestamp: new Date().toLocaleString(),
+          gift: gift || "" 
+        });
+        
+        alert(`✅ 成功建立憑證給 ${name} (${phone})！`);
+        closeManualModal();
+      } catch(e) {
+        console.error(e);
+        alert("❌ 發送失敗，請檢查網路連線或權限設定。");
+      }
+    };
 
     // --- 系統登入與資料表邏輯保持不變 ---
     window.login = function() {
@@ -649,7 +740,6 @@
           document.getElementById('sidebar-nav').style.display = 'flex'; 
           document.getElementById('main-app').style.display = 'block';
           
-          // 🔥 登入成功後，改為去 Firebase 抓取雲端設定檔
           fetchSystemConfig();
 
         } else {
