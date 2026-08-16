@@ -39,6 +39,7 @@
     .sidebar-footer{margin-top:auto;padding-top:20px}
     .btn-logout{width:100%;background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.12);padding:12px;border-radius:999px;font-weight:700;font-size:14px;cursor:pointer;transition:.2s}
     .btn-logout:hover{background:var(--accent);border-color:var(--accent)}
+    .mobile-logout { display: none; } /* 預設隱藏手機版登出 */
 
     /* Layouts */
     .view-section { display: none; }
@@ -77,7 +78,6 @@
     .table-toolbar #result-count{color:var(--text-sub);font-size:13px;font-weight:600}
     .search-box{padding:12px 18px;border-radius:999px;border:none;font-size:14px;width:300px;outline:none;background:#fff;box-shadow:var(--shadow);color:var(--text-main)}
     
-    /* 🔥 Table Container: 增加底部 padding 防止 Kebab menu 被切掉 */
     .table-container{background:var(--card-bg);border-radius:var(--radius);box-shadow:var(--shadow);overflow:auto;max-height:52vh;padding:8px; padding-bottom: 120px;}
     table{width:100%;border-collapse:separate;border-spacing:0 4px;min-width:980px}
     th,td{padding:14px 18px;text-align:left;border:none}
@@ -94,7 +94,7 @@
     .status-expired{color:#8A93A5;font-weight:800;background:rgba(138,147,165,.12);padding:5px 12px;border-radius:999px;font-size:12px}
     .time-text{font-size:13px;color:var(--text-sub)}
 
-    /* 🔥 Kebab Dropdown Menu (共用下拉選單樣式) */
+    /* 🔥 Kebab Dropdown Menu */
     .kebab-dropdown { position: relative; flex-shrink: 0; }
     .kebab-dropdown summary { list-style: none; background: #fff; border: 1px solid #E6EAF0; font-size: 20px; font-weight: bold; color: var(--text-sub); cursor: pointer; width: 44px; height: 44px; border-radius: 12px; transition: .2s; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,0.02); }
     .kebab-dropdown summary::-webkit-details-marker { display: none; }
@@ -121,8 +121,8 @@
 
     .btn-primary { background: var(--accent); color: #fff; border: none; padding: 12px 24px; border-radius: 12px; font-weight: 700; cursor: pointer; transition: 0.2s; }
     .btn-primary:hover { filter: brightness(1.1); }
-    .btn-danger { background: rgba(240,118,84,.1); color: var(--accent); border: none; padding: 8px 16px; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 12px; }
-    .btn-danger:hover { background: var(--accent); color: #fff; }
+    .btn-danger { background: #fef2f2; color: #ef4444; border: 1px solid #fecaca; padding: 8px 16px; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 12px; transition: .2s;}
+    .btn-danger:hover { background: #ef4444; color: #fff; }
     .btn-cancel { background: #F4F6F8; color: var(--text-main); border: none; padding: 12px 24px; border-radius: 12px; font-weight: 700; cursor: pointer; transition: .2s;}
     .btn-cancel:hover { background: #E6EAF0; }
     
@@ -131,7 +131,7 @@
     .item-info strong { font-size: 16px; color: var(--text-main); display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
     .item-info span { font-size: 13px; color: var(--text-sub); }
     
-    /* 🔥 QR Code 卡片區塊 */
+    /* QR Code 卡片 */
     .result-box { margin-top: 16px; padding: 20px; background: rgba(63,191,143,.05); border: 2px solid rgba(63,191,143,.2); border-radius: 16px; font-size: 14px; display: none; max-height: 600px; overflow-y: auto;}
     .winner-card { display: flex; gap: 16px; background: #fff; padding: 16px; border-radius: 12px; margin-bottom: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid #E6EAF0; align-items: center; }
     .winner-card img { width: 100px; height: 100px; border-radius: 8px; border: 1px solid #f0f0f0; }
@@ -141,25 +141,45 @@
     .winner-comment { font-size: 13px; color: #8A93A5; margin: 6px 0 8px; line-height: 1.4; max-height: 40px; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
     .winner-code { font-weight: bold; font-size: 16px; color: var(--text-main); }
 
-    /* 🔥 獨立 QR Code 顯示彈窗 */
+    /* 獨立 QR Code 顯示彈窗 */
     .modal-overlay { position: fixed; inset: 0; background: rgba(26,28,36,0.7); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 2000; }
     .modal-card { background: var(--card-bg); padding: 32px; border-radius: var(--radius); width: 90%; max-width: 360px; box-shadow: 0 20px 50px rgba(0,0,0,0.3); text-align: center;}
     .modal-card h2 { margin: 0 0 16px; font-size: 22px; color: var(--accent); }
 
+    /* 🔥 完美修復手機版 RWD (響應式設計) */
     @media (max-width:768px){
       body{flex-direction:column}
-      .sidebar{width:100%;flex:none;height:auto;position:relative;flex-direction:row;align-items:center;justify-content:space-between;padding:14px 18px; z-index: 100;}
-      .sidebar-brand p{display:none}
-      .sidebar-menu{display:none;}
-      .sidebar-footer{margin:0;padding:0}
-      .btn-logout{width:auto;padding:10px 18px}
-      #main-app{padding:16px;height:auto}
+      .sidebar{width:100%; flex:none; height:auto; position:relative; display:flex; flex-direction:column; padding:16px; align-items:flex-start; z-index: 100;}
+      .sidebar-brand{display:flex; justify-content:space-between; width:100%; align-items:center;}
+      .sidebar-brand p{display:block; margin:0;}
+      /* 手機版登出按鈕獨立顯示在頂部 */
+      .mobile-logout{display:block; background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); color:#fff; border-radius:8px; padding:6px 12px; font-size:13px; cursor:pointer;}
+      /* 手機版導覽選單改為網格排列 */
+      .sidebar-menu{display:flex; flex-direction:row; flex-wrap:wrap; width:100%; justify-content:center; gap:8px; margin-top:16px;}
+      .sidebar-item{flex:1 1 45%; text-align:center; justify-content:center; padding:12px; font-size:13px;}
+      .sidebar-footer{display:none;} /* 隱藏原本的底部登出按鈕 */
+      
+      #main-app{padding:16px; height:auto;}
+      .header{flex-direction:column; align-items:flex-start; gap:16px;}
+      .header h1{font-size:24px;}
+      /* 控制列自動換行 */
+      .controls{display:grid; grid-template-columns:1fr 1fr; width:100%; gap:10px;}
+      .controls select{grid-column:span 2;}
+      /* 儀表板卡片改為 2x2 排列 */
+      .dashboard{grid-template-columns:repeat(2, 1fr); gap:12px;}
+      .stat-card{padding:16px;}
+      .stat-card.c-total{grid-column:span 2; padding:24px;}
+      
+      .charts-wrapper{flex-direction:column;}
+      .table-toolbar{flex-direction:column; align-items:flex-start; gap:10px;}
+      .search-box{width:100%;}
+      .kebab-menu{right:auto; left:0; /* 手機版選單靠左對齊防超出螢幕 */}
     }
   </style>
 </head>
 <body>
 
-  <!-- 🔥 獨立 QR Code 彈出視窗 (萬用顯示器) -->
+  <!-- 獨立 QR Code 彈出視窗 -->
   <div class="modal-overlay" id="qr-modal">
     <div class="modal-card">
       <h2 id="qr-modal-title">🎫 專屬兌換碼</h2>
@@ -184,14 +204,18 @@
 
   <aside class="sidebar" id="sidebar-nav" style="display:none;">
     <div class="sidebar-brand">
-      <h2>德州小騎士</h2>
-      <p>後台控制室</p>
+      <div>
+        <h2>德州小騎士</h2>
+        <p>後台控制室</p>
+      </div>
+      <!-- 🔥 手機版專屬登出按鈕 -->
+      <button class="mobile-logout" onclick="logout()">登出</button>
     </div>
     <nav class="sidebar-menu" style="display:flex;">
       <div class="sidebar-item active" onclick="switchView('dashboard', this)">📊 電子兌換卷儀表板</div>
       <div class="sidebar-item" onclick="switchView('issue-ui', this)">🎟️ 票券發放與建檔</div>
       <div class="sidebar-item" onclick="switchView('lottery-ui', this)">🎉 社群抽獎發券中心</div>
-      <div class="sidebar-item" onclick="switchView('config-ui', this)">⚙️ 系統設定中心 (雲端)</div>
+      <div class="sidebar-item" onclick="switchView('config-ui', this)">⚙️ 系統設定中心</div>
     </nav>
     <div class="sidebar-footer">
       <button class="btn-logout" onclick="logout()">登出</button>
@@ -416,7 +440,7 @@
 
         <div class="config-card">
           <h2>🎯 行銷活動與資料夾管理</h2>
-          <p class="desc">建立抽獎活動或實體券分類。若為「實體券」，密碼與贈品欄位可直接留白，系統會自動填寫為免密碼。</p>
+          <p class="desc">建立抽獎活動或實體券分類。可透過右方點點選單【上下移動】調整排序，POS 端會自動套用！</p>
           <div class="form-group">
             <div class="field-block">
               <label>活動/資料夾名稱 <span id="edit-lock-hint" style="color:red;display:none;">(編輯模式下不可改名)</span></label>
@@ -486,16 +510,17 @@
     let globalPosConfig = {};
     let globalEventConfig = {};
     let globalStoreList = [];
+    let globalEventOrder = []; // 🔥 新增：管理活動排序順序的陣列
     let editingActName = null; 
 
-    // 🔥 全域點擊隱藏下拉選單
+    // 全域點擊隱藏下拉選單
     document.addEventListener('click', function(e) {
       if (!e.target.closest('.kebab-dropdown')) {
         document.querySelectorAll('.kebab-dropdown[open]').forEach(d => d.removeAttribute('open'));
       }
     });
 
-    // 🔥 萬用 QR Code 呼叫器
+    // 萬用 QR Code 呼叫器
     window.showQrCode = function(phone, name, isNew = false) {
       const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${phone}&margin=10`;
       document.getElementById('qr-modal-title').innerHTML = isNew ? '🎉 發券成功' : '🎫 專屬兌換碼';
@@ -524,9 +549,9 @@
       }
     };
 
+    // 🔥 修改：下拉選單依據 globalEventOrder 陣列來產生
     function populateAdminDropdown() {
-      const acts = Object.keys(globalEventConfig);
-      const html = acts.map(a => {
+      const html = globalEventOrder.map(a => {
         const isActive = globalPosConfig[a]?.active !== false;
         const displayText = isActive ? a : `${a} (已下架)`;
         return `<option value="${a}">${displayText}</option>`;
@@ -538,9 +563,10 @@
           if (el) el.innerHTML = html;
       });
       
-      if (acts.length > 0) window.fetchData(); 
+      if (globalEventOrder.length > 0) window.fetchData(); 
     }
 
+    // 🔥 修改：活動列表依據 globalEventOrder 陣列來產生
     function renderConfigUI() {
       document.getElementById('ui-store-list').innerHTML = globalStoreList.map((store, idx) => `
         <li class="item-li">
@@ -549,7 +575,7 @@
         </li>
       `).join('');
 
-      document.getElementById('ui-event-list').innerHTML = Object.keys(globalEventConfig).map(actName => {
+      document.getElementById('ui-event-list').innerHTML = globalEventOrder.map(actName => {
         const pwd = globalEventConfig[actName];
         const giftInfo = globalPosConfig[actName];
         const giftStr = giftInfo ? giftInfo.gift : "無設定";
@@ -573,6 +599,8 @@
             <summary>⋮</summary>
             <div class="kebab-menu">
               <button onclick="editEvent('${actName}')">✏️ 編輯設定</button>
+              <button onclick="moveEventUp('${actName}')">🔼 向上移動</button>
+              <button onclick="moveEventDown('${actName}')">🔽 向下移動</button>
               <button onclick="toggleEventStatus('${actName}')">${isActive ? '⬇️ 隱藏下架' : '⬆️ 重新上架'}</button>
               <button class="danger" onclick="deleteEvent('${actName}')">🗑️ 刪除活動</button>
             </div>
@@ -580,6 +608,30 @@
         </li>
         `;
       }).join('');
+    }
+
+    // 🔥 新增：順序移動功能
+    window.moveEventUp = function(actName) {
+      const idx = globalEventOrder.indexOf(actName);
+      if(idx > 0) {
+        [globalEventOrder[idx-1], globalEventOrder[idx]] = [globalEventOrder[idx], globalEventOrder[idx-1]];
+        renderConfigUI();
+        triggerSaveHint();
+      }
+    };
+
+    window.moveEventDown = function(actName) {
+      const idx = globalEventOrder.indexOf(actName);
+      if(idx < globalEventOrder.length - 1 && idx !== -1) {
+        [globalEventOrder[idx], globalEventOrder[idx+1]] = [globalEventOrder[idx+1], globalEventOrder[idx]];
+        renderConfigUI();
+        triggerSaveHint();
+      }
+    };
+
+    function triggerSaveHint() {
+      document.getElementById('save-cloud-btn').style.background = "#FF3366";
+      document.getElementById('save-cloud-btn').innerText = "⚠️ 設定已修改，請點此儲存至雲端！";
     }
 
     window.addStore = function() {
@@ -590,12 +642,14 @@
       globalStoreList.push(val);
       input.value = '';
       renderConfigUI();
+      triggerSaveHint();
     };
     
     window.deleteStore = function(idx) {
       if(confirm("確定刪除此門市？\n(記得操作完要按下『儲存至雲端』才會生效喔)")) {
         globalStoreList.splice(idx, 1);
         renderConfigUI();
+        triggerSaveHint();
       }
     };
 
@@ -650,6 +704,11 @@
 
       const isActive = globalPosConfig[name] ? globalPosConfig[name].active !== false : true;
 
+      // 🔥 若為新增活動，加入到順序陣列的最後面
+      if (!globalEventOrder.includes(name)) {
+          globalEventOrder.push(name);
+      }
+
       globalEventConfig[name] = pwd || "無 (實體券或後台專用)";
       globalPosConfig[name] = { 
         gift: gift || "依實體券面標示發放", 
@@ -660,18 +719,17 @@
       
       cancelEditEvent(); 
       renderConfigUI();
-
-      document.getElementById('save-cloud-btn').style.background = "#FF3366";
-      document.getElementById('save-cloud-btn').innerText = "⚠️ 設定已修改，請點此儲存至雲端！";
+      triggerSaveHint();
     };
 
     window.deleteEvent = function(actName) {
       if(confirm(`確定刪除活動「${actName}」？\n(記得操作完要按下『儲存至雲端』才會生效喔)`)) {
         delete globalEventConfig[actName];
         delete globalPosConfig[actName];
+        // 🔥 從順序陣列中移除
+        globalEventOrder = globalEventOrder.filter(n => n !== actName);
         renderConfigUI();
-        document.getElementById('save-cloud-btn').style.background = "#FF3366";
-        document.getElementById('save-cloud-btn').innerText = "⚠️ 設定已修改，請點此儲存至雲端！";
+        triggerSaveHint();
       }
     };
 
@@ -683,8 +741,7 @@
           globalPosConfig[actName].active = false;
       }
       renderConfigUI();
-      document.getElementById('save-cloud-btn').style.background = "#FF3366";
-      document.getElementById('save-cloud-btn').innerText = "⚠️ 設定已修改，請點此儲存至雲端！";
+      triggerSaveHint();
     };
 
     window.saveConfigToCloud = async function() {
@@ -700,6 +757,7 @@
           EVENT_CONFIG: globalEventConfig,
           STORE_LIST: globalStoreList,
           POS_CONFIG: globalPosConfig,
+          EVENT_ORDER: globalEventOrder, // 🔥 將排序陣列存上雲端
           lastUpdated: new Date().toLocaleString()
         });
         
@@ -723,6 +781,14 @@
           globalEventConfig = data.EVENT_CONFIG || {};
           globalStoreList = data.STORE_LIST || [];
           globalPosConfig = data.POS_CONFIG || {};
+          
+          // 🔥 讀取雲端排序陣列 (若沒有則用 Object.keys 兜底)
+          globalEventOrder = data.EVENT_ORDER || Object.keys(globalEventConfig);
+          // 確保順序陣列與資料庫一致 (防呆機制)
+          globalEventOrder = globalEventOrder.filter(a => globalEventConfig[a]);
+          Object.keys(globalEventConfig).forEach(a => {
+              if(!globalEventOrder.includes(a)) globalEventOrder.push(a);
+          });
         }
         renderConfigUI();
         populateAdminDropdown();
@@ -768,7 +834,7 @@
         document.getElementById('manual-gift').value = '';
         document.getElementById('manual-expire').value = ''; 
         
-        window.showQrCode(phone, name, true); // true 代表是新建立的發券成功
+        window.showQrCode(phone, name, true); 
 
       } catch(e) {
         console.error(e);
@@ -825,7 +891,7 @@
       }
     };
 
-    // ================= 🔥 社群抽獎解析 + QR Code 產生引擎 =================
+    // ================= 社群抽獎 =================
     window.runLottery = async function() {
       const act = document.getElementById('lottery-act').value;
       const rawText = document.getElementById('lottery-raw-list').value.trim();
@@ -840,7 +906,6 @@
       if (!rawText) return alert("⚠️ 請貼上參加者名單！");
       if (isNaN(count) || count < 1) return alert("⚠️ 抽出人數必須大於 0！");
 
-      // 1. 智慧解析 CSV
       let candidateList = [];
       const lines = rawText.split('\n');
       
@@ -920,7 +985,7 @@
           const randomCode = "888" + Math.floor(10000 + Math.random() * 90000);
           
           await setDoc(doc(db, act, randomCode), {
-            name: `@${winnerName}`, // 儲存 IG 帳號作為姓名
+            name: `@${winnerName}`, 
             social_id: `@${winnerName}`,
             phone: randomCode, 
             status: "未兌換",
@@ -937,7 +1002,6 @@
           <div class="winner-card">
             <img src="${qrUrl}" alt="QR Code">
             <div class="winner-info">
-              <!-- 🔥 可點擊的 IG 連結 -->
               <a href="https://instagram.com/${winnerName}" target="_blank">👑 @${winnerName} 🔗</a>
               <div class="winner-comment">💬 留言：${w.comment}</div>
               <div class="winner-code">🎫 兌換碼：${randomCode}</div>
@@ -1106,7 +1170,6 @@
         let displayGift = d.gift ? `${d.gift} <span style="font-size:10px; color:#F07654;">(專屬)</span>` : defaultGift;
         let displayExpire = d.expireDate || defaultExpire;
         
-        // 🔥 表格操作按鈕全面改為 Kebab Menu (點點選單)
         let actionBtnHTML = `
           <details class="kebab-dropdown">
             <summary>⋮</summary>
