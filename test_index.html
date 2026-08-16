@@ -120,7 +120,6 @@ button{font-family:inherit;cursor:pointer;}
 .act-btn.on .radio{border-color:var(--accent);background:var(--accent); box-shadow: 0 0 0 4px oklch(0.78 0.14 195/.2);}
 .empty{border:1px dashed var(--border);border-radius:14px;padding:24px;text-align:center;font-size:14px;color:var(--muted-foreground)}
 
-/* 🔥 電子券 / 實體券 模式切換樣式 */
 .mode-switch { display: flex; gap: 8px; margin-bottom: 16px; padding: 6px; background: var(--secondary); border-radius: 16px; }
 .mode-btn { flex: 1; padding: 12px; border-radius: 12px; border: none; background: transparent; color: var(--muted-foreground); font-weight: 700; font-size: 15px; transition: 0.2s; }
 .mode-btn.active { background: var(--card); color: var(--foreground); box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
@@ -147,7 +146,6 @@ button{font-family:inherit;cursor:pointer;}
 .primary-btn:active{transform:scale(.95)}
 button:disabled{opacity:.5;cursor:not-allowed}
 
-/* 全螢幕掃描器樣式 */
 #scan-area{
   position: fixed; inset: 0; z-index: 9999; 
   background: rgba(10, 12, 16, 0.95); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
@@ -312,6 +310,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
 
   let STORE_LIST = [];
   let POS_CONFIG = {};
+  let EVENT_ORDER = []; // 🔥 加入讀取排序功能
   let evMap = {};
   let giftMap = {};
 
@@ -327,7 +326,6 @@ button:disabled{opacity:.5;cursor:not-allowed}
     $('mode-physical').classList.toggle('active', m === 'physical');
     $('phone').value = '';
     
-    // 🔥 確保兩種模式下，相機按鈕都顯示！
     $('btn-scan').style.display = 'block';
 
     if (m === 'digital') {
@@ -343,7 +341,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
     } else {
       $('phone').type = 'text';
       $('phone').placeholder = '輸入實體券流水號 (英文與數字)';
-      $('btn-check').innerText = '查詢';
+      $('btn-check').innerText = '查詢 / 核銷';
       $('placeholder-emoji').innerText = "🎫";
       $('placeholder-title').innerText = "實體券快速核銷";
       $('placeholder-desc').innerText = "掃描實體券 QR Code 或直接輸入流水號進行核銷。";
@@ -369,6 +367,12 @@ button:disabled{opacity:.5;cursor:not-allowed}
         const data = configSnap.data();
         STORE_LIST = data.STORE_LIST || [];
         POS_CONFIG = data.POS_CONFIG || {};
+        
+        // 🔥 讀取排序資料
+        EVENT_ORDER = data.EVENT_ORDER || Object.keys(POS_CONFIG);
+        // 過濾掉可能已經刪除但還留在排序陣列的幽靈資料
+        EVENT_ORDER = EVENT_ORDER.filter(a => POS_CONFIG[a]);
+        
       } else {
         alert("⚠️ 雲端尚未建立系統設定，請先至總部後台儲存設定！");
         return;
@@ -377,15 +381,16 @@ button:disabled{opacity:.5;cursor:not-allowed}
       evMap = {};
       STORE_LIST.forEach(s => {
         evMap[s] = [];
-        for (const a in POS_CONFIG) {
+        // 🔥 改用 EVENT_ORDER 陣列來產生活動列表，保證順序與後台一模一樣
+        EVENT_ORDER.forEach(a => {
           const cfg = POS_CONFIG[a];
           
-          if (cfg.active === false) continue;
+          if (cfg.active === false) return;
           
           if (cfg.stores === "ALL" || (Array.isArray(cfg.stores) && cfg.stores.includes(s))) {
             evMap[s].push(a);
           }
-        }
+        });
       });
 
       giftMap = {};
@@ -563,12 +568,11 @@ button:disabled{opacity:.5;cursor:not-allowed}
       { facingMode: "environment" },
       { fps: 10, qrbox: 250 },
       (txt) => {
-        // 🔥 根據當前模式切換掃描的過濾條件
         let result = txt;
         if (currentMode === 'digital') {
-            result = txt.replace(/[^\d\-]/g, ""); // 只留數字與連字號
+            result = txt.replace(/[^\d\-]/g, ""); 
         } else {
-            result = txt.replace(/[^a-zA-Z0-9]/g, "").toUpperCase(); // 留英文數字並轉大寫
+            result = txt.replace(/[^a-zA-Z0-9]/g, "").toUpperCase(); 
         }
         $("phone").value = result;
         stopScan();
