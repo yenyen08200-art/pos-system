@@ -336,7 +336,6 @@
   </main>
 
 <script type="module">
-  // 🔥 匯入 Firebase Auth 的驗證模組
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
   import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
   import { getAuth, RecaptchaVerifier, signInWithPhoneNumber } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
@@ -354,7 +353,6 @@
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
   
-  // 🔥 初始化 Auth 模組 (將簡訊語系設為繁體中文)
   const auth = getAuth(app);
   auth.languageCode = 'zh-TW';
 
@@ -363,7 +361,6 @@
   let EVENT_SECRETS = {}; 
   let POS_CONFIG = {}; 
   
-  // 存放簡訊驗證的結果與 reCAPTCHA
   let confirmationResult = null;
   let recaptchaVerifier = null;
 
@@ -384,21 +381,31 @@
         const data = configSnap.data();
         EVENT_SECRETS = data.EVENT_CONFIG || {};
         POS_CONFIG = data.POS_CONFIG || {}; 
+
+        // 🔥 讀取後台的排序陣列 (若沒有則退回使用原本的 Object.keys)
+        let EVENT_ORDER = data.EVENT_ORDER || Object.keys(EVENT_SECRETS);
+        
+        // 防呆機制：過濾掉已經被刪除但還卡在排序陣列裡的活動
+        EVENT_ORDER = EVENT_ORDER.filter(a => EVENT_SECRETS[a]);
+
+        const actSelect = $('activity');
+        actSelect.innerHTML = "";
+        
+        // 依照排序陣列產生活動選項
+        EVENT_ORDER.forEach(actName => {
+          // 🔥 貼心防呆：如果該活動在後台已經「下架 (active === false)」，前台就不顯示給客人看！
+          if (POS_CONFIG[actName] && POS_CONFIG[actName].active === false) return;
+
+          const opt = document.createElement('option');
+          opt.value = actName;
+          opt.text = actName;
+          actSelect.appendChild(opt);
+        });
+
+        checkSaved(true);
       } else {
         $('activity').innerHTML = '<option value="">⚠️ 系統設定讀取失敗</option>';
-        return;
       }
-
-      const actSelect = $('activity');
-      actSelect.innerHTML = ""; 
-      for (const actName in EVENT_SECRETS) {
-        const opt = document.createElement('option');
-        opt.value = actName;
-        opt.text = actName;
-        actSelect.appendChild(opt);
-      }
-      
-      checkSaved(true);
     } catch (e) {
       console.error("讀取系統設定失敗:", e);
       alert("系統連線異常，請重新整理頁面！");
@@ -447,19 +454,18 @@
     }
   }
 
-  // 🔥 初始化隱形機器人防禦
+  // 初始化隱形機器人防禦
   function initRecaptcha() {
     if (!recaptchaVerifier) {
       recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
         'size': 'invisible',
         'callback': (response) => {
-          // reCAPTCHA 驗證通過
         }
       });
     }
   }
 
-  // 🔥 發送簡訊驗證碼功能
+  // 發送簡訊驗證碼功能
   async function sendOTP() {
     const ph = $('phone').value.replace(/\D/g,'');
     if(ph.length !== 10 || !ph.startsWith('09')) return alert("⚠️ 手機號碼必須為「09 開頭且滿 10 碼數字」！");
@@ -470,16 +476,13 @@
 
     initRecaptcha();
 
-    // 轉換為國際格式 +886
     const phoneNumber = "+886" + ph.substring(1);
 
     try {
-      // 觸發 Firebase 發送簡訊
       confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, recaptchaVerifier);
       alert("✅ 驗證碼已發送，請查看手機簡訊！");
       $('otp-field').style.display = 'block';
 
-      // 60秒按鈕冷卻倒數
       let timeLeft = 60;
       btn.innerText = `重新發送 (${timeLeft}s)`;
       const timer = setInterval(() => {
@@ -498,7 +501,6 @@
       alert("❌ 發送失敗，請確認號碼是否正確，或稍後再試。");
       btn.innerText = "取得驗證碼";
       btn.disabled = false;
-      // 重置驗證器
       if(recaptchaVerifier) {
         recaptchaVerifier.render().then(widgetId => grecaptcha.reset(widgetId));
       }
@@ -514,7 +516,6 @@
     if(!name || !soc || !cd) return alert("⚠️ 請完整填寫資料與通關密語！");
     if(cd.toUpperCase() !== EVENT_SECRETS[act]) return alert("⚠️ 通關密語錯誤！");
     
-    // 🔥 檢查是否已獲取並輸入驗證碼
     if(!confirmationResult) return alert("⚠️ 請先點擊「取得驗證碼」！");
     if(otp.length !== 6) return alert("⚠️ 請輸入完整的 6 位數簡訊驗證碼！");
 
@@ -528,7 +529,6 @@
     btn.innerText = "驗證中...";
 
     try {
-      // 🔥 提交給 Firebase 驗證這組 6 位數密碼是否正確
       await confirmationResult.confirm(otp);
     } catch (error) {
       console.error("驗證碼錯誤:", error);
@@ -537,7 +537,6 @@
       return alert("❌ 簡訊驗證碼錯誤或已過期，請重新輸入！");
     }
 
-    // 驗證成功後，繼續原本的存檔流程...
     try {
       const docRef = doc(db, act, ph);
       const docSnap = await getDoc(docRef);
@@ -611,4 +610,4 @@
   }
 </script>
 </body>
-</html>  
+</html>
