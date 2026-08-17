@@ -385,9 +385,7 @@
         actSelect.innerHTML = "";
         
         EVENT_ORDER.forEach(actName => {
-          // 🔥 貼心防呆：如果該活動在後台已經「下架」，前台就不顯示給客人看
           if (POS_CONFIG[actName] && POS_CONFIG[actName].active === false) return;
-          // 🔥 新增：只要活動名稱包含「【實體】」或「實體券」，就不顯示在前台，避免誤領
           if (actName.includes('【實體】') || actName.includes('實體券')) return;
 
           const opt = document.createElement('option');
@@ -532,8 +530,9 @@
       const docSnap = await getDoc(docRef);
 
       if(!docSnap.exists()) {
+        // 🔥 修正：明確將預設狀態設為 "未兌換"
         await setDoc(docRef, {
-          name, social_id: soc, phone: ph, status: "", store: "", redeemTime: "", timestamp: new Date().toLocaleString(), gift: customGift
+          name, social_id: soc, phone: ph, status: "未兌換", store: "", redeemTime: "", timestamp: new Date().toLocaleString(), gift: customGift, expireDate: ""
         });
         confetti({particleCount:80, spread:70});
 
