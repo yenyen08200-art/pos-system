@@ -27,7 +27,8 @@
   --gradient-tech:linear-gradient(135deg, oklch(0.78 0.17 68), oklch(0.72 0.16 40));
   --gradient-panel:linear-gradient(160deg, oklch(0.24 0.03 262), oklch(0.2 0.026 258));
   
-  /* 🔥 新增：實體券專屬橘紅色漸層 */
+  /* 🔥 實體券專屬橘紅色系 */
+  --accent-physical: #FF6B35;
   --gradient-physical:linear-gradient(135deg, #FF6B35, #F04323);
   --radius:1.25rem;
 }
@@ -117,17 +118,24 @@ button{font-family:inherit;cursor:pointer;}
   border-radius:14px;border:1px solid var(--border);background:var(--secondary);color:var(--foreground);transition:all .2s;}
 .act-btn:hover{background:var(--muted);border-color:oklch(0.78 0.14 195/.5)}
 .act-btn:active{transform:scale(.99)}
-.act-btn.on{border-color:var(--accent);background:oklch(0.78 0.14 195/.15)}
 .act-name{display:block;font-size:18px;font-weight:600}
 .radio{width:16px;height:16px;border-radius:999px;border:2px solid var(--muted-foreground);flex:none; transition: .2s;}
+
+/* 預設活動選中狀態 (電子券：青綠色) */
+.act-btn.on{border-color:var(--accent);background:oklch(0.78 0.14 195/.15)}
 .act-btn.on .radio{border-color:var(--accent);background:var(--accent); box-shadow: 0 0 0 4px oklch(0.78 0.14 195/.2);}
+
+/* 🔥 新增：實體活動選中狀態 (實體券：橘紅色) */
+.act-btn.is-physical.on { border-color: var(--accent-physical); background: rgba(255, 107, 53, 0.15); }
+.act-btn.is-physical.on .radio { border-color: var(--accent-physical); background: var(--accent-physical); box-shadow: 0 0 0 4px rgba(255, 107, 53, 0.2); }
+
 .empty{border:1px dashed var(--border);border-radius:14px;padding:24px;text-align:center;font-size:14px;color:var(--muted-foreground)}
 
 .mode-switch { display: flex; gap: 8px; margin-bottom: 16px; padding: 6px; background: var(--secondary); border-radius: 16px; }
 .mode-btn { flex: 1; padding: 12px; border-radius: 12px; border: none; background: transparent; color: var(--muted-foreground); font-weight: 700; font-size: 15px; transition: 0.2s; }
 .mode-btn.active { background: var(--card); color: var(--foreground); box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
 
-/* 🔥 新增：實體券按鈕啟動時的專屬顏色 (橘紅色) */
+/* 實體券切換按鈕啟動時的專屬顏色 */
 #mode-physical.active { background: var(--gradient-physical); color: #fff; box-shadow: 0 8px 20px -6px rgba(255,107,53,0.6); border: none; }
 
 .searchbar{display:flex;flex-direction:column;gap:10px; width: 100%;}
@@ -144,8 +152,8 @@ button{font-family:inherit;cursor:pointer;}
 #phone::placeholder{font-size:15px;font-weight:400;letter-spacing:normal;color:var(--muted-foreground)}
 #phone:focus{border-color:var(--primary);box-shadow:0 0 0 4px oklch(0.78 0.17 68/.25)}
 
-/* 🔥 動態修改：當處於實體模式時，輸入框 focus 變成橘色光暈 */
-body.mode-physical-active #phone:focus { border-color: #FF6B35; box-shadow: 0 0 0 4px rgba(255,107,53,0.25); }
+/* 當處於實體模式時，輸入框 focus 變成橘色光暈 */
+body.mode-physical-active #phone:focus { border-color: var(--accent-physical); box-shadow: 0 0 0 4px rgba(255,107,53,0.25); }
 
 .icon-btn{min-height:64px;padding:0 20px;font-size:24px;border-radius:14px;border:1px solid var(--border);background:var(--secondary);color:var(--foreground);transition:all .2s}
 .icon-btn:hover{background:var(--muted)}
@@ -156,7 +164,7 @@ body.mode-physical-active #phone:focus { border-color: #FF6B35; box-shadow: 0 0 
 .primary-btn:active{transform:scale(.95)}
 button:disabled{opacity:.5;cursor:not-allowed}
 
-/* 🔥 新增：當處於實體模式時，查詢按鈕也變成橘紅色漸層 */
+/* 當處於實體模式時，查詢按鈕也變成橘紅色漸層 */
 body.mode-physical-active .primary-btn { background-image: var(--gradient-physical); box-shadow: 0 14px 30px -16px rgba(255,107,53,0.9); }
 
 #employee-name{width:100%; min-height:56px; border-radius:12px; border:1px solid var(--border); background:var(--secondary); color:var(--foreground); padding:0 16px; font-size:16px; outline:none; transition:all .2s;}
@@ -206,7 +214,7 @@ body.mode-physical-active .primary-btn { background-image: var(--gradient-physic
 .redeem{min-height:96px;width:100%;border:none;border-radius:18px;font-size:28px;font-weight:900;letter-spacing:.04em;
   background-image:var(--gradient-tech);color:var(--primary-foreground);box-shadow:0 26px 50px -22px oklch(0 0 0/1);transition:all .2s}
 
-/* 🔥 新增：當處於實體模式時，核銷按鈕也變成橘紅色漸層 */
+/* 當處於實體模式時，核銷按鈕也變成橘紅色漸層 */
 body.mode-physical-active .redeem { background-image: var(--gradient-physical); box-shadow: 0 26px 50px -22px rgba(255,107,53,1); }
 
 .redeem:hover{transform:translateY(-2px);filter:brightness(1.1)}
@@ -271,7 +279,7 @@ body.mode-physical-active .redeem { background-image: var(--gradient-physical); 
           </div>
 
           <div class="searchbar">
-            <!-- 輸入框動態切換：不在此設定 maxlength，交給 JS 動態控制 -->
+            <!-- 輸入框動態切換：交給 JS 控制 maxlength 與 placeholder -->
             <input id="phone" type="tel" placeholder="輸入手機號碼 (限10碼)" oninput="handleInput(this)" />
             <button class="icon-btn" id="btn-scan" aria-label="掃描 QR Code">📷</button>
             <button class="primary-btn" id="btn-check">查詢</button>
@@ -349,7 +357,7 @@ body.mode-physical-active .redeem { background-image: var(--gradient-physical); 
       localStorage.setItem("p_employee", e.target.value.trim());
   });
 
-  // 🔥 動態切換輸入框屬性與長度限制，並透過 body class 改變全域顏色
+  // 動態切換輸入框屬性與長度限制，並透過 body class 改變全域顏色
   window.setMode = function(m) {
     currentMode = m;
     $('mode-digital').classList.toggle('active', m === 'digital');
@@ -445,8 +453,17 @@ body.mode-physical-active .redeem { background-image: var(--gradient-physical); 
       const savedEmp = localStorage.getItem("p_employee");
       if(savedEmp) $("employee-name").value = savedEmp;
 
-      // 呼叫預設模式 (電子憑證)
-      setMode('digital');
+      // 🔥 初始啟動時，檢查第一個選中的活動是否為實體，自動切換模式
+      if (act) {
+        if (act.includes('【實體】') || act.includes('實體券')) {
+            setMode('physical');
+        } else {
+            setMode('digital');
+        }
+      } else {
+        setMode('digital'); // 預設
+      }
+
       renderStores(); 
       renderActs(); 
       renderRight();
@@ -496,12 +513,26 @@ body.mode-physical-active .redeem { background-image: var(--gradient-physical); 
     currentEvs.forEach((a) => {
       const b = document.createElement("button");
       b.className = "act-btn" + (act === a ? " on" : "");
+      
+      // 🔥 如果活動名稱包含實體，加上專屬 class 以顯示橘紅色
+      if (a.includes('【實體】') || a.includes('實體券')) {
+          b.classList.add("is-physical");
+      }
+      
       b.innerHTML = '<span><span class="act-name"></span></span><span class="radio"></span>';
       b.querySelector(".act-name").innerText = a;
       
       b.onclick = () => { 
         act = a; 
         renderActs(); 
+        
+        // 🔥 終極防呆：點擊活動列表瞬間，全自動切換下方的對應模式！
+        if (a.includes('【實體】') || a.includes('實體券')) {
+            setMode('physical');
+        } else {
+            setMode('digital');
+        }
+        
         setTimeout(() => $("phone").focus(), 100); 
       };
       list.appendChild(b);
@@ -515,6 +546,13 @@ body.mode-physical-active .redeem { background-image: var(--gradient-physical); 
     act = (evMap[s] || [])[0] || "";
     record = null;
     $("store-dropdown").removeAttribute("open");
+    
+    // 🔥 切換門市時，也要檢查第一個活動並自動連動模式
+    if (act) {
+        if (act.includes('【實體】') || act.includes('實體券')) setMode('physical');
+        else setMode('digital');
+    }
+
     renderStores(); renderActs(); renderRight();
     setTimeout(() => $("phone").focus(), 100);
   }
@@ -656,6 +694,11 @@ body.mode-physical-active .redeem { background-image: var(--gradient-physical); 
         playAlert("error");
         if (confirm("❌ 找不到「" + ac + "」的紀錄。\n\n💡 但發現客人有未兌換的「" + foundOtherActName + "」，是否要自動切換過去？")){
           act = foundOtherActName;
+          
+          // 🔥 自動補捉跳轉活動時的模式切換
+          if (act.includes('【實體】') || act.includes('實體券')) setMode('physical');
+          else setMode('digital');
+          
           renderActs();
           renderContent(foundOtherData, ph, foundOtherActName);
         } else {
