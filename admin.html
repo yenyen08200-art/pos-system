@@ -52,7 +52,7 @@
     .live-badge{background:var(--accent);color:#fff;font-size:10px;font-weight:800;padding:5px 10px;border-radius:999px;animation:pulse 1.5s infinite}
     @keyframes pulse{0%,100%{opacity:1}50%{opacity:.45}}
 
-    /* 🔥 全新模組化工具列 Toolbar UI */
+    /* 🔥 Toolbar UI */
     .toolbar-card {
       background: var(--card-bg); border-radius: 16px; padding: 16px 24px; box-shadow: var(--shadow);
       display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;
@@ -64,11 +64,12 @@
       border: 1px solid #E6EAF0; background: #fff; color: var(--text-main);
       outline: none; cursor: pointer; transition: .2s; font-family: inherit;
     }
-    .toolbar-item:hover { border-color: var(--accent); color: var(--accent); }
+    .toolbar-item:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+    .toolbar-item:disabled { opacity: 0.5; cursor: not-allowed; }
     .toolbar-btn-primary { background: var(--sidebar-bg); color: #fff; border: none; }
-    .toolbar-btn-primary:hover { background: #2A2D38; color: #fff; }
+    .toolbar-btn-primary:hover:not(:disabled) { background: #2A2D38; color: #fff; }
     .toolbar-btn-success { background: var(--green); color: #fff; border: none; }
-    .toolbar-btn-success:hover { filter: brightness(1.05); color: #fff; }
+    .toolbar-btn-success:hover:not(:disabled) { filter: brightness(1.05); color: #fff; }
     .date-filter-box { display: flex; align-items: center; border: 1px solid #E6EAF0; border-radius: 10px; overflow: hidden; background: #fff; }
     .date-filter-box input { border: none; padding: 10px 12px; font-weight: 600; outline: none; background: transparent; font-family: inherit; color: var(--text-main); }
     .date-filter-box button { border: none; background: transparent; padding: 0 16px; color: var(--text-sub); font-weight: 600; cursor: pointer; border-left: 1px solid #E6EAF0; transition: .2s; }
@@ -108,6 +109,7 @@
     .status-no{color:var(--accent);font-weight:800;background:rgba(240,118,84,.12);padding:5px 12px;border-radius:999px;font-size:12px}
     .status-expired{color:#8A93A5;font-weight:800;background:rgba(138,147,165,.12);padding:5px 12px;border-radius:999px;font-size:12px}
     .time-text{font-size:13px;color:var(--text-sub)}
+    .act-tag { background: #E6EAF0; color: var(--text-main); font-size: 11px; padding: 4px 8px; border-radius: 6px; font-weight: 700; display: inline-block; white-space: nowrap; }
 
     /* Kebab Dropdown Menu */
     .kebab-dropdown { position: relative; flex-shrink: 0; }
@@ -244,10 +246,10 @@
           </div>
         </div>
 
-        <!-- 🔥 新版工具列 Toolbar -->
         <div class="toolbar-card">
           <div class="toolbar-group">
             <select id="act-select" class="toolbar-item" onchange="fetchData()"></select>
+            
             <div class="date-filter-box">
               <input type="date" id="date-filter" onchange="updateDashboardStats()" title="篩選特定日期的核銷紀錄">
               <button onclick="clearDateFilter()">✖ 清除篩選</button>
@@ -255,7 +257,7 @@
           </div>
           <div class="toolbar-group">
             <button class="toolbar-item toolbar-btn-success" id="btn-batch" onclick="batchRedeem()">☑️ 批次核銷</button>
-            <button class="toolbar-item" onclick="expireTickets()">🧹 智慧結算過期</button>
+            <button class="toolbar-item" id="btn-expire" onclick="expireTickets()">🧹 智慧結算過期</button>
             <button class="toolbar-item toolbar-btn-primary" onclick="exportExcel()">📥 匯出 Excel</button>
           </div>
         </div>
@@ -299,7 +301,9 @@
           <table id="data-table">
             <thead>
               <tr>
-                <th><input type="checkbox" onclick="document.querySelectorAll('.row-check').forEach(cb => cb.checked = this.checked)"></th>
+                <th><input type="checkbox" id="check-all" onclick="document.querySelectorAll('.row-check').forEach(cb => cb.checked = this.checked)"></th>
+                <!-- 🔥 新增總覽模式專屬欄位：活動名稱 -->
+                <th id="col-act" style="display:none;" onclick="setSort('act_source')">🎯 所屬活動 <span class="sort-icon" id="sort-act_source">▼</span></th>
                 <th onclick="setSort('phone')">📱 兌換號碼 <span class="sort-icon" id="sort-phone">▼</span></th>
                 <th onclick="setSort('name')">👤 顧客姓名 <span class="sort-icon" id="sort-name">▼</span></th>
                 <th onclick="setSort('social_id')">🔗 社群帳號 <span class="sort-icon" id="sort-social_id">▼</span></th>
@@ -310,7 +314,7 @@
                 <th onclick="setSort('redeemBy')">👤 核銷人員 <span class="sort-icon" id="sort-redeemBy">▼</span></th>
                 <th onclick="setSort('expireDate')">⏳ 使用期限 <span class="sort-icon" id="sort-expireDate">▼</span></th>
                 <th onclick="setSort('timestamp')">📅 領券時間 <span class="sort-icon" id="sort-timestamp">▼</span></th>
-                <th>⚙️ 管理操作</th>
+                <th id="col-action">⚙️ 管理操作</th>
               </tr>
             </thead>
             <tbody id="table-body"></tbody>
@@ -505,7 +509,7 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getFirestore, collection, onSnapshot, doc, getDoc, setDoc, updateDoc, deleteDoc, query, limit } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getFirestore, collection, getDocs, onSnapshot, doc, getDoc, setDoc, updateDoc, deleteDoc, query, limit } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
     import { getAuth, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
     const firebaseConfig = {
@@ -564,24 +568,25 @@
       
       if (viewId === 'lottery-ui' || viewId === 'issue-ui') {
         const actSelectHtml = document.getElementById('act-select').innerHTML;
-        if(document.getElementById('lottery-act')) document.getElementById('lottery-act').innerHTML = actSelectHtml;
-        if(document.getElementById('manual-act')) document.getElementById('manual-act').innerHTML = actSelectHtml;
-        if(document.getElementById('batch-act')) document.getElementById('batch-act').innerHTML = actSelectHtml;
+        // 發券跟抽獎不需要「總覽」，所以過濾掉
+        let cleanHtml = actSelectHtml.replace(/<option value="ALL_OVERVIEW">🌐 總覽 \(所有活動\)<\/option>/g, '');
+        if(document.getElementById('lottery-act')) document.getElementById('lottery-act').innerHTML = cleanHtml;
+        if(document.getElementById('manual-act')) document.getElementById('manual-act').innerHTML = cleanHtml;
+        if(document.getElementById('batch-act')) document.getElementById('batch-act').innerHTML = cleanHtml;
       }
     };
 
+    // 🔥 升級：產生下拉選單時，加入「🌐 總覽 (所有活動)」選項
     function populateAdminDropdown() {
-      const html = globalEventOrder.map(a => {
+      let html = `<option value="ALL_OVERVIEW">🌐 總覽 (所有活動)</option>`;
+      html += globalEventOrder.map(a => {
         const isActive = globalPosConfig[a]?.active !== false;
         const displayText = isActive ? a : `${a} (已下架)`;
         return `<option value="${a}">${displayText}</option>`;
       }).join('');
       
-      const targetIds = ['act-select', 'manual-act', 'batch-act', 'lottery-act'];
-      targetIds.forEach(id => {
-          const el = document.getElementById(id);
-          if (el) el.innerHTML = html;
-      });
+      const el = document.getElementById('act-select');
+      if (el) el.innerHTML = html;
       
       if (globalEventOrder.length > 0) window.fetchData(); 
     }
@@ -820,7 +825,8 @@
       const gift = document.getElementById('manual-gift').value.trim();
       const expire = document.getElementById('manual-expire').value.trim(); 
 
-      if(!act || !phone || !name) return alert("⚠️ 請填寫活動、號碼與姓名！");
+      if(!act || act === 'ALL_OVERVIEW') return alert("⚠️ 請確實選擇要發券的活動項目！");
+      if(!phone || !name) return alert("⚠️ 請填寫號碼與姓名！");
 
       try {
         const docRef = doc(db, act, phone);
@@ -864,7 +870,7 @@
       const gift = document.getElementById('batch-gift').value.trim();
       const btn = document.getElementById('btn-run-batch');
 
-      if(!act) return alert("⚠️ 請選擇活動！");
+      if(!act || act === 'ALL_OVERVIEW') return alert("⚠️ 請選擇具體的活動！");
       if(isNaN(start) || isNaN(end) || start > end) return alert("⚠️ 號碼設定錯誤！");
       if((end - start) > 2000) return alert("⚠️ 一次最多產生 2000 筆！");
 
@@ -915,7 +921,7 @@
       const btn = document.getElementById('btn-run-lottery');
       const resultBox = document.getElementById('lottery-result');
 
-      if (!act) return alert("⚠️ 請選擇活動！");
+      if (!act || act === 'ALL_OVERVIEW') return alert("⚠️ 請選擇活動！");
       if (!rawText) return alert("⚠️ 請貼上參加者名單！");
       if (isNaN(count) || count < 1) return alert("⚠️ 抽出人數必須大於 0！");
 
@@ -1041,26 +1047,64 @@
       updateDashboardStats();
     };
 
-    window.fetchData = function() {
+    // 🔥 升級：抓取資料邏輯，支援「總覽」所有活動
+    window.fetchData = async function() {
       const actSelect = document.getElementById('act-select');
       if (!actSelect || !actSelect.value) return;
       const act = actSelect.value;
       const tbody = document.getElementById('table-body');
+      const colAct = document.getElementById('col-act');
+      const colAction = document.getElementById('col-action');
+      const btnBatch = document.getElementById('btn-batch');
+      const btnExpire = document.getElementById('btn-expire');
       
       if (unsubscribeSnapshot) unsubscribeSnapshot();
       tbody.innerHTML = '<tr><td colspan="12" style="text-align:center; padding: 40px; color: #8A93A5;">📡 與資料庫即時連線中...</td></tr>';
       
-      const q = query(collection(db, act), limit(500));
-      unsubscribeSnapshot = onSnapshot(q, (querySnapshot) => {
-        allData = [];
-        querySnapshot.forEach((doc) => {
-          const d = doc.data(); d.id = doc.id; allData.push(d);
-        });
-        
-        updateDashboardStats();
-      }, (error) => {
-        tbody.innerHTML = '<tr><td colspan="12" style="text-align:center; padding: 40px; color: red;">連線中斷，請確認網路連線。</td></tr>';
-      });
+      // 如果選擇的是「總覽」，改變 UI 行為並撈取所有活動
+      if (act === 'ALL_OVERVIEW') {
+          colAct.style.display = 'table-cell';
+          colAction.style.display = 'none'; // 總覽模式下不開放操作按鈕
+          btnBatch.disabled = true;
+          btnExpire.disabled = true;
+          document.getElementById('check-all').disabled = true;
+          
+          allData = [];
+          try {
+              const fetchPromises = globalEventOrder.map(async (aName) => {
+                  const q = query(collection(db, aName), limit(200)); // 每個活動抓最近 200 筆防止卡死
+                  const snap = await getDocs(q);
+                  snap.forEach(doc => {
+                      const d = doc.data(); 
+                      d.id = doc.id; 
+                      d.act_source = aName; // 標記來源活動
+                      allData.push(d);
+                  });
+              });
+              await Promise.all(fetchPromises);
+              updateDashboardStats();
+          } catch(e) {
+              tbody.innerHTML = '<tr><td colspan="12" style="text-align:center; padding: 40px; color: red;">載入總覽失敗，請重試。</td></tr>';
+          }
+      } else {
+          // 單一活動即時連線模式
+          colAct.style.display = 'none';
+          colAction.style.display = 'table-cell';
+          btnBatch.disabled = false;
+          btnExpire.disabled = false;
+          document.getElementById('check-all').disabled = false;
+          
+          const q = query(collection(db, act), limit(500));
+          unsubscribeSnapshot = onSnapshot(q, (querySnapshot) => {
+            allData = [];
+            querySnapshot.forEach((doc) => {
+              const d = doc.data(); d.id = doc.id; d.act_source = act; allData.push(d);
+            });
+            updateDashboardStats();
+          }, (error) => {
+            tbody.innerHTML = '<tr><td colspan="12" style="text-align:center; padding: 40px; color: red;">連線中斷，請確認網路連線。</td></tr>';
+          });
+      }
     };
 
     window.updateDashboardStats = function() {
@@ -1098,6 +1142,8 @@
 
     window.batchRedeem = async function() {
       const act = document.getElementById('act-select').value;
+      if (act === 'ALL_OVERVIEW') return alert("⚠️ 總覽模式下無法批次核銷，請選擇特定活動。");
+      
       const checkedBoxes = document.querySelectorAll('.row-check:checked');
       if(checkedBoxes.length === 0) return alert("⚠️ 請先勾選表格左側要核銷的票券！");
       if(!confirm(`確定要在後台強制核銷這 ${checkedBoxes.length} 張票券嗎？`)) return;
@@ -1132,15 +1178,24 @@
       const actSelect = document.getElementById('act-select');
       if (!actSelect || !actSelect.value) return;
       const act = actSelect.value;
+      
+      // 🔥 升級：攔截在「已下架」或「總覽」的狀態下按智慧結算
+      if (act === 'ALL_OVERVIEW') {
+          return alert("🛑 總覽模式下無法進行智慧結算，請選擇單一具體活動。");
+      }
+      if (act.includes('(已下架)')) {
+          return alert("🛑 該活動已下架結束，無需再進行掃描結算！");
+      }
+      
       const defaultExpire = globalPosConfig[act]?.expireDate || "";
 
       if(!confirm(`💡 智慧結算系統\n\n系統將自動掃描「${act}」中所有【未兌換】的憑證，並比對其「使用期限」。\n\n若期限日期早於今天，系統會自動將其設為【已過期】。\n(未設定日期或實體券不受影響)\n\n確定要開始掃描並結算嗎？`)) return;
 
       try {
-        const btn = document.querySelector('.btn-expire');
+        const btn = document.getElementById('btn-expire');
         btn.innerText = "掃描結算中..."; btn.disabled = true;
 
-        const unredeemedDocs = allData.filter(d => !d.status || d.status === "未兌換");
+        const unredeemedDocs = allData.filter(d => (!d.status || d.status === "未兌換") && d.act_source === act);
         if (unredeemedDocs.length === 0) {
           alert("🎉 目前沒有任何【未兌換】的票券可以結算！");
           btn.innerText = "🧹 智慧結算過期"; btn.disabled = false;
@@ -1156,7 +1211,6 @@
           const expStr = d.expireDate || defaultExpire;
           if (!expStr) return; 
           
-          // 🔥 修正 Bug：將掃描器(Regex)移入迴圈內，避免產生歷史殘留造成錯誤
           const regex = /(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})/g;
           let match;
           let lastDate = null;
@@ -1183,22 +1237,22 @@
       } catch (error) {
         console.error(error);
         alert("結算失敗，請檢查網路連線或權限。\n錯誤詳情：" + error.message);
-        document.querySelector('.btn-expire').innerText = "🧹 智慧結算過期"; 
-        document.querySelector('.btn-expire').disabled = false;
+        document.getElementById('btn-expire').innerText = "🧹 智慧結算過期"; 
+        document.getElementById('btn-expire').disabled = false;
       }
     };
 
-    window.resetSingleTicket = async function(phone) {
-      const act = document.getElementById('act-select').value;
+    window.resetSingleTicket = async function(phone, sourceAct) {
       if (!confirm(`⚠️ 確定要將兌換號碼「${phone}」重設為【未兌換】嗎？\n(將清空核銷門市與時間紀錄)`)) return;
-      await updateDoc(doc(db, act, phone), { status: "未兌換", store: "", redeemTime: "", redeemBy: "" });
+      await updateDoc(doc(db, sourceAct, phone), { status: "未兌換", store: "", redeemTime: "", redeemBy: "" });
+      if(document.getElementById('act-select').value === 'ALL_OVERVIEW') fetchData(); // 總覽模式手動重整
     };
 
-    window.deleteSingleTicket = async function(phone) {
-      const act = document.getElementById('act-select').value;
+    window.deleteSingleTicket = async function(phone, sourceAct) {
       if (!confirm(`🚨 警告：您即將永久刪除「${phone}」的憑證資料！\n刪除後將無法復原，確定要刪除嗎？`)) return;
       try {
-        await deleteDoc(doc(db, act, phone));
+        await deleteDoc(doc(db, sourceAct, phone));
+        if(document.getElementById('act-select').value === 'ALL_OVERVIEW') fetchData(); // 總覽模式手動重整
       } catch (error) {
         alert("刪除失敗，請檢查權限或連線狀態。");
       }
@@ -1217,8 +1271,7 @@
       const tbody = document.getElementById('table-body');
       const searchTerm = document.getElementById('search-box').value.trim().toLowerCase();
       const currentAct = document.getElementById('act-select').value;
-      const defaultGift = globalPosConfig[currentAct]?.gift || '預設活動贈品';
-      const defaultExpire = globalPosConfig[currentAct]?.expireDate || "無特別限制";
+      const isOverview = currentAct === 'ALL_OVERVIEW';
 
       const selectedDate = document.getElementById('date-filter').value;
       let dateStr = selectedDate ? selectedDate.replace(/-/g, '/') : "";
@@ -1239,10 +1292,13 @@
       document.getElementById('result-count').innerText = `顯示 ${filteredData.length} 筆結果`;
 
       if (filteredData.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="12" style="text-align:center; padding: 40px; color: #F07654; font-weight: bold;">找不到資料 🥲</td></tr>'; return;
+        tbody.innerHTML = `<tr><td colspan="12" style="text-align:center; padding: 40px; color: #F07654; font-weight: bold;">找不到資料 🥲</td></tr>`; return;
       }
 
       tbody.innerHTML = filteredData.map(d => {
+        const defaultGift = globalPosConfig[d.act_source]?.gift || '預設活動贈品';
+        const defaultExpire = globalPosConfig[d.act_source]?.expireDate || "無特別限制";
+
         let statusBadge = `<span class="status-no">${d.status || '未兌換'}</span>`; 
         if (d.status === '已兌換') statusBadge = `<span class="status-yes">已兌換</span>`; 
         if (d.status === '已過期') statusBadge = `<span class="status-expired">已過期</span>`; 
@@ -1250,29 +1306,31 @@
         let displayGift = d.gift ? `${d.gift} <span style="font-size:10px; color:#F07654;">(專屬)</span>` : defaultGift;
         let displayExpire = d.expireDate || defaultExpire;
         
-        // 🔥 修正 Bug：確保尚未兌換且無狀態值的票券也能被勾選
-        let checkboxHTML = (!d.status || d.status === '未兌換') ? `<input type="checkbox" class="row-check" value="${d.id}">` : '';
+        let checkboxHTML = (!d.status || d.status === '未兌換') ? `<input type="checkbox" class="row-check" value="${d.id}" ${isOverview ? 'disabled' : ''}>` : '';
+        let actColHTML = isOverview ? `<td><span class="act-tag">${d.act_source}</span></td>` : '';
 
-        let actionBtnHTML = `
-          <details class="kebab-dropdown">
-            <summary>⋮</summary>
-            <div class="kebab-menu">
-              <button onclick="showQrCode('${d.phone}', '${d.name}')">📱 顯示 QR Code</button>
-        `;
-        
-        if (d.status === '已兌換' || d.status === '已過期') {
-            actionBtnHTML += `<button onclick="resetSingleTicket('${d.id}')">↻ 復原未兌換狀態</button>`;
+        let actionBtnHTML = ``;
+        if(!isOverview) {
+            actionBtnHTML = `
+              <details class="kebab-dropdown">
+                <summary>⋮</summary>
+                <div class="kebab-menu">
+                  <button onclick="showQrCode('${d.phone}', '${d.name}')">📱 顯示 QR Code</button>
+            `;
+            if (d.status === '已兌換' || d.status === '已過期') {
+                actionBtnHTML += `<button onclick="resetSingleTicket('${d.id}', '${d.act_source}')">↻ 復原未兌換狀態</button>`;
+            }
+            actionBtnHTML += `
+                  <button class="danger" onclick="deleteSingleTicket('${d.id}', '${d.act_source}')">🗑️ 刪除紀錄</button>
+                </div>
+              </details>
+            `;
         }
-        
-        actionBtnHTML += `
-              <button class="danger" onclick="deleteSingleTicket('${d.id}')">🗑️ 刪除紀錄</button>
-            </div>
-          </details>
-        `;
 
         return `
           <tr>
             <td>${checkboxHTML}</td>
+            ${actColHTML}
             <td style="font-family:monospace; font-size:15px; font-weight:bold; color:var(--text-main);">${d.phone || ''}</td>
             <td style="font-weight:bold;">${d.name || ''}</td>
             <td style="color:#F07654;">${d.social_id || '未提供'}</td>
@@ -1283,7 +1341,7 @@
             <td style="font-weight:bold; color:var(--text-sub);">${d.redeemBy || '-'}</td>
             <td style="font-weight:bold; color:var(--text-main);">${displayExpire}</td>
             <td class="time-text">${d.timestamp || '-'}</td>
-            <td>${actionBtnHTML}</td>
+            ${!isOverview ? `<td>${actionBtnHTML}</td>` : ''}
           </tr>
         `;
       }).join('');
@@ -1291,20 +1349,30 @@
 
     window.exportExcel = function() {
       if (allData.length === 0) return alert('⚠️ 目前沒有資料可以匯出！');
-      const act = document.getElementById('act-select').value;
-      const defaultGift = globalPosConfig[act]?.gift || '預設活動贈品';
-      const defaultExpire = globalPosConfig[act]?.expireDate || "無特別限制";
-
-      const exportArr = allData.map(d => ({
-        "兌換號碼": d.phone, "顧客姓名": d.name, "社群帳號": d.social_id || '未提供',
-        "兌換品項": d.gift || defaultGift, "兌換狀態": d.status || '未兌換',
-        "核銷門市": d.store || '', "核銷時間": d.redeemTime || '', 
-        "核銷人員": d.redeemBy || '', 
-        "使用期限": d.expireDate || defaultExpire, "領券時間": d.timestamp || ''
-      }));
+      
+      const exportArr = allData.map(d => {
+        const defaultGift = globalPosConfig[d.act_source]?.gift || '預設活動贈品';
+        const defaultExpire = globalPosConfig[d.act_source]?.expireDate || "無特別限制";
+        
+        return {
+          "所屬活動": d.act_source,
+          "兌換號碼": d.phone, 
+          "顧客姓名": d.name, 
+          "社群帳號": d.social_id || '未提供',
+          "兌換品項": d.gift || defaultGift, 
+          "兌換狀態": d.status || '未兌換',
+          "核銷門市": d.store || '', 
+          "核銷時間": d.redeemTime || '', 
+          "核銷人員": d.redeemBy || '', 
+          "使用期限": d.expireDate || defaultExpire, 
+          "領券時間": d.timestamp || ''
+        };
+      });
+      
       const ws = XLSX.utils.json_to_sheet(exportArr); const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, "兌換名單");
-      XLSX.writeFile(wb, `${act}_兌換報表_${new Date().toISOString().slice(0,10)}.xlsx`);
+      const fileName = document.getElementById('act-select').value === 'ALL_OVERVIEW' ? '總覽_所有活動' : document.getElementById('act-select').value;
+      XLSX.writeFile(wb, `${fileName}_兌換報表_${new Date().toISOString().slice(0,10)}.xlsx`);
     };
 
     function drawCharts(storeStats, redeemed, unredeemed, expired) {
