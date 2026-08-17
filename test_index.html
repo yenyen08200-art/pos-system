@@ -146,6 +146,10 @@ button{font-family:inherit;cursor:pointer;}
 .primary-btn:active{transform:scale(.95)}
 button:disabled{opacity:.5;cursor:not-allowed}
 
+/* 🔥 新增值班人員輸入框專屬樣式 */
+#employee-name{width:100%; min-height:56px; border-radius:12px; border:1px solid var(--border); background:var(--secondary); color:var(--foreground); padding:0 16px; font-size:16px; outline:none; transition:all .2s;}
+#employee-name:focus{border-color:var(--primary); background:var(--card);}
+
 #scan-area{
   position: fixed; inset: 0; z-index: 9999; 
   background: rgba(10, 12, 16, 0.95); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
@@ -233,6 +237,12 @@ button:disabled{opacity:.5;cursor:not-allowed}
           </details>
         </div>
 
+        <!-- 🔥 新增值班人員輸入框 -->
+        <div class="block">
+          <h2 class="label">● 值班人員 (必填)</h2>
+          <input id="employee-name" type="text" placeholder="請輸入姓名或員工代號">
+        </div>
+
         <div class="block">
           <h2 class="label">● 活動選單</h2>
           <div id="acts"><p class="empty">正在從雲端載入活動...</p></div>
@@ -310,7 +320,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
 
   let STORE_LIST = [];
   let POS_CONFIG = {};
-  let EVENT_ORDER = []; // 🔥 加入讀取排序功能
+  let EVENT_ORDER = [];
   let evMap = {};
   let giftMap = {};
 
@@ -368,9 +378,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
         STORE_LIST = data.STORE_LIST || [];
         POS_CONFIG = data.POS_CONFIG || {};
         
-        // 🔥 讀取排序資料
         EVENT_ORDER = data.EVENT_ORDER || Object.keys(POS_CONFIG);
-        // 過濾掉可能已經刪除但還留在排序陣列的幽靈資料
         EVENT_ORDER = EVENT_ORDER.filter(a => POS_CONFIG[a]);
         
       } else {
@@ -381,12 +389,9 @@ button:disabled{opacity:.5;cursor:not-allowed}
       evMap = {};
       STORE_LIST.forEach(s => {
         evMap[s] = [];
-        // 🔥 改用 EVENT_ORDER 陣列來產生活動列表，保證順序與後台一模一樣
         EVENT_ORDER.forEach(a => {
           const cfg = POS_CONFIG[a];
-          
           if (cfg.active === false) return;
-          
           if (cfg.stores === "ALL" || (Array.isArray(cfg.stores) && cfg.stores.includes(s))) {
             evMap[s].push(a);
           }
@@ -398,14 +403,18 @@ button:disabled{opacity:.5;cursor:not-allowed}
         giftMap[a] = POS_CONFIG[a].gift;
       }
 
-      const saved = localStorage.getItem("p_store");
-      if (saved && evMap[saved]) { 
-        store = saved; 
-        act = (evMap[saved] || [])[0] || ""; 
+      const savedStore = localStorage.getItem("p_store");
+      if (savedStore && evMap[savedStore]) { 
+        store = savedStore; 
+        act = (evMap[savedStore] || [])[0] || ""; 
       } else if (STORE_LIST.length > 0) {
         store = STORE_LIST[0];
         act = (evMap[store] || [])[0] || "";
       }
+
+      // 🔥 讀取上次輸入的員工姓名
+      const savedEmp = localStorage.getItem("p_employee");
+      if(savedEmp) $("employee-name").value = savedEmp;
 
       renderStores(); 
       renderActs(); 
@@ -496,7 +505,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
     banner.className = "banner rise " + (isInvalid ? "bad" : "ok");
     
     if (isClaimed) {
-      banner.innerHTML = "❌ 券已失效 / 已領取<small>📌 於 " + (record.store || "—") + " 兌換</small><small>🕒 " + (record.redeemTime || "—") + "</small>";
+      banner.innerHTML = `❌ 券已失效 / 已領取<small>📌 於 ${record.store || "—"} 兌換</small><small>🕒 ${record.redeemTime || "—"}</small><small>👤 核銷人員：${record.redeemBy || "—"}</small>`;
     } else if (isExpired) {
       banner.innerHTML = "⚠️ 券已逾期失效<small>🕒 系統已結算過期</small>";
     } else {
@@ -636,6 +645,11 @@ button:disabled{opacity:.5;cursor:not-allowed}
   }
 
   async function redeem(){
+    // 🔥 確保員工有填寫姓名
+    const empName = $("employee-name").value.trim();
+    if(!empName) return alert("🛑 請先填寫左上方或上方的「值班人員」姓名！");
+    localStorage.setItem("p_employee", empName); // 記憶員工名字
+
     if (!confirm("確定核銷？憑證將失效！")) return;
     const ph = shownPhone, st = store, ac = act;
     const d = new Date(), pad = (n) => (n < 10 ? "0" + n : String(n));
@@ -644,8 +658,14 @@ button:disabled{opacity:.5;cursor:not-allowed}
     setBusy(true);
     
     try {
-      await updateDoc(doc(db, ac, ph), { status: "已兌換", store: st, redeemTime: nowStr });
-      record = Object.assign({}, record || {}, { status: "已兌換", store: st, redeemTime: nowStr });
+      // 🔥 將員工名字寫入資料庫
+      await updateDoc(doc(db, ac, ph), { 
+        status: "已兌換", 
+        store: st, 
+        redeemTime: nowStr,
+        redeemBy: empName
+      });
+      record = Object.assign({}, record || {}, { status: "已兌換", store: st, redeemTime: nowStr, redeemBy: empName });
     } finally {
       setBusy(false);
     }
@@ -671,7 +691,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
     const ph = shownPhone, ac = act;
     setBusy(true);
     try {
-      await updateDoc(doc(db, ac, ph), { status: "未兌換", store: "", redeemTime: "" });
+      await updateDoc(doc(db, ac, ph), { status: "未兌換", store: "", redeemTime: "", redeemBy: "" });
     } finally {
       setBusy(false);
     }
