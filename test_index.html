@@ -24,10 +24,16 @@
   --border:oklch(1 0 0 / 10%);
   --input:oklch(1 0 0 / 14%);
   --surface-glow:0 0 0 1px oklch(1 0 0 / 6%), 0 24px 60px -20px oklch(0 0 0 / 60%);
-  --gradient-tech:linear-gradient(135deg, oklch(0.78 0.17 68), oklch(0.72 0.16 40));
   --gradient-panel:linear-gradient(160deg, oklch(0.24 0.03 262), oklch(0.2 0.026 258));
+  
+  /* 🔥 新增：電子憑證專屬「霓虹冰藍」漸層 */
+  --accent-digital: #00C6FF;
+  --gradient-digital: linear-gradient(135deg, #00C6FF, #0072FF);
+
+  /* 🔥 實體券專屬「橘紅色」漸層 */
   --accent-physical: #FF6B35;
-  --gradient-physical:linear-gradient(135deg, #FF6B35, #F04323);
+  --gradient-physical: linear-gradient(135deg, #FF6B35, #F04323);
+  
   --radius:1.25rem;
 }
 *{box-sizing:border-box;margin:0;padding:0;border-color:var(--border)}
@@ -43,21 +49,31 @@ body {
 main {
   min-height: 100vh; width: 100%; max-width: 100vw; overflow-x: hidden;
   background-image:
-    radial-gradient(circle at 15% 10%, oklch(0.78 0.17 68 / 12%), transparent 45%),
-    radial-gradient(circle at 85% 0%, oklch(0.78 0.14 195 / 12%), transparent 40%),
+    radial-gradient(circle at 15% 10%, rgba(0,198,255,0.1), transparent 45%),
+    radial-gradient(circle at 85% 0%, rgba(0,114,255,0.1), transparent 40%),
     linear-gradient(oklch(1 0 0 / 3%) 1px, transparent 1px),
     linear-gradient(90deg, oklch(1 0 0 / 3%) 1px, transparent 1px);
   background-size: auto,auto,44px 44px,44px 44px;
 }
 
+/* 實體模式時的背景光暈 */
+body.mode-physical-active main {
+  background-image:
+    radial-gradient(circle at 15% 10%, rgba(255,107,53,0.12), transparent 45%),
+    radial-gradient(circle at 85% 0%, rgba(240,67,35,0.12), transparent 40%),
+    linear-gradient(oklch(1 0 0 / 3%) 1px, transparent 1px),
+    linear-gradient(90deg, oklch(1 0 0 / 3%) 1px, transparent 1px);
+}
+
 .wrap { max-width: 1400px; margin: 0 auto; width: 100%; padding: 20px 16px; }
 @media(min-width:768px){.wrap{padding:32px}}
 
-/* 🔥 頂部狀態列與心跳監控 */
+/* 頂部狀態列與心跳監控 */
 header{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px;margin-bottom:24px}
 .brand{display:flex;align-items:center;gap:16px}
 .logo{width:56px;height:56px;display:flex;align-items:center;justify-content:center;border-radius:18px;font-size:26px;
-  background-image:var(--gradient-tech);color:var(--primary-foreground);box-shadow:0 12px 30px -12px oklch(0 0 0/.8); transition:transform .3s}
+  background-image:var(--gradient-digital);color:#fff;box-shadow:0 12px 30px -12px rgba(0,198,255,0.8); transition:transform .3s}
+body.mode-physical-active .logo { background-image: var(--gradient-physical); box-shadow:0 12px 30px -12px rgba(255,107,53,0.8); }
 .logo:hover{transform:scale(1.05)}
 h1{font-size:clamp(22px,3vw,30px);font-weight:700;letter-spacing:-.02em}
 .sub{font-size:14px;color:var(--muted-foreground); display:flex; align-items:center; gap:8px;}
@@ -106,21 +122,24 @@ section.panel{padding:20px}
 button{font-family:inherit;cursor:pointer;}
 .store-btn{width:100%;min-height:56px;border-radius:12px;border:1px solid var(--border);background:var(--secondary);color:var(--secondary-foreground);
   font-size:16px;font-weight:600;transition:all .2s; padding: 0 8px;}
-.store-btn:hover{background:var(--muted);border-color:oklch(0.78 0.17 68/.6)}
+.store-btn:hover{background:var(--muted);border-color:var(--accent-digital)}
 .store-btn:active{transform:scale(.97)}
-.store-btn.on{background-image:var(--gradient-tech);color:var(--primary-foreground);border-color:var(--primary);box-shadow:0 12px 26px -14px oklch(0 0 0/.9)}
+.store-btn.on{background-image:var(--gradient-digital);color:#fff;border-color:var(--accent-digital);box-shadow:0 12px 26px -14px rgba(0,198,255,0.9)}
 
 .acts{display:flex;flex-direction:column;gap:10px; width:100%;}
 .act-btn{width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:64px;padding:0 20px;text-align:left;
   border-radius:14px;border:1px solid var(--border);background:var(--secondary);color:var(--foreground);transition:all .2s;}
-.act-btn:hover{background:var(--muted);border-color:oklch(0.78 0.14 195/.5)}
+.act-btn:hover{background:var(--muted);border-color:rgba(0,198,255,0.5)}
 .act-btn:active{transform:scale(.99)}
 .act-name{display:block;font-size:18px;font-weight:600}
 .radio{width:16px;height:16px;border-radius:999px;border:2px solid var(--muted-foreground);flex:none; transition: .2s;}
-.act-btn.on{border-color:var(--accent);background:oklch(0.78 0.14 195/.15)}
-.act-btn.on .radio{border-color:var(--accent);background:var(--accent); box-shadow: 0 0 0 4px oklch(0.78 0.14 195/.2);}
 
-/* 實體券選中狀態 */
+/* 🔥 電子券選中狀態 (高亮霓虹冰藍) */
+.act-btn.on{border-color:var(--accent-digital);background:rgba(0,198,255,0.15)}
+.act-btn.on .radio{border-color:var(--accent-digital);background:var(--accent-digital); box-shadow: 0 0 0 4px rgba(0,198,255,0.2);}
+
+/* 🔥 實體券選中狀態 (高亮橘紅) */
+.act-btn.is-physical:hover { border-color: rgba(255,107,53,0.5); }
 .act-btn.is-physical.on { border-color: var(--accent-physical); background: rgba(255, 107, 53, 0.15); }
 .act-btn.is-physical.on .radio { border-color: var(--accent-physical); background: var(--accent-physical); box-shadow: 0 0 0 4px rgba(255, 107, 53, 0.2); }
 
@@ -128,9 +147,9 @@ button{font-family:inherit;cursor:pointer;}
 
 .mode-switch { display: flex; gap: 8px; margin-bottom: 16px; padding: 6px; background: var(--secondary); border-radius: 16px; }
 .mode-btn { flex: 1; padding: 12px; border-radius: 12px; border: none; background: transparent; color: var(--muted-foreground); font-weight: 700; font-size: 15px; transition: 0.2s; }
-.mode-btn.active { background: var(--card); color: var(--foreground); box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
 
-/* 實體模式顏色 */
+/* 模式按鈕高亮 */
+#mode-digital.active { background: var(--gradient-digital); color: #fff; box-shadow: 0 8px 20px -6px rgba(0,198,255,0.6); border: none; }
 #mode-physical.active { background: var(--gradient-physical); color: #fff; box-shadow: 0 8px 20px -6px rgba(255,107,53,0.6); border: none; }
 
 .searchbar{display:flex;flex-direction:column;gap:10px; width: 100%;}
@@ -145,27 +164,28 @@ button{font-family:inherit;cursor:pointer;}
 #phone{flex:1;min-height:64px;border-radius:14px;border:1px solid var(--input);background:oklch(0.17 0.024 259/.6);
   color:var(--foreground);padding:0 16px;font-size:20px;font-weight:600;letter-spacing:.08em;outline:none;transition:all .2s; width: 100%; min-width: 0;}
 #phone::placeholder{font-size:15px;font-weight:400;letter-spacing:normal;color:var(--muted-foreground)}
-#phone:focus{border-color:var(--primary);box-shadow:0 0 0 4px oklch(0.78 0.17 68/.25)}
+
+/* 輸入框 Focus 顏色切換 */
+#phone:focus { border-color: var(--accent-digital); box-shadow: 0 0 0 4px rgba(0,198,255,0.25); }
 body.mode-physical-active #phone:focus { border-color: var(--accent-physical); box-shadow: 0 0 0 4px rgba(255,107,53,0.25); }
 
 .icon-btn{min-height:64px;padding:0 20px;font-size:24px;border-radius:14px;border:1px solid var(--border);background:var(--secondary);color:var(--foreground);transition:all .2s}
 .icon-btn:hover{background:var(--muted)}
 .icon-btn:active{transform:scale(.95)}
+
 .primary-btn{min-height:64px;padding:0 28px;font-size:18px;font-weight:700;border:none;border-radius:14px;
-  background-image:var(--gradient-tech);color:var(--primary-foreground);box-shadow:0 14px 30px -16px oklch(0 0 0/.9);transition:all .2s;
+  background-image:var(--gradient-digital);color:#fff;box-shadow:0 14px 30px -16px rgba(0,198,255,0.9);transition:all .2s;
   display: flex; align-items: center; justify-content: center; gap: 8px;}
 .primary-btn:hover{filter:brightness(1.1)}
 .primary-btn:active{transform:scale(.95)}
 body.mode-physical-active .primary-btn { background-image: var(--gradient-physical); box-shadow: 0 14px 30px -16px rgba(255,107,53,0.9); }
 button:disabled{opacity:.5;cursor:not-allowed}
 
-/* 顯示快捷鍵提示 */
-.hotkey-hint { font-size: 10px; background: rgba(0,0,0,0.3); padding: 2px 6px; border-radius: 4px; font-weight: normal; letter-spacing: normal;}
-
 #employee-name{width:100%; min-height:56px; border-radius:12px; border:1px solid var(--border); background:var(--secondary); color:var(--foreground); padding:0 16px; font-size:16px; outline:none; transition:all .2s;}
-#employee-name:focus{border-color:var(--primary); background:var(--card); box-shadow:0 0 0 4px oklch(0.78 0.17 68/.25);}
+#employee-name:focus{border-color:var(--accent-digital); background:var(--card); box-shadow:0 0 0 4px rgba(0,198,255,0.25);}
+body.mode-physical-active #employee-name:focus { border-color: var(--accent-physical); box-shadow: 0 0 0 4px rgba(255,107,53,0.25); }
 
-/* 🔥 動態島通知 HUD */
+/* 動態島通知 HUD */
 #toast-container {
   position: fixed; top: -100px; left: 50%; transform: translateX(-50%); z-index: 10000;
   display: flex; align-items: center; gap: 12px; padding: 16px 24px; border-radius: 999px;
@@ -177,20 +197,24 @@ button:disabled{opacity:.5;cursor:not-allowed}
 #toast-container.success { background: rgba(63,191,143,0.15); color: var(--green); border-color: rgba(63,191,143,0.3); }
 .toast-icon { font-size: 20px; }
 
-/* 🔥 JARVIS 掃描儀 HUD */
+/* JARVIS 掃描儀 HUD */
 #scan-area{ position: fixed; inset: 0; z-index: 9999; background: rgba(10, 12, 16, 0.95); display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 24px; }
 #scan-area.hidden{display:none !important}
 .reader-wrap{ width: 100%; max-width: 450px; position: relative; }
-/* 遮罩與瞄準框 */
 .reader-wrap::before, .reader-wrap::after, .reader-wrap .corner-bl, .reader-wrap .corner-br {
-  content: ''; position: absolute; width: 40px; height: 40px; border-color: var(--primary); border-style: solid; z-index: 10; pointer-events: none;
+  content: ''; position: absolute; width: 40px; height: 40px; border-color: var(--accent-digital); border-style: solid; z-index: 10; pointer-events: none;
+}
+body.mode-physical-active .reader-wrap::before, body.mode-physical-active .reader-wrap::after, 
+body.mode-physical-active .reader-wrap .corner-bl, body.mode-physical-active .reader-wrap .corner-br {
+  border-color: var(--accent-physical);
 }
 .reader-wrap::before { top: -2px; left: -2px; border-width: 4px 0 0 4px; }
 .reader-wrap::after { top: -2px; right: -2px; border-width: 4px 4px 0 0; }
 .reader-wrap .corner-bl { bottom: -2px; left: -2px; border-width: 0 0 4px 4px; }
 .reader-wrap .corner-br { bottom: -2px; right: -2px; border-width: 0 4px 4px 0; }
 #reader{width:100%; border-radius: 12px; overflow: hidden; box-shadow: 0 0 0 9999px rgba(0,0,0,0.5); }
-.scanline{position:absolute;left:0;right:0;top:0;height:3px;background:var(--primary);pointer-events:none;animation:scan 2.5s ease-in-out infinite alternate; box-shadow: 0 0 15px 2px var(--primary); z-index: 11;}
+.scanline{position:absolute;left:0;right:0;top:0;height:3px;background:var(--accent-digital);pointer-events:none;animation:scan 2.5s ease-in-out infinite alternate; box-shadow: 0 0 15px 2px var(--accent-digital); z-index: 11;}
+body.mode-physical-active .scanline { background: var(--accent-physical); box-shadow: 0 0 15px 2px var(--accent-physical); }
 @keyframes scan{0%{top:0%}100%{top:100%}}
 .close-cam{ margin-top: 40px; width: 100%; max-width: 450px; min-height: 64px; border-radius: 999px; font-size: 16px; font-weight: 700; color: #fff; border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); transition: .2s; }
 .close-cam:active{transform:scale(.95)}
@@ -215,15 +239,25 @@ button:disabled{opacity:.5;cursor:not-allowed}
 .info .v{margin-top:4px;font-size:20px;font-weight:700; word-break: break-all;}
 .info .v.mono{letter-spacing:.08em}
 .actions{margin-top:auto;padding-top:8px;display:flex;flex-direction:column;gap:12px; width: 100%;}
+
+/* 🔥 核銷按鈕樣式 */
 .redeem{min-height:96px;width:100%;border:none;border-radius:18px;font-size:28px;font-weight:900;letter-spacing:.04em;
-  background-image:var(--gradient-tech);color:var(--primary-foreground);box-shadow:0 26px 50px -22px oklch(0 0 0/1);transition:all .2s;
+  background-image:var(--gradient-digital);color:#fff;box-shadow:0 26px 50px -22px rgba(0,198,255,0.8);transition:all .2s;
   display: flex; align-items: center; justify-content: center; gap: 12px;}
 body.mode-physical-active .redeem { background-image: var(--gradient-physical); box-shadow: 0 26px 50px -22px rgba(255,107,53,1); }
 .redeem:hover{transform:translateY(-2px);filter:brightness(1.1)}
 .redeem:active{transform:scale(.98)}
-.undo{min-height:64px;width:100%;border-radius:18px;font-size:20px;font-weight:700;color:var(--accent);
-  border:1px solid oklch(0.78 0.14 195/.5);background:oklch(0.78 0.14 195/.15);transition:background .2s}
-.undo:hover{background:oklch(0.78 0.14 195/.25)}
+
+/* 🔥 過期與已兌換按鈕強制覆寫 (防呆鎖死) */
+.redeem.is-claimed { background: var(--muted) !important; box-shadow: none !important; color: var(--muted-foreground) !important; cursor: not-allowed; transform: none !important; }
+.redeem.is-expired { background: var(--destructive) !important; box-shadow: 0 10px 20px -10px rgba(255,0,0,0.5) !important; color: #fff !important; cursor: not-allowed; transform: none !important; }
+
+.undo{min-height:64px;width:100%;border-radius:18px;font-size:20px;font-weight:700;color:var(--accent-digital);
+  border:1px solid rgba(0,198,255,0.5);background:rgba(0,198,255,0.15);transition:background .2s}
+body.mode-physical-active .undo { color:var(--accent-physical); border-color: rgba(255,107,53,0.5); background:rgba(255,107,53,0.15); }
+.undo:hover{background:rgba(0,198,255,0.25)}
+body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
+
 .next{min-height:64px;width:100%;border-radius:18px;font-size:18px;font-weight:600;color:var(--foreground);
   border:1px solid var(--border);background:var(--secondary);transition:all .2s;
   display: flex; align-items: center; justify-content: center; gap: 8px;}
@@ -234,7 +268,7 @@ body.mode-physical-active .redeem { background-image: var(--gradient-physical); 
 </head>
 <body>
 
-<!-- 🔥 動態 HUD 通知 -->
+<!-- 動態 HUD 通知 -->
 <div id="toast-container">
   <span class="toast-icon">⚠️</span>
   <span id="toast-msg">系統訊息</span>
@@ -287,14 +321,15 @@ body.mode-physical-active .redeem { background-image: var(--gradient-physical); 
         <div class="block">
           <h2 class="label">● 掃描 / 查詢</h2>
           <div class="mode-switch">
-            <button id="mode-digital" class="mode-btn active" onclick="setMode('digital')">📱 電子憑證 <span class="hotkey-hint">F1</span></button>
-            <button id="mode-physical" class="mode-btn" onclick="setMode('physical')">🎫 實體流水號 <span class="hotkey-hint">F2</span></button>
+            <!-- 移除文字快捷鍵提示 -->
+            <button id="mode-digital" class="mode-btn active" onclick="setMode('digital')">📱 電子憑證</button>
+            <button id="mode-physical" class="mode-btn" onclick="setMode('physical')">🎫 實體流水號</button>
           </div>
 
           <div class="searchbar">
             <input id="phone" type="tel" placeholder="輸入手機號碼 (限10碼)" oninput="handleInput(this)" />
             <button class="icon-btn" id="btn-scan" aria-label="掃描 QR Code">📷</button>
-            <button class="primary-btn" id="btn-check">查詢 <span class="hotkey-hint">Enter</span></button>
+            <button class="primary-btn" id="btn-check">查詢</button>
           </div>
         </div>
       </section>
@@ -318,9 +353,10 @@ body.mode-physical-active .redeem { background-image: var(--gradient-physical); 
           </div>
 
           <div class="actions">
-            <button class="redeem" id="btn-redeem">✔ 確認核銷優惠 <span class="hotkey-hint" style="background:rgba(255,255,255,0.2);">Space</span></button>
+            <!-- 移除文字快捷鍵提示 -->
+            <button class="redeem" id="btn-redeem">✔ 確認核銷優惠</button>
             <button class="undo hidden" id="btn-undo">⚡ 撤銷 (5s)</button>
-            <button class="next" id="btn-next">🧹 清除／服務下一位 <span class="hotkey-hint">Esc</span></button>
+            <button class="next" id="btn-next">🧹 清除／服務下一位</button>
           </div>
         </div>
       </section>
@@ -368,13 +404,13 @@ body.mode-physical-active .redeem { background-image: var(--gradient-physical); 
   let currentMode = 'digital';
   let toastTimer = null;
 
-  // 🔥 假連線延遲跳動 (裝逼用)
+  // 假連線延遲跳動 (裝逼用)
   setInterval(() => {
       const ping = Math.floor(Math.random() * (45 - 12 + 1) + 12);
       document.querySelector('#ping-tracker span:last-child').innerText = `API OK ${ping}ms`;
   }, 3000);
 
-  // 🔥 動態島 Toast 通知系統
+  // 動態島 Toast 通知系統
   window.showToast = function(msg, type = 'error') {
       const toast = $('toast-container');
       const icon = toast.querySelector('.toast-icon');
@@ -394,7 +430,6 @@ body.mode-physical-active .redeem { background-image: var(--gradient-physical); 
       }, 3500);
   };
 
-  // 覆寫預設 Alert
   window.alert = function(msg) { showToast(msg, 'error'); };
 
   $("employee-name").addEventListener("change", function(e) {
@@ -419,7 +454,7 @@ body.mode-physical-active .redeem { background-image: var(--gradient-physical); 
       $('phone').type = 'tel';
       $('phone').placeholder = '輸入手機號碼 (限10碼)';
       $('phone').maxLength = 10; 
-      $('btn-check').innerHTML = '查詢 <span class="hotkey-hint">Enter</span>';
+      $('btn-check').innerText = '查詢';
       $('placeholder-emoji').innerText = "🎟️";
       $('placeholder-title').innerText = "等待掃描顧客憑證";
       $('placeholder-desc').innerText = "選擇門市與活動後，掃描 QR Code 或輸入手機號碼即可帶出顧客資訊。";
@@ -430,7 +465,7 @@ body.mode-physical-active .redeem { background-image: var(--gradient-physical); 
       $('phone').type = 'text';
       $('phone').placeholder = '輸入實體券流水號 (英文與數字)';
       $('phone').maxLength = 20; 
-      $('btn-check').innerHTML = '查詢 / 核銷 <span class="hotkey-hint">Enter</span>';
+      $('btn-check').innerText = '查詢 / 核銷';
       $('placeholder-emoji').innerText = "🎫";
       $('placeholder-title').innerText = "實體券快速核銷";
       $('placeholder-desc').innerText = "掃描實體券 QR Code 或直接輸入流水號進行核銷。";
@@ -510,7 +545,7 @@ body.mode-physical-active .redeem { background-image: var(--gradient-physical); 
     if(b) {
         $("btn-check").innerText = "處理中…";
     } else {
-        $("btn-check").innerHTML = currentMode === 'digital' ? '查詢 <span class="hotkey-hint">Enter</span>' : '查詢 / 核銷 <span class="hotkey-hint">Enter</span>';
+        $("btn-check").innerText = currentMode === 'digital' ? '查詢' : '查詢 / 核銷';
     }
   }
 
@@ -578,23 +613,44 @@ body.mode-physical-active .redeem { background-image: var(--gradient-physical); 
     $("placeholder").classList.add("hidden");
     $("detail").classList.remove("hidden");
     
+    const defaultExpire = (POS_CONFIG[shownAct] && POS_CONFIG[shownAct].expireDate) ? POS_CONFIG[shownAct].expireDate : "無特別限制";
+    const expireStr = record.expireDate || defaultExpire;
+
+    // 🔥 前端本地即時檢測：自動判定是否過期
+    let autoExpired = false;
+    if (record.status !== "已過期" && record.status !== "已兌換" && expireStr && expireStr !== "無特別限制" && !expireStr.includes("依紙本券面")) {
+        const today = new Date();
+        today.setHours(0,0,0,0);
+        const regex = /(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})/g;
+        let match;
+        let lastDate = null;
+        while ((match = regex.exec(expireStr)) !== null) {
+            lastDate = new Date(match[1], parseInt(match[2])-1, match[3]);
+        }
+        if (lastDate && lastDate < today) {
+            autoExpired = true;
+            record.status = "已過期"; 
+            // 在背景直接幫他寫入 Firebase 判死刑
+            updateDoc(doc(db, shownAct, shownPhone), { status: "已過期", redeemTime: "逾期未換 (前台自動攔截)" });
+        }
+    }
+
     const isClaimed = record.status === "已兌換";
-    const isExpired = record.status === "已過期";
-    const isInvalid = isClaimed || isExpired; 
+    const isExpired = record.status === "已過期" || autoExpired;
 
     const banner = $("banner");
-    banner.className = "banner rise " + (isInvalid ? "bad" : "ok");
     
     if (isClaimed) {
+      banner.className = "banner bad rise";
       banner.innerHTML = `❌ 券已失效 / 已領取<small>📌 於 ${record.store || "—"} 兌換</small><small>🕒 ${record.redeemTime || "—"}</small><small>👤 核銷人員：${record.redeemBy || "—"}</small>`;
     } else if (isExpired) {
-      banner.innerHTML = "⚠️ 券已逾期失效<small>🕒 系統已結算過期</small>";
+      banner.className = "banner bad rise";
+      banner.innerHTML = `⚠️ 券已逾期失效<small>🕒 系統檢測已過期 (${expireStr})</small>`;
     } else {
+      banner.className = "banner ok rise";
       banner.innerHTML = "✅ 有效優惠券";
     }
 
-    const defaultExpire = (POS_CONFIG[shownAct] && POS_CONFIG[shownAct].expireDate) ? POS_CONFIG[shownAct].expireDate : "無特別限制";
-    const expireStr = record.expireDate || defaultExpire;
     const displayGift = record.gift || giftMap[shownAct] || "未設定餐點";
 
     $("v-phone").innerText = shownPhone;
@@ -609,7 +665,22 @@ body.mode-physical-active .redeem { background-image: var(--gradient-physical); 
         $("v-gift").innerText = displayGift;
     }
     
-    $("btn-redeem").classList.toggle("hidden", isInvalid);
+    // 🔥 動態切換按鈕狀態與文字
+    const redeemBtn = $("btn-redeem");
+    redeemBtn.className = "redeem"; // 重置 Class
+    redeemBtn.disabled = false;
+
+    if (isClaimed) {
+        redeemBtn.innerText = "已兌換完畢";
+        redeemBtn.disabled = true;
+        redeemBtn.classList.add("is-claimed");
+    } else if (isExpired) {
+        redeemBtn.innerText = "已過期無法核銷";
+        redeemBtn.disabled = true;
+        redeemBtn.classList.add("is-expired");
+    } else {
+        redeemBtn.innerText = "✔ 確認核銷優惠";
+    }
   }
 
   function renderContent(data, ph, ac){
@@ -752,33 +823,27 @@ body.mode-physical-active .redeem { background-image: var(--gradient-physical); 
     setTimeout(() => $("phone").focus(), 100);
   }
 
-  // 🔥 鍵盤忍者事件綁定
+  // 鍵盤忍者事件綁定 (保留快捷功能但不顯示文字)
   document.addEventListener("keydown", (e) => {
-    // 聚焦在文字輸入框時，不要觸發捷徑 (除了 Enter)
     if (document.activeElement.tagName === 'INPUT' && e.key !== 'Enter') return;
 
     if (e.key === "Enter") {
         e.preventDefault();
-        // 如果還沒查資料，就執行查詢
         if (!record || record.status === '已兌換' || record.status === '已過期') {
             if($("phone").value.trim().length > 0) check();
         } 
     } 
-    // Space 鍵觸發核銷
     else if (e.code === "Space" || e.key === " ") {
         if (record && record.status === "未兌換" && document.activeElement.tagName !== 'INPUT') {
             e.preventDefault(); redeem();
         }
     }
-    // Esc 鍵觸發清除換下一位
     else if (e.key === "Escape") {
         e.preventDefault(); nextCust();
     }
-    // F1 切換電子
     else if (e.key === "F1") {
         e.preventDefault(); setMode('digital');
     }
-    // F2 切換實體
     else if (e.key === "F2") {
         e.preventDefault(); setMode('physical');
     }
