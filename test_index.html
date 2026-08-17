@@ -26,14 +26,10 @@
   --surface-glow:0 0 0 1px oklch(1 0 0 / 6%), 0 24px 60px -20px oklch(0 0 0 / 60%);
   --gradient-panel:linear-gradient(160deg, oklch(0.24 0.03 262), oklch(0.2 0.026 258));
   
-  /* 電子憑證專屬「霓虹冰藍」漸層 */
   --accent-digital: #00C6FF;
   --gradient-digital: linear-gradient(135deg, #00C6FF, #0072FF);
-
-  /* 實體券專屬「橘紅色」漸層 */
   --accent-physical: #FF6B35;
   --gradient-physical: linear-gradient(135deg, #FF6B35, #F04323);
-  
   --radius:1.25rem;
 }
 *{box-sizing:border-box;margin:0;padding:0;border-color:var(--border)}
@@ -56,7 +52,6 @@ main {
   background-size: auto,auto,44px 44px,44px 44px;
 }
 
-/* 實體模式時的背景光暈 */
 body.mode-physical-active main {
   background-image:
     radial-gradient(circle at 15% 10%, rgba(255,107,53,0.12), transparent 45%),
@@ -68,7 +63,6 @@ body.mode-physical-active main {
 .wrap { max-width: 1400px; margin: 0 auto; width: 100%; padding: 20px 16px; }
 @media(min-width:768px){.wrap{padding:32px}}
 
-/* 頂部狀態列與心跳監控 */
 header{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px;margin-bottom:24px}
 .brand{display:flex;align-items:center;gap:16px}
 .logo{width:56px;height:56px;display:flex;align-items:center;justify-content:center;border-radius:18px;font-size:26px;
@@ -78,7 +72,6 @@ body.mode-physical-active .logo { background-image: var(--gradient-physical); bo
 h1{font-size:clamp(22px,3vw,30px);font-weight:700;letter-spacing:-.02em}
 .sub{font-size:14px;color:var(--muted-foreground); display:flex; align-items:center; gap:8px;}
 
-/* 駭客終端機連線字體 */
 .ping-monitor { font-family: monospace; font-size: 11px; color: var(--success); background: rgba(63,191,143,0.1); padding: 4px 8px; border-radius: 6px; letter-spacing: 0.05em; display:flex; align-items:center; gap:6px; border: 1px solid rgba(63,191,143,0.3);}
 .ping-dot { width: 6px; height: 6px; background: var(--success); border-radius: 50%; animation: pulse-ping 1s infinite; }
 @keyframes pulse-ping { 0% { opacity: 1; box-shadow: 0 0 0 0 rgba(63,191,143,0.7); } 70% { opacity: 0.5; box-shadow: 0 0 0 4px rgba(63,191,143,0); } 100% { opacity: 1; } }
@@ -99,8 +92,6 @@ section.panel{padding:20px}
 @keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
 .block+.block{margin-top:24px}
 .label{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.2em;color:var(--muted-foreground);margin-bottom:12px}
-.stores{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px; width: 100%;}
-@media(min-width:640px){.stores{grid-template-columns:repeat(3,minmax(0,1fr))}}
 
 .custom-dropdown { position: relative; width: 100%; }
 .custom-dropdown summary {
@@ -119,6 +110,8 @@ section.panel{padding:20px}
   background: var(--card); box-shadow: 0 10px 40px -10px rgba(0,0,0,0.6); z-index: 50; position: absolute; width: 100%;
 }
 
+.stores{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px; width: 100%;}
+@media(min-width:640px){.stores{grid-template-columns:repeat(3,minmax(0,1fr))}}
 button{font-family:inherit;cursor:pointer;}
 .store-btn{width:100%;min-height:56px;border-radius:12px;border:1px solid var(--border);background:var(--secondary);color:var(--secondary-foreground);
   font-size:16px;font-weight:600;transition:all .2s; padding: 0 8px;}
@@ -126,13 +119,11 @@ button{font-family:inherit;cursor:pointer;}
 .store-btn:active{transform:scale(.97)}
 .store-btn.on{background-image:var(--gradient-digital);color:#fff;border-color:var(--accent-digital);box-shadow:0 12px 26px -14px rgba(0,198,255,0.9)}
 
-/* 憑證類型開關樣式 */
 .mode-switch { display: flex; gap: 8px; padding: 6px; background: var(--secondary); border-radius: 16px; }
 .mode-btn { flex: 1; padding: 14px 12px; border-radius: 12px; border: none; background: transparent; color: var(--muted-foreground); font-weight: 700; font-size: 16px; transition: 0.2s; }
 #mode-digital.active { background: var(--gradient-digital); color: #fff; box-shadow: 0 8px 20px -6px rgba(0,198,255,0.6); border: none; }
 #mode-physical.active { background: var(--gradient-physical); color: #fff; box-shadow: 0 8px 20px -6px rgba(255,107,53,0.6); border: none; }
 
-/* 活動按鈕樣式 */
 .acts{display:flex;flex-direction:column;gap:10px; width:100%;}
 .act-btn{width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:64px;padding:0 20px;text-align:left;
   border-radius:14px;border:1px solid var(--border);background:var(--secondary);color:var(--foreground);transition:all .2s;}
@@ -140,19 +131,16 @@ button{font-family:inherit;cursor:pointer;}
 .act-name{display:block;font-size:18px;font-weight:600}
 .radio{width:16px;height:16px;border-radius:999px;border:2px solid var(--muted-foreground);flex:none; transition: .2s;}
 
-/* 電子模式下的活動顏色 */
 .act-btn:hover{background:var(--muted);border-color:rgba(0,198,255,0.5)}
 .act-btn.on{border-color:var(--accent-digital);background:rgba(0,198,255,0.15)}
 .act-btn.on .radio{border-color:var(--accent-digital);background:var(--accent-digital); box-shadow: 0 0 0 4px rgba(0,198,255,0.2);}
 
-/* 實體模式下的活動顏色覆寫 */
 body.mode-physical-active .act-btn:hover { border-color: rgba(255,107,53,0.5); }
 body.mode-physical-active .act-btn.on { border-color: var(--accent-physical); background: rgba(255, 107, 53, 0.15); }
 body.mode-physical-active .act-btn.on .radio { border-color: var(--accent-physical); background: var(--accent-physical); box-shadow: 0 0 0 4px rgba(255, 107, 53, 0.2); }
 
 .empty{border:1px dashed var(--border);border-radius:14px;padding:24px;text-align:center;font-size:14px;color:var(--muted-foreground)}
 
-/* 搜尋列 */
 .searchbar{display:flex;flex-direction:column;gap:10px; width: 100%;}
 @media(min-width:640px){
   .searchbar { flex-direction: row; }
@@ -161,14 +149,12 @@ body.mode-physical-active .act-btn.on .radio { border-color: var(--accent-physic
 }
 
 .search-input-wrapper { position: relative; flex: 1; width: 100%; }
-
 #phone{width:100%;min-height:64px;border-radius:14px;border:1px solid var(--input);background:oklch(0.17 0.024 259/.6);
   color:var(--foreground);padding:0 16px;font-size:20px;font-weight:600;letter-spacing:.08em;outline:none;transition:all .2s;}
 #phone::placeholder{font-size:15px;font-weight:400;letter-spacing:normal;color:var(--muted-foreground)}
 #phone:focus{border-color:var(--accent-digital);box-shadow:0 0 0 4px rgba(0,198,255,0.25);}
 body.mode-physical-active #phone:focus { border-color: var(--accent-physical); box-shadow: 0 0 0 4px rgba(255,107,53,0.25); }
 
-/* 快搜下拉選單樣式 */
 .autocomplete-list {
   position: absolute; top: calc(100% + 8px); left: 0; right: 0; 
   background: var(--card); border: 1px solid var(--border); border-radius: 14px;
@@ -206,7 +192,6 @@ button:disabled{opacity:.5;cursor:not-allowed}
 #employee-name:focus{border-color:var(--accent-digital); background:var(--card); box-shadow:0 0 0 4px rgba(0,198,255,0.25);}
 body.mode-physical-active #employee-name:focus { border-color: var(--accent-physical); box-shadow: 0 0 0 4px rgba(255,107,53,0.25); }
 
-/* 動態島通知 HUD */
 #toast-container {
   position: fixed; top: -100px; left: 50%; transform: translateX(-50%); z-index: 10000;
   display: flex; align-items: center; gap: 12px; padding: 16px 24px; border-radius: 999px;
@@ -240,20 +225,10 @@ body.mode-physical-active .scanline { background: var(--accent-physical); box-sh
 .close-cam:active{transform:scale(.95)}
 
 .right{display:flex;flex-direction:column}
-
-/* 🔥 新增：SVG 向量憑證圖示 (自動變色發光) */
 .placeholder{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;text-align:center;padding:80px 0}
 #placeholder-emoji { display: flex; justify-content: center; align-items: center; margin-bottom: 10px; }
-.ticket-icon {
-  width: 76px; height: 76px;
-  color: var(--accent-digital);
-  filter: drop-shadow(0 0 20px rgba(0,198,255,0.4));
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-body.mode-physical-active .ticket-icon {
-  color: var(--accent-physical);
-  filter: drop-shadow(0 0 20px rgba(255,107,53,0.4));
-}
+.ticket-icon { width: 76px; height: 76px; color: var(--accent-digital); filter: drop-shadow(0 0 20px rgba(0,198,255,0.4)); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+body.mode-physical-active .ticket-icon { color: var(--accent-physical); filter: drop-shadow(0 0 20px rgba(255,107,53,0.4)); }
 
 .placeholder p{color:var(--muted-foreground)}
 .placeholder .p1{font-size:18px;font-weight:600}
@@ -273,7 +248,6 @@ body.mode-physical-active .ticket-icon {
 .info .v.mono{letter-spacing:.08em}
 .actions{margin-top:auto;padding-top:8px;display:flex;flex-direction:column;gap:12px; width: 100%;}
 
-/* 核銷大按鈕 */
 .redeem{min-height:96px;width:100%;border:none;border-radius:18px;font-size:28px;font-weight:900;letter-spacing:.04em;
   background-image:var(--gradient-digital);color:#fff;box-shadow:0 26px 50px -22px rgba(0,198,255,0.8);transition:all .2s;
   display: flex; align-items: center; justify-content: center; gap: 12px; cursor: pointer;}
@@ -281,7 +255,6 @@ body.mode-physical-active .redeem { background-image: var(--gradient-physical); 
 .redeem:hover:not(:disabled){transform:translateY(-2px);filter:brightness(1.1)}
 .redeem:active:not(:disabled){transform:scale(.98)}
 
-/* 過期與已兌換按鈕強制鎖死 */
 .redeem.is-claimed { background: var(--muted) !important; box-shadow: none !important; color: var(--muted-foreground) !important; cursor: not-allowed !important; pointer-events: none !important; opacity: 1 !important; transform: none !important; }
 .redeem.is-expired { background: var(--destructive) !important; box-shadow: 0 10px 20px -10px rgba(255,0,0,0.5) !important; color: #fff !important; cursor: not-allowed !important; pointer-events: none !important; opacity: 1 !important; transform: none !important; }
 
@@ -345,7 +318,6 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
           <input id="employee-name" type="text" placeholder="請輸入您的姓名或代號">
         </div>
 
-        <!-- 憑證類型選擇器放到最上面當過濾器 -->
         <div class="block">
           <h2 class="label">● 憑證類型</h2>
           <div class="mode-switch">
@@ -362,7 +334,6 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
         <div class="block">
           <h2 class="label">● 掃描 / 查詢</h2>
           <div class="searchbar">
-            <!-- 殘影快搜 Wrapper -->
             <div class="search-input-wrapper">
               <input id="phone" type="tel" placeholder="輸入手機號碼 (限10碼)" autocomplete="off" />
               <div id="autocomplete-list" class="autocomplete-list"></div>
@@ -377,7 +348,6 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
       <!-- RIGHT -->
       <section class="panel rise right">
         <div id="placeholder" class="placeholder">
-          <!-- 🔥 替換為科技感 SVG 向量圖標 -->
           <div id="placeholder-emoji">
             <svg class="ticket-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
               <path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"></path>
@@ -400,7 +370,7 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
           </div>
 
           <div class="actions">
-            <!-- 核銷大按鈕 -->
+            <!-- 恢復為大按鈕 -->
             <button class="redeem" id="btn-redeem" onclick="redeem()">✔ 確認核銷優惠</button>
             <button class="undo hidden" id="btn-undo" onclick="undo()">⚡ 撤銷 (5s)</button>
             <button class="next" id="btn-next" onclick="nextCust()">🧹 清除／服務下一位</button>
@@ -492,6 +462,7 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
 
     $('btn-scan').style.display = 'block';
 
+    // 移除文字快捷鍵標示，但功能仍在背後運作
     if (m === 'digital') {
       $('phone').type = 'tel';
       $('phone').placeholder = '輸入手機號碼 (限10碼)';
@@ -642,7 +613,6 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
     if (!store){ box.innerHTML = '<p class="empty">請先選擇門市</p>'; return; }
     
     let currentEvs = evMap[store] || [];
-    
     if (currentMode === 'physical') {
       currentEvs = currentEvs.filter(a => a.includes('【實體】') || a.includes('實體券'));
     } else {
@@ -684,7 +654,6 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
     $("store-dropdown").removeAttribute("open");
     
     setMode(currentMode);
-    
     renderStores(); renderRight();
     setTimeout(() => $("phone").focus(), 100);
   }
@@ -701,6 +670,7 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
     const defaultExpire = (POS_CONFIG[shownAct] && POS_CONFIG[shownAct].expireDate) ? POS_CONFIG[shownAct].expireDate : "無特別限制";
     const expireStr = record.expireDate || defaultExpire;
 
+    // 🔥 終極防護：自動判定並在本地封鎖過期憑證
     let autoExpired = false;
     if (record.status !== "已過期" && record.status !== "已兌換" && expireStr && expireStr !== "無特別限制" && !expireStr.includes("依紙本券面")) {
         const today = new Date(); today.setHours(0,0,0,0);
@@ -745,6 +715,7 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
     redeemBtn.className = "redeem"; 
     redeemBtn.disabled = false;
 
+    // 🔥 將過期按鈕鎖死，不允許點擊
     if (isClaimed) {
         redeemBtn.innerText = "已兌換完畢";
         redeemBtn.disabled = true;
@@ -868,6 +839,7 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
     }
     localStorage.setItem("p_employee", empName); 
 
+    // 🔥 終極防護：JS 底層雙重鎖定
     if (record && (record.status === "已兌換" || record.status === "已過期")) {
         playAlert("error"); 
         return showToast("此憑證已失效，無法執行核銷！", "error");
@@ -882,7 +854,7 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
     setBusy(true);
     try {
       await updateDoc(doc(db, ac, ph), { status: "已兌換", store: st, redeemTime: nowStr, redeemBy: empName });
-      record = Object.assign({}, record || {}, { status: "status": "已兌換", store: st, redeemTime: nowStr, redeemBy: empName });
+      record = Object.assign({}, record || {}, { status: "已兌換", store: st, redeemTime: nowStr, redeemBy: empName });
     } finally { setBusy(false); }
     
     renderRight();
@@ -926,6 +898,8 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
         }
     }
     else if (e.key === "Escape") { e.preventDefault(); nextCust(); }
+    else if (e.key === "F1") { e.preventDefault(); setMode('digital'); }
+    else if (e.key === "F2") { e.preventDefault(); setMode('physical'); }
   });
 
   $("btn-scan").onclick = startScan;
