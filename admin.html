@@ -39,7 +39,7 @@
     .sidebar-footer{margin-top:auto;padding-top:20px}
     .btn-logout{width:100%;background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.12);padding:12px;border-radius:999px;font-weight:700;font-size:14px;cursor:pointer;transition:.2s}
     .btn-logout:hover{background:var(--accent);border-color:var(--accent)}
-    .mobile-logout { display: none; } /* 預設隱藏手機版登出 */
+    .mobile-logout { display: none; } 
 
     /* Layouts */
     .view-section { display: none; }
@@ -54,9 +54,9 @@
 
     /* Dashboard UI */
     .controls{display:flex;gap:10px;align-items:center}
-    .controls select,.controls button{padding:11px 20px;font-size:14px;border-radius:999px;border:none;outline:none;font-weight:700;cursor:pointer;transition:.2s}
-    .controls select{background:#fff;color:var(--text-main);box-shadow:var(--shadow)}
-    .btn-expire{background:#fff;color:var(--text-main);box-shadow:var(--shadow)}
+    .controls select,.controls button, .controls input[type="date"]{padding:11px 16px;font-size:14px;border-radius:999px;border:none;outline:none;font-weight:700;cursor:pointer;transition:.2s}
+    .controls select, .controls input[type="date"]{background:#fff;color:var(--text-main);box-shadow:var(--shadow);border:1px solid #E6EAF0;font-family:inherit;}
+    .btn-expire{background:#fff;color:var(--text-main);box-shadow:var(--shadow);border:1px solid #E6EAF0;}
     .btn-expire:hover{color:var(--accent)}
     .btn-export{background:var(--sidebar-bg);color:#fff}
     .btn-export:hover{background:#2A2D38}
@@ -146,25 +146,23 @@
     .modal-card { background: var(--card-bg); padding: 32px; border-radius: var(--radius); width: 90%; max-width: 360px; box-shadow: 0 20px 50px rgba(0,0,0,0.3); text-align: center;}
     .modal-card h2 { margin: 0 0 16px; font-size: 22px; color: var(--accent); }
 
-    /* 🔥 完美修復手機版 RWD (響應式設計) */
+    /* 🔥 完美修復手機版 RWD */
     @media (max-width:768px){
       body{flex-direction:column}
       .sidebar{width:100%; flex:none; height:auto; position:relative; display:flex; flex-direction:column; padding:16px; align-items:flex-start; z-index: 100;}
       .sidebar-brand{display:flex; justify-content:space-between; width:100%; align-items:center;}
       .sidebar-brand p{display:block; margin:0;}
-      /* 手機版登出按鈕獨立顯示在頂部 */
       .mobile-logout{display:block; background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); color:#fff; border-radius:8px; padding:6px 12px; font-size:13px; cursor:pointer;}
-      /* 手機版導覽選單改為網格排列 */
       .sidebar-menu{display:flex; flex-direction:row; flex-wrap:wrap; width:100%; justify-content:center; gap:8px; margin-top:16px;}
       .sidebar-item{flex:1 1 45%; text-align:center; justify-content:center; padding:12px; font-size:13px;}
-      .sidebar-footer{display:none;} /* 隱藏原本的底部登出按鈕 */
+      .sidebar-footer{display:none;}
       
       #main-app{padding:16px; height:auto;}
       .header{flex-direction:column; align-items:flex-start; gap:16px;}
       .header h1{font-size:24px;}
       /* 控制列自動換行 */
       .controls{display:grid; grid-template-columns:1fr 1fr; width:100%; gap:10px;}
-      .controls select{grid-column:span 2;}
+      .controls select, .controls input[type="date"]{grid-column:span 2; width:100%;}
       /* 儀表板卡片改為 2x2 排列 */
       .dashboard{grid-template-columns:repeat(2, 1fr); gap:12px;}
       .stat-card{padding:16px;}
@@ -173,7 +171,7 @@
       .charts-wrapper{flex-direction:column;}
       .table-toolbar{flex-direction:column; align-items:flex-start; gap:10px;}
       .search-box{width:100%;}
-      .kebab-menu{right:auto; left:0; /* 手機版選單靠左對齊防超出螢幕 */}
+      .kebab-menu{right:auto; left:0;}
     }
   </style>
 </head>
@@ -208,7 +206,6 @@
         <h2>德州小騎士</h2>
         <p>後台控制室</p>
       </div>
-      <!-- 🔥 手機版專屬登出按鈕 -->
       <button class="mobile-logout" onclick="logout()">登出</button>
     </div>
     <nav class="sidebar-menu" style="display:flex;">
@@ -233,6 +230,11 @@
           </div>
           <div class="controls">
             <select id="act-select" onchange="fetchData()"></select>
+            <!-- 🔥 新增日期篩選 -->
+            <input type="date" id="date-filter" onchange="updateDashboardStats()" title="篩選特定日期的核銷紀錄">
+            
+            <!-- 🔥 新增批次核銷 -->
+            <button id="btn-batch" onclick="batchRedeem()" style="background:var(--green); color:#fff;">☑️ 批次核銷</button>
             <button class="btn-expire" onclick="expireTickets()">🧹 智慧結算過期</button>
             <button class="btn-export" onclick="exportExcel()">📥 匯出 Excel</button>
           </div>
@@ -240,7 +242,7 @@
 
         <div class="dashboard">
           <div class="stat-card c-total">
-            <h3>總發行張數 (近500筆)</h3>
+            <h3>總發行張數 (依所選條件)</h3>
             <div class="num" id="total-count">0</div>
           </div>
           <div class="stat-card c-redeemed">
@@ -277,6 +279,8 @@
           <table id="data-table">
             <thead>
               <tr>
+                <!-- 🔥 新增全選 Checkbox -->
+                <th><input type="checkbox" onclick="document.querySelectorAll('.row-check').forEach(cb => cb.checked = this.checked)"></th>
                 <th onclick="setSort('phone')">📱 兌換號碼 <span class="sort-icon" id="sort-phone">▼</span></th>
                 <th onclick="setSort('name')">👤 顧客姓名 <span class="sort-icon" id="sort-name">▼</span></th>
                 <th onclick="setSort('social_id')">🔗 社群帳號 <span class="sort-icon" id="sort-social_id">▼</span></th>
@@ -284,6 +288,8 @@
                 <th onclick="setSort('status')">⚡ 狀態 <span class="sort-icon" id="sort-status">▼</span></th>
                 <th onclick="setSort('store')">📌 核銷門市 <span class="sort-icon" id="sort-store">▼</span></th>
                 <th onclick="setSort('redeemTime')">🕒 核銷時間 <span class="sort-icon" id="sort-redeemTime">▼</span></th>
+                <!-- 🔥 新增核銷人員欄位 -->
+                <th onclick="setSort('redeemBy')">👤 核銷人員 <span class="sort-icon" id="sort-redeemBy">▼</span></th>
                 <th onclick="setSort('expireDate')">⏳ 使用期限 <span class="sort-icon" id="sort-expireDate">▼</span></th>
                 <th onclick="setSort('timestamp')">📅 領券時間 <span class="sort-icon" id="sort-timestamp">▼</span></th>
                 <th>⚙️ 管理操作</th>
@@ -510,7 +516,7 @@
     let globalPosConfig = {};
     let globalEventConfig = {};
     let globalStoreList = [];
-    let globalEventOrder = []; // 🔥 新增：管理活動排序順序的陣列
+    let globalEventOrder = [];
     let editingActName = null; 
 
     // 全域點擊隱藏下拉選單
@@ -520,7 +526,6 @@
       }
     });
 
-    // 萬用 QR Code 呼叫器
     window.showQrCode = function(phone, name, isNew = false) {
       const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${phone}&margin=10`;
       document.getElementById('qr-modal-title').innerHTML = isNew ? '🎉 發券成功' : '🎫 專屬兌換碼';
@@ -534,7 +539,6 @@
       document.getElementById('qr-modal').style.display = 'none';
     };
 
-    // ================= 畫面切換與同步 =================
     window.switchView = function(viewId, element) {
       document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
       document.getElementById('view-' + viewId).classList.add('active');
@@ -549,7 +553,6 @@
       }
     };
 
-    // 🔥 修改：下拉選單依據 globalEventOrder 陣列來產生
     function populateAdminDropdown() {
       const html = globalEventOrder.map(a => {
         const isActive = globalPosConfig[a]?.active !== false;
@@ -566,7 +569,6 @@
       if (globalEventOrder.length > 0) window.fetchData(); 
     }
 
-    // 🔥 修改：活動列表依據 globalEventOrder 陣列來產生
     function renderConfigUI() {
       document.getElementById('ui-store-list').innerHTML = globalStoreList.map((store, idx) => `
         <li class="item-li">
@@ -610,7 +612,6 @@
       }).join('');
     }
 
-    // 🔥 新增：順序移動功能
     window.moveEventUp = function(actName) {
       const idx = globalEventOrder.indexOf(actName);
       if(idx > 0) {
@@ -704,7 +705,6 @@
 
       const isActive = globalPosConfig[name] ? globalPosConfig[name].active !== false : true;
 
-      // 🔥 若為新增活動，加入到順序陣列的最後面
       if (!globalEventOrder.includes(name)) {
           globalEventOrder.push(name);
       }
@@ -726,7 +726,6 @@
       if(confirm(`確定刪除活動「${actName}」？\n(記得操作完要按下『儲存至雲端』才會生效喔)`)) {
         delete globalEventConfig[actName];
         delete globalPosConfig[actName];
-        // 🔥 從順序陣列中移除
         globalEventOrder = globalEventOrder.filter(n => n !== actName);
         renderConfigUI();
         triggerSaveHint();
@@ -757,7 +756,7 @@
           EVENT_CONFIG: globalEventConfig,
           STORE_LIST: globalStoreList,
           POS_CONFIG: globalPosConfig,
-          EVENT_ORDER: globalEventOrder, // 🔥 將排序陣列存上雲端
+          EVENT_ORDER: globalEventOrder,
           lastUpdated: new Date().toLocaleString()
         });
         
@@ -782,9 +781,7 @@
           globalStoreList = data.STORE_LIST || [];
           globalPosConfig = data.POS_CONFIG || {};
           
-          // 🔥 讀取雲端排序陣列 (若沒有則用 Object.keys 兜底)
           globalEventOrder = data.EVENT_ORDER || Object.keys(globalEventConfig);
-          // 確保順序陣列與資料庫一致 (防呆機制)
           globalEventOrder = globalEventOrder.filter(a => globalEventConfig[a]);
           Object.keys(globalEventConfig).forEach(a => {
               if(!globalEventOrder.includes(a)) globalEventOrder.push(a);
@@ -827,7 +824,6 @@
           expireDate: expire || ""
         });
         
-        // 🔥 呼叫 QR Code 萬用彈窗 (並清除輸入框)
         document.getElementById('manual-phone').value = '';
         document.getElementById('manual-name').value = '';
         document.getElementById('manual-social').value = '';
@@ -1022,7 +1018,7 @@
       }
     };
 
-    // ================= 儀表板 & 智慧結算過期 =================
+    // ================= 儀表板 & 智慧結算過期 & 日期篩選 =================
     window.fetchData = function() {
       const actSelect = document.getElementById('act-select');
       if (!actSelect || !actSelect.value) return;
@@ -1030,31 +1026,90 @@
       const tbody = document.getElementById('table-body');
       
       if (unsubscribeSnapshot) unsubscribeSnapshot();
-      tbody.innerHTML = '<tr><td colspan="10" style="text-align:center; padding: 40px; color: #8A93A5;">📡 與資料庫即時連線中...</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="12" style="text-align:center; padding: 40px; color: #8A93A5;">📡 與資料庫即時連線中...</td></tr>';
       
       const q = query(collection(db, act), limit(500));
       unsubscribeSnapshot = onSnapshot(q, (querySnapshot) => {
         allData = [];
-        let redeemedCount = 0; let expiredCount = 0; let storeStats = {}; 
-
         querySnapshot.forEach((doc) => {
           const d = doc.data(); d.id = doc.id; allData.push(d);
-          if (d.status === "已兌換") {
-            redeemedCount++;
-            if (d.store) { storeStats[d.store] = (storeStats[d.store] || 0) + 1; }
-          } else if (d.status === "已過期") { expiredCount++; }
         });
-
-        const unredeemedCount = allData.length - redeemedCount - expiredCount; 
-        document.getElementById('total-count').innerText = allData.length;
-        document.getElementById('redeemed-count').innerText = redeemedCount;
-        document.getElementById('unredeemed-count').innerText = unredeemedCount;
-        document.getElementById('expired-count').innerText = expiredCount; 
-        drawCharts(storeStats, redeemedCount, unredeemedCount, expiredCount); 
-        window.renderTable(); 
+        
+        // 🔥 將計算邏輯丟給 updateDashboardStats 統一處理
+        updateDashboardStats();
       }, (error) => {
-        tbody.innerHTML = '<tr><td colspan="10" style="text-align:center; padding: 40px; color: red;">連線中斷，請確認網路連線。</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="12" style="text-align:center; padding: 40px; color: red;">連線中斷，請確認網路連線。</td></tr>';
       });
+    };
+
+    // 🔥 新增：動態日期篩選與統計更新函數
+    window.updateDashboardStats = function() {
+      const selectedDate = document.getElementById('date-filter').value;
+      let dateStr = "";
+      if(selectedDate) dateStr = selectedDate.replace(/-/g, '/'); // 將 YYYY-MM-DD 轉成 YYYY/MM/DD
+
+      let redeemedCount = 0; let expiredCount = 0; let storeStats = {}; 
+      let validTotalCount = 0; // 用於計算篩選後的總張數
+
+      allData.forEach(d => {
+        // 若有選日期，且該筆資料的核銷時間(或領取時間)不包含該日期，則跳過計算
+        if(dateStr && ((d.redeemTime && !d.redeemTime.includes(dateStr)) && (d.timestamp && !d.timestamp.includes(dateStr)))) {
+            return; 
+        }
+        
+        validTotalCount++;
+
+        if (d.status === "已兌換") {
+          redeemedCount++;
+          if (d.store) { storeStats[d.store] = (storeStats[d.store] || 0) + 1; }
+        } else if (d.status === "已過期") { 
+          expiredCount++; 
+        }
+      });
+
+      const unredeemedCount = validTotalCount - redeemedCount - expiredCount; 
+      
+      document.getElementById('total-count').innerText = validTotalCount;
+      document.getElementById('redeemed-count').innerText = redeemedCount;
+      document.getElementById('unredeemed-count').innerText = unredeemedCount;
+      document.getElementById('expired-count').innerText = expiredCount; 
+      
+      drawCharts(storeStats, redeemedCount, unredeemedCount, expiredCount); 
+      renderTable(); // 更新下方表格
+    };
+
+    // 🔥 新增：後台批次強制核銷
+    window.batchRedeem = async function() {
+      const act = document.getElementById('act-select').value;
+      const checkedBoxes = document.querySelectorAll('.row-check:checked');
+      if(checkedBoxes.length === 0) return alert("⚠️ 請先勾選表格左側要核銷的票券！");
+      if(!confirm(`確定要在後台強制核銷這 ${checkedBoxes.length} 張票券嗎？`)) return;
+
+      const btn = document.getElementById('btn-batch');
+      btn.innerText = "處理中..."; btn.disabled = true;
+
+      const d = new Date(), pad = (n) => (n < 10 ? "0" + n : String(n));
+      const nowStr = d.getFullYear() + "/" + pad(d.getMonth()+1) + "/" + pad(d.getDate()) + " " + pad(d.getHours()) + ":" + pad(d.getMinutes()) + ":" + pad(d.getSeconds());
+
+      const promises = Array.from(checkedBoxes).map(box => {
+        return updateDoc(doc(db, act, box.value), {
+          status: "已兌換",
+          store: "總部後台 (補登)",
+          redeemTime: nowStr,
+          redeemBy: "總部管理員"
+        });
+      });
+
+      try {
+        await Promise.all(promises);
+        alert(`✅ 成功批次核銷 ${checkedBoxes.length} 張票券！`);
+      } catch(e) {
+        console.error(e);
+        alert("批次核銷發生錯誤");
+      } finally {
+        btn.innerText = "☑️ 批次核銷"; btn.disabled = false;
+        // 畫面會因為 Firestore onSnapshot 自動重整，無需手動清空勾選
+      }
     };
 
     window.expireTickets = async function() {
@@ -1119,7 +1174,7 @@
     window.resetSingleTicket = async function(phone) {
       const act = document.getElementById('act-select').value;
       if (!confirm(`⚠️ 確定要將兌換號碼「${phone}」重設為【未兌換】嗎？\n(將清空核銷門市與時間紀錄)`)) return;
-      await updateDoc(doc(db, act, phone), { status: "未兌換", store: "", redeemTime: "" });
+      await updateDoc(doc(db, act, phone), { status: "未兌換", store: "", redeemTime: "", redeemBy: "" });
     };
 
     window.deleteSingleTicket = async function(phone) {
@@ -1148,7 +1203,16 @@
       const defaultGift = globalPosConfig[currentAct]?.gift || '預設活動贈品';
       const defaultExpire = globalPosConfig[currentAct]?.expireDate || "無特別限制";
 
-      let filteredData = allData.filter(d => (d.phone || '').toLowerCase().includes(searchTerm) || (d.name || '').toLowerCase().includes(searchTerm));
+      const selectedDate = document.getElementById('date-filter').value;
+      let dateStr = selectedDate ? selectedDate.replace(/-/g, '/') : "";
+
+      let filteredData = allData.filter(d => {
+        const matchSearch = (d.phone || '').toLowerCase().includes(searchTerm) || (d.name || '').toLowerCase().includes(searchTerm);
+        // 🔥 日期篩選同時過濾「核銷時間」或「領取時間」
+        const matchDate = dateStr === "" || (d.redeemTime && d.redeemTime.includes(dateStr)) || (d.timestamp && d.timestamp.includes(dateStr));
+        return matchSearch && matchDate;
+      });
+      
       filteredData.sort((a, b) => {
         let valA = a[sortCol] || ''; let valB = b[sortCol] || '';
         if (valA < valB) return sortAsc ? -1 : 1;
@@ -1159,7 +1223,7 @@
       document.getElementById('result-count').innerText = `顯示 ${filteredData.length} 筆結果`;
 
       if (filteredData.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="10" style="text-align:center; padding: 40px; color: #F07654; font-weight: bold;">找不到資料 🥲</td></tr>'; return;
+        tbody.innerHTML = '<tr><td colspan="12" style="text-align:center; padding: 40px; color: #F07654; font-weight: bold;">找不到資料 🥲</td></tr>'; return;
       }
 
       tbody.innerHTML = filteredData.map(d => {
@@ -1170,6 +1234,9 @@
         let displayGift = d.gift ? `${d.gift} <span style="font-size:10px; color:#F07654;">(專屬)</span>` : defaultGift;
         let displayExpire = d.expireDate || defaultExpire;
         
+        // 🔥 未兌換的票券才顯示 Checkbox
+        let checkboxHTML = d.status === '未兌換' ? `<input type="checkbox" class="row-check" value="${d.id}">` : '';
+
         let actionBtnHTML = `
           <details class="kebab-dropdown">
             <summary>⋮</summary>
@@ -1189,6 +1256,7 @@
 
         return `
           <tr>
+            <td>${checkboxHTML}</td>
             <td style="font-family:monospace; font-size:15px; font-weight:bold; color:var(--text-main);">${d.phone || ''}</td>
             <td style="font-weight:bold;">${d.name || ''}</td>
             <td style="color:#F07654;">${d.social_id || '未提供'}</td>
@@ -1196,6 +1264,7 @@
             <td>${statusBadge}</td>
             <td style="font-weight:bold; color:var(--sidebar-bg);">${d.store || '-'}</td>
             <td class="time-text">${d.redeemTime || '-'}</td>
+            <td style="font-weight:bold; color:var(--text-sub);">${d.redeemBy || '-'}</td>
             <td style="font-weight:bold; color:var(--text-main);">${displayExpire}</td>
             <td class="time-text">${d.timestamp || '-'}</td>
             <td>${actionBtnHTML}</td>
@@ -1214,6 +1283,7 @@
         "兌換號碼": d.phone, "顧客姓名": d.name, "社群帳號": d.social_id || '未提供',
         "兌換品項": d.gift || defaultGift, "兌換狀態": d.status || '未兌換',
         "核銷門市": d.store || '', "核銷時間": d.redeemTime || '', 
+        "核銷人員": d.redeemBy || '', // 🔥 加入核銷人員欄位
         "使用期限": d.expireDate || defaultExpire, "領券時間": d.timestamp || ''
       }));
       const ws = XLSX.utils.json_to_sheet(exportArr); const wb = XLSX.utils.book_new();
@@ -1284,4 +1354,4 @@
 
   </script>
 </body>
-</html>     
+</html>
