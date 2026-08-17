@@ -146,9 +146,9 @@ button{font-family:inherit;cursor:pointer;}
 .primary-btn:active{transform:scale(.95)}
 button:disabled{opacity:.5;cursor:not-allowed}
 
-/* 🔥 新增值班人員輸入框專屬樣式 */
+/* 值班人員輸入框專屬樣式 */
 #employee-name{width:100%; min-height:56px; border-radius:12px; border:1px solid var(--border); background:var(--secondary); color:var(--foreground); padding:0 16px; font-size:16px; outline:none; transition:all .2s;}
-#employee-name:focus{border-color:var(--primary); background:var(--card);}
+#employee-name:focus{border-color:var(--primary); background:var(--card); box-shadow:0 0 0 4px oklch(0.78 0.17 68/.25);}
 
 #scan-area{
   position: fixed; inset: 0; z-index: 9999; 
@@ -237,10 +237,9 @@ button:disabled{opacity:.5;cursor:not-allowed}
           </details>
         </div>
 
-        <!-- 🔥 新增值班人員輸入框 -->
         <div class="block">
           <h2 class="label">● 值班人員 (必填)</h2>
-          <input id="employee-name" type="text" placeholder="請輸入姓名或員工代號">
+          <input id="employee-name" type="text" placeholder="請輸入您的姓名或代號">
         </div>
 
         <div class="block">
@@ -327,8 +326,12 @@ button:disabled{opacity:.5;cursor:not-allowed}
   const $ = (id) => document.getElementById(id);
   let store = "", act = "", shownPhone = "", shownAct = "", record = null;
   let scanner = null, uTimer = null, busy = false;
-  
   let currentMode = 'digital';
+
+  // 🔥 監聽員工姓名輸入，即時存入 localStorage
+  $("employee-name").addEventListener("change", function(e) {
+      localStorage.setItem("p_employee", e.target.value.trim());
+  });
 
   window.setMode = function(m) {
     currentMode = m;
@@ -645,10 +648,14 @@ button:disabled{opacity:.5;cursor:not-allowed}
   }
 
   async function redeem(){
-    // 🔥 確保員工有填寫姓名
+    // 🔥 檢查員工姓名
     const empName = $("employee-name").value.trim();
-    if(!empName) return alert("🛑 請先填寫左上方或上方的「值班人員」姓名！");
-    localStorage.setItem("p_employee", empName); // 記憶員工名字
+    if(!empName) {
+        $("employee-name").focus();
+        return alert("🛑 請先填寫上方的「值班人員」姓名！");
+    }
+    // 確保再次記憶
+    localStorage.setItem("p_employee", empName);
 
     if (!confirm("確定核銷？憑證將失效！")) return;
     const ph = shownPhone, st = store, ac = act;
@@ -658,7 +665,6 @@ button:disabled{opacity:.5;cursor:not-allowed}
     setBusy(true);
     
     try {
-      // 🔥 將員工名字寫入資料庫
       await updateDoc(doc(db, ac, ph), { 
         status: "已兌換", 
         store: st, 
