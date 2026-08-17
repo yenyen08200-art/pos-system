@@ -149,7 +149,7 @@ button{font-family:inherit;cursor:pointer;}
   #btn-check { min-width: 120px; flex-shrink: 0;}
 }
 
-/* 🔥 殘影預判快搜系統 Wrapper */
+/* 殘影預判快搜 Wrapper */
 .search-input-wrapper { position: relative; flex: 1; width: 100%; }
 
 #phone{width:100%;min-height:64px;border-radius:14px;border:1px solid var(--input);background:oklch(0.17 0.024 259/.6);
@@ -158,7 +158,7 @@ button{font-family:inherit;cursor:pointer;}
 #phone:focus{border-color:var(--accent-digital);box-shadow:0 0 0 4px rgba(0,198,255,0.25);}
 body.mode-physical-active #phone:focus { border-color: var(--accent-physical); box-shadow: 0 0 0 4px rgba(255,107,53,0.25); }
 
-/* 🔥 快搜下拉選單樣式 */
+/* 快搜下拉選單樣式 */
 .autocomplete-list {
   position: absolute; top: calc(100% + 8px); left: 0; right: 0; 
   background: var(--card); border: 1px solid var(--border); border-radius: 14px;
@@ -249,44 +249,17 @@ body.mode-physical-active .scanline { background: var(--accent-physical); box-sh
 .info .v.mono{letter-spacing:.08em}
 .actions{margin-top:auto;padding-top:8px;display:flex;flex-direction:column;gap:12px; width: 100%;}
 
-/* 🔥 滑動核銷 UI (Swipe to Redeem) */
-.swipe-container {
-  position: relative; height: 96px; width: 100%; background: var(--secondary);
-  border-radius: 18px; border: 1px solid var(--border); overflow: hidden;
-  display: flex; align-items: center; justify-content: center; user-select: none;
-  transition: all 0.3s;
-}
-.swipe-track {
-  position: absolute; left: 0; top: 0; bottom: 0; width: 0%;
-  background-image: var(--gradient-digital); z-index: 1; transition: width 0s;
-}
-body.mode-physical-active .swipe-track { background-image: var(--gradient-physical); }
-.swipe-text { 
-  position: relative; z-index: 2; font-size: 24px; font-weight: 900; letter-spacing: 0.04em;
-  color: var(--muted-foreground); pointer-events: none; transition: color 0.3s; 
-}
-.swipe-thumb {
-  position: absolute; left: 8px; top: 8px; bottom: 8px; width: 80px;
-  background: #fff; border-radius: 14px; box-shadow: 0 4px 20px rgba(0,0,0,0.4);
-  display: flex; align-items: center; justify-content: center; font-size: 32px;
-  z-index: 3; cursor: grab; transition: transform 0s; color: var(--background);
-}
-.swipe-thumb:active { cursor: grabbing; }
+/* 🔥 退回為極致大按鈕 */
+.redeem{min-height:96px;width:100%;border:none;border-radius:18px;font-size:28px;font-weight:900;letter-spacing:.04em;
+  background-image:var(--gradient-digital);color:#fff;box-shadow:0 26px 50px -22px rgba(0,198,255,0.8);transition:all .2s;
+  display: flex; align-items: center; justify-content: center; gap: 12px; cursor: pointer;}
+body.mode-physical-active .redeem { background-image: var(--gradient-physical); box-shadow: 0 26px 50px -22px rgba(255,107,53,1); }
+.redeem:hover:not(:disabled){transform:translateY(-2px);filter:brightness(1.1)}
+.redeem:active:not(:disabled){transform:scale(.98)}
 
-/* 滑動條狀態變化 */
-.swipe-container.is-ready { border-color: rgba(0,198,255,0.4); box-shadow: 0 0 30px -10px rgba(0,198,255,0.3); }
-body.mode-physical-active .swipe-container.is-ready { border-color: rgba(255,107,53,0.4); box-shadow: 0 0 30px -10px rgba(255,107,53,0.3); }
-.swipe-container.is-ready .swipe-text { color: #fff; text-shadow: 0 2px 10px rgba(0,0,0,0.8); }
-
-/* 防呆鎖死狀態 */
-.swipe-container.is-claimed { background: var(--muted); border-color: var(--border); pointer-events: none; box-shadow: none; }
-.swipe-container.is-claimed .swipe-text { color: var(--muted-foreground); text-shadow: none; }
-.swipe-container.is-claimed .swipe-thumb { background: var(--border); color: var(--muted-foreground); box-shadow: none; }
-
-.swipe-container.is-expired { background: var(--destructive); border-color: rgba(255,0,0,0.5); pointer-events: none; box-shadow: 0 10px 20px -10px rgba(255,0,0,0.5); }
-.swipe-container.is-expired .swipe-text { color: #fff; text-shadow: none; }
-.swipe-container.is-expired .swipe-thumb { background: rgba(0,0,0,0.2); color: #fff; box-shadow: none; }
-
+/* 🔥 終極防呆：過期與已兌換按鈕強制鎖死 */
+.redeem.is-claimed { background: var(--muted) !important; box-shadow: none !important; color: var(--muted-foreground) !important; cursor: not-allowed !important; pointer-events: none !important; opacity: 1 !important; transform: none !important; }
+.redeem.is-expired { background: var(--destructive) !important; box-shadow: 0 10px 20px -10px rgba(255,0,0,0.5) !important; color: #fff !important; cursor: not-allowed !important; pointer-events: none !important; opacity: 1 !important; transform: none !important; }
 
 .undo{min-height:64px;width:100%;border-radius:18px;font-size:20px;font-weight:700;color:var(--accent-digital);
   border:1px solid rgba(0,198,255,0.5);background:rgba(0,198,255,0.15);transition:background .2s}
@@ -304,7 +277,6 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
 </head>
 <body>
 
-<!-- 動態 HUD 通知 -->
 <div id="toast-container">
   <span class="toast-icon">⚠️</span>
   <span id="toast-msg">系統訊息</span>
@@ -362,7 +334,7 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
           </div>
 
           <div class="searchbar">
-            <!-- 🔥 殘影快搜 Wrapper -->
+            <!-- 殘影快搜 Wrapper -->
             <div class="search-input-wrapper">
               <input id="phone" type="tel" placeholder="輸入手機號碼 (限10碼)" autocomplete="off" />
               <div id="autocomplete-list" class="autocomplete-list"></div>
@@ -393,15 +365,10 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
           </div>
 
           <div class="actions">
-            <!-- 🔥 滑動核銷 UI -->
-            <div id="swipe-btn-container" class="swipe-container">
-              <div class="swipe-track" id="swipe-track"></div>
-              <div class="swipe-text" id="swipe-text">向右滑動以核銷 👉</div>
-              <div class="swipe-thumb" id="swipe-thumb">🍔</div>
-            </div>
-            
-            <button class="undo hidden" id="btn-undo">⚡ 撤銷 (5s)</button>
-            <button class="next" id="btn-next">🧹 清除／服務下一位</button>
+            <!-- 🔥 恢復極致大按鈕 -->
+            <button class="redeem" id="btn-redeem" onclick="redeem()">✔ 確認核銷優惠</button>
+            <button class="undo hidden" id="btn-undo" onclick="undo()">⚡ 撤銷 (5s)</button>
+            <button class="next" id="btn-next" onclick="nextCust()">🧹 清除／服務下一位</button>
           </div>
         </div>
       </section>
@@ -449,7 +416,6 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
   let currentMode = 'digital';
   let toastTimer = null;
 
-  // 假連線延遲跳動
   setInterval(() => {
       const ping = Math.floor(Math.random() * (45 - 12 + 1) + 12);
       document.querySelector('#ping-tracker span:last-child').innerText = `API OK ${ping}ms`;
@@ -517,24 +483,20 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
     nextCust();
   };
 
-  // 🔥 殘影預判快搜系統邏輯
   let acTimeout = null;
   $("phone").addEventListener("input", function() {
-      // 驗證字元
       if (currentMode === 'digital') this.value = this.value.replace(/[^\d]/g,'').slice(0,10); 
       else this.value = this.value.replace(/[^a-zA-Z0-9]/g,'').toUpperCase().slice(0,20);
       
       const val = this.value.trim();
       const list = $("autocomplete-list");
       
-      // 至少輸入 3 個字才啟動快搜，避免撈出太多資料
       if (val.length < 3) { list.innerHTML = ""; list.classList.remove("show"); return; } 
       
       if (acTimeout) clearTimeout(acTimeout);
       acTimeout = setTimeout(async () => {
           if(!act || !store) return;
           try {
-              // Firebase 完美的前綴查詢 (Prefix Search)
               const q = query(collection(db, act), 
                   where("phone", ">=", val), 
                   where("phone", "<=", val + '\uf8ff'), 
@@ -550,7 +512,6 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
                   const statusClass = isReady ? "ready" : "done";
                   const statusText = isReady ? "可兌換" : (d.status || "已失效");
                   
-                  // 高亮輸入的文字
                   const highlightedPhone = d.phone.replace(new RegExp(`(${val})`, 'i'), `<span class="ac-hl">$1</span>`);
                   
                   html += `
@@ -565,17 +526,16 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
               list.innerHTML = html;
               list.classList.add("show");
           } catch(e) { console.error("快搜發生錯誤", e); }
-      }, 300); // 300ms 防抖
+      }, 300);
   });
 
   window.selectAutocomplete = function(ph) {
       $("phone").value = ph;
       $("autocomplete-list").innerHTML = "";
       $("autocomplete-list").classList.remove("show");
-      check(ph); // 自動執行查詢
+      check(ph); 
   };
   
-  // 點擊空白處隱藏選單
   document.addEventListener("click", function (e) {
       if (e.target !== $("phone")) {
           $("autocomplete-list").classList.remove("show");
@@ -620,7 +580,7 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
         else setMode('digital');
       } else { setMode('digital'); }
 
-      renderStores(); renderActs(); renderRight(); initSwipe();
+      renderStores(); renderActs(); renderRight();
     } catch (e) { showToast("無法連線至雲端讀取 POS 設定！", "error"); }
   }
 
@@ -736,89 +696,22 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
         $("v-gift").innerText = displayGift;
     }
     
-    // 🔥 滑動按鈕狀態重置與鎖定
-    const swipeCont = $("swipe-btn-container");
-    const swipeText = $("swipe-text");
-    const swipeThumb = $("swipe-thumb");
-    const swipeTrack = $("swipe-track");
-    
-    swipeCont.className = "swipe-container";
-    swipeThumb.style.transition = "none";
-    swipeTrack.style.transition = "none";
-    swipeThumb.style.transform = `translateX(0px)`;
-    swipeTrack.style.width = `0px`;
+    // 🔥 動態鎖定大按鈕 (終極防呆)
+    const redeemBtn = $("btn-redeem");
+    redeemBtn.className = "redeem"; 
+    redeemBtn.disabled = false;
 
     if (isClaimed) {
-        swipeCont.classList.add("is-claimed");
-        swipeText.innerText = "已兌換完畢";
-        swipeThumb.innerText = "🔒";
+        redeemBtn.innerText = "已兌換完畢";
+        redeemBtn.disabled = true;
+        redeemBtn.classList.add("is-claimed");
     } else if (isExpired) {
-        swipeCont.classList.add("is-expired");
-        swipeText.innerText = "已過期無法核銷";
-        swipeThumb.innerText = "⛔";
+        redeemBtn.innerText = "已過期無法核銷";
+        redeemBtn.disabled = true;
+        redeemBtn.classList.add("is-expired");
     } else {
-        swipeCont.classList.add("is-ready");
-        swipeText.innerText = "向右滑動以核銷 👉";
-        swipeThumb.innerText = "🍔"; 
+        redeemBtn.innerText = "✔ 確認核銷優惠";
     }
-  }
-
-  // 🔥 滑動核銷核心引擎
-  function initSwipe() {
-      const swipeContainer = $("swipe-btn-container");
-      const swipeThumb = $("swipe-thumb");
-      const swipeTrack = $("swipe-track");
-      let isDragging = false;
-      let startX = 0;
-      let maxDrag = 0;
-
-      const handleDown = (e) => {
-          if (swipeContainer.classList.contains("is-claimed") || swipeContainer.classList.contains("is-expired")) return;
-          if (!record || (record.status !== "未兌換" && record.status !== "")) return;
-          
-          isDragging = true;
-          startX = e.type.includes('mouse') ? e.pageX : e.touches[0].pageX;
-          maxDrag = swipeContainer.clientWidth - swipeThumb.clientWidth - 16; 
-          swipeThumb.style.transition = "none";
-          swipeTrack.style.transition = "none";
-      };
-
-      const handleMove = (e) => {
-          if (!isDragging) return;
-          let currentX = e.type.includes('mouse') ? e.pageX : e.touches[0].pageX;
-          let offset = currentX - startX;
-          if (offset < 0) offset = 0;
-          if (offset > maxDrag) offset = maxDrag;
-          
-          swipeThumb.style.transform = `translateX(${offset}px)`;
-          swipeTrack.style.width = `${offset + 40}px`; 
-      };
-
-      const handleUp = (e) => {
-          if (!isDragging) return;
-          isDragging = false;
-          let currentX = e.type.includes('mouse') ? e.pageX : e.changedTouches[0].pageX;
-          let offset = currentX - startX;
-          
-          swipeThumb.style.transition = "transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)";
-          swipeTrack.style.transition = "width 0.3s ease";
-
-          if (offset > maxDrag * 0.85) { 
-              swipeThumb.style.transform = `translateX(${maxDrag}px)`;
-              swipeTrack.style.width = `100%`;
-              window.redeem(); // 觸發核銷
-          } else {
-              swipeThumb.style.transform = `translateX(0px)`;
-              swipeTrack.style.width = `0px`;
-          }
-      };
-
-      swipeThumb.addEventListener("mousedown", handleDown);
-      swipeThumb.addEventListener("touchstart", handleDown, {passive: true});
-      document.addEventListener("mousemove", handleMove);
-      document.addEventListener("touchmove", handleMove, {passive: false});
-      document.addEventListener("mouseup", handleUp);
-      document.addEventListener("touchend", handleUp);
   }
 
   function renderContent(data, ph, ac){
@@ -922,20 +815,17 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
     const empName = $("employee-name").value.trim();
     if(!empName) { 
         $("employee-name").focus(); 
-        renderRight(); // 退回滑塊
         return showToast("請先填寫上方的「值班人員」姓名！", "error"); 
     }
     localStorage.setItem("p_employee", empName); 
 
+    // 🔥 終極防護：JS 底層雙重鎖定
     if (record && (record.status === "已兌換" || record.status === "已過期")) {
-        playAlert("error"); renderRight();
+        playAlert("error"); 
         return showToast("此憑證已失效，無法執行核銷！", "error");
     }
 
-    if (!confirm("確定核銷？憑證將失效！")) {
-        renderRight(); // 退回滑塊
-        return;
-    }
+    if (!confirm("確定核銷？憑證將失效！")) return;
     
     const ph = shownPhone, st = store, ac = act;
     const d = new Date(), pad = (n) => (n < 10 ? "0" + n : String(n));
@@ -974,7 +864,7 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
     setTimeout(() => $("phone").focus(), 100);
   }
 
-  // 鍵盤忍者快捷鍵 (保留但不顯示提示字)
+  // 鍵盤忍者快捷鍵
   document.addEventListener("keydown", (e) => {
     if (document.activeElement.tagName === 'INPUT' && e.key !== 'Enter') return;
     if (e.key === "Enter") {
@@ -985,17 +875,7 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
     } 
     else if (e.code === "Space" || e.key === " ") {
         if (record && record.status === "未兌換" && document.activeElement.tagName !== 'INPUT') {
-            e.preventDefault(); 
-            // 讓滑塊有視覺反饋再執行
-            const swipeContainer = $("swipe-btn-container");
-            const swipeThumb = $("swipe-thumb");
-            const swipeTrack = $("swipe-track");
-            const maxDrag = swipeContainer.clientWidth - swipeThumb.clientWidth - 16;
-            swipeThumb.style.transition = "transform 0.3s ease";
-            swipeTrack.style.transition = "width 0.3s ease";
-            swipeThumb.style.transform = `translateX(${maxDrag}px)`;
-            swipeTrack.style.width = `100%`;
-            setTimeout(window.redeem, 300);
+            e.preventDefault(); window.redeem();
         }
     }
     else if (e.key === "Escape") { e.preventDefault(); nextCust(); }
@@ -1006,8 +886,6 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
   $("btn-scan").onclick = startScan;
   $("btn-stop").onclick = stopScan;
   $("btn-check").onclick = () => check();
-  $("btn-undo").onclick = undo;
-  $("btn-next").onclick = nextCust;
 </script>
 </body>
 </html>
