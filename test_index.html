@@ -26,11 +26,11 @@
   --surface-glow:0 0 0 1px oklch(1 0 0 / 6%), 0 24px 60px -20px oklch(0 0 0 / 60%);
   --gradient-panel:linear-gradient(160deg, oklch(0.24 0.03 262), oklch(0.2 0.026 258));
   
-  /* 🔥 新增：電子憑證專屬「霓虹冰藍」漸層 */
+  /* 電子憑證專屬「霓虹冰藍」漸層 */
   --accent-digital: #00C6FF;
   --gradient-digital: linear-gradient(135deg, #00C6FF, #0072FF);
 
-  /* 🔥 實體券專屬「橘紅色」漸層 */
+  /* 實體券專屬「橘紅色」漸層 */
   --accent-physical: #FF6B35;
   --gradient-physical: linear-gradient(135deg, #FF6B35, #F04323);
   
@@ -134,11 +134,11 @@ button{font-family:inherit;cursor:pointer;}
 .act-name{display:block;font-size:18px;font-weight:600}
 .radio{width:16px;height:16px;border-radius:999px;border:2px solid var(--muted-foreground);flex:none; transition: .2s;}
 
-/* 🔥 電子券選中狀態 (高亮霓虹冰藍) */
+/* 電子券選中狀態 (高亮霓虹冰藍) */
 .act-btn.on{border-color:var(--accent-digital);background:rgba(0,198,255,0.15)}
 .act-btn.on .radio{border-color:var(--accent-digital);background:var(--accent-digital); box-shadow: 0 0 0 4px rgba(0,198,255,0.2);}
 
-/* 🔥 實體券選中狀態 (高亮橘紅) */
+/* 實體券選中狀態 (高亮橘紅) */
 .act-btn.is-physical:hover { border-color: rgba(255,107,53,0.5); }
 .act-btn.is-physical.on { border-color: var(--accent-physical); background: rgba(255, 107, 53, 0.15); }
 .act-btn.is-physical.on .radio { border-color: var(--accent-physical); background: var(--accent-physical); box-shadow: 0 0 0 4px rgba(255, 107, 53, 0.2); }
@@ -240,17 +240,17 @@ body.mode-physical-active .scanline { background: var(--accent-physical); box-sh
 .info .v.mono{letter-spacing:.08em}
 .actions{margin-top:auto;padding-top:8px;display:flex;flex-direction:column;gap:12px; width: 100%;}
 
-/* 🔥 核銷按鈕樣式 */
+/* 🔥 核銷大按鈕樣式 */
 .redeem{min-height:96px;width:100%;border:none;border-radius:18px;font-size:28px;font-weight:900;letter-spacing:.04em;
   background-image:var(--gradient-digital);color:#fff;box-shadow:0 26px 50px -22px rgba(0,198,255,0.8);transition:all .2s;
-  display: flex; align-items: center; justify-content: center; gap: 12px;}
+  display: flex; align-items: center; justify-content: center; gap: 12px; cursor: pointer;}
 body.mode-physical-active .redeem { background-image: var(--gradient-physical); box-shadow: 0 26px 50px -22px rgba(255,107,53,1); }
-.redeem:hover{transform:translateY(-2px);filter:brightness(1.1)}
-.redeem:active{transform:scale(.98)}
+.redeem:hover:not(:disabled){transform:translateY(-2px);filter:brightness(1.1)}
+.redeem:active:not(:disabled){transform:scale(.98)}
 
-/* 🔥 過期與已兌換按鈕強制覆寫 (防呆鎖死) */
-.redeem.is-claimed { background: var(--muted) !important; box-shadow: none !important; color: var(--muted-foreground) !important; cursor: not-allowed; transform: none !important; }
-.redeem.is-expired { background: var(--destructive) !important; box-shadow: 0 10px 20px -10px rgba(255,0,0,0.5) !important; color: #fff !important; cursor: not-allowed; transform: none !important; }
+/* 🔥 終極防呆：過期與已兌換按鈕強制鎖死，完全阻擋滑鼠與點擊事件 */
+.redeem.is-claimed { background: var(--muted) !important; box-shadow: none !important; color: var(--muted-foreground) !important; cursor: not-allowed !important; pointer-events: none !important; opacity: 1 !important; transform: none !important; }
+.redeem.is-expired { background: var(--destructive) !important; box-shadow: 0 10px 20px -10px rgba(255,0,0,0.5) !important; color: #fff !important; cursor: not-allowed !important; pointer-events: none !important; opacity: 1 !important; transform: none !important; }
 
 .undo{min-height:64px;width:100%;border-radius:18px;font-size:20px;font-weight:700;color:var(--accent-digital);
   border:1px solid rgba(0,198,255,0.5);background:rgba(0,198,255,0.15);transition:background .2s}
@@ -321,7 +321,6 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
         <div class="block">
           <h2 class="label">● 掃描 / 查詢</h2>
           <div class="mode-switch">
-            <!-- 移除文字快捷鍵提示 -->
             <button id="mode-digital" class="mode-btn active" onclick="setMode('digital')">📱 電子憑證</button>
             <button id="mode-physical" class="mode-btn" onclick="setMode('physical')">🎫 實體流水號</button>
           </div>
@@ -353,10 +352,10 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
           </div>
 
           <div class="actions">
-            <!-- 移除文字快捷鍵提示 -->
-            <button class="redeem" id="btn-redeem">✔ 確認核銷優惠</button>
-            <button class="undo hidden" id="btn-undo">⚡ 撤銷 (5s)</button>
-            <button class="next" id="btn-next">🧹 清除／服務下一位</button>
+            <!-- 核銷大按鈕 -->
+            <button class="redeem" id="btn-redeem" onclick="redeem()">✔ 確認核銷優惠</button>
+            <button class="undo hidden" id="btn-undo" onclick="undo()">⚡ 撤銷 (5s)</button>
+            <button class="next" id="btn-next" onclick="nextCust()">🧹 清除／服務下一位</button>
           </div>
         </div>
       </section>
@@ -404,7 +403,7 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
   let currentMode = 'digital';
   let toastTimer = null;
 
-  // 假連線延遲跳動 (裝逼用)
+  // 假連線延遲跳動
   setInterval(() => {
       const ping = Math.floor(Math.random() * (45 - 12 + 1) + 12);
       document.querySelector('#ping-tracker span:last-child').innerText = `API OK ${ping}ms`;
@@ -616,7 +615,7 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
     const defaultExpire = (POS_CONFIG[shownAct] && POS_CONFIG[shownAct].expireDate) ? POS_CONFIG[shownAct].expireDate : "無特別限制";
     const expireStr = record.expireDate || defaultExpire;
 
-    // 🔥 前端本地即時檢測：自動判定是否過期
+    // 🔥 前端本地即時防護：自動判定是否過期
     let autoExpired = false;
     if (record.status !== "已過期" && record.status !== "已兌換" && expireStr && expireStr !== "無特別限制" && !expireStr.includes("依紙本券面")) {
         const today = new Date();
@@ -627,10 +626,10 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
         while ((match = regex.exec(expireStr)) !== null) {
             lastDate = new Date(match[1], parseInt(match[2])-1, match[3]);
         }
+        // 如果期限小於今天，強制判為過期
         if (lastDate && lastDate < today) {
             autoExpired = true;
             record.status = "已過期"; 
-            // 在背景直接幫他寫入 Firebase 判死刑
             updateDoc(doc(db, shownAct, shownPhone), { status: "已過期", redeemTime: "逾期未換 (前台自動攔截)" });
         }
     }
@@ -665,7 +664,7 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
         $("v-gift").innerText = displayGift;
     }
     
-    // 🔥 動態切換按鈕狀態與文字
+    // 🔥 動態鎖定大按鈕 (終極防呆)
     const redeemBtn = $("btn-redeem");
     redeemBtn.className = "redeem"; // 重置 Class
     redeemBtn.disabled = false;
@@ -780,10 +779,16 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
     } finally { setBusy(false); }
   }
 
-  async function redeem(){
+  window.redeem = async function() {
     const empName = $("employee-name").value.trim();
     if(!empName) { $("employee-name").focus(); return showToast("請先填寫上方的「值班人員」姓名！", "error"); }
     localStorage.setItem("p_employee", empName); 
+
+    // 🔥 終極防護：JS 底層雙重鎖定，防堵駭客或鍵盤強制觸發
+    if (record && (record.status === "已兌換" || record.status === "已過期")) {
+        playAlert("error");
+        return showToast("此憑證已失效，無法執行核銷！", "error");
+    }
 
     if (!confirm("確定核銷？憑證將失效！")) return;
     const ph = shownPhone, st = store, ac = act;
@@ -810,7 +815,7 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
     }, 1000);
   }
 
-  async function undo(){
+  window.undo = async function() {
     if (uTimer) clearInterval(uTimer);
     const ph = shownPhone, ac = act; setBusy(true);
     try { await updateDoc(doc(db, ac, ph), { status: "未兌換", store: "", redeemTime: "", redeemBy: "" }); } finally { setBusy(false); }
@@ -818,12 +823,12 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
     showToast("已撤銷復原", "success"); check(ph);
   }
 
-  function nextCust(){
+  window.nextCust = function() {
     $("phone").value = ""; record = null; hideUndo(); renderRight();
     setTimeout(() => $("phone").focus(), 100);
   }
 
-  // 鍵盤忍者事件綁定 (保留快捷功能但不顯示文字)
+  // 鍵盤忍者事件綁定 (隱藏文字但不拔功能)
   document.addEventListener("keydown", (e) => {
     if (document.activeElement.tagName === 'INPUT' && e.key !== 'Enter') return;
 
@@ -852,9 +857,6 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
   $("btn-scan").onclick = startScan;
   $("btn-stop").onclick = stopScan;
   $("btn-check").onclick = () => check();
-  $("btn-redeem").onclick = redeem;
-  $("btn-undo").onclick = undo;
-  $("btn-next").onclick = nextCust;
 </script>
 </body>
 </html>
