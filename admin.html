@@ -52,14 +52,21 @@
     .live-badge{background:var(--accent);color:#fff;font-size:10px;font-weight:800;padding:5px 10px;border-radius:999px;animation:pulse 1.5s infinite}
     @keyframes pulse{0%,100%{opacity:1}50%{opacity:.45}}
 
-    /* Dashboard UI */
-    .controls{display:flex;gap:10px;align-items:center}
-    .controls select,.controls button, .controls input[type="date"]{padding:11px 16px;font-size:14px;border-radius:999px;border:none;outline:none;font-weight:700;cursor:pointer;transition:.2s}
-    .controls select, .controls input[type="date"]{background:#fff;color:var(--text-main);box-shadow:var(--shadow);border:1px solid #E6EAF0;font-family:inherit;}
-    .btn-expire{background:#fff;color:var(--text-main);box-shadow:var(--shadow);border:1px solid #E6EAF0;}
-    .btn-expire:hover{color:var(--accent)}
-    .btn-export{background:var(--sidebar-bg);color:#fff}
-    .btn-export:hover{background:#2A2D38}
+    /* 🔥 Dashboard UI - 控制區大升級 */
+    .controls { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; width: 100%; margin-top: 10px; }
+    .controls-left, .controls-right { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    .control-item { padding: 10px 16px; font-size: 14px; border-radius: 12px; font-weight: 700; cursor: pointer; transition: .2s; border: 1px solid #E6EAF0; background: #fff; box-shadow: var(--shadow); color: var(--text-main); display: flex; align-items: center; gap: 6px; font-family: inherit;}
+    .control-item:hover { border-color: var(--accent); color: var(--accent); }
+    .control-item.primary { background: var(--sidebar-bg); color: #fff; border: none; }
+    .control-item.primary:hover { background: #2A2D38; color: #fff; }
+    .control-item.success { background: var(--green); color: #fff; border: none; }
+    .control-item.success:hover { filter: brightness(1.05); color: #fff; }
+    
+    .date-wrapper { display: flex; align-items: center; background: #fff; border: 1px solid #E6EAF0; border-radius: 12px; box-shadow: var(--shadow); overflow: hidden; }
+    .date-wrapper input[type="date"] { border: none; padding: 10px 12px; font-family: inherit; font-weight: 600; outline: none; background: transparent; color: var(--text-main); }
+    .date-wrapper button { border: none; background: transparent; padding: 0 16px; color: var(--text-sub); font-weight: 600; cursor: pointer; border-left: 1px solid #E6EAF0; transition: .2s; }
+    .date-wrapper button:hover { color: var(--accent); background: #fdfdfd; }
+
     .dashboard{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:20px;margin-bottom:24px}
     .stat-card{background:var(--card-bg);padding:26px;border-radius:var(--radius);box-shadow:var(--shadow)}
     .stat-card h3{margin:0 0 10px;color:var(--text-sub);font-size:13px;font-weight:600}
@@ -160,9 +167,13 @@
       #main-app{padding:16px; height:auto;}
       .header{flex-direction:column; align-items:flex-start; gap:16px;}
       .header h1{font-size:24px;}
+      
       /* 控制列自動換行 */
-      .controls{display:grid; grid-template-columns:1fr 1fr; width:100%; gap:10px;}
-      .controls select, .controls input[type="date"]{grid-column:span 2; width:100%;}
+      .controls { flex-direction: column; align-items: flex-start; }
+      .controls-left, .controls-right { width: 100%; }
+      .control-item { flex: 1; justify-content: center; }
+      .date-wrapper { width: 100%; justify-content: space-between; }
+      
       /* 儀表板卡片改為 2x2 排列 */
       .dashboard{grid-template-columns:repeat(2, 1fr); gap:12px;}
       .stat-card{padding:16px;}
@@ -228,15 +239,24 @@
           <div class="header-title-area">
             <h1>電子兌換卷儀表板 <span class="live-badge">LIVE 監控中</span></h1>
           </div>
+          
+          <!-- 🔥 全新頂部控制列 UI -->
           <div class="controls">
-            <select id="act-select" onchange="fetchData()"></select>
-            <!-- 🔥 新增日期篩選 -->
-            <input type="date" id="date-filter" onchange="updateDashboardStats()" title="篩選特定日期的核銷紀錄">
+            <div class="controls-left">
+              <select id="act-select" class="control-item" onchange="fetchData()"></select>
+              
+              <!-- 內建清除按鈕的日期選擇器 -->
+              <div class="date-wrapper">
+                <input type="date" id="date-filter" onchange="updateDashboardStats()" title="篩選特定日期的核銷紀錄">
+                <button onclick="clearDateFilter()">✖ 清除篩選</button>
+              </div>
+            </div>
             
-            <!-- 🔥 新增批次核銷 -->
-            <button id="btn-batch" onclick="batchRedeem()" style="background:var(--green); color:#fff;">☑️ 批次核銷</button>
-            <button class="btn-expire" onclick="expireTickets()">🧹 智慧結算過期</button>
-            <button class="btn-export" onclick="exportExcel()">📥 匯出 Excel</button>
+            <div class="controls-right">
+              <button class="control-item success" id="btn-batch" onclick="batchRedeem()">☑️ 批次核銷</button>
+              <button class="control-item" onclick="expireTickets()">🧹 智慧結算過期</button>
+              <button class="control-item primary" onclick="exportExcel()">📥 匯出 Excel</button>
+            </div>
           </div>
         </div>
 
@@ -1018,7 +1038,12 @@
       }
     };
 
-    // ================= 儀表板 & 智慧結算過期 & 日期篩選 =================
+    // ================= 儀表板 & 日期篩選 & 批次核銷 =================
+    window.clearDateFilter = function() {
+      document.getElementById('date-filter').value = '';
+      updateDashboardStats();
+    };
+
     window.fetchData = function() {
       const actSelect = document.getElementById('act-select');
       if (!actSelect || !actSelect.value) return;
@@ -1035,24 +1060,20 @@
           const d = doc.data(); d.id = doc.id; allData.push(d);
         });
         
-        // 🔥 將計算邏輯丟給 updateDashboardStats 統一處理
         updateDashboardStats();
       }, (error) => {
         tbody.innerHTML = '<tr><td colspan="12" style="text-align:center; padding: 40px; color: red;">連線中斷，請確認網路連線。</td></tr>';
       });
     };
 
-    // 🔥 新增：動態日期篩選與統計更新函數
     window.updateDashboardStats = function() {
       const selectedDate = document.getElementById('date-filter').value;
-      let dateStr = "";
-      if(selectedDate) dateStr = selectedDate.replace(/-/g, '/'); // 將 YYYY-MM-DD 轉成 YYYY/MM/DD
+      let dateStr = selectedDate ? selectedDate.replace(/-/g, '/') : "";
 
       let redeemedCount = 0; let expiredCount = 0; let storeStats = {}; 
-      let validTotalCount = 0; // 用於計算篩選後的總張數
+      let validTotalCount = 0; 
 
       allData.forEach(d => {
-        // 若有選日期，且該筆資料的核銷時間(或領取時間)不包含該日期，則跳過計算
         if(dateStr && ((d.redeemTime && !d.redeemTime.includes(dateStr)) && (d.timestamp && !d.timestamp.includes(dateStr)))) {
             return; 
         }
@@ -1075,10 +1096,9 @@
       document.getElementById('expired-count').innerText = expiredCount; 
       
       drawCharts(storeStats, redeemedCount, unredeemedCount, expiredCount); 
-      renderTable(); // 更新下方表格
+      renderTable(); 
     };
 
-    // 🔥 新增：後台批次強制核銷
     window.batchRedeem = async function() {
       const act = document.getElementById('act-select').value;
       const checkedBoxes = document.querySelectorAll('.row-check:checked');
@@ -1108,7 +1128,6 @@
         alert("批次核銷發生錯誤");
       } finally {
         btn.innerText = "☑️ 批次核銷"; btn.disabled = false;
-        // 畫面會因為 Firestore onSnapshot 自動重整，無需手動清空勾選
       }
     };
 
@@ -1208,7 +1227,6 @@
 
       let filteredData = allData.filter(d => {
         const matchSearch = (d.phone || '').toLowerCase().includes(searchTerm) || (d.name || '').toLowerCase().includes(searchTerm);
-        // 🔥 日期篩選同時過濾「核銷時間」或「領取時間」
         const matchDate = dateStr === "" || (d.redeemTime && d.redeemTime.includes(dateStr)) || (d.timestamp && d.timestamp.includes(dateStr));
         return matchSearch && matchDate;
       });
@@ -1234,7 +1252,6 @@
         let displayGift = d.gift ? `${d.gift} <span style="font-size:10px; color:#F07654;">(專屬)</span>` : defaultGift;
         let displayExpire = d.expireDate || defaultExpire;
         
-        // 🔥 未兌換的票券才顯示 Checkbox
         let checkboxHTML = d.status === '未兌換' ? `<input type="checkbox" class="row-check" value="${d.id}">` : '';
 
         let actionBtnHTML = `
@@ -1283,7 +1300,7 @@
         "兌換號碼": d.phone, "顧客姓名": d.name, "社群帳號": d.social_id || '未提供',
         "兌換品項": d.gift || defaultGift, "兌換狀態": d.status || '未兌換',
         "核銷門市": d.store || '', "核銷時間": d.redeemTime || '', 
-        "核銷人員": d.redeemBy || '', // 🔥 加入核銷人員欄位
+        "核銷人員": d.redeemBy || '', 
         "使用期限": d.expireDate || defaultExpire, "領券時間": d.timestamp || ''
       }));
       const ws = XLSX.utils.json_to_sheet(exportArr); const wb = XLSX.utils.book_new();
