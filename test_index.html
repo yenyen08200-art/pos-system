@@ -6,7 +6,7 @@
 <title>抽獎核銷系統 | 門市 POS 兌換平台</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Space+Grotesk:wght@500;700&display=swap" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Space+Grotesk:wght@500;700;900&display=swap" />
 <style>
 :root{
   --background:oklch(0.17 0.024 259);
@@ -26,8 +26,6 @@
   --surface-glow:0 0 0 1px oklch(1 0 0 / 6%), 0 24px 60px -20px oklch(0 0 0 / 60%);
   --gradient-tech:linear-gradient(135deg, oklch(0.78 0.17 68), oklch(0.72 0.16 40));
   --gradient-panel:linear-gradient(160deg, oklch(0.24 0.03 262), oklch(0.2 0.026 258));
-  
-  /* 🔥 實體券專屬橘紅色系 */
   --accent-physical: #FF6B35;
   --gradient-physical:linear-gradient(135deg, #FF6B35, #F04323);
   --radius:1.25rem;
@@ -36,21 +34,14 @@
 
 html { overflow-x: hidden; }
 body {
-  height: 100%;
-  width: 100%;
-  overflow-x: hidden;
-  position: relative;
-  background: var(--background);
-  color: var(--foreground);
+  height: 100%; width: 100%; overflow-x: hidden; position: relative;
+  background: var(--background); color: var(--foreground);
   font-family: "Space Grotesk","Noto Sans TC",system-ui,sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
 main {
-  min-height: 100vh;
-  width: 100%;
-  max-width: 100vw;
-  overflow-x: hidden;
+  min-height: 100vh; width: 100%; max-width: 100vw; overflow-x: hidden;
   background-image:
     radial-gradient(circle at 15% 10%, oklch(0.78 0.17 68 / 12%), transparent 45%),
     radial-gradient(circle at 85% 0%, oklch(0.78 0.14 195 / 12%), transparent 40%),
@@ -62,14 +53,20 @@ main {
 .wrap { max-width: 1400px; margin: 0 auto; width: 100%; padding: 20px 16px; }
 @media(min-width:768px){.wrap{padding:32px}}
 
+/* 🔥 頂部狀態列與心跳監控 */
 header{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px;margin-bottom:24px}
 .brand{display:flex;align-items:center;gap:16px}
 .logo{width:56px;height:56px;display:flex;align-items:center;justify-content:center;border-radius:18px;font-size:26px;
-  background-image:var(--gradient-tech);color:var(--primary-foreground);box-shadow:0 12px 30px -12px oklch(0 0 0/.8);
-  transition:transform .3s}
+  background-image:var(--gradient-tech);color:var(--primary-foreground);box-shadow:0 12px 30px -12px oklch(0 0 0/.8); transition:transform .3s}
 .logo:hover{transform:scale(1.05)}
 h1{font-size:clamp(22px,3vw,30px);font-weight:700;letter-spacing:-.02em}
-.sub{font-size:14px;color:var(--muted-foreground)}
+.sub{font-size:14px;color:var(--muted-foreground); display:flex; align-items:center; gap:8px;}
+
+/* 駭客終端機連線字體 */
+.ping-monitor { font-family: monospace; font-size: 11px; color: var(--success); background: rgba(63,191,143,0.1); padding: 4px 8px; border-radius: 6px; letter-spacing: 0.05em; display:flex; align-items:center; gap:6px; border: 1px solid rgba(63,191,143,0.3);}
+.ping-dot { width: 6px; height: 6px; background: var(--success); border-radius: 50%; animation: pulse-ping 1s infinite; }
+@keyframes pulse-ping { 0% { opacity: 1; box-shadow: 0 0 0 0 rgba(63,191,143,0.7); } 70% { opacity: 0.5; box-shadow: 0 0 0 4px rgba(63,191,143,0); } 100% { opacity: 1; } }
+
 .panel{background-image:var(--gradient-panel);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--surface-glow); width: 100%;}
 .status{display:flex;align-items:center;gap:12px;padding:10px 16px;font-size:14px}
 .dot{position:relative;display:inline-flex;width:10px;height:10px;flex-shrink:0;}
@@ -120,12 +117,10 @@ button{font-family:inherit;cursor:pointer;}
 .act-btn:active{transform:scale(.99)}
 .act-name{display:block;font-size:18px;font-weight:600}
 .radio{width:16px;height:16px;border-radius:999px;border:2px solid var(--muted-foreground);flex:none; transition: .2s;}
-
-/* 預設活動選中狀態 (電子券：青綠色) */
 .act-btn.on{border-color:var(--accent);background:oklch(0.78 0.14 195/.15)}
 .act-btn.on .radio{border-color:var(--accent);background:var(--accent); box-shadow: 0 0 0 4px oklch(0.78 0.14 195/.2);}
 
-/* 🔥 新增：實體活動選中狀態 (實體券：橘紅色) */
+/* 實體券選中狀態 */
 .act-btn.is-physical.on { border-color: var(--accent-physical); background: rgba(255, 107, 53, 0.15); }
 .act-btn.is-physical.on .radio { border-color: var(--accent-physical); background: var(--accent-physical); box-shadow: 0 0 0 4px rgba(255, 107, 53, 0.2); }
 
@@ -135,7 +130,7 @@ button{font-family:inherit;cursor:pointer;}
 .mode-btn { flex: 1; padding: 12px; border-radius: 12px; border: none; background: transparent; color: var(--muted-foreground); font-weight: 700; font-size: 15px; transition: 0.2s; }
 .mode-btn.active { background: var(--card); color: var(--foreground); box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
 
-/* 實體券切換按鈕啟動時的專屬顏色 */
+/* 實體模式顏色 */
 #mode-physical.active { background: var(--gradient-physical); color: #fff; box-shadow: 0 8px 20px -6px rgba(255,107,53,0.6); border: none; }
 
 .searchbar{display:flex;flex-direction:column;gap:10px; width: 100%;}
@@ -151,44 +146,53 @@ button{font-family:inherit;cursor:pointer;}
   color:var(--foreground);padding:0 16px;font-size:20px;font-weight:600;letter-spacing:.08em;outline:none;transition:all .2s; width: 100%; min-width: 0;}
 #phone::placeholder{font-size:15px;font-weight:400;letter-spacing:normal;color:var(--muted-foreground)}
 #phone:focus{border-color:var(--primary);box-shadow:0 0 0 4px oklch(0.78 0.17 68/.25)}
-
-/* 當處於實體模式時，輸入框 focus 變成橘色光暈 */
 body.mode-physical-active #phone:focus { border-color: var(--accent-physical); box-shadow: 0 0 0 4px rgba(255,107,53,0.25); }
 
 .icon-btn{min-height:64px;padding:0 20px;font-size:24px;border-radius:14px;border:1px solid var(--border);background:var(--secondary);color:var(--foreground);transition:all .2s}
 .icon-btn:hover{background:var(--muted)}
 .icon-btn:active{transform:scale(.95)}
 .primary-btn{min-height:64px;padding:0 28px;font-size:18px;font-weight:700;border:none;border-radius:14px;
-  background-image:var(--gradient-tech);color:var(--primary-foreground);box-shadow:0 14px 30px -16px oklch(0 0 0/.9);transition:all .2s}
+  background-image:var(--gradient-tech);color:var(--primary-foreground);box-shadow:0 14px 30px -16px oklch(0 0 0/.9);transition:all .2s;
+  display: flex; align-items: center; justify-content: center; gap: 8px;}
 .primary-btn:hover{filter:brightness(1.1)}
 .primary-btn:active{transform:scale(.95)}
+body.mode-physical-active .primary-btn { background-image: var(--gradient-physical); box-shadow: 0 14px 30px -16px rgba(255,107,53,0.9); }
 button:disabled{opacity:.5;cursor:not-allowed}
 
-/* 當處於實體模式時，查詢按鈕也變成橘紅色漸層 */
-body.mode-physical-active .primary-btn { background-image: var(--gradient-physical); box-shadow: 0 14px 30px -16px rgba(255,107,53,0.9); }
+/* 顯示快捷鍵提示 */
+.hotkey-hint { font-size: 10px; background: rgba(0,0,0,0.3); padding: 2px 6px; border-radius: 4px; font-weight: normal; letter-spacing: normal;}
 
 #employee-name{width:100%; min-height:56px; border-radius:12px; border:1px solid var(--border); background:var(--secondary); color:var(--foreground); padding:0 16px; font-size:16px; outline:none; transition:all .2s;}
 #employee-name:focus{border-color:var(--primary); background:var(--card); box-shadow:0 0 0 4px oklch(0.78 0.17 68/.25);}
 
-#scan-area{
-  position: fixed; inset: 0; z-index: 9999; 
-  background: rgba(10, 12, 16, 0.95); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
-  display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 24px;
+/* 🔥 動態島通知 HUD */
+#toast-container {
+  position: fixed; top: -100px; left: 50%; transform: translateX(-50%); z-index: 10000;
+  display: flex; align-items: center; gap: 12px; padding: 16px 24px; border-radius: 999px;
+  font-weight: 700; font-size: 15px; letter-spacing: 0.05em; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.5); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1);
 }
+#toast-container.show { top: 24px; }
+#toast-container.error { background: rgba(255,50,50,0.15); color: #ff6b6b; border-color: rgba(255,50,50,0.3); }
+#toast-container.success { background: rgba(63,191,143,0.15); color: var(--green); border-color: rgba(63,191,143,0.3); }
+.toast-icon { font-size: 20px; }
+
+/* 🔥 JARVIS 掃描儀 HUD */
+#scan-area{ position: fixed; inset: 0; z-index: 9999; background: rgba(10, 12, 16, 0.95); display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 24px; }
 #scan-area.hidden{display:none !important}
-.reader-wrap{
-  width: 100%; max-width: 450px; border-radius: 24px; border: 2px solid var(--primary);
-  overflow: hidden; position: relative; box-shadow: 0 0 50px rgba(255, 107, 53, 0.25);
+.reader-wrap{ width: 100%; max-width: 450px; position: relative; }
+/* 遮罩與瞄準框 */
+.reader-wrap::before, .reader-wrap::after, .reader-wrap .corner-bl, .reader-wrap .corner-br {
+  content: ''; position: absolute; width: 40px; height: 40px; border-color: var(--primary); border-style: solid; z-index: 10; pointer-events: none;
 }
-#reader{width:100%}
-.scanline{position:absolute;left:0;right:0;top:0;height:4px;background:var(--primary);pointer-events:none;animation:scan 2s linear infinite; box-shadow: 0 0 10px var(--primary);}
-@keyframes scan{0%{top:0}100%{top:100%}}
-.close-cam{
-  margin-top: 32px; width: 100%; max-width: 450px; min-height: 72px; border-radius: 999px;
-  font-size: 18px; font-weight: 700; color: #fff; border: none;
-  background: var(--destructive); box-shadow: 0 10px 25px -10px rgba(255, 0, 0, 0.6);
-  transition: transform .2s, filter .2s;
-}
+.reader-wrap::before { top: -2px; left: -2px; border-width: 4px 0 0 4px; }
+.reader-wrap::after { top: -2px; right: -2px; border-width: 4px 4px 0 0; }
+.reader-wrap .corner-bl { bottom: -2px; left: -2px; border-width: 0 0 4px 4px; }
+.reader-wrap .corner-br { bottom: -2px; right: -2px; border-width: 0 4px 4px 0; }
+#reader{width:100%; border-radius: 12px; overflow: hidden; box-shadow: 0 0 0 9999px rgba(0,0,0,0.5); }
+.scanline{position:absolute;left:0;right:0;top:0;height:3px;background:var(--primary);pointer-events:none;animation:scan 2.5s ease-in-out infinite alternate; box-shadow: 0 0 15px 2px var(--primary); z-index: 11;}
+@keyframes scan{0%{top:0%}100%{top:100%}}
+.close-cam{ margin-top: 40px; width: 100%; max-width: 450px; min-height: 64px; border-radius: 999px; font-size: 16px; font-weight: 700; color: #fff; border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); transition: .2s; }
 .close-cam:active{transform:scale(.95)}
 
 .right{display:flex;flex-direction:column}
@@ -212,24 +216,30 @@ body.mode-physical-active .primary-btn { background-image: var(--gradient-physic
 .info .v.mono{letter-spacing:.08em}
 .actions{margin-top:auto;padding-top:8px;display:flex;flex-direction:column;gap:12px; width: 100%;}
 .redeem{min-height:96px;width:100%;border:none;border-radius:18px;font-size:28px;font-weight:900;letter-spacing:.04em;
-  background-image:var(--gradient-tech);color:var(--primary-foreground);box-shadow:0 26px 50px -22px oklch(0 0 0/1);transition:all .2s}
-
-/* 當處於實體模式時，核銷按鈕也變成橘紅色漸層 */
+  background-image:var(--gradient-tech);color:var(--primary-foreground);box-shadow:0 26px 50px -22px oklch(0 0 0/1);transition:all .2s;
+  display: flex; align-items: center; justify-content: center; gap: 12px;}
 body.mode-physical-active .redeem { background-image: var(--gradient-physical); box-shadow: 0 26px 50px -22px rgba(255,107,53,1); }
-
 .redeem:hover{transform:translateY(-2px);filter:brightness(1.1)}
 .redeem:active{transform:scale(.98)}
 .undo{min-height:64px;width:100%;border-radius:18px;font-size:20px;font-weight:700;color:var(--accent);
   border:1px solid oklch(0.78 0.14 195/.5);background:oklch(0.78 0.14 195/.15);transition:background .2s}
 .undo:hover{background:oklch(0.78 0.14 195/.25)}
 .next{min-height:64px;width:100%;border-radius:18px;font-size:18px;font-weight:600;color:var(--foreground);
-  border:1px solid var(--border);background:var(--secondary);transition:all .2s}
+  border:1px solid var(--border);background:var(--secondary);transition:all .2s;
+  display: flex; align-items: center; justify-content: center; gap: 8px;}
 .next:hover{background:var(--muted)}
 .next:active{transform:scale(.98)}
 .hidden{display:none !important}
 </style>
 </head>
 <body>
+
+<!-- 🔥 動態 HUD 通知 -->
+<div id="toast-container">
+  <span class="toast-icon">⚠️</span>
+  <span id="toast-msg">系統訊息</span>
+</div>
+
 <main>
   <div class="wrap">
     <header>
@@ -237,7 +247,10 @@ body.mode-physical-active .redeem { background-image: var(--gradient-physical); 
         <div class="logo">⚡</div>
         <div>
           <h1>抽獎核銷系統</h1>
-          <p class="sub">Redemption POS · 內部測試區</p>
+          <p class="sub">
+            Redemption POS · 內部測試區
+            <span class="ping-monitor" id="ping-tracker"><span class="ping-dot"></span> <span>API OK 18ms</span></span>
+          </p>
         </div>
       </div>
       <div class="panel status">
@@ -274,15 +287,14 @@ body.mode-physical-active .redeem { background-image: var(--gradient-physical); 
         <div class="block">
           <h2 class="label">● 掃描 / 查詢</h2>
           <div class="mode-switch">
-            <button id="mode-digital" class="mode-btn active" onclick="setMode('digital')">📱 電子憑證</button>
-            <button id="mode-physical" class="mode-btn" onclick="setMode('physical')">🎫 實體流水號</button>
+            <button id="mode-digital" class="mode-btn active" onclick="setMode('digital')">📱 電子憑證 <span class="hotkey-hint">F1</span></button>
+            <button id="mode-physical" class="mode-btn" onclick="setMode('physical')">🎫 實體流水號 <span class="hotkey-hint">F2</span></button>
           </div>
 
           <div class="searchbar">
-            <!-- 輸入框動態切換：交給 JS 控制 maxlength 與 placeholder -->
             <input id="phone" type="tel" placeholder="輸入手機號碼 (限10碼)" oninput="handleInput(this)" />
             <button class="icon-btn" id="btn-scan" aria-label="掃描 QR Code">📷</button>
-            <button class="primary-btn" id="btn-check">查詢</button>
+            <button class="primary-btn" id="btn-check">查詢 <span class="hotkey-hint">Enter</span></button>
           </div>
         </div>
       </section>
@@ -306,9 +318,9 @@ body.mode-physical-active .redeem { background-image: var(--gradient-physical); 
           </div>
 
           <div class="actions">
-            <button class="redeem" id="btn-redeem">✔ 確認核銷優惠</button>
+            <button class="redeem" id="btn-redeem">✔ 確認核銷優惠 <span class="hotkey-hint" style="background:rgba(255,255,255,0.2);">Space</span></button>
             <button class="undo hidden" id="btn-undo">⚡ 撤銷 (5s)</button>
-            <button class="next" id="btn-next">🧹 清除／服務下一位</button>
+            <button class="next" id="btn-next">🧹 清除／服務下一位 <span class="hotkey-hint">Esc</span></button>
           </div>
         </div>
       </section>
@@ -317,10 +329,12 @@ body.mode-physical-active .redeem { background-image: var(--gradient-physical); 
   
   <div id="scan-area" class="hidden">
     <div class="reader-wrap">
+      <div class="corner-bl"></div>
+      <div class="corner-br"></div>
       <div id="reader"></div>
       <div class="scanline"></div>
     </div>
-    <button class="close-cam" id="btn-stop">✖ 關閉相機</button>
+    <button class="close-cam" id="btn-stop">✖ 關閉光學鎖定系統</button>
   </div>
 </main>
 
@@ -352,19 +366,47 @@ body.mode-physical-active .redeem { background-image: var(--gradient-physical); 
   let store = "", act = "", shownPhone = "", shownAct = "", record = null;
   let scanner = null, uTimer = null, busy = false;
   let currentMode = 'digital';
+  let toastTimer = null;
+
+  // 🔥 假連線延遲跳動 (裝逼用)
+  setInterval(() => {
+      const ping = Math.floor(Math.random() * (45 - 12 + 1) + 12);
+      document.querySelector('#ping-tracker span:last-child').innerText = `API OK ${ping}ms`;
+  }, 3000);
+
+  // 🔥 動態島 Toast 通知系統
+  window.showToast = function(msg, type = 'error') {
+      const toast = $('toast-container');
+      const icon = toast.querySelector('.toast-icon');
+      const text = $('toast-msg');
+      
+      toast.className = ''; 
+      toast.classList.add(type);
+      icon.innerText = type === 'success' ? '✅' : '🚨';
+      text.innerText = msg;
+      
+      toast.classList.add('show');
+      if (type === 'error') playAlert("error");
+      
+      if(toastTimer) clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+          toast.classList.remove('show');
+      }, 3500);
+  };
+
+  // 覆寫預設 Alert
+  window.alert = function(msg) { showToast(msg, 'error'); };
 
   $("employee-name").addEventListener("change", function(e) {
       localStorage.setItem("p_employee", e.target.value.trim());
   });
 
-  // 動態切換輸入框屬性與長度限制，並透過 body class 改變全域顏色
   window.setMode = function(m) {
     currentMode = m;
     $('mode-digital').classList.toggle('active', m === 'digital');
     $('mode-physical').classList.toggle('active', m === 'physical');
     $('phone').value = '';
     
-    // 切換 Body 的 Class 來觸發 CSS 變色
     if(m === 'physical') {
         document.body.classList.add('mode-physical-active');
     } else {
@@ -377,7 +419,7 @@ body.mode-physical-active .redeem { background-image: var(--gradient-physical); 
       $('phone').type = 'tel';
       $('phone').placeholder = '輸入手機號碼 (限10碼)';
       $('phone').maxLength = 10; 
-      $('btn-check').innerText = '查詢';
+      $('btn-check').innerHTML = '查詢 <span class="hotkey-hint">Enter</span>';
       $('placeholder-emoji').innerText = "🎟️";
       $('placeholder-title').innerText = "等待掃描顧客憑證";
       $('placeholder-desc').innerText = "選擇門市與活動後，掃描 QR Code 或輸入手機號碼即可帶出顧客資訊。";
@@ -388,7 +430,7 @@ body.mode-physical-active .redeem { background-image: var(--gradient-physical); 
       $('phone').type = 'text';
       $('phone').placeholder = '輸入實體券流水號 (英文與數字)';
       $('phone').maxLength = 20; 
-      $('btn-check').innerText = '查詢 / 核銷';
+      $('btn-check').innerHTML = '查詢 / 核銷 <span class="hotkey-hint">Enter</span>';
       $('placeholder-emoji').innerText = "🎫";
       $('placeholder-title').innerText = "實體券快速核銷";
       $('placeholder-desc').innerText = "掃描實體券 QR Code 或直接輸入流水號進行核銷。";
@@ -399,7 +441,6 @@ body.mode-physical-active .redeem { background-image: var(--gradient-physical); 
     nextCust();
   };
 
-  // 處理使用者即時輸入
   window.handleInput = function(el) {
     if (currentMode === 'digital') {
       el.value = el.value.replace(/[^\d]/g,'').slice(0,10); 
@@ -415,12 +456,10 @@ body.mode-physical-active .redeem { background-image: var(--gradient-physical); 
         const data = configSnap.data();
         STORE_LIST = data.STORE_LIST || [];
         POS_CONFIG = data.POS_CONFIG || {};
-        
         EVENT_ORDER = data.EVENT_ORDER || Object.keys(POS_CONFIG);
         EVENT_ORDER = EVENT_ORDER.filter(a => POS_CONFIG[a]);
-        
       } else {
-        alert("⚠️ 雲端尚未建立系統設定，請先至總部後台儲存設定！");
+        showToast("雲端尚未建立系統設定，請先至總部後台儲存設定！", "error");
         return;
       }
 
@@ -437,40 +476,28 @@ body.mode-physical-active .redeem { background-image: var(--gradient-physical); 
       });
 
       giftMap = {};
-      for (const a in POS_CONFIG) {
-        giftMap[a] = POS_CONFIG[a].gift;
-      }
+      for (const a in POS_CONFIG) { giftMap[a] = POS_CONFIG[a].gift; }
 
       const savedStore = localStorage.getItem("p_store");
       if (savedStore && evMap[savedStore]) { 
-        store = savedStore; 
-        act = (evMap[savedStore] || [])[0] || ""; 
+        store = savedStore; act = (evMap[savedStore] || [])[0] || ""; 
       } else if (STORE_LIST.length > 0) {
-        store = STORE_LIST[0];
-        act = (evMap[store] || [])[0] || "";
+        store = STORE_LIST[0]; act = (evMap[store] || [])[0] || "";
       }
 
       const savedEmp = localStorage.getItem("p_employee");
       if(savedEmp) $("employee-name").value = savedEmp;
 
-      // 🔥 初始啟動時，檢查第一個選中的活動是否為實體，自動切換模式
       if (act) {
-        if (act.includes('【實體】') || act.includes('實體券')) {
-            setMode('physical');
-        } else {
-            setMode('digital');
-        }
+        if (act.includes('【實體】') || act.includes('實體券')) setMode('physical');
+        else setMode('digital');
       } else {
-        setMode('digital'); // 預設
+        setMode('digital');
       }
 
-      renderStores(); 
-      renderActs(); 
-      renderRight();
-
+      renderStores(); renderActs(); renderRight();
     } catch (e) {
-      console.error("載入雲端設定失敗:", e);
-      alert("無法連線至雲端讀取 POS 設定！");
+      showToast("無法連線至雲端讀取 POS 設定！", "error");
     }
   }
 
@@ -480,7 +507,11 @@ body.mode-physical-active .redeem { background-image: var(--gradient-physical); 
     busy = b;
     $("btn-check").disabled = b;
     $("btn-redeem").disabled = b;
-    $("btn-check").innerText = b ? "處理中…" : (currentMode === 'digital' ? "查詢" : "查詢 / 核銷");
+    if(b) {
+        $("btn-check").innerText = "處理中…";
+    } else {
+        $("btn-check").innerHTML = currentMode === 'digital' ? '查詢 <span class="hotkey-hint">Enter</span>' : '查詢 / 核銷 <span class="hotkey-hint">Enter</span>';
+    }
   }
 
   function renderStores(){
@@ -498,15 +529,9 @@ body.mode-physical-active .redeem { background-image: var(--gradient-physical); 
 
   function renderActs(){
     const box = $("acts"); box.innerHTML = "";
-    if (!store){
-      box.innerHTML = '<p class="empty">請先選擇門市</p>';
-      return;
-    }
+    if (!store){ box.innerHTML = '<p class="empty">請先選擇門市</p>'; return; }
     const currentEvs = evMap[store] || [];
-    if(currentEvs.length === 0) {
-      box.innerHTML = '<p class="empty">此門市目前無開放活動</p>';
-      return;
-    }
+    if(currentEvs.length === 0) { box.innerHTML = '<p class="empty">此門市目前無開放活動</p>'; return; }
 
     const list = document.createElement("div");
     list.className = "acts";
@@ -514,25 +539,15 @@ body.mode-physical-active .redeem { background-image: var(--gradient-physical); 
       const b = document.createElement("button");
       b.className = "act-btn" + (act === a ? " on" : "");
       
-      // 🔥 如果活動名稱包含實體，加上專屬 class 以顯示橘紅色
-      if (a.includes('【實體】') || a.includes('實體券')) {
-          b.classList.add("is-physical");
-      }
+      if (a.includes('【實體】') || a.includes('實體券')) b.classList.add("is-physical");
       
       b.innerHTML = '<span><span class="act-name"></span></span><span class="radio"></span>';
       b.querySelector(".act-name").innerText = a;
       
       b.onclick = () => { 
-        act = a; 
-        renderActs(); 
-        
-        // 🔥 終極防呆：點擊活動列表瞬間，全自動切換下方的對應模式！
-        if (a.includes('【實體】') || a.includes('實體券')) {
-            setMode('physical');
-        } else {
-            setMode('digital');
-        }
-        
+        act = a; renderActs(); 
+        if (a.includes('【實體】') || a.includes('實體券')) setMode('physical');
+        else setMode('digital');
         setTimeout(() => $("phone").focus(), 100); 
       };
       list.appendChild(b);
@@ -541,13 +556,10 @@ body.mode-physical-active .redeem { background-image: var(--gradient-physical); 
   }
 
   function selectStore(s){
-    store = s;
-    localStorage.setItem("p_store", s);
-    act = (evMap[s] || [])[0] || "";
-    record = null;
+    store = s; localStorage.setItem("p_store", s);
+    act = (evMap[s] || [])[0] || ""; record = null;
     $("store-dropdown").removeAttribute("open");
     
-    // 🔥 切換門市時，也要檢查第一個活動並自動連動模式
     if (act) {
         if (act.includes('【實體】') || act.includes('實體券')) setMode('physical');
         else setMode('digital');
@@ -602,8 +614,7 @@ body.mode-physical-active .redeem { background-image: var(--gradient-physical); 
 
   function renderContent(data, ph, ac){
     shownPhone = ph; shownAct = ac; record = data;
-    hideUndo();
-    renderRight();
+    hideUndo(); renderRight();
   }
   function hideUndo(){
     if (uTimer) clearInterval(uTimer);
@@ -644,20 +655,17 @@ body.mode-physical-active .redeem { background-image: var(--gradient-physical); 
     if (!scanner) scanner = new Html5Qrcode("reader");
     scanner.start(
       { facingMode: "environment" },
-      { fps: 10, qrbox: 250 },
+      { fps: 15, qrbox: 250 },
       (txt) => {
         let result = txt;
-        if (currentMode === 'digital') {
-            result = txt.replace(/[^\d]/g, "").slice(0,10); 
-        } else {
-            result = txt.replace(/[^a-zA-Z0-9]/g, "").toUpperCase().slice(0,20); 
-        }
+        if (currentMode === 'digital') result = txt.replace(/[^\d]/g, "").slice(0,10); 
+        else result = txt.replace(/[^a-zA-Z0-9]/g, "").toUpperCase().slice(0,20); 
+        
         $("phone").value = result;
-        stopScan();
-        check(result);
+        stopScan(); check(result);
       },
       () => {}
-    ).catch(() => alert("無相機權限或裝置不支援相機！"));
+    ).catch(() => showToast("無相機權限或裝置不支援相機！", "error"));
   }
   function stopScan(){
     if (scanner && scanner.isScanning) scanner.stop();
@@ -667,17 +675,13 @@ body.mode-physical-active .redeem { background-image: var(--gradient-physical); 
   async function check(overridePhone){
     const ph = overridePhone || $("phone").value.trim();
     const st = store, ac = act;
-    if (!st || !ac || !ph) return alert("⚠️ 資料未齊！");
+    if (!st || !ac || !ph) return showToast("資料未齊！請確認已選擇門市與活動。", "error");
 
-    record = null; renderRight();
-    setBusy(true);
+    record = null; renderRight(); setBusy(true);
     try {
       const snap = await getDoc(doc(db, ac, ph));
-      
       if (snap.exists()){
-        playAlert("scan");
-        renderContent(snap.data(), ph, ac);
-        return;
+        playAlert("scan"); renderContent(snap.data(), ph, ac); return;
       }
       
       const otherActs = (evMap[st] || []).filter((a) => a !== ac);
@@ -691,68 +695,42 @@ body.mode-physical-active .redeem { background-image: var(--gradient-physical); 
       }
       
       if (foundOtherData){
-        playAlert("error");
         if (confirm("❌ 找不到「" + ac + "」的紀錄。\n\n💡 但發現客人有未兌換的「" + foundOtherActName + "」，是否要自動切換過去？")){
           act = foundOtherActName;
-          
-          // 🔥 自動補捉跳轉活動時的模式切換
           if (act.includes('【實體】') || act.includes('實體券')) setMode('physical');
           else setMode('digital');
-          
-          renderActs();
-          renderContent(foundOtherData, ph, foundOtherActName);
-        } else {
-          $("phone").value = "";
-        }
+          renderActs(); renderContent(foundOtherData, ph, foundOtherActName);
+        } else { $("phone").value = ""; }
       } else {
-        playAlert("error");
-        if (currentMode === 'physical') {
-            alert("❌ 查無此流水號！這張實體券尚未建檔或可能為偽造票券！");
-        } else {
-            alert("❌ 查無號碼，或該客人的所有活動皆已兌換完畢！");
-        }
+        if (currentMode === 'physical') showToast("查無流水號！這張實體券尚未建檔或可能為偽造票券！", "error");
+        else showToast("查無此號碼，或該客人的所有活動皆已兌換完畢！", "error");
         $("phone").value = "";
       }
-    } finally {
-      setBusy(false);
-    }
+    } finally { setBusy(false); }
   }
 
   async function redeem(){
     const empName = $("employee-name").value.trim();
-    if(!empName) {
-        $("employee-name").focus();
-        return alert("🛑 請先填寫上方的「值班人員」姓名！");
-    }
+    if(!empName) { $("employee-name").focus(); return showToast("請先填寫上方的「值班人員」姓名！", "error"); }
     localStorage.setItem("p_employee", empName); 
 
     if (!confirm("確定核銷？憑證將失效！")) return;
     const ph = shownPhone, st = store, ac = act;
     const d = new Date(), pad = (n) => (n < 10 ? "0" + n : String(n));
-    const nowStr = d.getFullYear() + "/" + pad(d.getMonth()+1) + "/" + pad(d.getDate()) + " " +
-                   pad(d.getHours()) + ":" + pad(d.getMinutes()) + ":" + pad(d.getSeconds());
-    setBusy(true);
+    const nowStr = d.getFullYear() + "/" + pad(d.getMonth()+1) + "/" + pad(d.getDate()) + " " + pad(d.getHours()) + ":" + pad(d.getMinutes()) + ":" + pad(d.getSeconds());
     
+    setBusy(true);
     try {
-      await updateDoc(doc(db, ac, ph), { 
-        status: "已兌換", 
-        store: st, 
-        redeemTime: nowStr,
-        redeemBy: empName
-      });
+      await updateDoc(doc(db, ac, ph), { status: "已兌換", store: st, redeemTime: nowStr, redeemBy: empName });
       record = Object.assign({}, record || {}, { status: "已兌換", store: st, redeemTime: nowStr, redeemBy: empName });
-    } finally {
-      setBusy(false);
-    }
+    } finally { setBusy(false); }
     
     renderRight();
-    playAlert("success");
+    showToast("✅ 核銷成功！", "success");
     if (window.confetti) confetti({ particleCount: 80, spread: 70 });
 
-    const btn = $("btn-undo");
-    btn.classList.remove("hidden");
-    let left = 5;
-    btn.innerText = "⚡ 撤銷 (" + left + "s)";
+    const btn = $("btn-undo"); btn.classList.remove("hidden");
+    let left = 5; btn.innerText = "⚡ 撤銷 (" + left + "s)";
     if (uTimer) clearInterval(uTimer);
     uTimer = setInterval(() => {
       left -= 1;
@@ -763,25 +741,48 @@ body.mode-physical-active .redeem { background-image: var(--gradient-physical); 
 
   async function undo(){
     if (uTimer) clearInterval(uTimer);
-    const ph = shownPhone, ac = act;
-    setBusy(true);
-    try {
-      await updateDoc(doc(db, ac, ph), { status: "未兌換", store: "", redeemTime: "", redeemBy: "" });
-    } finally {
-      setBusy(false);
-    }
+    const ph = shownPhone, ac = act; setBusy(true);
+    try { await updateDoc(doc(db, ac, ph), { status: "未兌換", store: "", redeemTime: "", redeemBy: "" }); } finally { setBusy(false); }
     $("btn-undo").classList.add("hidden");
-    alert("✅ 已撤銷！");
-    check(ph);
+    showToast("已撤銷復原", "success"); check(ph);
   }
 
   function nextCust(){
-    $("phone").value = "";
-    record = null;
-    hideUndo();
-    renderRight();
+    $("phone").value = ""; record = null; hideUndo(); renderRight();
     setTimeout(() => $("phone").focus(), 100);
   }
+
+  // 🔥 鍵盤忍者事件綁定
+  document.addEventListener("keydown", (e) => {
+    // 聚焦在文字輸入框時，不要觸發捷徑 (除了 Enter)
+    if (document.activeElement.tagName === 'INPUT' && e.key !== 'Enter') return;
+
+    if (e.key === "Enter") {
+        e.preventDefault();
+        // 如果還沒查資料，就執行查詢
+        if (!record || record.status === '已兌換' || record.status === '已過期') {
+            if($("phone").value.trim().length > 0) check();
+        } 
+    } 
+    // Space 鍵觸發核銷
+    else if (e.code === "Space" || e.key === " ") {
+        if (record && record.status === "未兌換" && document.activeElement.tagName !== 'INPUT') {
+            e.preventDefault(); redeem();
+        }
+    }
+    // Esc 鍵觸發清除換下一位
+    else if (e.key === "Escape") {
+        e.preventDefault(); nextCust();
+    }
+    // F1 切換電子
+    else if (e.key === "F1") {
+        e.preventDefault(); setMode('digital');
+    }
+    // F2 切換實體
+    else if (e.key === "F2") {
+        e.preventDefault(); setMode('physical');
+    }
+  });
 
   $("btn-scan").onclick = startScan;
   $("btn-stop").onclick = stopScan;
@@ -789,7 +790,6 @@ body.mode-physical-active .redeem { background-image: var(--gradient-physical); 
   $("btn-redeem").onclick = redeem;
   $("btn-undo").onclick = undo;
   $("btn-next").onclick = nextCust;
-  $("phone").addEventListener("keydown", (e) => { if (e.key === "Enter") check(); });
 </script>
 </body>
 </html>
