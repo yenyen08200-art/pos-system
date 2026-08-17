@@ -56,7 +56,7 @@ main {
   background-size: auto,auto,44px 44px,44px 44px;
 }
 
-/* 🔥 全域實體模式背景光暈 */
+/* 實體模式時的背景光暈 */
 body.mode-physical-active main {
   background-image:
     radial-gradient(circle at 15% 10%, rgba(255,107,53,0.12), transparent 45%),
@@ -68,6 +68,7 @@ body.mode-physical-active main {
 .wrap { max-width: 1400px; margin: 0 auto; width: 100%; padding: 20px 16px; }
 @media(min-width:768px){.wrap{padding:32px}}
 
+/* 頂部狀態列與心跳監控 */
 header{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px;margin-bottom:24px}
 .brand{display:flex;align-items:center;gap:16px}
 .logo{width:56px;height:56px;display:flex;align-items:center;justify-content:center;border-radius:18px;font-size:26px;
@@ -77,6 +78,7 @@ body.mode-physical-active .logo { background-image: var(--gradient-physical); bo
 h1{font-size:clamp(22px,3vw,30px);font-weight:700;letter-spacing:-.02em}
 .sub{font-size:14px;color:var(--muted-foreground); display:flex; align-items:center; gap:8px;}
 
+/* 駭客終端機連線字體 */
 .ping-monitor { font-family: monospace; font-size: 11px; color: var(--success); background: rgba(63,191,143,0.1); padding: 4px 8px; border-radius: 6px; letter-spacing: 0.05em; display:flex; align-items:center; gap:6px; border: 1px solid rgba(63,191,143,0.3);}
 .ping-dot { width: 6px; height: 6px; background: var(--success); border-radius: 50%; animation: pulse-ping 1s infinite; }
 @keyframes pulse-ping { 0% { opacity: 1; box-shadow: 0 0 0 0 rgba(63,191,143,0.7); } 70% { opacity: 0.5; box-shadow: 0 0 0 4px rgba(63,191,143,0); } 100% { opacity: 1; } }
@@ -97,6 +99,8 @@ section.panel{padding:20px}
 @keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
 .block+.block{margin-top:24px}
 .label{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.2em;color:var(--muted-foreground);margin-bottom:12px}
+.stores{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px; width: 100%;}
+@media(min-width:640px){.stores{grid-template-columns:repeat(3,minmax(0,1fr))}}
 
 .custom-dropdown { position: relative; width: 100%; }
 .custom-dropdown summary {
@@ -115,8 +119,6 @@ section.panel{padding:20px}
   background: var(--card); box-shadow: 0 10px 40px -10px rgba(0,0,0,0.6); z-index: 50; position: absolute; width: 100%;
 }
 
-.stores{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px; width: 100%;}
-@media(min-width:640px){.stores{grid-template-columns:repeat(3,minmax(0,1fr))}}
 button{font-family:inherit;cursor:pointer;}
 .store-btn{width:100%;min-height:56px;border-radius:12px;border:1px solid var(--border);background:var(--secondary);color:var(--secondary-foreground);
   font-size:16px;font-weight:600;transition:all .2s; padding: 0 8px;}
@@ -124,7 +126,7 @@ button{font-family:inherit;cursor:pointer;}
 .store-btn:active{transform:scale(.97)}
 .store-btn.on{background-image:var(--gradient-digital);color:#fff;border-color:var(--accent-digital);box-shadow:0 12px 26px -14px rgba(0,198,255,0.9)}
 
-/* 🔥 憑證類型開關樣式 */
+/* 憑證類型開關樣式 */
 .mode-switch { display: flex; gap: 8px; padding: 6px; background: var(--secondary); border-radius: 16px; }
 .mode-btn { flex: 1; padding: 14px 12px; border-radius: 12px; border: none; background: transparent; color: var(--muted-foreground); font-weight: 700; font-size: 16px; transition: 0.2s; }
 #mode-digital.active { background: var(--gradient-digital); color: #fff; box-shadow: 0 8px 20px -6px rgba(0,198,255,0.6); border: none; }
@@ -143,7 +145,7 @@ button{font-family:inherit;cursor:pointer;}
 .act-btn.on{border-color:var(--accent-digital);background:rgba(0,198,255,0.15)}
 .act-btn.on .radio{border-color:var(--accent-digital);background:var(--accent-digital); box-shadow: 0 0 0 4px rgba(0,198,255,0.2);}
 
-/* 🔥 實體模式下的活動顏色覆寫 */
+/* 實體模式下的活動顏色覆寫 */
 body.mode-physical-active .act-btn:hover { border-color: rgba(255,107,53,0.5); }
 body.mode-physical-active .act-btn.on { border-color: var(--accent-physical); background: rgba(255, 107, 53, 0.15); }
 body.mode-physical-active .act-btn.on .radio { border-color: var(--accent-physical); background: var(--accent-physical); box-shadow: 0 0 0 4px rgba(255, 107, 53, 0.2); }
@@ -204,6 +206,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
 #employee-name:focus{border-color:var(--accent-digital); background:var(--card); box-shadow:0 0 0 4px rgba(0,198,255,0.25);}
 body.mode-physical-active #employee-name:focus { border-color: var(--accent-physical); box-shadow: 0 0 0 4px rgba(255,107,53,0.25); }
 
+/* 動態島通知 HUD */
 #toast-container {
   position: fixed; top: -100px; left: 50%; transform: translateX(-50%); z-index: 10000;
   display: flex; align-items: center; gap: 12px; padding: 16px 24px; border-radius: 999px;
@@ -237,8 +240,21 @@ body.mode-physical-active .scanline { background: var(--accent-physical); box-sh
 .close-cam:active{transform:scale(.95)}
 
 .right{display:flex;flex-direction:column}
+
+/* 🔥 新增：SVG 向量憑證圖示 (自動變色發光) */
 .placeholder{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;text-align:center;padding:80px 0}
-.placeholder .emoji{font-size:60px;opacity:.4}
+#placeholder-emoji { display: flex; justify-content: center; align-items: center; margin-bottom: 10px; }
+.ticket-icon {
+  width: 76px; height: 76px;
+  color: var(--accent-digital);
+  filter: drop-shadow(0 0 20px rgba(0,198,255,0.4));
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+body.mode-physical-active .ticket-icon {
+  color: var(--accent-physical);
+  filter: drop-shadow(0 0 20px rgba(255,107,53,0.4));
+}
+
 .placeholder p{color:var(--muted-foreground)}
 .placeholder .p1{font-size:18px;font-weight:600}
 .placeholder .p2{font-size:14px;max-width:22rem;opacity:.7; padding: 0 10px;}
@@ -257,7 +273,7 @@ body.mode-physical-active .scanline { background: var(--accent-physical); box-sh
 .info .v.mono{letter-spacing:.08em}
 .actions{margin-top:auto;padding-top:8px;display:flex;flex-direction:column;gap:12px; width: 100%;}
 
-/* 🔥 恢復大按鈕，維持動態顏色與鎖定防呆 */
+/* 核銷大按鈕 */
 .redeem{min-height:96px;width:100%;border:none;border-radius:18px;font-size:28px;font-weight:900;letter-spacing:.04em;
   background-image:var(--gradient-digital);color:#fff;box-shadow:0 26px 50px -22px rgba(0,198,255,0.8);transition:all .2s;
   display: flex; align-items: center; justify-content: center; gap: 12px; cursor: pointer;}
@@ -265,6 +281,7 @@ body.mode-physical-active .redeem { background-image: var(--gradient-physical); 
 .redeem:hover:not(:disabled){transform:translateY(-2px);filter:brightness(1.1)}
 .redeem:active:not(:disabled){transform:scale(.98)}
 
+/* 過期與已兌換按鈕強制鎖死 */
 .redeem.is-claimed { background: var(--muted) !important; box-shadow: none !important; color: var(--muted-foreground) !important; cursor: not-allowed !important; pointer-events: none !important; opacity: 1 !important; transform: none !important; }
 .redeem.is-expired { background: var(--destructive) !important; box-shadow: 0 10px 20px -10px rgba(255,0,0,0.5) !important; color: #fff !important; cursor: not-allowed !important; pointer-events: none !important; opacity: 1 !important; transform: none !important; }
 
@@ -328,7 +345,7 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
           <input id="employee-name" type="text" placeholder="請輸入您的姓名或代號">
         </div>
 
-        <!-- 🔥 新增：憑證類型選擇器放到最上面當過濾器 -->
+        <!-- 憑證類型選擇器放到最上面當過濾器 -->
         <div class="block">
           <h2 class="label">● 憑證類型</h2>
           <div class="mode-switch">
@@ -360,7 +377,14 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
       <!-- RIGHT -->
       <section class="panel rise right">
         <div id="placeholder" class="placeholder">
-          <div class="emoji" id="placeholder-emoji">🎟️</div>
+          <!-- 🔥 替換為科技感 SVG 向量圖標 -->
+          <div id="placeholder-emoji">
+            <svg class="ticket-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"></path>
+              <path d="M9 7v10"></path>
+              <path stroke-width="2" d="M15 9h.01 M15 12h.01 M15 15h.01"></path>
+            </svg>
+          </div>
           <p class="p1" id="placeholder-title">等待掃描顧客憑證</p>
           <p class="p2" id="placeholder-desc">選擇門市與活動後，掃描 QR Code 或輸入號碼即可帶出資訊。</p>
         </div>
@@ -454,7 +478,6 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
       localStorage.setItem("p_employee", e.target.value.trim());
   });
 
-  // 🔥 更新 setMode 邏輯：不僅切換 UI，還要觸發 renderActs 進行活動過濾
   window.setMode = function(m) {
     currentMode = m;
     $('mode-digital').classList.toggle('active', m === 'digital');
@@ -474,7 +497,6 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
       $('phone').placeholder = '輸入手機號碼 (限10碼)';
       $('phone').maxLength = 10; 
       $('btn-check').innerText = '查詢';
-      $('placeholder-emoji').innerText = "🎟️";
       $('placeholder-title').innerText = "等待掃描顧客憑證";
       $('placeholder-desc').innerText = "選擇門市與活動後，掃描 QR Code 或輸入手機號碼即可帶出顧客資訊。";
       $('label-phone').innerText = "📱 兌換手機";
@@ -485,7 +507,6 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
       $('phone').placeholder = '輸入實體券流水號 (英文與數字)';
       $('phone').maxLength = 20; 
       $('btn-check').innerText = '查詢 / 核銷';
-      $('placeholder-emoji').innerText = "🎫";
       $('placeholder-title').innerText = "實體券快速核銷";
       $('placeholder-desc').innerText = "掃描實體券 QR Code 或直接輸入流水號進行核銷。";
       $('label-phone').innerText = "🔢 實體流水號";
@@ -493,7 +514,6 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
       $('info-expire').style.display = 'none';
     }
     
-    // 🔥 切換類型後，重新渲染並過濾活動清單
     renderActs();
     nextCust();
   };
@@ -590,7 +610,6 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
       const savedEmp = localStorage.getItem("p_employee");
       if(savedEmp) $("employee-name").value = savedEmp;
 
-      // 初始加載預設使用數位憑證模式
       setMode('digital');
       renderStores(); renderRight();
     } catch (e) { showToast("無法連線至雲端讀取 POS 設定！", "error"); }
@@ -618,14 +637,12 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
     $("store-summary").innerText = store ? `已選擇：${store}` : "請選擇門市...";
   }
 
-  // 🔥 更新：依據 currentMode 進行活動過濾
   function renderActs(){
     const box = $("acts"); box.innerHTML = "";
     if (!store){ box.innerHTML = '<p class="empty">請先選擇門市</p>'; return; }
     
     let currentEvs = evMap[store] || [];
     
-    // 依據當前模式漏斗篩選
     if (currentMode === 'physical') {
       currentEvs = currentEvs.filter(a => a.includes('【實體】') || a.includes('實體券'));
     } else {
@@ -634,11 +651,10 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
 
     if(currentEvs.length === 0) { 
       box.innerHTML = `<p class="empty">此門市目前無開放的${currentMode === 'physical' ? '實體' : '電子'}活動</p>`; 
-      act = ""; // 清空選擇
+      act = ""; 
       return; 
     }
 
-    // 若當前活動不在過濾清單中，自動選中第一個
     if (!currentEvs.includes(act)) {
        act = currentEvs[0];
     }
@@ -667,7 +683,6 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
     act = (evMap[s] || [])[0] || ""; record = null;
     $("store-dropdown").removeAttribute("open");
     
-    // 重設模式讓選單更新
     setMode(currentMode);
     
     renderStores(); renderRight();
@@ -827,7 +842,6 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
       
       if (foundOtherData){
         if (confirm("❌ 找不到「" + ac + "」的紀錄。\n\n💡 但發現客人有未兌換的「" + foundOtherActName + "」，是否要自動切換過去？")){
-          // 🔥 自動修正：若切換過去的活動類型不同，必須連動切換模式開關
           if (foundOtherActName.includes('【實體】') || foundOtherActName.includes('實體券')) {
              if(currentMode !== 'physical') setMode('physical');
           } else {
@@ -868,7 +882,7 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
     setBusy(true);
     try {
       await updateDoc(doc(db, ac, ph), { status: "已兌換", store: st, redeemTime: nowStr, redeemBy: empName });
-      record = Object.assign({}, record || {}, { status: "已兌換", store: st, redeemTime: nowStr, redeemBy: empName });
+      record = Object.assign({}, record || {}, { status: "status": "已兌換", store: st, redeemTime: nowStr, redeemBy: empName });
     } finally { setBusy(false); }
     
     renderRight();
