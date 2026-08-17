@@ -26,6 +26,9 @@
   --surface-glow:0 0 0 1px oklch(1 0 0 / 6%), 0 24px 60px -20px oklch(0 0 0 / 60%);
   --gradient-tech:linear-gradient(135deg, oklch(0.78 0.17 68), oklch(0.72 0.16 40));
   --gradient-panel:linear-gradient(160deg, oklch(0.24 0.03 262), oklch(0.2 0.026 258));
+  
+  /* 🔥 新增：實體券專屬橘紅色漸層 */
+  --gradient-physical:linear-gradient(135deg, #FF6B35, #F04323);
   --radius:1.25rem;
 }
 *{box-sizing:border-box;margin:0;padding:0;border-color:var(--border)}
@@ -124,6 +127,9 @@ button{font-family:inherit;cursor:pointer;}
 .mode-btn { flex: 1; padding: 12px; border-radius: 12px; border: none; background: transparent; color: var(--muted-foreground); font-weight: 700; font-size: 15px; transition: 0.2s; }
 .mode-btn.active { background: var(--card); color: var(--foreground); box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
 
+/* 🔥 新增：實體券按鈕啟動時的專屬顏色 (橘紅色) */
+#mode-physical.active { background: var(--gradient-physical); color: #fff; box-shadow: 0 8px 20px -6px rgba(255,107,53,0.6); border: none; }
+
 .searchbar{display:flex;flex-direction:column;gap:10px; width: 100%;}
 .searchbar > button { width: 100%; }
 @media(min-width:640px){
@@ -137,6 +143,10 @@ button{font-family:inherit;cursor:pointer;}
   color:var(--foreground);padding:0 16px;font-size:20px;font-weight:600;letter-spacing:.08em;outline:none;transition:all .2s; width: 100%; min-width: 0;}
 #phone::placeholder{font-size:15px;font-weight:400;letter-spacing:normal;color:var(--muted-foreground)}
 #phone:focus{border-color:var(--primary);box-shadow:0 0 0 4px oklch(0.78 0.17 68/.25)}
+
+/* 🔥 動態修改：當處於實體模式時，輸入框 focus 變成橘色光暈 */
+body.mode-physical-active #phone:focus { border-color: #FF6B35; box-shadow: 0 0 0 4px rgba(255,107,53,0.25); }
+
 .icon-btn{min-height:64px;padding:0 20px;font-size:24px;border-radius:14px;border:1px solid var(--border);background:var(--secondary);color:var(--foreground);transition:all .2s}
 .icon-btn:hover{background:var(--muted)}
 .icon-btn:active{transform:scale(.95)}
@@ -146,7 +156,9 @@ button{font-family:inherit;cursor:pointer;}
 .primary-btn:active{transform:scale(.95)}
 button:disabled{opacity:.5;cursor:not-allowed}
 
-/* 值班人員輸入框專屬樣式 */
+/* 🔥 新增：當處於實體模式時，查詢按鈕也變成橘紅色漸層 */
+body.mode-physical-active .primary-btn { background-image: var(--gradient-physical); box-shadow: 0 14px 30px -16px rgba(255,107,53,0.9); }
+
 #employee-name{width:100%; min-height:56px; border-radius:12px; border:1px solid var(--border); background:var(--secondary); color:var(--foreground); padding:0 16px; font-size:16px; outline:none; transition:all .2s;}
 #employee-name:focus{border-color:var(--primary); background:var(--card); box-shadow:0 0 0 4px oklch(0.78 0.17 68/.25);}
 
@@ -193,6 +205,10 @@ button:disabled{opacity:.5;cursor:not-allowed}
 .actions{margin-top:auto;padding-top:8px;display:flex;flex-direction:column;gap:12px; width: 100%;}
 .redeem{min-height:96px;width:100%;border:none;border-radius:18px;font-size:28px;font-weight:900;letter-spacing:.04em;
   background-image:var(--gradient-tech);color:var(--primary-foreground);box-shadow:0 26px 50px -22px oklch(0 0 0/1);transition:all .2s}
+
+/* 🔥 新增：當處於實體模式時，核銷按鈕也變成橘紅色漸層 */
+body.mode-physical-active .redeem { background-image: var(--gradient-physical); box-shadow: 0 26px 50px -22px rgba(255,107,53,1); }
+
 .redeem:hover{transform:translateY(-2px);filter:brightness(1.1)}
 .redeem:active{transform:scale(.98)}
 .undo{min-height:64px;width:100%;border-radius:18px;font-size:20px;font-weight:700;color:var(--accent);
@@ -255,7 +271,8 @@ button:disabled{opacity:.5;cursor:not-allowed}
           </div>
 
           <div class="searchbar">
-            <input id="phone" type="tel" placeholder="輸入手機或市話 (例:02-1234567)" oninput="handleInput(this)" maxlength="10" />
+            <!-- 輸入框動態切換：不在此設定 maxlength，交給 JS 動態控制 -->
+            <input id="phone" type="tel" placeholder="輸入手機號碼 (限10碼)" oninput="handleInput(this)" />
             <button class="icon-btn" id="btn-scan" aria-label="掃描 QR Code">📷</button>
             <button class="primary-btn" id="btn-check">查詢</button>
           </div>
@@ -328,22 +345,30 @@ button:disabled{opacity:.5;cursor:not-allowed}
   let scanner = null, uTimer = null, busy = false;
   let currentMode = 'digital';
 
-  // 🔥 監聽員工姓名輸入，即時存入 localStorage
   $("employee-name").addEventListener("change", function(e) {
       localStorage.setItem("p_employee", e.target.value.trim());
   });
 
+  // 🔥 動態切換輸入框屬性與長度限制，並透過 body class 改變全域顏色
   window.setMode = function(m) {
     currentMode = m;
     $('mode-digital').classList.toggle('active', m === 'digital');
     $('mode-physical').classList.toggle('active', m === 'physical');
     $('phone').value = '';
     
+    // 切換 Body 的 Class 來觸發 CSS 變色
+    if(m === 'physical') {
+        document.body.classList.add('mode-physical-active');
+    } else {
+        document.body.classList.remove('mode-physical-active');
+    }
+
     $('btn-scan').style.display = 'block';
 
     if (m === 'digital') {
       $('phone').type = 'tel';
-      $('phone').placeholder = '輸入手機或市話 (例:02-1234567)';
+      $('phone').placeholder = '輸入手機號碼 (限10碼)';
+      $('phone').maxLength = 10; 
       $('btn-check').innerText = '查詢';
       $('placeholder-emoji').innerText = "🎟️";
       $('placeholder-title').innerText = "等待掃描顧客憑證";
@@ -354,6 +379,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
     } else {
       $('phone').type = 'text';
       $('phone').placeholder = '輸入實體券流水號 (英文與數字)';
+      $('phone').maxLength = 20; 
       $('btn-check').innerText = '查詢 / 核銷';
       $('placeholder-emoji').innerText = "🎫";
       $('placeholder-title').innerText = "實體券快速核銷";
@@ -365,9 +391,10 @@ button:disabled{opacity:.5;cursor:not-allowed}
     nextCust();
   };
 
+  // 處理使用者即時輸入
   window.handleInput = function(el) {
     if (currentMode === 'digital') {
-      el.value = el.value.replace(/[^\d\-]/g,'').slice(0,15);
+      el.value = el.value.replace(/[^\d]/g,'').slice(0,10); 
     } else {
       el.value = el.value.replace(/[^a-zA-Z0-9]/g,'').toUpperCase().slice(0,20);
     }
@@ -415,10 +442,11 @@ button:disabled{opacity:.5;cursor:not-allowed}
         act = (evMap[store] || [])[0] || "";
       }
 
-      // 🔥 讀取上次輸入的員工姓名
       const savedEmp = localStorage.getItem("p_employee");
       if(savedEmp) $("employee-name").value = savedEmp;
 
+      // 呼叫預設模式 (電子憑證)
+      setMode('digital');
       renderStores(); 
       renderActs(); 
       renderRight();
@@ -582,9 +610,9 @@ button:disabled{opacity:.5;cursor:not-allowed}
       (txt) => {
         let result = txt;
         if (currentMode === 'digital') {
-            result = txt.replace(/[^\d\-]/g, ""); 
+            result = txt.replace(/[^\d]/g, "").slice(0,10); 
         } else {
-            result = txt.replace(/[^a-zA-Z0-9]/g, "").toUpperCase(); 
+            result = txt.replace(/[^a-zA-Z0-9]/g, "").toUpperCase().slice(0,20); 
         }
         $("phone").value = result;
         stopScan();
@@ -648,14 +676,12 @@ button:disabled{opacity:.5;cursor:not-allowed}
   }
 
   async function redeem(){
-    // 🔥 檢查員工姓名
     const empName = $("employee-name").value.trim();
     if(!empName) {
         $("employee-name").focus();
         return alert("🛑 請先填寫上方的「值班人員」姓名！");
     }
-    // 確保再次記憶
-    localStorage.setItem("p_employee", empName);
+    localStorage.setItem("p_employee", empName); 
 
     if (!confirm("確定核銷？憑證將失效！")) return;
     const ph = shownPhone, st = store, ac = act;
