@@ -26,14 +26,10 @@
   --surface-glow:0 0 0 1px oklch(1 0 0 / 6%), 0 24px 60px -20px oklch(0 0 0 / 60%);
   --gradient-panel:linear-gradient(160deg, oklch(0.24 0.03 262), oklch(0.2 0.026 258));
   
-  /* 電子憑證專屬「霓虹冰藍」漸層 */
   --accent-digital: #00C6FF;
   --gradient-digital: linear-gradient(135deg, #00C6FF, #0072FF);
-
-  /* 實體券專屬「橘紅色」漸層 */
   --accent-physical: #FF6B35;
   --gradient-physical: linear-gradient(135deg, #FF6B35, #F04323);
-  
   --radius:1.25rem;
 }
 *{box-sizing:border-box;margin:0;padding:0;border-color:var(--border)}
@@ -56,7 +52,6 @@ main {
   background-size: auto,auto,44px 44px,44px 44px;
 }
 
-/* 實體模式時的背景光暈 */
 body.mode-physical-active main {
   background-image:
     radial-gradient(circle at 15% 10%, rgba(255,107,53,0.12), transparent 45%),
@@ -68,7 +63,6 @@ body.mode-physical-active main {
 .wrap { max-width: 1400px; margin: 0 auto; width: 100%; padding: 20px 16px; }
 @media(min-width:768px){.wrap{padding:32px}}
 
-/* 頂部狀態列與心跳監控 */
 header{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px;margin-bottom:24px}
 .brand{display:flex;align-items:center;gap:16px}
 .logo{width:56px;height:56px;display:flex;align-items:center;justify-content:center;border-radius:18px;font-size:26px;
@@ -78,7 +72,6 @@ body.mode-physical-active .logo { background-image: var(--gradient-physical); bo
 h1{font-size:clamp(22px,3vw,30px);font-weight:700;letter-spacing:-.02em}
 .sub{font-size:14px;color:var(--muted-foreground); display:flex; align-items:center; gap:8px;}
 
-/* 駭客終端機連線字體 */
 .ping-monitor { font-family: monospace; font-size: 11px; color: var(--success); background: rgba(63,191,143,0.1); padding: 4px 8px; border-radius: 6px; letter-spacing: 0.05em; display:flex; align-items:center; gap:6px; border: 1px solid rgba(63,191,143,0.3);}
 .ping-dot { width: 6px; height: 6px; background: var(--success); border-radius: 50%; animation: pulse-ping 1s infinite; }
 @keyframes pulse-ping { 0% { opacity: 1; box-shadow: 0 0 0 0 rgba(63,191,143,0.7); } 70% { opacity: 0.5; box-shadow: 0 0 0 4px rgba(63,191,143,0); } 100% { opacity: 1; } }
@@ -116,7 +109,7 @@ section.panel{padding:20px}
 .custom-dropdown[open] summary { border-color: var(--primary); box-shadow: 0 0 0 2px oklch(0.78 0.17 68/.2); }
 .dropdown-content {
   margin-top: 12px; padding: 16px; border-radius: 14px; border: 1px solid var(--border);
-  background: var(--card); box-shadow: 0 10px 40px -10px rgba(0,0,0,0.6);
+  background: var(--card); box-shadow: 0 10px 40px -10px rgba(0,0,0,0.6); z-index: 50; position: absolute; width: 100%;
 }
 
 button{font-family:inherit;cursor:pointer;}
@@ -134,11 +127,9 @@ button{font-family:inherit;cursor:pointer;}
 .act-name{display:block;font-size:18px;font-weight:600}
 .radio{width:16px;height:16px;border-radius:999px;border:2px solid var(--muted-foreground);flex:none; transition: .2s;}
 
-/* 電子券選中狀態 (高亮霓虹冰藍) */
 .act-btn.on{border-color:var(--accent-digital);background:rgba(0,198,255,0.15)}
 .act-btn.on .radio{border-color:var(--accent-digital);background:var(--accent-digital); box-shadow: 0 0 0 4px rgba(0,198,255,0.2);}
 
-/* 實體券選中狀態 (高亮橘紅) */
 .act-btn.is-physical:hover { border-color: rgba(255,107,53,0.5); }
 .act-btn.is-physical.on { border-color: var(--accent-physical); background: rgba(255, 107, 53, 0.15); }
 .act-btn.is-physical.on .radio { border-color: var(--accent-physical); background: var(--accent-physical); box-shadow: 0 0 0 4px rgba(255, 107, 53, 0.2); }
@@ -148,26 +139,46 @@ button{font-family:inherit;cursor:pointer;}
 .mode-switch { display: flex; gap: 8px; margin-bottom: 16px; padding: 6px; background: var(--secondary); border-radius: 16px; }
 .mode-btn { flex: 1; padding: 12px; border-radius: 12px; border: none; background: transparent; color: var(--muted-foreground); font-weight: 700; font-size: 15px; transition: 0.2s; }
 
-/* 模式按鈕高亮 */
 #mode-digital.active { background: var(--gradient-digital); color: #fff; box-shadow: 0 8px 20px -6px rgba(0,198,255,0.6); border: none; }
 #mode-physical.active { background: var(--gradient-physical); color: #fff; box-shadow: 0 8px 20px -6px rgba(255,107,53,0.6); border: none; }
 
 .searchbar{display:flex;flex-direction:column;gap:10px; width: 100%;}
-.searchbar > button { width: 100%; }
 @media(min-width:640px){
   .searchbar { flex-direction: row; }
-  .searchbar > button { width: auto; flex-shrink: 0; }
-  #btn-scan { width: 80px; }
-  #btn-check { min-width: 120px; }
+  #btn-scan { width: 80px; flex-shrink: 0;}
+  #btn-check { min-width: 120px; flex-shrink: 0;}
 }
 
-#phone{flex:1;min-height:64px;border-radius:14px;border:1px solid var(--input);background:oklch(0.17 0.024 259/.6);
-  color:var(--foreground);padding:0 16px;font-size:20px;font-weight:600;letter-spacing:.08em;outline:none;transition:all .2s; width: 100%; min-width: 0;}
-#phone::placeholder{font-size:15px;font-weight:400;letter-spacing:normal;color:var(--muted-foreground)}
+/* 🔥 殘影預判快搜系統 Wrapper */
+.search-input-wrapper { position: relative; flex: 1; width: 100%; }
 
-/* 輸入框 Focus 顏色切換 */
-#phone:focus { border-color: var(--accent-digital); box-shadow: 0 0 0 4px rgba(0,198,255,0.25); }
+#phone{width:100%;min-height:64px;border-radius:14px;border:1px solid var(--input);background:oklch(0.17 0.024 259/.6);
+  color:var(--foreground);padding:0 16px;font-size:20px;font-weight:600;letter-spacing:.08em;outline:none;transition:all .2s;}
+#phone::placeholder{font-size:15px;font-weight:400;letter-spacing:normal;color:var(--muted-foreground)}
+#phone:focus{border-color:var(--accent-digital);box-shadow:0 0 0 4px rgba(0,198,255,0.25);}
 body.mode-physical-active #phone:focus { border-color: var(--accent-physical); box-shadow: 0 0 0 4px rgba(255,107,53,0.25); }
+
+/* 🔥 快搜下拉選單樣式 */
+.autocomplete-list {
+  position: absolute; top: calc(100% + 8px); left: 0; right: 0; 
+  background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.8); z-index: 100; max-height: 280px; overflow-y: auto;
+  opacity: 0; transform: translateY(-10px); pointer-events: none; transition: 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.autocomplete-list.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
+.autocomplete-item {
+  padding: 14px 18px; border-bottom: 1px solid var(--border); display: flex;
+  justify-content: space-between; align-items: center; cursor: pointer; transition: background 0.2s;
+}
+.autocomplete-item:hover { background: var(--secondary); }
+.autocomplete-item:last-child { border-bottom: none; }
+.ac-phone { font-size: 17px; font-weight: 700; color: var(--foreground); font-family: monospace; letter-spacing: 1px;}
+.ac-hl { color: var(--accent-digital); }
+body.mode-physical-active .ac-hl { color: var(--accent-physical); }
+.ac-name { font-size: 13px; color: var(--muted-foreground); margin-top: 4px; font-weight: 500;}
+.ac-status { font-size: 12px; padding: 4px 8px; border-radius: 6px; font-weight: 700;}
+.ac-status.ready { background: rgba(63,191,143,0.15); color: var(--success); }
+.ac-status.done { background: rgba(255,255,255,0.05); color: var(--muted-foreground); }
 
 .icon-btn{min-height:64px;padding:0 20px;font-size:24px;border-radius:14px;border:1px solid var(--border);background:var(--secondary);color:var(--foreground);transition:all .2s}
 .icon-btn:hover{background:var(--muted)}
@@ -185,7 +196,6 @@ button:disabled{opacity:.5;cursor:not-allowed}
 #employee-name:focus{border-color:var(--accent-digital); background:var(--card); box-shadow:0 0 0 4px rgba(0,198,255,0.25);}
 body.mode-physical-active #employee-name:focus { border-color: var(--accent-physical); box-shadow: 0 0 0 4px rgba(255,107,53,0.25); }
 
-/* 動態島通知 HUD */
 #toast-container {
   position: fixed; top: -100px; left: 50%; transform: translateX(-50%); z-index: 10000;
   display: flex; align-items: center; gap: 12px; padding: 16px 24px; border-radius: 999px;
@@ -197,7 +207,6 @@ body.mode-physical-active #employee-name:focus { border-color: var(--accent-phys
 #toast-container.success { background: rgba(63,191,143,0.15); color: var(--green); border-color: rgba(63,191,143,0.3); }
 .toast-icon { font-size: 20px; }
 
-/* JARVIS 掃描儀 HUD */
 #scan-area{ position: fixed; inset: 0; z-index: 9999; background: rgba(10, 12, 16, 0.95); display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 24px; }
 #scan-area.hidden{display:none !important}
 .reader-wrap{ width: 100%; max-width: 450px; position: relative; }
@@ -240,17 +249,44 @@ body.mode-physical-active .scanline { background: var(--accent-physical); box-sh
 .info .v.mono{letter-spacing:.08em}
 .actions{margin-top:auto;padding-top:8px;display:flex;flex-direction:column;gap:12px; width: 100%;}
 
-/* 🔥 核銷大按鈕樣式 */
-.redeem{min-height:96px;width:100%;border:none;border-radius:18px;font-size:28px;font-weight:900;letter-spacing:.04em;
-  background-image:var(--gradient-digital);color:#fff;box-shadow:0 26px 50px -22px rgba(0,198,255,0.8);transition:all .2s;
-  display: flex; align-items: center; justify-content: center; gap: 12px; cursor: pointer;}
-body.mode-physical-active .redeem { background-image: var(--gradient-physical); box-shadow: 0 26px 50px -22px rgba(255,107,53,1); }
-.redeem:hover:not(:disabled){transform:translateY(-2px);filter:brightness(1.1)}
-.redeem:active:not(:disabled){transform:scale(.98)}
+/* 🔥 滑動核銷 UI (Swipe to Redeem) */
+.swipe-container {
+  position: relative; height: 96px; width: 100%; background: var(--secondary);
+  border-radius: 18px; border: 1px solid var(--border); overflow: hidden;
+  display: flex; align-items: center; justify-content: center; user-select: none;
+  transition: all 0.3s;
+}
+.swipe-track {
+  position: absolute; left: 0; top: 0; bottom: 0; width: 0%;
+  background-image: var(--gradient-digital); z-index: 1; transition: width 0s;
+}
+body.mode-physical-active .swipe-track { background-image: var(--gradient-physical); }
+.swipe-text { 
+  position: relative; z-index: 2; font-size: 24px; font-weight: 900; letter-spacing: 0.04em;
+  color: var(--muted-foreground); pointer-events: none; transition: color 0.3s; 
+}
+.swipe-thumb {
+  position: absolute; left: 8px; top: 8px; bottom: 8px; width: 80px;
+  background: #fff; border-radius: 14px; box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+  display: flex; align-items: center; justify-content: center; font-size: 32px;
+  z-index: 3; cursor: grab; transition: transform 0s; color: var(--background);
+}
+.swipe-thumb:active { cursor: grabbing; }
 
-/* 🔥 終極防呆：過期與已兌換按鈕強制鎖死，完全阻擋滑鼠與點擊事件 */
-.redeem.is-claimed { background: var(--muted) !important; box-shadow: none !important; color: var(--muted-foreground) !important; cursor: not-allowed !important; pointer-events: none !important; opacity: 1 !important; transform: none !important; }
-.redeem.is-expired { background: var(--destructive) !important; box-shadow: 0 10px 20px -10px rgba(255,0,0,0.5) !important; color: #fff !important; cursor: not-allowed !important; pointer-events: none !important; opacity: 1 !important; transform: none !important; }
+/* 滑動條狀態變化 */
+.swipe-container.is-ready { border-color: rgba(0,198,255,0.4); box-shadow: 0 0 30px -10px rgba(0,198,255,0.3); }
+body.mode-physical-active .swipe-container.is-ready { border-color: rgba(255,107,53,0.4); box-shadow: 0 0 30px -10px rgba(255,107,53,0.3); }
+.swipe-container.is-ready .swipe-text { color: #fff; text-shadow: 0 2px 10px rgba(0,0,0,0.8); }
+
+/* 防呆鎖死狀態 */
+.swipe-container.is-claimed { background: var(--muted); border-color: var(--border); pointer-events: none; box-shadow: none; }
+.swipe-container.is-claimed .swipe-text { color: var(--muted-foreground); text-shadow: none; }
+.swipe-container.is-claimed .swipe-thumb { background: var(--border); color: var(--muted-foreground); box-shadow: none; }
+
+.swipe-container.is-expired { background: var(--destructive); border-color: rgba(255,0,0,0.5); pointer-events: none; box-shadow: 0 10px 20px -10px rgba(255,0,0,0.5); }
+.swipe-container.is-expired .swipe-text { color: #fff; text-shadow: none; }
+.swipe-container.is-expired .swipe-thumb { background: rgba(0,0,0,0.2); color: #fff; box-shadow: none; }
+
 
 .undo{min-height:64px;width:100%;border-radius:18px;font-size:20px;font-weight:700;color:var(--accent-digital);
   border:1px solid rgba(0,198,255,0.5);background:rgba(0,198,255,0.15);transition:background .2s}
@@ -326,7 +362,12 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
           </div>
 
           <div class="searchbar">
-            <input id="phone" type="tel" placeholder="輸入手機號碼 (限10碼)" oninput="handleInput(this)" />
+            <!-- 🔥 殘影快搜 Wrapper -->
+            <div class="search-input-wrapper">
+              <input id="phone" type="tel" placeholder="輸入手機號碼 (限10碼)" autocomplete="off" />
+              <div id="autocomplete-list" class="autocomplete-list"></div>
+            </div>
+            
             <button class="icon-btn" id="btn-scan" aria-label="掃描 QR Code">📷</button>
             <button class="primary-btn" id="btn-check">查詢</button>
           </div>
@@ -352,10 +393,15 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
           </div>
 
           <div class="actions">
-            <!-- 核銷大按鈕 -->
-            <button class="redeem" id="btn-redeem" onclick="redeem()">✔ 確認核銷優惠</button>
-            <button class="undo hidden" id="btn-undo" onclick="undo()">⚡ 撤銷 (5s)</button>
-            <button class="next" id="btn-next" onclick="nextCust()">🧹 清除／服務下一位</button>
+            <!-- 🔥 滑動核銷 UI -->
+            <div id="swipe-btn-container" class="swipe-container">
+              <div class="swipe-track" id="swipe-track"></div>
+              <div class="swipe-text" id="swipe-text">向右滑動以核銷 👉</div>
+              <div class="swipe-thumb" id="swipe-thumb">🍔</div>
+            </div>
+            
+            <button class="undo hidden" id="btn-undo">⚡ 撤銷 (5s)</button>
+            <button class="next" id="btn-next">🧹 清除／服務下一位</button>
           </div>
         </div>
       </section>
@@ -377,7 +423,7 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-  import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  import { getFirestore, doc, getDoc, setDoc, updateDoc, query, collection, where, limit, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyBINQuYtYZA8RLfwm51AfGLTYj1TX_UcFo",
@@ -409,7 +455,6 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
       document.querySelector('#ping-tracker span:last-child').innerText = `API OK ${ping}ms`;
   }, 3000);
 
-  // 動態島 Toast 通知系統
   window.showToast = function(msg, type = 'error') {
       const toast = $('toast-container');
       const icon = toast.querySelector('.toast-icon');
@@ -424,11 +469,8 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
       if (type === 'error') playAlert("error");
       
       if(toastTimer) clearTimeout(toastTimer);
-      toastTimer = setTimeout(() => {
-          toast.classList.remove('show');
-      }, 3500);
+      toastTimer = setTimeout(() => { toast.classList.remove('show'); }, 3500);
   };
-
   window.alert = function(msg) { showToast(msg, 'error'); };
 
   $("employee-name").addEventListener("change", function(e) {
@@ -475,13 +517,70 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
     nextCust();
   };
 
-  window.handleInput = function(el) {
-    if (currentMode === 'digital') {
-      el.value = el.value.replace(/[^\d]/g,'').slice(0,10); 
-    } else {
-      el.value = el.value.replace(/[^a-zA-Z0-9]/g,'').toUpperCase().slice(0,20);
-    }
+  // 🔥 殘影預判快搜系統邏輯
+  let acTimeout = null;
+  $("phone").addEventListener("input", function() {
+      // 驗證字元
+      if (currentMode === 'digital') this.value = this.value.replace(/[^\d]/g,'').slice(0,10); 
+      else this.value = this.value.replace(/[^a-zA-Z0-9]/g,'').toUpperCase().slice(0,20);
+      
+      const val = this.value.trim();
+      const list = $("autocomplete-list");
+      
+      // 至少輸入 3 個字才啟動快搜，避免撈出太多資料
+      if (val.length < 3) { list.innerHTML = ""; list.classList.remove("show"); return; } 
+      
+      if (acTimeout) clearTimeout(acTimeout);
+      acTimeout = setTimeout(async () => {
+          if(!act || !store) return;
+          try {
+              // Firebase 完美的前綴查詢 (Prefix Search)
+              const q = query(collection(db, act), 
+                  where("phone", ">=", val), 
+                  where("phone", "<=", val + '\uf8ff'), 
+                  limit(5)
+              );
+              const snap = await getDocs(q);
+              if(snap.empty) { list.innerHTML = ""; list.classList.remove("show"); return; }
+              
+              let html = "";
+              snap.forEach(doc => {
+                  const d = doc.data();
+                  const isReady = (!d.status || d.status === "未兌換");
+                  const statusClass = isReady ? "ready" : "done";
+                  const statusText = isReady ? "可兌換" : (d.status || "已失效");
+                  
+                  // 高亮輸入的文字
+                  const highlightedPhone = d.phone.replace(new RegExp(`(${val})`, 'i'), `<span class="ac-hl">$1</span>`);
+                  
+                  html += `
+                  <div class="autocomplete-item" onclick="selectAutocomplete('${d.phone}')">
+                      <div>
+                          <div class="ac-phone">${highlightedPhone}</div>
+                          <div class="ac-name">👤 ${d.name || "實體券"} | 🎁 ${d.gift || "預設贈品"}</div>
+                      </div>
+                      <div class="ac-status ${statusClass}">${statusText}</div>
+                  </div>`;
+              });
+              list.innerHTML = html;
+              list.classList.add("show");
+          } catch(e) { console.error("快搜發生錯誤", e); }
+      }, 300); // 300ms 防抖
+  });
+
+  window.selectAutocomplete = function(ph) {
+      $("phone").value = ph;
+      $("autocomplete-list").innerHTML = "";
+      $("autocomplete-list").classList.remove("show");
+      check(ph); // 自動執行查詢
   };
+  
+  // 點擊空白處隱藏選單
+  document.addEventListener("click", function (e) {
+      if (e.target !== $("phone")) {
+          $("autocomplete-list").classList.remove("show");
+      }
+  });
 
   async function initPOS() {
     try {
@@ -493,8 +592,7 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
         EVENT_ORDER = data.EVENT_ORDER || Object.keys(POS_CONFIG);
         EVENT_ORDER = EVENT_ORDER.filter(a => POS_CONFIG[a]);
       } else {
-        showToast("雲端尚未建立系統設定，請先至總部後台儲存設定！", "error");
-        return;
+        showToast("雲端尚未建立系統設定，請先至總部後台儲存設定！", "error"); return;
       }
 
       evMap = {};
@@ -503,9 +601,7 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
         EVENT_ORDER.forEach(a => {
           const cfg = POS_CONFIG[a];
           if (cfg.active === false) return;
-          if (cfg.stores === "ALL" || (Array.isArray(cfg.stores) && cfg.stores.includes(s))) {
-            evMap[s].push(a);
-          }
+          if (cfg.stores === "ALL" || (Array.isArray(cfg.stores) && cfg.stores.includes(s))) { evMap[s].push(a); }
         });
       });
 
@@ -513,11 +609,8 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
       for (const a in POS_CONFIG) { giftMap[a] = POS_CONFIG[a].gift; }
 
       const savedStore = localStorage.getItem("p_store");
-      if (savedStore && evMap[savedStore]) { 
-        store = savedStore; act = (evMap[savedStore] || [])[0] || ""; 
-      } else if (STORE_LIST.length > 0) {
-        store = STORE_LIST[0]; act = (evMap[store] || [])[0] || "";
-      }
+      if (savedStore && evMap[savedStore]) { store = savedStore; act = (evMap[savedStore] || [])[0] || ""; } 
+      else if (STORE_LIST.length > 0) { store = STORE_LIST[0]; act = (evMap[store] || [])[0] || ""; }
 
       const savedEmp = localStorage.getItem("p_employee");
       if(savedEmp) $("employee-name").value = savedEmp;
@@ -525,14 +618,10 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
       if (act) {
         if (act.includes('【實體】') || act.includes('實體券')) setMode('physical');
         else setMode('digital');
-      } else {
-        setMode('digital');
-      }
+      } else { setMode('digital'); }
 
-      renderStores(); renderActs(); renderRight();
-    } catch (e) {
-      showToast("無法連線至雲端讀取 POS 設定！", "error");
-    }
+      renderStores(); renderActs(); renderRight(); initSwipe();
+    } catch (e) { showToast("無法連線至雲端讀取 POS 設定！", "error"); }
   }
 
   initPOS();
@@ -540,12 +629,8 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
   function setBusy(b){
     busy = b;
     $("btn-check").disabled = b;
-    $("btn-redeem").disabled = b;
-    if(b) {
-        $("btn-check").innerText = "處理中…";
-    } else {
-        $("btn-check").innerText = currentMode === 'digital' ? '查詢' : '查詢 / 核銷';
-    }
+    if(b) { $("btn-check").innerText = "處理中…"; } 
+    else { $("btn-check").innerText = currentMode === 'digital' ? '查詢' : '查詢 / 核銷'; }
   }
 
   function renderStores(){
@@ -572,12 +657,10 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
     currentEvs.forEach((a) => {
       const b = document.createElement("button");
       b.className = "act-btn" + (act === a ? " on" : "");
-      
       if (a.includes('【實體】') || a.includes('實體券')) b.classList.add("is-physical");
       
       b.innerHTML = '<span><span class="act-name"></span></span><span class="radio"></span>';
       b.querySelector(".act-name").innerText = a;
-      
       b.onclick = () => { 
         act = a; renderActs(); 
         if (a.includes('【實體】') || a.includes('實體券')) setMode('physical');
@@ -593,12 +676,10 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
     store = s; localStorage.setItem("p_store", s);
     act = (evMap[s] || [])[0] || ""; record = null;
     $("store-dropdown").removeAttribute("open");
-    
     if (act) {
         if (act.includes('【實體】') || act.includes('實體券')) setMode('physical');
         else setMode('digital');
     }
-
     renderStores(); renderActs(); renderRight();
     setTimeout(() => $("phone").focus(), 100);
   }
@@ -615,28 +696,20 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
     const defaultExpire = (POS_CONFIG[shownAct] && POS_CONFIG[shownAct].expireDate) ? POS_CONFIG[shownAct].expireDate : "無特別限制";
     const expireStr = record.expireDate || defaultExpire;
 
-    // 🔥 前端本地即時防護：自動判定是否過期
     let autoExpired = false;
     if (record.status !== "已過期" && record.status !== "已兌換" && expireStr && expireStr !== "無特別限制" && !expireStr.includes("依紙本券面")) {
-        const today = new Date();
-        today.setHours(0,0,0,0);
+        const today = new Date(); today.setHours(0,0,0,0);
         const regex = /(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})/g;
-        let match;
-        let lastDate = null;
-        while ((match = regex.exec(expireStr)) !== null) {
-            lastDate = new Date(match[1], parseInt(match[2])-1, match[3]);
-        }
-        // 如果期限小於今天，強制判為過期
+        let match; let lastDate = null;
+        while ((match = regex.exec(expireStr)) !== null) { lastDate = new Date(match[1], parseInt(match[2])-1, match[3]); }
         if (lastDate && lastDate < today) {
-            autoExpired = true;
-            record.status = "已過期"; 
+            autoExpired = true; record.status = "已過期"; 
             updateDoc(doc(db, shownAct, shownPhone), { status: "已過期", redeemTime: "逾期未換 (前台自動攔截)" });
         }
     }
 
     const isClaimed = record.status === "已兌換";
     const isExpired = record.status === "已過期" || autoExpired;
-
     const banner = $("banner");
     
     if (isClaimed) {
@@ -651,7 +724,6 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
     }
 
     const displayGift = record.gift || giftMap[shownAct] || "未設定餐點";
-
     $("v-phone").innerText = shownPhone;
     $("v-name").innerText = record.name || "—";
     $("v-expire").innerText = expireStr;
@@ -664,22 +736,89 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
         $("v-gift").innerText = displayGift;
     }
     
-    // 🔥 動態鎖定大按鈕 (終極防呆)
-    const redeemBtn = $("btn-redeem");
-    redeemBtn.className = "redeem"; // 重置 Class
-    redeemBtn.disabled = false;
+    // 🔥 滑動按鈕狀態重置與鎖定
+    const swipeCont = $("swipe-btn-container");
+    const swipeText = $("swipe-text");
+    const swipeThumb = $("swipe-thumb");
+    const swipeTrack = $("swipe-track");
+    
+    swipeCont.className = "swipe-container";
+    swipeThumb.style.transition = "none";
+    swipeTrack.style.transition = "none";
+    swipeThumb.style.transform = `translateX(0px)`;
+    swipeTrack.style.width = `0px`;
 
     if (isClaimed) {
-        redeemBtn.innerText = "已兌換完畢";
-        redeemBtn.disabled = true;
-        redeemBtn.classList.add("is-claimed");
+        swipeCont.classList.add("is-claimed");
+        swipeText.innerText = "已兌換完畢";
+        swipeThumb.innerText = "🔒";
     } else if (isExpired) {
-        redeemBtn.innerText = "已過期無法核銷";
-        redeemBtn.disabled = true;
-        redeemBtn.classList.add("is-expired");
+        swipeCont.classList.add("is-expired");
+        swipeText.innerText = "已過期無法核銷";
+        swipeThumb.innerText = "⛔";
     } else {
-        redeemBtn.innerText = "✔ 確認核銷優惠";
+        swipeCont.classList.add("is-ready");
+        swipeText.innerText = "向右滑動以核銷 👉";
+        swipeThumb.innerText = "🍔"; 
     }
+  }
+
+  // 🔥 滑動核銷核心引擎
+  function initSwipe() {
+      const swipeContainer = $("swipe-btn-container");
+      const swipeThumb = $("swipe-thumb");
+      const swipeTrack = $("swipe-track");
+      let isDragging = false;
+      let startX = 0;
+      let maxDrag = 0;
+
+      const handleDown = (e) => {
+          if (swipeContainer.classList.contains("is-claimed") || swipeContainer.classList.contains("is-expired")) return;
+          if (!record || (record.status !== "未兌換" && record.status !== "")) return;
+          
+          isDragging = true;
+          startX = e.type.includes('mouse') ? e.pageX : e.touches[0].pageX;
+          maxDrag = swipeContainer.clientWidth - swipeThumb.clientWidth - 16; 
+          swipeThumb.style.transition = "none";
+          swipeTrack.style.transition = "none";
+      };
+
+      const handleMove = (e) => {
+          if (!isDragging) return;
+          let currentX = e.type.includes('mouse') ? e.pageX : e.touches[0].pageX;
+          let offset = currentX - startX;
+          if (offset < 0) offset = 0;
+          if (offset > maxDrag) offset = maxDrag;
+          
+          swipeThumb.style.transform = `translateX(${offset}px)`;
+          swipeTrack.style.width = `${offset + 40}px`; 
+      };
+
+      const handleUp = (e) => {
+          if (!isDragging) return;
+          isDragging = false;
+          let currentX = e.type.includes('mouse') ? e.pageX : e.changedTouches[0].pageX;
+          let offset = currentX - startX;
+          
+          swipeThumb.style.transition = "transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)";
+          swipeTrack.style.transition = "width 0.3s ease";
+
+          if (offset > maxDrag * 0.85) { 
+              swipeThumb.style.transform = `translateX(${maxDrag}px)`;
+              swipeTrack.style.width = `100%`;
+              window.redeem(); // 觸發核銷
+          } else {
+              swipeThumb.style.transform = `translateX(0px)`;
+              swipeTrack.style.width = `0px`;
+          }
+      };
+
+      swipeThumb.addEventListener("mousedown", handleDown);
+      swipeThumb.addEventListener("touchstart", handleDown, {passive: true});
+      document.addEventListener("mousemove", handleMove);
+      document.addEventListener("touchmove", handleMove, {passive: false});
+      document.addEventListener("mouseup", handleUp);
+      document.addEventListener("touchend", handleUp);
   }
 
   function renderContent(data, ph, ac){
@@ -781,16 +920,23 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
 
   window.redeem = async function() {
     const empName = $("employee-name").value.trim();
-    if(!empName) { $("employee-name").focus(); return showToast("請先填寫上方的「值班人員」姓名！", "error"); }
+    if(!empName) { 
+        $("employee-name").focus(); 
+        renderRight(); // 退回滑塊
+        return showToast("請先填寫上方的「值班人員」姓名！", "error"); 
+    }
     localStorage.setItem("p_employee", empName); 
 
-    // 🔥 終極防護：JS 底層雙重鎖定，防堵駭客或鍵盤強制觸發
     if (record && (record.status === "已兌換" || record.status === "已過期")) {
-        playAlert("error");
+        playAlert("error"); renderRight();
         return showToast("此憑證已失效，無法執行核銷！", "error");
     }
 
-    if (!confirm("確定核銷？憑證將失效！")) return;
+    if (!confirm("確定核銷？憑證將失效！")) {
+        renderRight(); // 退回滑塊
+        return;
+    }
+    
     const ph = shownPhone, st = store, ac = act;
     const d = new Date(), pad = (n) => (n < 10 ? "0" + n : String(n));
     const nowStr = d.getFullYear() + "/" + pad(d.getMonth()+1) + "/" + pad(d.getDate()) + " " + pad(d.getHours()) + ":" + pad(d.getMinutes()) + ":" + pad(d.getSeconds());
@@ -828,10 +974,9 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
     setTimeout(() => $("phone").focus(), 100);
   }
 
-  // 鍵盤忍者事件綁定 (隱藏文字但不拔功能)
+  // 鍵盤忍者快捷鍵 (保留但不顯示提示字)
   document.addEventListener("keydown", (e) => {
     if (document.activeElement.tagName === 'INPUT' && e.key !== 'Enter') return;
-
     if (e.key === "Enter") {
         e.preventDefault();
         if (!record || record.status === '已兌換' || record.status === '已過期') {
@@ -840,23 +985,29 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
     } 
     else if (e.code === "Space" || e.key === " ") {
         if (record && record.status === "未兌換" && document.activeElement.tagName !== 'INPUT') {
-            e.preventDefault(); redeem();
+            e.preventDefault(); 
+            // 讓滑塊有視覺反饋再執行
+            const swipeContainer = $("swipe-btn-container");
+            const swipeThumb = $("swipe-thumb");
+            const swipeTrack = $("swipe-track");
+            const maxDrag = swipeContainer.clientWidth - swipeThumb.clientWidth - 16;
+            swipeThumb.style.transition = "transform 0.3s ease";
+            swipeTrack.style.transition = "width 0.3s ease";
+            swipeThumb.style.transform = `translateX(${maxDrag}px)`;
+            swipeTrack.style.width = `100%`;
+            setTimeout(window.redeem, 300);
         }
     }
-    else if (e.key === "Escape") {
-        e.preventDefault(); nextCust();
-    }
-    else if (e.key === "F1") {
-        e.preventDefault(); setMode('digital');
-    }
-    else if (e.key === "F2") {
-        e.preventDefault(); setMode('physical');
-    }
+    else if (e.key === "Escape") { e.preventDefault(); nextCust(); }
+    else if (e.key === "F1") { e.preventDefault(); setMode('digital'); }
+    else if (e.key === "F2") { e.preventDefault(); setMode('physical'); }
   });
 
   $("btn-scan").onclick = startScan;
   $("btn-stop").onclick = stopScan;
   $("btn-check").onclick = () => check();
+  $("btn-undo").onclick = undo;
+  $("btn-next").onclick = nextCust;
 </script>
 </body>
-</html>  
+</html>
