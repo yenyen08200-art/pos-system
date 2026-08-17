@@ -126,7 +126,6 @@
     }
     input::placeholder{color:rgba(90,96,88,.6);font-weight:400}
 
-    /* 🔥 簡訊按鈕專用樣式 */
     .btn-otp {
       width: auto; padding: 0 16px; margin: 0; border-radius: 14px; font-size: 13px; font-weight: 700; letter-spacing: 0.05em;
       background: rgba(185,145,90,.15); color: var(--brass-deep); border: 1px solid rgba(185,145,90,.5);
@@ -273,7 +272,6 @@
         <input id="social_id" type="text" placeholder="IG / FB 帳號">
       </div>
       
-      <!-- 🔥 手機輸入框與取得驗證碼按鈕 -->
       <div class="field">
         <label for="phone">手機號碼 (限 09 開頭)</label>
         <div style="display: flex; gap: 8px;">
@@ -287,7 +285,6 @@
         </div>
       </div>
       
-      <!-- 🔥 隱藏的簡訊驗證碼輸入框 -->
       <div class="field" id="otp-field" style="display: none;">
         <label for="otp_code">簡訊驗證碼</label>
         <input id="otp_code" type="tel" inputmode="numeric" placeholder="請輸入 6 位數驗證碼" maxlength="6" oninput="this.value=this.value.replace(/\D/g,'')">
@@ -329,7 +326,6 @@
       <button class="family-btn" onclick="refillForFamily()">➕ 幫親友代領 (重新填單)</button>
     </section>
 
-    <!-- 🔥 隱形的 reCAPTCHA 機器人防禦盾牌 -->
     <div id="recaptcha-container"></div>
 
     <p class="footnote">Texas Chick · Since 1987</p>
@@ -382,19 +378,17 @@
         EVENT_SECRETS = data.EVENT_CONFIG || {};
         POS_CONFIG = data.POS_CONFIG || {}; 
 
-        // 🔥 讀取後台的排序陣列 (若沒有則退回使用原本的 Object.keys)
         let EVENT_ORDER = data.EVENT_ORDER || Object.keys(EVENT_SECRETS);
-        
-        // 防呆機制：過濾掉已經被刪除但還卡在排序陣列裡的活動
         EVENT_ORDER = EVENT_ORDER.filter(a => EVENT_SECRETS[a]);
 
         const actSelect = $('activity');
         actSelect.innerHTML = "";
         
-        // 依照排序陣列產生活動選項
         EVENT_ORDER.forEach(actName => {
-          // 🔥 貼心防呆：如果該活動在後台已經「下架 (active === false)」，前台就不顯示給客人看！
+          // 🔥 貼心防呆：如果該活動在後台已經「下架」，前台就不顯示給客人看
           if (POS_CONFIG[actName] && POS_CONFIG[actName].active === false) return;
+          // 🔥 新增：只要活動名稱包含「【實體】」或「實體券」，就不顯示在前台，避免誤領
+          if (actName.includes('【實體】') || actName.includes('實體券')) return;
 
           const opt = document.createElement('option');
           opt.value = actName;
@@ -418,7 +412,6 @@
     const act = $('activity').value;
     if(!act) return;
     
-    // 初始化時，重置驗證碼欄位
     $('otp-field').style.display = 'none';
     $('otp_code').value = '';
     confirmationResult = null;
@@ -446,7 +439,6 @@
     const act = $('activity').value;
     if(confirm("確定要幫親友代領嗎？\n\n⚠️ 系統將回到空白表單。\n⚠️ 請務必輸入【親友的真實電話】並重新獲取驗證碼！")) {
       localStorage.removeItem(`p_${act}_phone`);
-      // 確保畫面回到乾淨的驗證狀態
       $('phone').value = '';
       $('btn-send-otp').disabled = false;
       $('btn-send-otp').innerText = "取得驗證碼";
@@ -454,7 +446,6 @@
     }
   }
 
-  // 初始化隱形機器人防禦
   function initRecaptcha() {
     if (!recaptchaVerifier) {
       recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
@@ -465,7 +456,6 @@
     }
   }
 
-  // 發送簡訊驗證碼功能
   async function sendOTP() {
     const ph = $('phone').value.replace(/\D/g,'');
     if(ph.length !== 10 || !ph.startsWith('09')) return alert("⚠️ 手機號碼必須為「09 開頭且滿 10 碼數字」！");
