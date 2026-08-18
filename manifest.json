@@ -1,16 +1,17 @@
 {
-  "name": "門市電子核銷系統",
+  "name": "門市核銷系統",
   "short_name": "門市核銷",
-  "start_url": ".",
+  "description": "德州小騎士門市專用核銷與庫存管理系統",
+  "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#f3f4f6",
-  "theme_color": "#3b82f6",
+  "background_color": "#1A1C24",
+  "theme_color": "#00C6FF",
   "icons": [
     {
       "src": "icon.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }
- 
