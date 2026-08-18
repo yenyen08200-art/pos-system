@@ -27,6 +27,23 @@
             <integer>1</integer>
             <key>URL</key>
             <string>https://yenyen08200-art.github.io/pos-system/index.html</string>
+            <!-- 🔥 內嵌漸層閃電專屬圖示 (Base64) -->
+            <key>Icon</key>
+            <data>
+            iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAMAAAD04JH5AAAAUVBMVEUAAAD/
+            AACAgIAAAAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/
+            AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AADmF5fXAAAAG3RS
+            TlMAERITFBUWFxgZGhscHR4fICEiIyQlJicoKSpH+b9yAAABgUlEQVR42u3Z
+            wWrCQBCG4ZlEoxcRC4r2/V/wILi74F0p5FBoF9rM77+w5LBDf2YdF388d7k/
+            D2D2YQEAqAUAoBYAgFoAAGoBAKgFAKAWAIBeAMD4P0DX3v0fAH/bW34DQC0A
+            ALUAMHUA6G4A7/kNANQCQI93APiHnvs7AOgFAOD3AXr5VwDQCwBA7QfAj3/F
+            b4A7/9YLAEAtAICpAzD2eQD8n38DANQCANA7APTyTwCgHgCA2m8AHv/ebwB3
+            /q0XAIBeAABTA2DsFwB8P37rBQCgHgCAWQDoe/V/AN77vQeAXgAA3x4A37u7
+            B8DX28+9AAD0AgCYGQBrvwHg33sPANQCANA7AOzyTwCgFgCA2m8AHP/ebwD3
+            8bdeAAB6AQBwB8DYYwDe+7kHAFALAEDvALDJHwGAKwCs/QW4Pj8CgN8HAODb
+            A4Dv/fP4bQ8AvQAAZj0APX91P94DQHsBAKgFAKAWAIBaAABqAQCovfs7AD7N
+            70sBAP8BAKgFAKAWAIBA+wUk7R07oX8JdgAAAABJRU5ErkJggg==
+            </data>
         </dict>
     </array>
     <key>PayloadDisplayName</key>
