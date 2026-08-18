@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>PayloadContent</key>
+    <array>
+        <dict>
+            <key>FullScreen</key>
+            <true/>
+            <key>IconIsPrecomposed</key>
+            <true/>
+            <key>IsRemovable</key>
+            <true/>
+            <key>Label</key>
+            <string>門市核銷</string>
+            <key>PayloadDescription</key>
+            <string>德州小騎士門市專用核銷系統</string>
+            <key>PayloadDisplayName</key>
+            <string>Web Clip</string>
+            <key>PayloadIdentifier</key>
+            <string>com.texaschick.pos.webclip</string>
+            <key>PayloadType</key>
+            <string>com.apple.webClip.managed</string>
+            <key>PayloadUUID</key>
+            <string>12345678-1234-1234-1234-123456789012</string>
+            <key>PayloadVersion</key>
+            <integer>1</integer>
+            <key>URL</key>
+            <string>https://yenyen08200-art.github.io/pos-system/index.html</string>
+        </dict>
+    </array>
+    <key>PayloadDisplayName</key>
+    <string>⚡ 門市核銷安裝檔</string>
+    <key>PayloadIdentifier</key>
+    <string>com.texaschick.pos</string>
+    <key>PayloadRemovalDisallowed</key>
+    <false/>
+    <key>PayloadType</key>
+    <string>Configuration</string>
+    <key>PayloadUUID</key>
+    <string>87654321-4321-4321-4321-210987654321</string>
+    <key>PayloadVersion</key>
+    <integer>1</integer>
+</dict>
+</plist>
