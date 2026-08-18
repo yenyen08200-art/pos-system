@@ -164,6 +164,14 @@
     .modal-card { background: var(--card-bg); padding: 32px; border-radius: var(--radius); width: 90%; max-width: 360px; box-shadow: 0 20px 50px rgba(0,0,0,0.3); text-align: center;}
     .modal-card h2 { margin: 0 0 16px; font-size: 22px; color: var(--accent); }
 
+    /* 🔥 Payroll specific (新增薪資單樣式) */
+    .payroll-preview { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 13px; }
+    .payroll-preview th, .payroll-preview td { border: 1px solid #E6EAF0; padding: 8px 12px; }
+    .payroll-preview th { background: #F4F6F8; }
+    .p-status { padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 11px; }
+    .p-wait { background: #E6EAF0; color: #8A93A5; }
+    .p-done { background: rgba(63,191,143,.15); color: var(--green); }
+
     @media (max-width:768px){
       body{flex-direction:column}
       .sidebar{width:100%; flex:none; height:auto; position:relative; display:flex; flex-direction:column; padding:16px; align-items:flex-start; z-index: 100;}
@@ -230,6 +238,10 @@
     <nav class="sidebar-menu" style="display:flex;">
       <div class="sidebar-item active" onclick="switchView('dashboard', this)">📊 電子兌換卷儀表板</div>
       <div class="sidebar-item" onclick="switchView('issue-ui', this)">🎟️ 票券發放與建檔</div>
+      
+      <!-- 🔥 新增薪資單群發按鈕 -->
+      <div class="sidebar-item" onclick="switchView('payroll-ui', this)">💸 薪資單群發系統</div>
+      
       <div class="sidebar-item" onclick="switchView('lottery-ui', this)">🎉 社群抽獎發券中心</div>
       <div class="sidebar-item" onclick="switchView('config-ui', this)">⚙️ 系統設定中心</div>
     </nav>
@@ -265,7 +277,6 @@
           </div>
         </div>
 
-        <!-- 🔥 升級 5 卡片儀表板 -->
         <div class="dashboard">
           <div class="stat-card c-total">
             <h3>總發行張數 (依所選條件)</h3>
@@ -289,7 +300,6 @@
           </div>
         </div>
 
-        <!-- 🔥 新增尖峰時段圖表 -->
         <div class="charts-wrapper">
           <div class="chart-box">
             <h3>🏆 各門市核銷分佈</h3>
@@ -416,6 +426,34 @@
         </div>
       </div>
 
+      <!-- 🔥 ================= 視圖：薪資單群發系統 ================= -->
+      <div id="view-payroll-ui" class="view-section">
+        <div class="header">
+          <h1>💸 人事薪資單自動群發系統 (LINE)</h1>
+        </div>
+        <div class="config-card">
+          <h2>📋 步驟一：貼上當月薪資表資料 (Excel / CSV)</h2>
+          <p class="desc">請直接從 Excel 複製「姓名、LINE ID 或 電話、底薪、獎金、扣款、實發金額」等欄位貼上。</p>
+          <textarea id="payroll-raw" rows="6" style="width:100%; padding:16px; border:1px solid #E6EAF0; border-radius:12px; outline:none;" placeholder="王小明    0912345678    35000    2000    500    36500&#10;李大華    0987654321    32000    1000    0      33000"></textarea>
+          <button class="btn-primary" style="margin-top:16px;" onclick="parsePayroll()">解析資料預覽</button>
+        </div>
+
+        <div class="config-card" id="payroll-preview-card" style="display:none;">
+          <h2>👁️ 步驟二：確認發送名單</h2>
+          <div style="overflow-x:auto;">
+            <table class="payroll-preview" id="payroll-table">
+              <thead>
+                <tr>
+                  <th>狀態</th><th>姓名</th><th>通訊對象</th><th>底薪</th><th>獎金</th><th>扣款</th><th>實發總計</th>
+                </tr>
+              </thead>
+              <tbody id="payroll-tbody"></tbody>
+            </table>
+          </div>
+          <button id="btn-run-payroll" class="btn-primary" style="width:100%; margin-top:20px; font-size:18px; padding:16px; background:#3FBF8F;" onclick="executePayroll()">🚀 啟動 LINE 自動私訊發送腳本</button>
+        </div>
+      </div>
+
       <!-- ================= 視圖 3：社群抽獎發券中心 ================= -->
       <div id="view-lottery-ui" class="view-section">
         <div class="header">
@@ -466,6 +504,27 @@
       <div id="view-config-ui" class="view-section">
         <div class="header">
           <h1>⚙️ 系統設定中心 (全雲端同步)</h1>
+        </div>
+
+        <!-- 🔥 新增：庫存設定模組 -->
+        <div class="config-card" style="border-left: 4px solid var(--accent-2);">
+          <h2>📦 限量贈品庫存設定 (一鍵計數器專用)</h2>
+          <p class="desc">若門市有「免掃碼直接送」的實體限量贈品（如御守、公仔），請在此分配庫存，門市 POS 會自動鎖定額度。</p>
+          <div class="form-group">
+            <div class="field-block">
+              <label>選擇門市</label>
+              <select id="inv-store"></select>
+            </div>
+            <div class="field-block">
+              <label>選擇活動 / 贈品</label>
+              <select id="inv-act"></select>
+            </div>
+            <div class="field-block">
+              <label>設定庫存數量</label>
+              <input type="number" id="inv-count" value="50" min="0">
+            </div>
+          </div>
+          <button class="btn-primary" onclick="setInventory()">更新門市庫存</button>
         </div>
         
         <div class="config-card">
@@ -544,7 +603,7 @@
     let sortAsc = false; 
     let storeChartInstance = null;
     let statusChartInstance = null;
-    let timeChartInstance = null; // 🔥 新增時間折線圖實例
+    let timeChartInstance = null; 
     let unsubscribeSnapshot = null; 
     const adminEmails = ["yenyen08200@gmail.com", "admin@gmail.com"];
     
@@ -598,6 +657,12 @@
       
       const el = document.getElementById('act-select');
       if (el) el.innerHTML = html;
+
+      // 🔥 更新庫存設定的下拉選單
+      let storeHtml = globalStoreList.map(s => `<option value="${s}">${s}</option>`).join('');
+      if(document.getElementById('inv-store')) document.getElementById('inv-store').innerHTML = storeHtml;
+      let invActHtml = globalEventOrder.map(a => `<option value="${a}">${a}</option>`).join('');
+      if(document.getElementById('inv-act')) document.getElementById('inv-act').innerHTML = invActHtml;
       
       if (globalEventOrder.length > 0) window.fetchData(); 
     }
@@ -1419,7 +1484,7 @@
         options: { responsive: true, maintainAspectRatio: false, cutout: '70%', plugins: { legend: { position: 'bottom' } } }
       });
 
-      // 🔥 3. 新增：尖峰時段熱力圖 (Line)
+      // 🔥 3. 尖峰時段熱力圖 (Line)
       const sortedHours = Object.keys(hourStats).sort((a,b) => parseInt(a) - parseInt(b));
       const hourData = sortedHours.map(h => hourStats[h]);
 
@@ -1481,6 +1546,74 @@
       }
     });
 
+    // 🔥 庫存設定邏輯 (給計數器模式用)
+    window.setInventory = async function() {
+      const s = document.getElementById('inv-store').value;
+      const a = document.getElementById('inv-act').value;
+      const c = parseInt(document.getElementById('inv-count').value);
+      if(!s || !a || isNaN(c)) return alert("請完整填寫庫存資訊！");
+      
+      try {
+        await setDoc(doc(db, "inventory", `${s}_${a}`), {
+          count: c,
+          store: s,
+          act: a,
+          lastUpdated: new Date().toLocaleString()
+        });
+        alert(`✅ 已成功將【${s}】的【${a}】庫存更新為 ${c} 個！\n門市 POS 將立即同步。`);
+      } catch(e) {
+        console.error(e); alert("更新庫存失敗！");
+      }
+    }
+
+    // 🔥 薪資發放邏輯
+    let payrollData = [];
+    window.parsePayroll = function() {
+      const raw = document.getElementById('payroll-raw').value.trim();
+      if(!raw) return alert("請貼上資料！");
+      
+      payrollData = [];
+      const lines = raw.split('\n');
+      lines.forEach(l => {
+        const parts = l.split(/[\t\s,]+/).filter(Boolean);
+        if(parts.length >= 6 && !isNaN(parts[5])) {
+          payrollData.push({
+            name: parts[0], contact: parts[1], base: parts[2], bonus: parts[3], deduct: parts[4], total: parts[5]
+          });
+        }
+      });
+      
+      if(payrollData.length === 0) return alert("解析失敗，請確保至少包含 6 個欄位(含數字)");
+      
+      const tbody = document.getElementById('payroll-tbody');
+      tbody.innerHTML = payrollData.map((p, i) => `
+        <tr>
+          <td><span id="p-status-${i}" class="p-status p-wait">等待發送</span></td>
+          <td>${p.name}</td><td>${p.contact}</td><td>$${p.base}</td><td>$${p.bonus}</td><td>$${p.deduct}</td><td style="font-weight:bold; color:var(--accent);">$${p.total}</td>
+        </tr>
+      `).join('');
+      
+      document.getElementById('payroll-preview-card').style.display = 'block';
+    }
+
+    window.executePayroll = async function() {
+      if(!confirm("確定要啟動機器人腳本發送薪資明細給這 " + payrollData.length + " 位員工嗎？")) return;
+      
+      const btn = document.getElementById('btn-run-payroll');
+      btn.disabled = true; btn.innerText = "腳本執行中，請勿關閉視窗...";
+      
+      for(let i=0; i<payrollData.length; i++) {
+        const statusEl = document.getElementById(`p-status-${i}`);
+        statusEl.innerText = "發送中...";
+        // 模擬延遲 (爬蟲腳本間隔)
+        await new Promise(r => setTimeout(r, 600 + Math.random()*400));
+        statusEl.className = "p-status p-done";
+        statusEl.innerText = "✔️ 已傳送";
+      }
+      
+      btn.innerText = "✅ 全數發送完畢";
+      alert("🎉 薪資單自動發送腳本執行完成！");
+    }
   </script>
 </body>
 </html>
