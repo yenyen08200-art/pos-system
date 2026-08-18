@@ -270,6 +270,19 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
 .next:hover{background:var(--muted)}
 .next:active{transform:scale(.98)}
 .hidden{display:none !important}
+
+/* 🔥 新增：核銷成功螢幕邊框金光特效 */
+#success-overlay {
+  position: fixed; inset: 0; pointer-events: none; z-index: 99999;
+  opacity: 0; box-shadow: inset 0 0 0px 0px transparent;
+}
+#success-overlay.flash {
+  animation: success-glow-anim 0.6s ease-out forwards;
+}
+@keyframes success-glow-anim {
+  0% { opacity: 1; box-shadow: inset 0 0 60px 15px rgba(255, 190, 0, 0.8), inset 0 0 150px 20px rgba(255, 107, 53, 0.4); }
+  100% { opacity: 0; box-shadow: inset 0 0 0px 0px transparent; }
+}
 </style>
 </head>
 <body>
@@ -389,6 +402,9 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
     </div>
     <button class="close-cam" id="btn-stop">✖ 關閉光學鎖定系統</button>
   </div>
+  
+  <!-- 🔥 新增：核銷成功特效層 -->
+  <div id="success-overlay"></div>
 </main>
 
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
@@ -859,7 +875,23 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
     
     renderRight();
     showToast("✅ 核銷成功！", "success");
-    if (window.confetti) confetti({ particleCount: 80, spread: 70 });
+
+    // 🔥 1. 觸發螢幕邊框金光特效
+    const overlay = $("success-overlay");
+    overlay.classList.remove("flash");
+    void overlay.offsetWidth; // 強制重繪
+    overlay.classList.add("flash");
+
+    // 🔥 2. 觸發質感撒花特效 (客製化德州小騎士配色：金、橘、白)
+    if (window.confetti) {
+        confetti({
+            particleCount: 120,
+            spread: 80,
+            origin: { y: 0.6 },
+            colors: ['#FFD700', '#FFA500', '#FF6B35', '#FFFFFF'],
+            disableForReducedMotion: true
+        });
+    }
 
     const btn = $("btn-undo"); btn.classList.remove("hidden");
     let left = 5; btn.innerText = "⚡ 撤銷 (" + left + "s)";
