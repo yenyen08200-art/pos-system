@@ -3,7 +3,13 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+<!-- 🔥 新增：Apple PWA 專用 Meta -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>抽獎核銷系統 | 門市 POS 兌換平台</title>
+<!-- 🔥 新增：PWA Manifest -->
+<link rel="manifest" href='data:application/manifest+json;base64,eyJuYW1lIjoi5b635bee5bCP6aiO5aOrIFBPUyIsInNob3J0X25hbWUiOiLlsI_poI7lo6sgUE9TIiwic3RhcnRfdXJsIjoiLiIsImRpc3BsYXkiOiJzdGFuZGFsb25lIiwiYmFja2dyb3VuZF9jb2xvciI6IiMxQTFDMjQiLCJ0aGVtZV9jb2xvciI6IiMwMEM2RkYifQ=='>
+<link rel="apple-touch-icon" href="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Square_logo.svg/512px-Square_logo.svg.png">
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Space+Grotesk:wght@500;700;900&display=swap" />
@@ -30,6 +36,9 @@
   --gradient-digital: linear-gradient(135deg, #00C6FF, #0072FF);
   --accent-physical: #FF6B35;
   --gradient-physical: linear-gradient(135deg, #FF6B35, #F04323);
+  /* 🔥 新增：計數器模式的品牌色 (德州小綠) */
+  --accent-counter: #3FBF8F;
+  --gradient-counter: linear-gradient(135deg, #3FBF8F, #2A8C66);
   --radius:1.25rem;
 }
 *{box-sizing:border-box;margin:0;padding:0;border-color:var(--border)}
@@ -60,6 +69,15 @@ body.mode-physical-active main {
     linear-gradient(90deg, oklch(1 0 0 / 3%) 1px, transparent 1px);
 }
 
+/* 🔥 新增：計數器模式背景光效 */
+body.mode-counter-active main {
+  background-image:
+    radial-gradient(circle at 15% 10%, rgba(63,191,143,0.12), transparent 45%),
+    radial-gradient(circle at 85% 0%, rgba(42,140,102,0.12), transparent 40%),
+    linear-gradient(oklch(1 0 0 / 3%) 1px, transparent 1px),
+    linear-gradient(90deg, oklch(1 0 0 / 3%) 1px, transparent 1px);
+}
+
 .wrap { max-width: 1400px; margin: 0 auto; width: 100%; padding: 20px 16px; }
 @media(min-width:768px){.wrap{padding:32px}}
 
@@ -68,6 +86,7 @@ header{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-betw
 .logo{width:56px;height:56px;display:flex;align-items:center;justify-content:center;border-radius:18px;font-size:26px;
   background-image:var(--gradient-digital);color:#fff;box-shadow:0 12px 30px -12px rgba(0,198,255,0.8); transition:transform .3s}
 body.mode-physical-active .logo { background-image: var(--gradient-physical); box-shadow:0 12px 30px -12px rgba(255,107,53,0.8); }
+body.mode-counter-active .logo { background-image: var(--gradient-counter); box-shadow:0 12px 30px -12px rgba(63,191,143,0.8); }
 .logo:hover{transform:scale(1.05)}
 h1{font-size:clamp(22px,3vw,30px);font-weight:700;letter-spacing:-.02em}
 .sub{font-size:14px;color:var(--muted-foreground); display:flex; align-items:center; gap:8px;}
@@ -123,6 +142,8 @@ button{font-family:inherit;cursor:pointer;}
 .mode-btn { flex: 1; padding: 14px 12px; border-radius: 12px; border: none; background: transparent; color: var(--muted-foreground); font-weight: 700; font-size: 16px; transition: 0.2s; }
 #mode-digital.active { background: var(--gradient-digital); color: #fff; box-shadow: 0 8px 20px -6px rgba(0,198,255,0.6); border: none; }
 #mode-physical.active { background: var(--gradient-physical); color: #fff; box-shadow: 0 8px 20px -6px rgba(255,107,53,0.6); border: none; }
+/* 🔥 新增：計數器模式按鈕的 Active 樣式 */
+#mode-counter.active { background: var(--gradient-counter); color: #fff; box-shadow: 0 8px 20px -6px rgba(63,191,143,0.6); border: none; }
 
 .acts{display:flex;flex-direction:column;gap:10px; width:100%;}
 .act-btn{width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:64px;padding:0 20px;text-align:left;
@@ -138,6 +159,11 @@ button{font-family:inherit;cursor:pointer;}
 body.mode-physical-active .act-btn:hover { border-color: rgba(255,107,53,0.5); }
 body.mode-physical-active .act-btn.on { border-color: var(--accent-physical); background: rgba(255, 107, 53, 0.15); }
 body.mode-physical-active .act-btn.on .radio { border-color: var(--accent-physical); background: var(--accent-physical); box-shadow: 0 0 0 4px rgba(255, 107, 53, 0.2); }
+
+/* 🔥 新增：計數器模式下活動選單顏色 */
+body.mode-counter-active .act-btn:hover { border-color: rgba(63,191,143,0.5); }
+body.mode-counter-active .act-btn.on { border-color: var(--accent-counter); background: rgba(63,191,143,0.15); }
+body.mode-counter-active .act-btn.on .radio { border-color: var(--accent-counter); background: var(--accent-counter); box-shadow: 0 0 0 4px rgba(63,191,143,0.2); }
 
 .empty{border:1px dashed var(--border);border-radius:14px;padding:24px;text-align:center;font-size:14px;color:var(--muted-foreground)}
 
@@ -271,7 +297,7 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
 .next:active{transform:scale(.98)}
 .hidden{display:none !important}
 
-/* 🔥 新增：核銷成功螢幕邊框金光特效 */
+/* 🔥 核銷成功螢幕邊框金光特效 */
 #success-overlay {
   position: fixed; inset: 0; pointer-events: none; z-index: 99999;
   opacity: 0; box-shadow: inset 0 0 0px 0px transparent;
@@ -283,9 +309,28 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
   0% { opacity: 1; box-shadow: inset 0 0 60px 15px rgba(255, 190, 0, 0.8), inset 0 0 150px 20px rgba(255, 107, 53, 0.4); }
   100% { opacity: 0; box-shadow: inset 0 0 0px 0px transparent; }
 }
+
+/* 🔥 新增：計數器模式專屬樣式 */
+.counter-area { text-align: center; padding: 60px 20px; }
+.giant-count { font-size: 100px; font-weight: 900; line-height: 1; margin: 30px 0; color: var(--success); font-family: monospace; }
+.giant-btn { width: 100%; min-height: 140px; border-radius: 24px; font-size: 32px; font-weight: 900; border: none; background: var(--gradient-counter); color: #fff; cursor: pointer; box-shadow: 0 26px 50px -22px rgba(63,191,143,0.8); transition: .2s; }
+.giant-btn:active:not(:disabled) { transform: scale(0.96); }
+.giant-btn:disabled { background: var(--muted); box-shadow: none; color: var(--muted-foreground); cursor: not-allowed; }
+
+/* 🔥 新增：PWA 提示窗樣式 */
+#pwa-prompt {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); width: calc(100% - 32px); max-width: 400px;
+  background: #fff; color: #000; padding: 16px 20px; border-radius: 16px; display: none; align-items: center; justify-content: space-between; z-index: 100000; box-shadow: 0 20px 40px rgba(0,0,0,0.4); font-weight:bold;
+}
 </style>
 </head>
 <body>
+
+<!-- 🔥 新增：PWA 提示框 -->
+<div id="pwa-prompt">
+  <span>📲 點擊安裝 App，核銷速度更快！</span>
+  <button id="pwa-install-btn" style="background:#000; color:#fff; padding:8px 16px; border-radius:8px; border:none; font-weight:bold; cursor:pointer;">安裝</button>
+</div>
 
 <div id="toast-container">
   <span class="toast-icon">⚠️</span>
@@ -336,6 +381,8 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
           <div class="mode-switch">
             <button id="mode-digital" class="mode-btn active" onclick="setMode('digital')">📱 電子憑證</button>
             <button id="mode-physical" class="mode-btn" onclick="setMode('physical')">🎫 實體流水號</button>
+            <!-- 🔥 新增：計數器模式按鈕 -->
+            <button id="mode-counter" class="mode-btn" onclick="setMode('counter')">🔢 限量計數器</button>
           </div>
         </div>
 
@@ -344,7 +391,8 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
           <div id="acts"><p class="empty">請先選擇憑證類型...</p></div>
         </div>
 
-        <div class="block">
+        <!-- 🔥 將掃描區加上 id 以便隱藏 -->
+        <div class="block" id="scan-block">
           <h2 class="label">● 掃描 / 查詢</h2>
           <div class="searchbar">
             <div class="search-input-wrapper">
@@ -371,6 +419,7 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
           <p class="p1" id="placeholder-title">等待掃描顧客憑證</p>
           <p class="p2" id="placeholder-desc">選擇門市與活動後，掃描 QR Code 或輸入號碼即可帶出資訊。</p>
         </div>
+        
         <div id="detail" class="detail hidden">
           <div id="banner" class="banner ok rise"></div>
           
@@ -389,6 +438,15 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
             <button class="next" id="btn-next" onclick="nextCust()">🧹 清除／服務下一位</button>
           </div>
         </div>
+
+        <!-- 🔥 新增：計數器模式專屬區塊 -->
+        <div id="counter-area" class="counter-area hidden">
+          <div style="font-weight:700; font-size:18px; color:var(--muted-foreground); letter-spacing: 0.1em;">門市專屬配額剩餘</div>
+          <div class="giant-count" id="c-count">--</div>
+          <button id="btn-tally" class="giant-btn" onclick="deductTally()">🎁 發出 1 件</button>
+          <p style="margin-top:24px; font-size:14px; color:var(--muted-foreground);">店員直接點擊扣除，雲端即時同步，防呆鎖死。</p>
+        </div>
+
       </section>
     </div>
   </div>
@@ -403,15 +461,16 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
     <button class="close-cam" id="btn-stop">✖ 關閉光學鎖定系統</button>
   </div>
   
-  <!-- 🔥 新增：核銷成功特效層 -->
+  <!-- 🔥 核銷成功特效層 -->
   <div id="success-overlay"></div>
 </main>
 
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 <script type="module">
+  // 🔥 新增：在 import 中加入 onSnapshot 與 increment
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-  import { getFirestore, doc, getDoc, setDoc, updateDoc, query, collection, where, limit, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  import { getFirestore, doc, getDoc, setDoc, updateDoc, query, collection, where, limit, getDocs, onSnapshot, increment } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyBINQuYtYZA8RLfwm51AfGLTYj1TX_UcFo",
@@ -436,6 +495,31 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
   let scanner = null, uTimer = null, busy = false;
   let currentMode = 'digital';
   let toastTimer = null;
+  
+  // 🔥 新增：計數器模式的變數
+  let unsubCounter = null; 
+  let currentCount = 0;
+
+  // 🔥 新增：PWA 安裝邏輯
+  let deferredPrompt;
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault(); 
+    deferredPrompt = e;
+    $('pwa-prompt').style.display = 'flex';
+  });
+  $('pwa-install-btn').onclick = async () => {
+    if(deferredPrompt) { 
+      deferredPrompt.prompt(); 
+      deferredPrompt = null; 
+      $('pwa-prompt').style.display = 'none'; 
+    }
+  };
+  const isIos = () => /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
+  const isInStandaloneMode = () => ('standalone' in window.navigator) && (window.navigator.standalone);
+  if (isIos() && !isInStandaloneMode()) {
+    $('pwa-prompt').innerHTML = `<span style="font-size:14px;">📲 iOS：請點選下方「分享」➔「加入主畫面」</span><button onclick="document.getElementById('pwa-prompt').style.display='none'" style="background:transparent; border:none; font-size:20px; cursor:pointer;">✖</button>`;
+    $('pwa-prompt').style.display = 'flex';
+  }
 
   setInterval(() => {
       const ping = Math.floor(Math.random() * (45 - 12 + 1) + 12);
@@ -454,6 +538,7 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
       
       toast.classList.add('show');
       if (type === 'error') playAlert("error");
+      else if (type === 'success') playAlert("success");
       
       if(toastTimer) clearTimeout(toastTimer);
       toastTimer = setTimeout(() => { toast.classList.remove('show'); }, 3500);
@@ -468,41 +553,50 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
     currentMode = m;
     $('mode-digital').classList.toggle('active', m === 'digital');
     $('mode-physical').classList.toggle('active', m === 'physical');
+    $('mode-counter').classList.toggle('active', m === 'counter'); // 🔥
     $('phone').value = '';
     
-    if(m === 'physical') {
-        document.body.classList.add('mode-physical-active');
-    } else {
-        document.body.classList.remove('mode-physical-active');
-    }
+    document.body.classList.remove('mode-physical-active', 'mode-counter-active');
+    if(m === 'physical') document.body.classList.add('mode-physical-active');
+    if(m === 'counter') document.body.classList.add('mode-counter-active');
 
-    $('btn-scan').style.display = 'block';
-
-    // 移除文字快捷鍵標示，但功能仍在背後運作
-    if (m === 'digital') {
-      $('phone').type = 'tel';
-      $('phone').placeholder = '輸入手機號碼 (限10碼)';
-      $('phone').maxLength = 10; 
-      $('btn-check').innerText = '查詢';
-      $('placeholder-title').innerText = "等待掃描顧客憑證";
-      $('placeholder-desc').innerText = "選擇門市與活動後，掃描 QR Code 或輸入手機號碼即可帶出顧客資訊。";
-      $('label-phone').innerText = "📱 兌換手機";
-      $('info-social').style.display = 'block';
-      $('info-expire').style.display = 'block';
+    // 🔥 針對計數器模式隱藏不必要的區塊
+    if (m === 'counter') {
+      $('scan-block').classList.add('hidden');
+      $('placeholder').classList.add('hidden');
+      $('detail').classList.add('hidden');
+      $('counter-area').classList.remove('hidden');
+      loadCounter();
     } else {
-      $('phone').type = 'text';
-      $('phone').placeholder = '輸入實體券流水號 (英文與數字)';
-      $('phone').maxLength = 20; 
-      $('btn-check').innerText = '查詢 / 核銷';
-      $('placeholder-title').innerText = "實體券快速核銷";
-      $('placeholder-desc').innerText = "掃描實體券 QR Code 或直接輸入流水號進行核銷。";
-      $('label-phone').innerText = "🔢 實體流水號";
-      $('info-social').style.display = 'none';
-      $('info-expire').style.display = 'none';
+      $('scan-block').classList.remove('hidden');
+      $('counter-area').classList.add('hidden');
+      $('btn-scan').style.display = 'block';
+
+      if (m === 'digital') {
+        $('phone').type = 'tel';
+        $('phone').placeholder = '輸入手機號碼 (限10碼)';
+        $('phone').maxLength = 10; 
+        $('btn-check').innerText = '查詢';
+        $('placeholder-title').innerText = "等待掃描顧客憑證";
+        $('placeholder-desc').innerText = "選擇門市與活動後，掃描 QR Code 或輸入手機號碼即可帶出顧客資訊。";
+        $('label-phone').innerText = "📱 兌換手機";
+        $('info-social').style.display = 'block';
+        $('info-expire').style.display = 'block';
+      } else {
+        $('phone').type = 'text';
+        $('phone').placeholder = '輸入實體券流水號 (英文與數字)';
+        $('phone').maxLength = 20; 
+        $('btn-check').innerText = '查詢 / 核銷';
+        $('placeholder-title').innerText = "實體券快速核銷";
+        $('placeholder-desc').innerText = "掃描實體券 QR Code 或直接輸入流水號進行核銷。";
+        $('label-phone').innerText = "🔢 實體流水號";
+        $('info-social').style.display = 'none';
+        $('info-expire').style.display = 'none';
+      }
+      
+      renderActs();
+      nextCust();
     }
-    
-    renderActs();
-    nextCust();
   };
 
   let acTimeout = null;
@@ -657,6 +751,7 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
       b.onclick = () => { 
         act = a; 
         renderActs(); 
+        if(currentMode === 'counter') { loadCounter(); } // 🔥
         setTimeout(() => $("phone").focus(), 100); 
       };
       list.appendChild(b);
@@ -671,8 +766,67 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
     
     setMode(currentMode);
     renderStores(); renderRight();
+    if(currentMode === 'counter') { loadCounter(); } // 🔥
     setTimeout(() => $("phone").focus(), 100);
   }
+
+  // 🔥 新增：載入 Firebase 庫存邏輯
+  function loadCounter() {
+    if(currentMode !== 'counter' || !store || !act) return;
+    if(unsubCounter) unsubCounter();
+    $('c-count').innerText = "載入中";
+    $('btn-tally').disabled = true;
+    
+    unsubCounter = onSnapshot(doc(db, "inventory", `${store}_${act}`), (d) => {
+      if(d.exists()) {
+        currentCount = d.data().count;
+        $('c-count').innerText = currentCount;
+        $('btn-tally').disabled = currentCount <= 0;
+        $('btn-tally').innerText = currentCount <= 0 ? "庫存已用盡" : "🎁 發出 1 件";
+      } else {
+        $('c-count').innerText = "未設配額"; 
+        $('btn-tally').disabled = true;
+        $('btn-tally').innerText = "請總部設定配額";
+      }
+    });
+  }
+
+  // 🔥 新增：扣除 Firebase 庫存邏輯
+  window.deductTally = async function() {
+    if(currentCount <= 0) return;
+    
+    const empName = $("employee-name").value.trim();
+    if(!empName) { 
+        $("employee-name").focus(); 
+        return showToast("請先填寫上方的「值班人員」姓名！", "error"); 
+    }
+    localStorage.setItem("p_employee", empName); 
+
+    $('btn-tally').disabled = true;
+    try {
+      await updateDoc(doc(db, "inventory", `${store}_${act}`), { count: increment(-1) });
+      
+      // 觸發金光特效與紙花
+      const overlay = $("success-overlay");
+      overlay.classList.remove("flash");
+      void overlay.offsetWidth;
+      overlay.classList.add("flash");
+      if (window.confetti) {
+          confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 }, colors: ['#FFD700', '#FFA500', '#FF6B35', '#FFFFFF'], disableForReducedMotion: true });
+      }
+      showToast("✅ 已成功發放 1 件！", "success");
+      
+      // 防呆：1 秒後才能按下一件
+      setTimeout(() => { 
+        if(currentCount > 0) $('btn-tally').disabled = false; 
+      }, 1000);
+      
+    } catch(e) { 
+      console.error(e);
+      showToast("扣除失敗，請檢查網路連線", "error"); 
+      $('btn-tally').disabled = false;
+    }
+  };
 
   function renderRight(){
     if (!record){
@@ -686,7 +840,6 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
     const defaultExpire = (POS_CONFIG[shownAct] && POS_CONFIG[shownAct].expireDate) ? POS_CONFIG[shownAct].expireDate : "無特別限制";
     const expireStr = record.expireDate || defaultExpire;
 
-    // 🔥 終極防護：自動判定並在本地封鎖過期憑證
     let autoExpired = false;
     if (record.status !== "已過期" && record.status !== "已兌換" && expireStr && expireStr !== "無特別限制" && !expireStr.includes("依紙本券面")) {
         const today = new Date(); today.setHours(0,0,0,0);
@@ -731,7 +884,6 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
     redeemBtn.className = "redeem"; 
     redeemBtn.disabled = false;
 
-    // 🔥 將過期按鈕鎖死，不允許點擊
     if (isClaimed) {
         redeemBtn.innerText = "已兌換完畢";
         redeemBtn.disabled = true;
@@ -855,7 +1007,6 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
     }
     localStorage.setItem("p_employee", empName); 
 
-    // 🔥 終極防護：JS 底層雙重鎖定
     if (record && (record.status === "已兌換" || record.status === "已過期")) {
         playAlert("error"); 
         return showToast("此憑證已失效，無法執行核銷！", "error");
@@ -876,13 +1027,11 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
     renderRight();
     showToast("✅ 核銷成功！", "success");
 
-    // 🔥 1. 觸發螢幕邊框金光特效
     const overlay = $("success-overlay");
     overlay.classList.remove("flash");
-    void overlay.offsetWidth; // 強制重繪
+    void overlay.offsetWidth;
     overlay.classList.add("flash");
 
-    // 🔥 2. 觸發質感撒花特效 (客製化德州小騎士配色：金、橘、白)
     if (window.confetti) {
         confetti({
             particleCount: 120,
@@ -932,6 +1081,7 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
     else if (e.key === "Escape") { e.preventDefault(); nextCust(); }
     else if (e.key === "F1") { e.preventDefault(); setMode('digital'); }
     else if (e.key === "F2") { e.preventDefault(); setMode('physical'); }
+    else if (e.key === "F3") { e.preventDefault(); setMode('counter'); } // 🔥 快捷鍵 F3
   });
 
   $("btn-scan").onclick = startScan;
