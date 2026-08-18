@@ -4,6 +4,10 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
   <title>門市終端核銷系統</title>
+  
+  <!-- 🔥 補上這行：讓 PWABuilder 抓得到 PWA 設定檔 -->
+  <link rel="manifest" href="./manifest.json">
+  
   <link rel="apple-touch-icon" href="icon.png">
   <script src="https://unpkg.com/html5-qrcode"></script>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
@@ -244,5 +248,13 @@
     check();
   }
 </script>
+
+<!-- 🔥 補上這段：PWABuilder 必備的 Service Worker 註冊碼 -->
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW 註冊失敗', err));
+  }
+</script>
+
 </body>
 </html>
