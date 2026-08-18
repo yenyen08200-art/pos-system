@@ -2,9 +2,16 @@
 <html lang="zh-TW">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <!-- 🔥 新增：Apple PWA 專用 Meta -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>電子領卷系統</title>
-  <link rel="apple-touch-icon" href="icon.png">
+  
+  <!-- 🔥 新增：PWA Manifest 確保外掛瀏覽器有 App 體驗 -->
+  <link rel="manifest" href='data:application/manifest+json;base64,eyJuYW1lIjoi5b635bee5bCP6aiO5aOrIFZJUCIsInNob3J0X25hbWUiOiLlsI_poI7lo6sgVklQIiwic3RhcnRfdXJsIjoiLiIsImRpc3BsYXkiOiJzdGFuZGFsb25lIiwiYmFja2dyb3VuZF9jb2xvciI6IiNGRkRGNTAiLCJ0aGVtZV9jb2xvciI6IiNiOTkxNWEifQ=='>
+  <link rel="apple-touch-icon" href="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Square_logo.svg/512px-Square_logo.svg.png">
+  
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -530,7 +537,6 @@
       const docSnap = await getDoc(docRef);
 
       if(!docSnap.exists()) {
-        // 🔥 修正：明確將預設狀態設為 "未兌換"
         await setDoc(docRef, {
           name, social_id: soc, phone: ph, status: "未兌換", store: "", redeemTime: "", timestamp: new Date().toLocaleString(), gift: customGift, expireDate: ""
         });
