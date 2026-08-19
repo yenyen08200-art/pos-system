@@ -75,7 +75,7 @@
     .date-filter-box button { border: none; background: transparent; padding: 0 16px; color: var(--text-sub); font-weight: 600; cursor: pointer; border-left: 1px solid #E6EAF0; transition: .2s; }
     .date-filter-box button:hover { color: var(--accent); background: #fdfdfd; }
 
-    /* 🔥 Dashboard UI 升級 5 卡片 */
+    /* Dashboard UI */
     .dashboard{display:grid;grid-template-columns:1.2fr 1fr 1fr 1fr 1fr;gap:16px;margin-bottom:24px}
     .stat-card{background:var(--card-bg);padding:22px 20px;border-radius:var(--radius);box-shadow:var(--shadow)}
     .stat-card h3{margin:0 0 10px;color:var(--text-sub);font-size:13px;font-weight:600}
@@ -84,7 +84,7 @@
     .stat-card.c-total h3{color:rgba(255,255,255,.85)}
     .stat-card.c-total .num{font-size:38px}
     .stat-card.c-redeemed .num{color:var(--green)}
-    .stat-card.c-rate .num{color:#d3ab72} /* 新增兌換率顏色 */
+    .stat-card.c-rate .num{color:#d3ab72} 
     .stat-card.c-unredeemed .num{color:var(--text-main)}
     .stat-card.c-expired .num{color:var(--gray)}
     
@@ -164,7 +164,6 @@
     .modal-card { background: var(--card-bg); padding: 32px; border-radius: var(--radius); width: 90%; max-width: 360px; box-shadow: 0 20px 50px rgba(0,0,0,0.3); text-align: center;}
     .modal-card h2 { margin: 0 0 16px; font-size: 22px; color: var(--accent); }
 
-    /* 🔥 Payroll specific (新增薪資單樣式) */
     .payroll-preview { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 13px; }
     .payroll-preview th, .payroll-preview td { border: 1px solid #E6EAF0; padding: 8px 12px; }
     .payroll-preview th { background: #F4F6F8; }
@@ -238,10 +237,7 @@
     <nav class="sidebar-menu" style="display:flex;">
       <div class="sidebar-item active" onclick="switchView('dashboard', this)">📊 電子兌換卷儀表板</div>
       <div class="sidebar-item" onclick="switchView('issue-ui', this)">🎟️ 票券發放與建檔</div>
-      
-      <!-- 🔥 新增薪資單群發按鈕 -->
       <div class="sidebar-item" onclick="switchView('payroll-ui', this)">💸 薪資單群發系統</div>
-      
       <div class="sidebar-item" onclick="switchView('lottery-ui', this)">🎉 社群抽獎發券中心</div>
       <div class="sidebar-item" onclick="switchView('config-ui', this)">⚙️ 系統設定中心</div>
     </nav>
@@ -426,7 +422,7 @@
         </div>
       </div>
 
-      <!-- 🔥 ================= 視圖：薪資單群發系統 ================= -->
+      <!-- ================= 視圖：薪資單群發系統 ================= -->
       <div id="view-payroll-ui" class="view-section">
         <div class="header">
           <h1>💸 人事薪資單自動群發系統 (LINE)</h1>
@@ -506,7 +502,44 @@
           <h1>⚙️ 系統設定中心 (全雲端同步)</h1>
         </div>
 
-        <!-- 🔥 新增：庫存設定模組 -->
+        <!-- 🔥 新增：App 首頁視覺設定 -->
+        <div class="config-card">
+          <h2>📱 App 首頁視覺設定</h2>
+          <p class="desc">設定會員中心首頁的大圖輪播與最新情報圖片（請填入圖片網址）。</p>
+          <div class="form-group">
+            <div class="field-block">
+              <label>首頁大圖 Banner 網址</label>
+              <input type="text" id="cfg-home-banner" placeholder="例: https://imgur.com/your-banner.jpg" onchange="updateVisualConfig()">
+            </div>
+            <div class="field-block">
+              <label>最新情報圖片網址</label>
+              <input type="text" id="cfg-home-news" placeholder="例: https://imgur.com/your-news.jpg" onchange="updateVisualConfig()">
+            </div>
+          </div>
+        </div>
+
+        <!-- 🔥 新增：點數兌換商品管理 -->
+        <div class="config-card">
+          <h2>🎁 點數兌換商品管理</h2>
+          <p class="desc">設定會員中心「回饋優惠」頁面的可兌換商品。前 4 個將自動顯示於首頁預覽，可透過右方點點選單【上下移動】調整排序。</p>
+          <div class="form-group" style="align-items: flex-end;">
+            <div class="field-block">
+              <label>商品名稱</label>
+              <input type="text" id="new-reward-name" placeholder="例: 大份黃金脆薯">
+            </div>
+            <div class="field-block" style="flex: 0.5;">
+              <label>所需點數</label>
+              <input type="number" id="new-reward-points" placeholder="例: 300">
+            </div>
+            <div class="field-block">
+              <label>商品圖片網址 (選填)</label>
+              <input type="text" id="new-reward-img" placeholder="https://...">
+            </div>
+            <button class="btn-primary" onclick="addReward()" style="padding: 12px 18px; margin-bottom: 2px;">➕ 新增商品</button>
+          </div>
+          <ul class="item-list" id="ui-reward-list" style="margin-top: 15px;"></ul>
+        </div>
+
         <div class="config-card" style="border-left: 4px solid var(--accent-2);">
           <h2>📦 限量贈品庫存設定 (一鍵計數器專用)</h2>
           <p class="desc">若門市有「免掃碼直接送」的實體限量贈品（如御守、公仔），請在此分配庫存，門市 POS 會自動鎖定額度。</p>
@@ -569,7 +602,7 @@
         </div>
 
         <div class="config-card" style="border: 2px solid var(--accent); background: rgba(240,118,84,0.02);">
-          <h2>💾 同步至資料庫 (取代 config.js)</h2>
+          <h2>💾 同步至資料庫</h2>
           <p class="desc">在上方完成所有設定後，點擊下方按鈕，所有設定將立刻寫入 Firebase，全台門市與領券前台瞬間生效！</p>
           <button id="save-cloud-btn" class="btn-primary" style="width:100%; font-size:18px; padding: 16px;" onclick="saveConfigToCloud()">💾 儲存所有設定至雲端 (即時生效)</button>
         </div>
@@ -612,6 +645,11 @@
     let globalStoreList = [];
     let globalEventOrder = [];
     let editingActName = null; 
+    
+    // 🔥 新增的視覺與商品變數
+    let globalHomeBanner = "";
+    let globalHomeNews = "";
+    let globalRewardsList = [];
 
     document.addEventListener('click', function(e) {
       if (!e.target.closest('.kebab-dropdown')) {
@@ -658,7 +696,6 @@
       const el = document.getElementById('act-select');
       if (el) el.innerHTML = html;
 
-      // 🔥 更新庫存設定的下拉選單
       let storeHtml = globalStoreList.map(s => `<option value="${s}">${s}</option>`).join('');
       if(document.getElementById('inv-store')) document.getElementById('inv-store').innerHTML = storeHtml;
       let invActHtml = globalEventOrder.map(a => `<option value="${a}">${a}</option>`).join('');
@@ -668,13 +705,15 @@
     }
 
     function renderConfigUI() {
+      // 1. 渲染門市清單
       document.getElementById('ui-store-list').innerHTML = globalStoreList.map((store, idx) => `
         <li class="item-li">
           <div class="item-info"><strong>🏪 ${store}</strong></div>
-          <button class="btn-danger" style="background:#fef2f2; color:#ef4444; border:1px solid #fecaca;" onclick="deleteStore(${idx})">🗑️ 刪除</button>
+          <button class="btn-danger" onclick="deleteStore(${idx})">🗑️ 刪除</button>
         </li>
       `).join('');
 
+      // 2. 渲染活動清單
       document.getElementById('ui-event-list').innerHTML = globalEventOrder.map(actName => {
         const pwd = globalEventConfig[actName];
         const giftInfo = globalPosConfig[actName];
@@ -708,7 +747,74 @@
         </li>
         `;
       }).join('');
+
+      // 3. 渲染點數商品清單
+      document.getElementById('ui-reward-list').innerHTML = globalRewardsList.map((item, idx) => `
+        <li class="item-li">
+          <div class="item-info">
+            <strong>🎁 ${item.name}</strong>
+            <span>所需點數: <span style="color:var(--accent); font-weight:bold;">${item.points}</span> | 圖片: ${item.img_url ? '已設定' : '無'}</span>
+          </div>
+          <details class="kebab-dropdown">
+            <summary>⋮</summary>
+            <div class="kebab-menu">
+              <button onclick="moveRewardUp(${idx})">🔼 向上移動</button>
+              <button onclick="moveRewardDown(${idx})">🔽 向下移動</button>
+              <button class="danger" onclick="deleteReward(${idx})">🗑️ 刪除</button>
+            </div>
+          </details>
+        </li>
+      `).join('');
     }
+
+    // 🔥 點數商品管理邏輯
+    window.addReward = function() {
+      const name = document.getElementById('new-reward-name').value.trim();
+      const points = parseInt(document.getElementById('new-reward-points').value, 10);
+      const img_url = document.getElementById('new-reward-img').value.trim();
+
+      if(!name || isNaN(points)) return alert("請填寫商品名稱與所需點數！");
+      
+      globalRewardsList.push({ name, points, img_url });
+      
+      document.getElementById('new-reward-name').value = '';
+      document.getElementById('new-reward-points').value = '';
+      document.getElementById('new-reward-img').value = '';
+      
+      renderConfigUI();
+      triggerSaveHint();
+    };
+
+    window.deleteReward = function(idx) {
+      if(confirm("確定要刪除這個兌換商品嗎？")) {
+        globalRewardsList.splice(idx, 1);
+        renderConfigUI();
+        triggerSaveHint();
+      }
+    };
+
+    window.moveRewardUp = function(idx) {
+      if(idx > 0) {
+        [globalRewardsList[idx-1], globalRewardsList[idx]] = [globalRewardsList[idx], globalRewardsList[idx-1]];
+        renderConfigUI();
+        triggerSaveHint();
+      }
+    };
+
+    window.moveRewardDown = function(idx) {
+      if(idx < globalRewardsList.length - 1) {
+        [globalRewardsList[idx], globalRewardsList[idx+1]] = [globalRewardsList[idx+1], globalRewardsList[idx]];
+        renderConfigUI();
+        triggerSaveHint();
+      }
+    };
+
+    // 更新圖片網址變數
+    window.updateVisualConfig = function() {
+      globalHomeBanner = document.getElementById('cfg-home-banner').value.trim();
+      globalHomeNews = document.getElementById('cfg-home-news').value.trim();
+      triggerSaveHint();
+    };
 
     window.moveEventUp = function(actName) {
       const idx = globalEventOrder.indexOf(actName);
@@ -841,12 +947,16 @@
       triggerSaveHint();
     };
 
+    // 🔥 儲存設定至雲端 (加入新的圖片與點數商品設定)
     window.saveConfigToCloud = async function() {
-      if(!confirm("⚠️ 確定要將設定寫入資料庫嗎？\n按下確定後，全台門市 POS 將立刻套用最新設定！")) return;
+      if(!confirm("⚠️ 確定要將設定寫入資料庫嗎？\n按下確定後，全台門市 POS 及會員 App 將立刻套用最新設定！")) return;
       
       const btn = document.getElementById('save-cloud-btn');
       btn.innerText = "⏳ 雲端同步中...";
       btn.disabled = true;
+
+      // 確認最新的圖片輸入框網址
+      updateVisualConfig();
 
       try {
         const configRef = doc(db, "system", "config");
@@ -855,8 +965,11 @@
           STORE_LIST: globalStoreList,
           POS_CONFIG: globalPosConfig,
           EVENT_ORDER: globalEventOrder,
+          home_banner_url: globalHomeBanner,
+          home_news_url: globalHomeNews,
+          REWARDS_LIST: globalRewardsList,
           lastUpdated: new Date().toLocaleString()
-        });
+        }, { merge: true });
         
         alert("✅ 系統設定已成功同步至雲端！");
         btn.style.background = "var(--accent)";
@@ -884,6 +997,19 @@
           Object.keys(globalEventConfig).forEach(a => {
               if(!globalEventOrder.includes(a)) globalEventOrder.push(a);
           });
+
+          // 讀取新的視覺設定與點數商品
+          globalHomeBanner = data.home_banner_url || "";
+          globalHomeNews = data.home_news_url || "";
+          document.getElementById('cfg-home-banner').value = globalHomeBanner;
+          document.getElementById('cfg-home-news').value = globalHomeNews;
+          
+          globalRewardsList = data.REWARDS_LIST || [
+            { name: "大份黃金脆薯", points: 300, img_url: "" },
+            { name: "香酥雞塊 (6塊)", points: 500, img_url: "" },
+            { name: "經典香辣炸雞堡", points: 800, img_url: "" },
+            { name: "大杯可樂", points: 200, img_url: "" }
+          ];
         }
         renderConfigUI();
         populateAdminDropdown();
@@ -1198,7 +1324,6 @@
           redeemedCount++;
           if (d.store) { storeStats[d.store] = (storeStats[d.store] || 0) + 1; }
           
-          // 🔥 擷取尖峰時段資料
           if (d.redeemTime) {
              const timeMatch = d.redeemTime.match(/\s(\d{1,2}):/);
              if (timeMatch) {
@@ -1213,7 +1338,6 @@
 
       const unredeemedCount = validTotalCount - redeemedCount - expiredCount; 
       
-      // 計算兌換率
       const rate = validTotalCount === 0 ? "0.0" : ((redeemedCount / validTotalCount) * 100).toFixed(1);
       document.getElementById('rate-count').innerText = rate + "%";
 
@@ -1330,14 +1454,14 @@
     window.resetSingleTicket = async function(phone, sourceAct) {
       if (!confirm(`⚠️ 確定要將兌換號碼「${phone}」重設為【未兌換】嗎？\n(將清空核銷門市與時間紀錄)`)) return;
       await updateDoc(doc(db, sourceAct, phone), { status: "未兌換", store: "", redeemTime: "", redeemBy: "" });
-      if(document.getElementById('act-select').value === 'ALL_OVERVIEW') fetchData(); // 總覽模式手動重整
+      if(document.getElementById('act-select').value === 'ALL_OVERVIEW') fetchData(); 
     };
 
     window.deleteSingleTicket = async function(phone, sourceAct) {
       if (!confirm(`🚨 警告：您即將永久刪除「${phone}」的憑證資料！\n刪除後將無法復原，確定要刪除嗎？`)) return;
       try {
         await deleteDoc(doc(db, sourceAct, phone));
-        if(document.getElementById('act-select').value === 'ALL_OVERVIEW') fetchData(); // 總覽模式手動重整
+        if(document.getElementById('act-select').value === 'ALL_OVERVIEW') fetchData();
       } catch (error) {
         alert("刪除失敗，請檢查權限或連線狀態。");
       }
@@ -1465,7 +1589,6 @@
       if (statusChartInstance) statusChartInstance.destroy();
       if (timeChartInstance) timeChartInstance.destroy();
 
-      // 1. 各門市核銷分佈 (Bar)
       const sortedStores = Object.entries(storeStats).sort((a, b) => b[1] - a[1]);
       const storeLabels = sortedStores.map(s => s[0]); const storeData = sortedStores.map(s => s[1]);
 
@@ -1476,7 +1599,6 @@
         options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
       });
 
-      // 2. 兌換狀態 (Doughnut)
       const ctxStatus = document.getElementById('statusChart').getContext('2d');
       statusChartInstance = new Chart(ctxStatus, {
         type: 'doughnut',
@@ -1484,7 +1606,6 @@
         options: { responsive: true, maintainAspectRatio: false, cutout: '70%', plugins: { legend: { position: 'bottom' } } }
       });
 
-      // 🔥 3. 尖峰時段熱力圖 (Line)
       const sortedHours = Object.keys(hourStats).sort((a,b) => parseInt(a) - parseInt(b));
       const hourData = sortedHours.map(h => hourStats[h]);
 
@@ -1546,7 +1667,6 @@
       }
     });
 
-    // 🔥 庫存設定邏輯 (給計數器模式用)
     window.setInventory = async function() {
       const s = document.getElementById('inv-store').value;
       const a = document.getElementById('inv-act').value;
@@ -1566,7 +1686,6 @@
       }
     }
 
-    // 🔥 薪資發放邏輯
     let payrollData = [];
     window.parsePayroll = function() {
       const raw = document.getElementById('payroll-raw').value.trim();
@@ -1605,7 +1724,6 @@
       for(let i=0; i<payrollData.length; i++) {
         const statusEl = document.getElementById(`p-status-${i}`);
         statusEl.innerText = "發送中...";
-        // 模擬延遲 (爬蟲腳本間隔)
         await new Promise(r => setTimeout(r, 600 + Math.random()*400));
         statusEl.className = "p-status p-done";
         statusEl.innerText = "✔️ 已傳送";
