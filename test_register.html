@@ -3,18 +3,19 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-  <!-- 🔥 新增：Apple PWA 專用 Meta -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>電子領卷系統</title>
+  <title>電子領卷系統 | 小騎士VIP</title>
   
-  <!-- 🔥 新增：PWA Manifest 確保外掛瀏覽器有 App 體驗 -->
   <link rel="manifest" href='data:application/manifest+json;base64,eyJuYW1lIjoi5b635bee5bCP6aiO5aOrIFZJUCIsInNob3J0X25hbWUiOiLlsI_poI7lo6sgVklQIiwic3RhcnRfdXJsIjoiLiIsImRpc3BsYXkiOiJzdGFuZGFsb25lIiwiYmFja2dyb3VuZF9jb2xvciI6IiNGRkRGNTAiLCJ0aGVtZV9jb2xvciI6IiNiOTkxNWEifQ=='>
   <link rel="apple-touch-icon" href="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Square_logo.svg/512px-Square_logo.svg.png">
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <!-- 🔥 新增 FontAwesome 圖示庫 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
   <style>
@@ -30,7 +31,7 @@
     html,body{max-width:100%;overflow-x:hidden}
     html{height:100%}
     body{
-      margin:0;padding:28px 16px 60px;
+      margin:0;padding:28px 16px 90px; /* 增加底部 padding 留給導覽列 */
       font-family:"Inter","Noto Sans TC",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
       color:var(--ink);
       background:
@@ -79,13 +80,7 @@
       content:"";position:absolute;inset:0;pointer-events:none;opacity:.4;mix-blend-mode:overlay;
       background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='f'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4'/></filter><rect width='200' height='200' filter='url(%23f)'/></svg>");
     }
-    .glass::after{
-      content:"";position:absolute;inset:0;pointer-events:none;
-      background:linear-gradient(115deg,transparent 36%,rgba(255,255,255,.5) 48%,transparent 60%);
-      transform:translateX(-130%);animation:sheen 8s ease-in-out infinite;
-    }
-    @keyframes sheen{0%,72%{transform:translateX(-130%)}100%{transform:translateX(130%)}}
-
+    
     .brand{text-align:center;padding:34px 24px 28px;animation:rise .8s cubic-bezier(.2,.8,.2,1) both}
     .brand .mark{
       display:inline-flex;align-items:center;gap:10px;margin-bottom:16px;
@@ -131,7 +126,6 @@
       box-shadow:0 0 0 4px rgba(185,145,90,.15),0 0 18px rgba(220,187,132,.35),inset 0 1px 0 rgba(255,255,255,.9);
       transform:translateY(-1px);
     }
-    input::placeholder{color:rgba(90,96,88,.6);font-weight:400}
 
     .btn-otp {
       width: auto; padding: 0 16px; margin: 0; border-radius: 14px; font-size: 13px; font-weight: 700; letter-spacing: 0.05em;
@@ -172,29 +166,12 @@
       background:linear-gradient(135deg,#d3ab72,#b9915a 45%,#8d6c3c);
       box-shadow:0 18px 38px -16px rgba(141,108,60,.85),inset 0 1px 0 rgba(255,255,255,.5);
     }
-    .submit-btn::after{
-      content:"";position:absolute;inset:0;
-      background:linear-gradient(115deg,transparent 40%,rgba(255,255,255,.4) 50%,transparent 60%);
-      transform:translateX(-130%);animation:sheen 5s ease-in-out infinite;
-    }
     .submit-btn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 24px 46px -16px rgba(141,108,60,1)}
-    .submit-btn:active:not(:disabled){transform:scale(.975)}
     .submit-btn:disabled{filter:grayscale(60%);opacity:0.7;cursor:not-allowed;}
 
-    .switch-btn{
-      margin-top:20px;color:var(--ink);background:rgba(255,255,255,.4);
-      border:1px solid rgba(255,255,255,.65);backdrop-filter:blur(14px);font-weight:500;
-      box-shadow:0 12px 28px -20px rgba(35,42,35,.6),inset 0 1px 0 rgba(255,255,255,.8);
-    }
-    .switch-btn:hover{background:rgba(255,255,255,.55);transform:translateY(-2px)}
-    .switch-btn:active{transform:scale(.975)}
-
-    .family-btn {
-      margin-top:12px; color: var(--brass-deep); background: rgba(185,145,90,.1);
-      border: 1px dashed rgba(185,145,90,.5); backdrop-filter: blur(10px);
-    }
-    .family-btn:hover { background: rgba(185,145,90,.2); border: 1px solid rgba(185,145,90,.6); }
-
+    .switch-btn, .family-btn { margin-top:12px; color:var(--ink); background:rgba(255,255,255,.4); border:1px solid rgba(255,255,255,.65); backdrop-filter:blur(14px); }
+    
+    /* QR 碼與票券區塊 */
     #ticket-card{text-align:center}
     .notice{
       background:rgba(185,145,90,.16);border:1px solid rgba(185,145,90,.42);
@@ -206,46 +183,47 @@
       display:inline-block;font-size:11px;font-weight:600;letter-spacing:.2em;
       padding:9px 18px;border-radius:999px;margin-bottom:20px;
       border:1px solid rgba(185,145,90,.55);color:var(--brass-deep);
-      background:rgba(255,255,255,.4);backdrop-filter:blur(10px);transition:.4s;position:relative;z-index:2;
-      max-width:100%;
+      background:rgba(255,255,255,.4);backdrop-filter:blur(10px);position:relative;z-index:2;
     }
     .qr-box{
       background:rgba(255,255,255,.9);border:1px solid rgba(255,255,255,.85);
       padding:16px;border-radius:24px;display:inline-block;margin:6px 0 22px;position:relative;z-index:2;
       box-shadow:0 24px 50px -24px rgba(35,42,35,.5),inset 0 1px 0 #ffffff;
-      transition:transform .4s cubic-bezier(.2,.8,.2,1);max-width:100%;
     }
-    .qr-box:hover{transform:translateY(-3px) scale(1.01)}
-    .qr-img{display:block;margin:0 auto;max-width:100%;height:auto;transition:opacity .4s ease;border-radius:8px}
+    .qr-img{display:block;margin:0 auto;max-width:100%;height:auto;border-radius:8px}
 
-    .highlight-text{
-      display:block;font-size:13.5px;font-weight:600;letter-spacing:.18em;color:var(--ink);
-      margin:0 0 24px;padding-bottom:20px;border-bottom:1px solid rgba(255,255,255,.5);
-      transition:.4s;position:relative;z-index:2;
+    /* 🔥 新增：分頁切換系統 */
+    .tab-content { display: none; animation: fadeIn 0.4s ease-out; }
+    .tab-content.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+
+    /* 🔥 新增：毛玻璃底部導覽列 */
+    .bottom-nav {
+      position: fixed; bottom: 0; left: 0; width: 100%;
+      background: rgba(255, 255, 255, 0.55);
+      backdrop-filter: blur(25px) saturate(180%); -webkit-backdrop-filter: blur(25px) saturate(180%);
+      border-top: 1px solid rgba(255, 255, 255, 0.7);
+      display: flex; justify-content: space-around; padding: 12px 0;
+      padding-bottom: calc(12px + env(safe-area-inset-bottom));
+      box-shadow: 0 -10px 30px rgba(0,0,0,0.03);
+      z-index: 999;
     }
-    .info-list{
-      text-align:left;display:flex;flex-direction:column;gap:12px;position:relative;z-index:2;
-      background:rgba(255,255,255,.35);border:1px solid rgba(255,255,255,.6);
-      padding:18px;border-radius:20px;backdrop-filter:blur(16px);
-      box-shadow:inset 0 1px 0 rgba(255,255,255,.8);
+    .nav-item {
+      text-align: center; color: var(--ink-soft); font-size: 11px;
+      font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em;
+      flex: 1; cursor: pointer; transition: 0.3s;
     }
+    .nav-item i { font-size: 22px; margin-bottom: 6px; display: block; transition: 0.3s; }
+    .nav-item.active { color: var(--brass-deep); }
+    .nav-item.active i { transform: translateY(-3px); text-shadow: 0 4px 12px rgba(185,145,90,0.4); }
+
+    .info-list{ text-align:left; display:flex; flex-direction:column; gap:12px; position:relative; z-index:2; background:rgba(255,255,255,.35); border:1px solid rgba(255,255,255,.6); padding:18px; border-radius:20px; backdrop-filter:blur(16px); box-shadow:inset 0 1px 0 rgba(255,255,255,.8); }
     .info-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding-bottom:11px;border-bottom:1px solid rgba(255,255,255,.45)}
     .info-row:last-child{border-bottom:none;padding-bottom:0}
-    .info-row strong{color:var(--ink-soft);font-weight:500;font-size:11px;letter-spacing:.16em;white-space:nowrap}
-    .info-row span{font-weight:600;font-size:14.5px;text-align:right;word-break:break-all;min-width:0}
-    .gift-text { color: #8d6c3c !important; font-weight: 800 !important; }
-    #r-phone{color:var(--brass-deep);font-size:16px;letter-spacing:.08em}
-    .footnote{text-align:center;font-size:10px;letter-spacing:.3em;color:rgba(111,118,110,.75);text-transform:uppercase;padding-bottom:4px}
+    .info-row strong{color:var(--ink-soft);font-weight:500;font-size:11px;letter-spacing:.16em;}
+    .info-row span{font-weight:600;font-size:14.5px;text-align:right;}
 
-    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.4} }
-
-    @media (max-width:380px){
-      body{padding:20px 12px 44px}
-      .brand{padding:28px 18px 22px}
-      section.card{padding:24px 16px 26px}
-      h1{font-size:28px}
-      .meta strong{font-size:11px}
-    }
+    @media (max-width:380px){ body{padding:20px 12px 90px} h1{font-size:28px} }
   </style>
 </head>
 <body>
@@ -255,88 +233,145 @@
     <header class="glass brand">
       <div class="mark">德州小騎士</div>
       <h1>電子領卷系統</h1>
-      <p class="subtitle">Exclusive Voucher</p>
-      <div class="meta">
-        <div><span>服務生</span><strong>小戰熊</strong></div>
+      <p class="subtitle">Exclusive VIP</p>
+      
+      <!-- 訪客狀態 -->
+      <div class="meta" id="meta-guest">
+        <div><span>狀態</span><strong>訪客</strong></div>
         <div><span>桌號</span><strong>VIP 席</strong></div>
-        <div><span>人數</span><strong>1 位</strong></div>
+        <div><span>優惠</span><strong>請先驗證</strong></div>
+      </div>
+      
+      <!-- 會員狀態 (登入後顯示) -->
+      <div class="meta" id="meta-member" style="display: none;">
+        <div><span>會員點數</span><strong id="display-points" style="color:var(--brass-deep)">讀取中..</strong></div>
+        <div><span>可用券</span><strong>查詢中</strong></div>
+        <div><span>等級</span><strong>小騎士</strong></div>
       </div>
     </header>
 
-    <section class="glass card" id="form-section">
-      <div class="field">
-        <label for="activity">兌換活動項目</label>
-        <select id="activity" onchange="checkSaved()">
-          <option value="">⏳ 系統連線中...</option>
-        </select>
-      </div>
-      <div class="field">
-        <label for="name">社群暱稱</label>
-        <input id="name" type="text" placeholder="請輸入您的社群暱稱">
-      </div>
-      <div class="field">
-        <label for="social_id">社群帳號</label>
-        <input id="social_id" type="text" placeholder="IG / FB 帳號">
-      </div>
-      
-      <div class="field">
-        <label for="phone">手機號碼 (限 09 開頭)</label>
-        <div style="display: flex; gap: 8px;">
-          <input id="phone" type="tel" inputmode="numeric" placeholder="例：0912345678" style="flex: 1;" oninput="
-            let v = this.value.replace(/\D/g,''); 
-            if(v.length > 0 && v[0] !== '0') v = ''; 
-            if(v.length > 1 && v[1] !== '9') v = '0';
-            this.value = v.slice(0,10);
-          ">
-          <button type="button" id="btn-send-otp" class="btn-otp" onclick="sendOTP()">取得驗證碼</button>
+    <!-- ==================== 分頁 1：領取優惠 (預設) ==================== -->
+    <div id="tab-home" class="tab-content active">
+      <section class="glass card" id="form-section">
+        <div class="field">
+          <label for="activity">兌換活動項目</label>
+          <select id="activity" onchange="checkSaved()">
+            <option value="">⏳ 系統連線中...</option>
+          </select>
         </div>
-      </div>
-      
-      <div class="field" id="otp-field" style="display: none;">
-        <label for="otp_code">簡訊驗證碼</label>
-        <input id="otp_code" type="tel" inputmode="numeric" placeholder="請輸入 6 位數驗證碼" maxlength="6" oninput="this.value=this.value.replace(/\D/g,'')">
-      </div>
+        <div class="field">
+          <label for="name">社群暱稱</label>
+          <input id="name" type="text" placeholder="請輸入您的社群暱稱">
+        </div>
+        <div class="field">
+          <label for="social_id">社群帳號</label>
+          <input id="social_id" type="text" placeholder="IG / FB 帳號">
+        </div>
+        
+        <div class="field">
+          <label for="phone">手機號碼 (限 09 開頭)</label>
+          <div style="display: flex; gap: 8px;">
+            <input id="phone" type="tel" inputmode="numeric" placeholder="例：0912345678" style="flex: 1;" oninput="
+              let v = this.value.replace(/\D/g,''); 
+              if(v.length > 0 && v[0] !== '0') v = ''; 
+              if(v.length > 1 && v[1] !== '9') v = '0';
+              this.value = v.slice(0,10);
+            ">
+            <button type="button" id="btn-send-otp" class="btn-otp" onclick="sendOTP()">取得驗證碼</button>
+          </div>
+        </div>
+        
+        <div class="field" id="otp-field" style="display: none;">
+          <label for="otp_code">簡訊驗證碼</label>
+          <input id="otp_code" type="tel" inputmode="numeric" placeholder="請輸入 6 位數驗證碼" maxlength="6" oninput="this.value=this.value.replace(/\D/g,'')">
+        </div>
 
-      <div class="secret">
-        <label for="secret_code">通關密語</label>
-        <input id="secret_code" type="text" placeholder="＊＊＊＊＊">
-      </div>
-      
-      <div class="warning-text">
-        ⚠️ 門市核銷將嚴格核對「本人社群畫面」<br>偽造帳號或非本人將拒絕兌換！
-      </div>
+        <div class="secret">
+          <label for="secret_code">通關密語</label>
+          <input id="secret_code" type="text" placeholder="＊＊＊＊＊">
+        </div>
+        
+        <button class="submit-btn" id="btn-submit" onclick="register()">領取專屬兌換卷</button>
+      </section>
 
-      <button class="submit-btn" id="btn-submit" onclick="register()">領取專屬兌換卷</button>
-    </section>
+      <!-- 領券成功後的票券畫面 -->
+      <section class="glass card" id="ticket-card" style="display:none">
+        <div class="notice">📸 請立即「截圖」保存此兌換券</div>
+        <div class="stamp-badge" id="stamp">【 小編已核銷確認 · 專屬兌換券 】</div>
+        
+        <div class="qr-box">
+          <canvas id="qr" class="qr-img"></canvas>
+        </div>
+        <span class="highlight-text" id="hl-text" style="display:block;font-size:13.5px;font-weight:600;letter-spacing:.18em;margin-bottom:24px;border-bottom:1px solid rgba(255,255,255,.5);padding-bottom:20px;position:relative;z-index:2;">至門市出示核銷</span>
 
-    <section class="glass card" id="ticket-card" style="display:none">
-      <div class="notice">📸 請立即「截圖」保存此兌換券</div>
-      <div class="stamp-badge" id="stamp">【 小編已核銷確認 · 專屬兌換券 】</div>
-      
-      <div style="color:var(--brass-deep); font-weight:700; font-size:13px; margin-bottom:12px; animation: blink 2s infinite; letter-spacing: 0.05em; position:relative; z-index:2;">💡 請將手機螢幕調至最亮，以便門市人員核銷</div>
+        <div class="info-list">
+          <div class="info-row"><strong>活動項目</strong><span id="r-act"></span></div>
+          <div class="info-row"><strong>🎁 兌換餐點</strong><span id="r-gift" style="color:#8d6c3c;font-weight:800;"></span></div>
+          <div class="info-row"><strong>⏳ 使用期限</strong><span id="r-expire"></span></div>
+        </div>
+        
+        <button class="switch-btn" onclick="switchAct()">🔄 切換 / 領取其他活動</button>
+        <button class="family-btn" onclick="refillForFamily()">➕ 幫親友代領</button>
+      </section>
+    </div>
 
-      <div class="qr-box">
-        <canvas id="qr" class="qr-img"></canvas>
-      </div>
-      <span class="highlight-text" id="hl-text">至德州小騎士門市出示核銷</span>
+    <!-- ==================== 分頁 2：會員集點卡 ==================== -->
+    <div id="tab-rewards" class="tab-content">
+      <section class="glass card" style="text-align: center;">
+        
+        <!-- 未登入提示 -->
+        <div id="member-login-prompt" style="padding: 30px 10px;">
+          <i class="fa-solid fa-lock" style="font-size: 40px; color: var(--brass-light); margin-bottom: 15px;"></i>
+          <h2 style="font-size: 16px; color: var(--ink); margin-bottom: 10px;">尚未啟用會員功能</h2>
+          <p style="font-size: 12px; color: var(--ink-soft); line-height: 1.6;">請先至「領取優惠」完成手機驗證，系統將自動為您開通專屬集點卡！</p>
+          <button class="submit-btn" style="margin-top: 20px; padding: 12px; font-size: 13px;" onclick="switchTab('home')">前往驗證</button>
+        </div>
 
-      <div class="info-list">
-        <div class="info-row"><strong>兌換活動項目</strong><span id="r-act"></span></div>
-        <div class="info-row"><strong>🎁 兌換餐點</strong><span id="r-gift" class="gift-text"></span></div>
-        <div class="info-row"><strong>⏳ 使用期限</strong><span id="r-expire"></span></div>
-        <div class="info-row"><strong>社群暱稱</strong><span id="r-name"></span></div>
-        <div class="info-row"><strong>社群帳號</strong><span id="r-social"></span></div>
-        <div class="info-row"><strong>手機號碼</strong><span id="r-phone"></span></div>
-      </div>
-      
-      <button class="switch-btn" onclick="switchAct()">🔄 切換 / 領取其他活動</button>
-      <button class="family-btn" onclick="refillForFamily()">➕ 幫親友代領 (重新填單)</button>
-    </section>
+        <!-- 登入後顯示的會員 QR -->
+        <div id="member-qr-section" style="display: none;">
+          <div class="notice" style="background: linear-gradient(135deg, var(--brass-light), var(--brass-deep)); color: white; border: none; box-shadow: 0 4px 15px rgba(185,145,90,0.3);">
+            ✨ 結帳出示條碼，立即累積點數 ✨
+          </div>
+          <div class="qr-box" style="margin-bottom: 10px;">
+            <canvas id="member-qr" class="qr-img"></canvas>
+          </div>
+          <div style="font-size: 18px; font-weight: 700; color: var(--ink); letter-spacing: 0.1em; margin-bottom: 25px; position: relative; z-index: 2;" id="member-phone-text">0912-345-678</div>
+
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; position: relative; z-index: 2;">
+            <h3 style="margin: 0; font-size: 14px; color: var(--ink);">點數兌換商城</h3>
+            <span style="font-size: 12px; color: var(--brass-deep); cursor: pointer;">查看全部 <i class="fa-solid fa-chevron-right"></i></span>
+          </div>
+
+          <div class="info-list">
+            <div class="info-row">
+              <strong style="background: var(--brass); color: white; padding: 4px 10px; border-radius: 12px;">300 點</strong>
+              <span>大份黃金脆薯</span>
+            </div>
+            <div class="info-row">
+              <strong style="background: var(--brass); color: white; padding: 4px 10px; border-radius: 12px;">800 點</strong>
+              <span>香辣小炸雞乙份</span>
+            </div>
+          </div>
+        </div>
+
+      </section>
+    </div>
 
     <div id="recaptcha-container"></div>
-
-    <p class="footnote">Texas Chick · Since 1987</p>
+    <p style="text-align:center;font-size:10px;letter-spacing:.3em;color:rgba(111,118,110,.75);text-transform:uppercase;margin-top: 20px;">Texas Chick · Since 1987</p>
   </main>
+
+  <!-- 🔥 新增：底部懸浮導覽列 -->
+  <nav class="bottom-nav">
+    <div class="nav-item active" id="nav-home" onclick="switchTab('home')">
+      <i class="fa-solid fa-gift"></i>
+      領取優惠
+    </div>
+    <div class="nav-item" id="nav-rewards" onclick="switchTab('rewards')">
+      <i class="fa-solid fa-qrcode"></i>
+      會員集點卡
+    </div>
+  </nav>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
@@ -349,13 +384,11 @@
     projectId: "texas-chick-event",
     storageBucket: "texas-chick-event.firebasestorage.app",
     messagingSenderId: "281248037440",
-    appId: "1:281248037440:web:20c32ba4136ea7c57ffda5",
-    measurementId: "G-HZ6334WB3B"
+    appId: "1:281248037440:web:20c32ba4136ea7c57ffda5"
   };
 
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
-  
   const auth = getAuth(app);
   auth.languageCode = 'zh-TW';
 
@@ -376,6 +409,61 @@
   window.register = register;
   window.refillForFamily = refillForFamily;
   window.sendOTP = sendOTP;
+  window.switchTab = switchTab; // 匯出分頁切換功能
+
+  // 檢查是否已登入會員 (檢查 LocalStorage)
+  function checkMemberStatus() {
+    let memberPhone = localStorage.getItem('member_phone');
+    // 如果沒有 global member_phone，但以前有領過券，自動升級為會員
+    if (!memberPhone) {
+      const keys = Object.keys(localStorage);
+      for (let key of keys) {
+        if (key.startsWith('p_') && key.endsWith('_phone')) {
+          memberPhone = localStorage.getItem(key);
+          localStorage.setItem('member_phone', memberPhone);
+          break;
+        }
+      }
+    }
+
+    if (memberPhone) {
+      // 顯示會員狀態 Header
+      $('meta-guest').style.display = 'none';
+      $('meta-member').style.display = 'grid';
+      
+      // 顯示集點卡 QR
+      $('member-login-prompt').style.display = 'none';
+      $('member-qr-section').style.display = 'block';
+      $('member-phone-text').innerText = memberPhone.replace(/(\d{4})(\d{3})(\d{3})/, '$1-$2-$3');
+
+      new QRious({
+        element: $('member-qr'),
+        value: memberPhone,
+        size: 220,
+        foreground: '#8d6c3c'
+      });
+
+      // 監聽 Firebase `members` 資料庫點數變化
+      onSnapshot(doc(db, "members", memberPhone), (docSnap) => {
+        if (docSnap.exists()) {
+          $('display-points').innerText = (docSnap.data().points || 0) + " 點";
+        } else {
+          // 如果資料庫還沒建立，先顯示 0 點，並自動在背景建立會員檔
+          $('display-points').innerText = "0 點";
+          setDoc(doc(db, "members", memberPhone), { points: 0, joinDate: new Date().toLocaleString() }, { merge: true });
+        }
+      });
+    }
+  }
+
+  // 分頁切換邏輯
+  function switchTab(tabId) {
+    document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+    
+    $('tab-' + tabId).classList.add('active');
+    $('nav-' + tabId).classList.add('active');
+  }
 
   async function initSystem() {
     try {
@@ -402,12 +490,12 @@
         });
 
         checkSaved(true);
+        checkMemberStatus(); // 初始化時檢查會員狀態
       } else {
         $('activity').innerHTML = '<option value="">⚠️ 系統設定讀取失敗</option>';
       }
     } catch (e) {
       console.error("讀取系統設定失敗:", e);
-      alert("系統連線異常，請重新整理頁面！");
     }
   }
 
@@ -453,11 +541,7 @@
 
   function initRecaptcha() {
     if (!recaptchaVerifier) {
-      recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-        'size': 'invisible',
-        'callback': (response) => {
-        }
-      });
+      recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', { 'size': 'invisible' });
     }
   }
 
@@ -466,15 +550,11 @@
     if(ph.length !== 10 || !ph.startsWith('09')) return alert("⚠️ 手機號碼必須為「09 開頭且滿 10 碼數字」！");
 
     const btn = $('btn-send-otp');
-    btn.disabled = true;
-    btn.innerText = "發送中...";
-
+    btn.disabled = true; btn.innerText = "發送中...";
     initRecaptcha();
 
-    const phoneNumber = "+886" + ph.substring(1);
-
     try {
-      confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, recaptchaVerifier);
+      confirmationResult = await signInWithPhoneNumber(auth, "+886" + ph.substring(1), recaptchaVerifier);
       alert("✅ 驗證碼已發送，請查看手機簡訊！");
       $('otp-field').style.display = 'block';
 
@@ -483,22 +563,14 @@
       const timer = setInterval(() => {
         timeLeft--;
         if(timeLeft <= 0) {
-          clearInterval(timer);
-          btn.innerText = "取得驗證碼";
-          btn.disabled = false;
+          clearInterval(timer); btn.innerText = "取得驗證碼"; btn.disabled = false;
         } else {
           btn.innerText = `重新發送 (${timeLeft}s)`;
         }
       }, 1000);
-
     } catch (error) {
-      console.error("SMS 發送失敗:", error);
-      alert("❌ 發送失敗，請確認號碼是否正確，或稍後再試。");
-      btn.innerText = "取得驗證碼";
-      btn.disabled = false;
-      if(recaptchaVerifier) {
-        recaptchaVerifier.render().then(widgetId => grecaptcha.reset(widgetId));
-      }
+      alert("❌ 發送失敗，請稍後再試。");
+      btn.innerText = "取得驗證碼"; btn.disabled = false;
     }
   }
 
@@ -506,30 +578,18 @@
     const act=$('activity').value, name=$('name').value.trim(), soc=$('social_id').value.trim(), ph=$('phone').value.replace(/\D/g,''), cd=$('secret_code').value.trim();
     const otp = $('otp_code').value.trim();
 
-    if(!act) return alert("⚠️ 系統載入中，請稍候！");
-    if(ph.length !== 10 || !ph.startsWith('09')) return alert("⚠️ 手機號碼必須為「09 開頭且滿 10 碼數字」！");
-    if(!name || !soc || !cd) return alert("⚠️ 請完整填寫資料與通關密語！");
+    if(!act || ph.length !== 10 || !name || !soc || !cd) return alert("⚠️ 請完整填寫資料與通關密語！");
     if(cd.toUpperCase() !== EVENT_SECRETS[act]) return alert("⚠️ 通關密語錯誤！");
-    
-    if(!confirmationResult) return alert("⚠️ 請先點擊「取得驗證碼」！");
+    if(!confirmationResult) return alert("⚠️ 請先取得驗證碼！");
     if(otp.length !== 6) return alert("⚠️ 請輸入完整的 6 位數簡訊驗證碼！");
 
-    let claimCount = parseInt(localStorage.getItem(`p_count_${act}`) || "0");
-    if(claimCount >= 3) {
-      return alert("🛑 為了維護活動公平性，同一台設備最多只能領取 3 次兌換券喔！請請親友使用自己的手機操作。");
-    }
-
-    const btn = $('btn-submit');
-    btn.disabled = true;
-    btn.innerText = "驗證中...";
+    const btn = $('btn-submit'); btn.disabled = true; btn.innerText = "驗證中...";
 
     try {
       await confirmationResult.confirm(otp);
     } catch (error) {
-      console.error("驗證碼錯誤:", error);
-      btn.disabled = false;
-      btn.innerText = "領取專屬兌換卷";
-      return alert("❌ 簡訊驗證碼錯誤或已過期，請重新輸入！");
+      btn.disabled = false; btn.innerText = "領取專屬兌換卷";
+      return alert("❌ 簡訊驗證碼錯誤或已過期！");
     }
 
     try {
@@ -537,32 +597,25 @@
       const docSnap = await getDoc(docRef);
 
       if(!docSnap.exists()) {
-        await setDoc(docRef, {
-          name, social_id: soc, phone: ph, status: "未兌換", store: "", redeemTime: "", timestamp: new Date().toLocaleString(), gift: customGift, expireDate: ""
-        });
+        await setDoc(docRef, { name, social_id: soc, phone: ph, status: "未兌換", timestamp: new Date().toLocaleString(), gift: customGift });
         confetti({particleCount:80, spread:70});
-
-        localStorage.setItem(`p_count_${act}`, claimCount + 1);
-        localStorage.setItem(`p_${act}_phone`, ph);
-        localStorage.setItem(`p_${act}_name`, name);
-        localStorage.setItem(`p_${act}_social`, soc);
-        renderTicket(act, name, soc, ph);
-
       } else {
-        const data = docSnap.data();
-        alert("💡 哎呀！這個電話號碼已經有領取紀錄囉！為您重新載入原本的憑證。");
-
-        localStorage.setItem(`p_${act}_phone`, ph);
-        localStorage.setItem(`p_${act}_name`, data.name);
-        localStorage.setItem(`p_${act}_social`, data.social_id);
-        renderTicket(act, data.name, data.social_id, ph);
+        alert("💡 這個電話號碼已經有領取紀錄囉！為您重新載入憑證。");
       }
+
+      // 🔥 核心升級：驗證成功後，綁定為永久會員，並自動切換狀態
+      localStorage.setItem(`p_${act}_phone`, ph);
+      localStorage.setItem(`p_${act}_name`, name);
+      localStorage.setItem(`p_${act}_social`, soc);
+      localStorage.setItem('member_phone', ph); // 記錄為全域會員
+      
+      checkMemberStatus(); // 刷新會員集點卡畫面
+      renderTicket(act, docSnap.exists() ? docSnap.data().name : name, docSnap.exists() ? docSnap.data().social_id : soc, ph);
+
     } catch (e) {
-      console.error(e);
       alert("資料儲存發生錯誤，請稍後再試！");
     } finally {
-      btn.disabled = false;
-      btn.innerText = "領取專屬兌換卷";
+      btn.disabled = false; btn.innerText = "領取專屬兌換卷";
     }
   }
 
@@ -571,37 +624,21 @@
     $('ticket-card').style.display = 'block';
     
     $('r-act').innerText = act; 
-    $('r-name').innerText = name; 
-    $('r-social').innerText = soc; 
-    $('r-phone').innerText = ph;
     $('r-gift').innerText = customGift || (POS_CONFIG[act] ? POS_CONFIG[act].gift : "專屬活動贈品");
     $('r-expire').innerText = (POS_CONFIG[act] && POS_CONFIG[act].expireDate) ? POS_CONFIG[act].expireDate : "無特別限制";
 
-    new QRious({
-      element: $('qr'),
-      value: ph,
-      size: 200,
-      foreground: '#5c6a5c'
-    });
+    new QRious({ element: $('qr'), value: ph, size: 200, foreground: '#5c6a5c' });
 
     if(unsubscribe) unsubscribe();
     unsubscribe = onSnapshot(doc(db, act, ph), (docSnap) => {
       if (docSnap.exists()) {
-        const data = docSnap.data();
-        setUI(data.status === "已兌換");
-        if (data.gift) $('r-gift').innerText = data.gift;
-        if (data.expireDate) $('r-expire').innerText = data.expireDate;
+        const isRedeemed = docSnap.data().status === "已兌換";
+        $('qr').style.opacity = isRedeemed ? "0.15" : "1";
+        $('stamp').innerHTML = isRedeemed ? "【 廚房已核銷確認 · 感謝完食 】" : "【 小編已核銷確認 · 專屬兌換券 】";
+        $('hl-text').innerHTML = isRedeemed ? "★ 本餐券已使用完畢 ★" : "至門市出示核銷";
+        if (docSnap.data().gift) $('r-gift').innerText = docSnap.data().gift;
       }
     });
-  }
-
-  function setUI(isRedeemed) {
-    $('qr').style.opacity = isRedeemed ? "0.15" : "1";
-    $('stamp').innerHTML = isRedeemed ? "【 廚房已核銷確認 · 感謝完食 】" : "【 小編已核銷確認 · 專屬兌換券 】";
-    $('stamp').style.borderColor = isRedeemed ? "rgba(111,118,110,.45)" : "rgba(185,145,90,.55)";
-    $('stamp').style.color = isRedeemed ? "#6f766e" : "#8d6c3c";
-    $('hl-text').innerHTML = isRedeemed ? "★ 本餐券已使用完畢 ★" : "至德州小騎士門市出示核銷";
-    $('hl-text').style.color = isRedeemed ? "#6f766e" : "#2c302c";
   }
 </script>
 </body>
