@@ -6,6 +6,7 @@
   <title>總部戰情室 - 德州小騎士</title>
   <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     :root {
       --bg:#F4F6F8; --sidebar-bg:#1A1C24; --card-bg:#ffffff; --text-main:#1F2430; --text-sub:#8A93A5;
@@ -36,6 +37,14 @@
     .sidebar-item{padding:13px 16px;border-radius:14px;color:#A9B1C2;font-weight:600;font-size:14px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:.2s}
     .sidebar-item:hover{background:rgba(255,255,255,.06);color:#fff}
     .sidebar-item.active{background:#F3F5F8;color:#1A1C24;font-weight:800}
+    
+    /* 子選單樣式 */
+    .sidebar-item.has-sub { justify-content: space-between; }
+    .sub-menu { display: none; flex-direction: column; background: rgba(0,0,0,0.2); border-radius: 12px; margin-top: 2px; overflow: hidden; padding: 6px 0;}
+    .sub-menu .sidebar-item { padding-left: 44px; border-radius: 0; font-size: 13px; font-weight: 500; }
+    .sub-menu .sidebar-item:hover { background: rgba(255,255,255,0.08); color: #fff;}
+    .sub-menu .sidebar-item.active { background: var(--accent); color: #fff; font-weight: 700; border-radius: 8px; margin: 0 8px;}
+
     .sidebar-footer{margin-top:auto;padding-top:20px}
     .btn-logout{width:100%;background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.12);padding:12px;border-radius:999px;font-weight:700;font-size:14px;cursor:pointer;transition:.2s}
     .btn-logout:hover{background:var(--accent);border-color:var(--accent)}
@@ -43,7 +52,8 @@
 
     /* Layouts */
     .view-section { display: none; }
-    .view-section.active { display: block; }
+    .view-section.active { display: block; animation: fadeIn 0.3s; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
     #main-app{flex:1;padding:32px 40px;display:none;overflow-y:auto;height:100vh}
     .container{max-width:1200px;margin:0 auto}
 
@@ -120,8 +130,7 @@
     .kebab-dropdown summary::-webkit-details-marker { display: none; }
     .kebab-dropdown summary:hover { background: #F4F6F8; color: var(--accent); border-color: #D1D5DB; }
     .kebab-dropdown[open] summary { background: var(--text-main); color: #fff; border-color: var(--text-main); }
-    .kebab-menu { position: absolute; right: 0; top: calc(100% + 8px); background: #fff; border: 1px solid #E6EAF0; border-radius: 14px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); width: 170px; display: flex; flex-direction: column; overflow: hidden; z-index: 9999; animation: fade-in-kebab 0.2s cubic-bezier(0.2, 0.8, 0.2, 1); }
-    @keyframes fade-in-kebab { from { opacity: 0; transform: translateY(-10px) scale(0.95); transform-origin: top right; } to { opacity: 1; transform: translateY(0) scale(1); transform-origin: top right; } }
+    .kebab-menu { position: absolute; right: 0; top: calc(100% + 8px); background: #fff; border: 1px solid #E6EAF0; border-radius: 14px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); width: 170px; display: flex; flex-direction: column; overflow: hidden; z-index: 9999; }
     .kebab-menu button { text-align: left; padding: 14px 18px; background: transparent; border: none; border-radius: 0; font-size: 14px; font-weight: 600; color: var(--text-main); transition: .2s; display: flex; align-items: center; gap: 10px; width: 100%; cursor: pointer;}
     .kebab-menu button:hover { background: #F7F9FB; color: var(--accent); }
     .kebab-menu button.danger { color: #ef4444; border-top: 1px solid #F1F3F7; }
@@ -170,6 +179,9 @@
     .p-status { padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 11px; }
     .p-wait { background: #E6EAF0; color: #8A93A5; }
     .p-done { background: rgba(63,191,143,.15); color: var(--green); }
+
+    /* 雲端儲存統一容器 */
+    .save-cloud-container { border: 2px solid var(--accent); background: rgba(240,118,84,0.02); }
 
     @media (max-width:768px){
       body{flex-direction:column}
@@ -239,7 +251,17 @@
       <div class="sidebar-item" onclick="switchView('issue-ui', this)">🎟️ 票券發放與建檔</div>
       <div class="sidebar-item" onclick="switchView('payroll-ui', this)">💸 薪資單群發系統</div>
       <div class="sidebar-item" onclick="switchView('lottery-ui', this)">🎉 社群抽獎發券中心</div>
-      <div class="sidebar-item" onclick="switchView('config-ui', this)">⚙️ 系統設定中心</div>
+      
+      <!-- 🔥 系統設定中心 (子選單版) -->
+      <div class="sidebar-item has-sub" onclick="toggleSubMenu('config-sub', this)">
+        <div style="display: flex; align-items: center; gap: 10px;">⚙️ 系統設定中心</div>
+        <i class="fa-solid fa-chevron-down" style="font-size: 12px; transition: 0.3s;"></i>
+      </div>
+      <div class="sub-menu" id="config-sub">
+        <div class="sidebar-item" onclick="switchView('config-app', this)">📱 APP設定與庫存</div>
+        <div class="sidebar-item" onclick="switchView('config-store', this)">🏪 門市清單管理</div>
+        <div class="sidebar-item" onclick="switchView('config-event', this)">🎯 行銷活動管理</div>
+      </div>
     </nav>
     <div class="sidebar-footer">
       <button class="btn-logout" onclick="logout()">登出</button>
@@ -496,13 +518,12 @@
         </div>
       </div>
 
-      <!-- ================= 視圖 4：系統設定中心 ================= -->
-      <div id="view-config-ui" class="view-section">
+      <!-- ================= 🔥 子選單視圖：APP設定與庫存 ================= -->
+      <div id="view-config-app" class="view-section">
         <div class="header">
-          <h1>⚙️ 系統設定中心 (全雲端同步)</h1>
+          <h1>📱 APP設定與庫存</h1>
         </div>
 
-        <!-- 🔥 新增：App 首頁視覺設定 -->
         <div class="config-card">
           <h2>📱 App 首頁視覺設定</h2>
           <p class="desc">設定會員中心首頁的大圖輪播與最新情報圖片（請填入圖片網址）。</p>
@@ -518,7 +539,6 @@
           </div>
         </div>
 
-        <!-- 🔥 新增：點數兌換商品管理 -->
         <div class="config-card">
           <h2>🎁 點數兌換商品管理</h2>
           <p class="desc">設定會員中心「回饋優惠」頁面的可兌換商品。前 4 個將自動顯示於首頁預覽，可透過右方點點選單【上下移動】調整排序。</p>
@@ -532,8 +552,8 @@
               <input type="number" id="new-reward-points" placeholder="例: 300">
             </div>
             <div class="field-block">
-              <label>商品圖片網址 (選填)</label>
-              <input type="text" id="new-reward-img" placeholder="https://...">
+              <label>商品圖片網址 (請填入 PNG 網址)</label>
+              <input type="text" id="new-reward-img" placeholder="例: https://.../fries.png">
             </div>
             <button class="btn-primary" onclick="addReward()" style="padding: 12px 18px; margin-bottom: 2px;">➕ 新增商品</button>
           </div>
@@ -559,9 +579,22 @@
           </div>
           <button class="btn-primary" onclick="setInventory()">更新門市庫存</button>
         </div>
-        
+
+        <div class="config-card save-cloud-container">
+          <h2>💾 同步至資料庫</h2>
+          <p class="desc">在上方完成所有設定後，點擊下方按鈕，所有設定將立刻寫入 Firebase，全台門市與領券前台瞬間生效！</p>
+          <button class="btn-primary btn-save-cloud" style="width:100%; font-size:18px; padding: 16px;" onclick="saveConfigToCloud()">💾 儲存所有設定至雲端 (即時生效)</button>
+        </div>
+      </div>
+
+      <!-- ================= 🔥 子選單視圖：門市清單管理 ================= -->
+      <div id="view-config-store" class="view-section">
+        <div class="header">
+          <h1>🏪 門市清單管理</h1>
+        </div>
+
         <div class="config-card">
-          <h2>🏪 門市清單管理</h2>
+          <h2>🏪 新增與移除門市</h2>
           <p class="desc">新增或刪除門市，全台 POS 系統會自動同步更新。</p>
           <div class="form-group">
             <input type="text" id="new-store-name" placeholder="輸入新門市名稱 (例: 巨蛋門市)">
@@ -570,8 +603,21 @@
           <ul class="item-list" id="ui-store-list"></ul>
         </div>
 
+        <div class="config-card save-cloud-container">
+          <h2>💾 同步至資料庫</h2>
+          <p class="desc">在上方完成所有設定後，點擊下方按鈕，所有設定將立刻寫入 Firebase，全台門市與領券前台瞬間生效！</p>
+          <button class="btn-primary btn-save-cloud" style="width:100%; font-size:18px; padding: 16px;" onclick="saveConfigToCloud()">💾 儲存所有設定至雲端 (即時生效)</button>
+        </div>
+      </div>
+
+      <!-- ================= 🔥 子選單視圖：行銷活動管理 ================= -->
+      <div id="view-config-event" class="view-section">
+        <div class="header">
+          <h1>🎯 行銷活動管理</h1>
+        </div>
+
         <div class="config-card">
-          <h2>🎯 行銷活動與資料夾管理</h2>
+          <h2>🎯 建立與調整活動</h2>
           <p class="desc">建立抽獎活動或實體券分類。可透過右方點點選單【上下移動】調整排序，POS 端會自動套用！</p>
           <div class="form-group">
             <div class="field-block">
@@ -601,10 +647,10 @@
           <ul class="item-list" id="ui-event-list" style="margin-top: 20px;"></ul>
         </div>
 
-        <div class="config-card" style="border: 2px solid var(--accent); background: rgba(240,118,84,0.02);">
+        <div class="config-card save-cloud-container">
           <h2>💾 同步至資料庫</h2>
           <p class="desc">在上方完成所有設定後，點擊下方按鈕，所有設定將立刻寫入 Firebase，全台門市與領券前台瞬間生效！</p>
-          <button id="save-cloud-btn" class="btn-primary" style="width:100%; font-size:18px; padding: 16px;" onclick="saveConfigToCloud()">💾 儲存所有設定至雲端 (即時生效)</button>
+          <button class="btn-primary btn-save-cloud" style="width:100%; font-size:18px; padding: 16px;" onclick="saveConfigToCloud()">💾 儲存所有設定至雲端 (即時生效)</button>
         </div>
       </div>
 
@@ -646,7 +692,7 @@
     let globalEventOrder = [];
     let editingActName = null; 
     
-    // 🔥 新增的視覺與商品變數
+    // 視覺與點數商品變數
     let globalHomeBanner = "";
     let globalHomeNews = "";
     let globalRewardsList = [];
@@ -670,12 +716,34 @@
       document.getElementById('qr-modal').style.display = 'none';
     };
 
+    // 🔥 子選單展開收合邏輯
+    window.toggleSubMenu = function(menuId, el) {
+      const menu = document.getElementById(menuId);
+      const icon = el.querySelector('.fa-chevron-down');
+      if(menu.style.display === 'flex') {
+        menu.style.display = 'none';
+        if(icon) icon.style.transform = 'rotate(0deg)';
+      } else {
+        menu.style.display = 'flex';
+        if(icon) icon.style.transform = 'rotate(180deg)';
+      }
+    };
+
     window.switchView = function(viewId, element) {
+      // 移除所有主視圖的 active
       document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
       document.getElementById('view-' + viewId).classList.add('active');
+      
+      // 移除所有側邊欄項目的 active
       document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
+      
+      // 如果點擊的是子選單，保持母選單的高亮狀態
+      if(element.parentElement.classList.contains('sub-menu')) {
+        element.parentElement.previousElementSibling.classList.add('active');
+      }
       element.classList.add('active');
       
+      // 處理下拉選單同步
       if (viewId === 'lottery-ui' || viewId === 'issue-ui') {
         const actSelectHtml = document.getElementById('act-select').innerHTML;
         let cleanHtml = actSelectHtml.replace(/<option value="ALL_OVERVIEW">🌐 總覽 \(所有活動\)<\/option>/g, '');
@@ -753,7 +821,7 @@
         <li class="item-li">
           <div class="item-info">
             <strong>🎁 ${item.name}</strong>
-            <span>所需點數: <span style="color:var(--accent); font-weight:bold;">${item.points}</span> | 圖片: ${item.img_url ? '已設定' : '無'}</span>
+            <span>所需點數: <span style="color:var(--accent); font-weight:bold;">${item.points}</span> | 圖片: ${item.img_url ? '已設定 PNG' : '無'}</span>
           </div>
           <details class="kebab-dropdown">
             <summary>⋮</summary>
@@ -767,7 +835,7 @@
       `).join('');
     }
 
-    // 🔥 點數商品管理邏輯
+    // 點數商品管理邏輯
     window.addReward = function() {
       const name = document.getElementById('new-reward-name').value.trim();
       const points = parseInt(document.getElementById('new-reward-points').value, 10);
@@ -809,7 +877,6 @@
       }
     };
 
-    // 更新圖片網址變數
     window.updateVisualConfig = function() {
       globalHomeBanner = document.getElementById('cfg-home-banner').value.trim();
       globalHomeNews = document.getElementById('cfg-home-news').value.trim();
@@ -834,9 +901,13 @@
       }
     };
 
+    // 🔥 將所有「儲存至雲端」按鈕變成紅色警告色
     function triggerSaveHint() {
-      document.getElementById('save-cloud-btn').style.background = "#FF3366";
-      document.getElementById('save-cloud-btn').innerText = "⚠️ 設定已修改，請點此儲存至雲端！";
+      const saveBtns = document.querySelectorAll('.btn-save-cloud');
+      saveBtns.forEach(btn => {
+        btn.style.background = "#FF3366";
+        btn.innerText = "⚠️ 設定已修改，請點此儲存至雲端！";
+      });
     }
 
     window.addStore = function() {
@@ -876,8 +947,6 @@
       btn.innerText = "💾 儲存修改內容";
       btn.style.background = "#3FBF8F";
       document.getElementById('btn-cancel-edit').style.display = 'block';
-      
-      document.querySelector('.container').scrollIntoView({ behavior: 'smooth' });
     };
 
     window.cancelEditEvent = function() {
@@ -947,15 +1016,16 @@
       triggerSaveHint();
     };
 
-    // 🔥 儲存設定至雲端 (加入新的圖片與點數商品設定)
+    // 🔥 儲存所有設定至雲端 (多個按鈕一起連動)
     window.saveConfigToCloud = async function() {
       if(!confirm("⚠️ 確定要將設定寫入資料庫嗎？\n按下確定後，全台門市 POS 及會員 App 將立刻套用最新設定！")) return;
       
-      const btn = document.getElementById('save-cloud-btn');
-      btn.innerText = "⏳ 雲端同步中...";
-      btn.disabled = true;
+      const saveBtns = document.querySelectorAll('.btn-save-cloud');
+      saveBtns.forEach(btn => {
+        btn.innerText = "⏳ 雲端同步中...";
+        btn.disabled = true;
+      });
 
-      // 確認最新的圖片輸入框網址
       updateVisualConfig();
 
       try {
@@ -972,14 +1042,19 @@
         }, { merge: true });
         
         alert("✅ 系統設定已成功同步至雲端！");
-        btn.style.background = "var(--accent)";
+        
+        saveBtns.forEach(btn => {
+          btn.style.background = "var(--accent)";
+        });
         populateAdminDropdown();
       } catch (error) {
         console.error(error);
         alert("❌ 同步失敗，請檢查網路狀態。");
       } finally {
-        btn.innerText = "💾 儲存所有設定至雲端 (即時生效)";
-        btn.disabled = false;
+        saveBtns.forEach(btn => {
+          btn.innerText = "💾 儲存所有設定至雲端 (即時生效)";
+          btn.disabled = false;
+        });
       }
     };
 
@@ -998,7 +1073,6 @@
               if(!globalEventOrder.includes(a)) globalEventOrder.push(a);
           });
 
-          // 讀取新的視覺設定與點數商品
           globalHomeBanner = data.home_banner_url || "";
           globalHomeNews = data.home_news_url || "";
           document.getElementById('cfg-home-banner').value = globalHomeBanner;
