@@ -3,16 +3,15 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
-<!-- 🔥 新增：Apple PWA 專用 Meta -->
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>抽獎核銷系統 | 門市 POS 兌換平台</title>
-<!-- 🔥 新增：PWA Manifest -->
+<title>德州小騎士 | 門市 POS 核銷與點數系統</title>
 <link rel="manifest" href="./manifest.json">
 <link rel="apple-touch-icon" href="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Square_logo.svg/512px-Square_logo.svg.png">
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Space+Grotesk:wght@500;700;900&display=swap" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
 :root{
   --background:oklch(0.17 0.024 259);
@@ -36,9 +35,10 @@
   --gradient-digital: linear-gradient(135deg, #00C6FF, #0072FF);
   --accent-physical: #FF6B35;
   --gradient-physical: linear-gradient(135deg, #FF6B35, #F04323);
-  /* 🔥 新增：計數器模式的品牌色 (德州小綠) */
   --accent-counter: #3FBF8F;
   --gradient-counter: linear-gradient(135deg, #3FBF8F, #2A8C66);
+  --accent-member: #F2A900;
+  --gradient-member: linear-gradient(135deg, #F2A900, #FFC72C);
   --radius:1.25rem;
 }
 *{box-sizing:border-box;margin:0;padding:0;border-color:var(--border)}
@@ -61,22 +61,9 @@ main {
   background-size: auto,auto,44px 44px,44px 44px;
 }
 
-body.mode-physical-active main {
-  background-image:
-    radial-gradient(circle at 15% 10%, rgba(255,107,53,0.12), transparent 45%),
-    radial-gradient(circle at 85% 0%, rgba(240,67,35,0.12), transparent 40%),
-    linear-gradient(oklch(1 0 0 / 3%) 1px, transparent 1px),
-    linear-gradient(90deg, oklch(1 0 0 / 3%) 1px, transparent 1px);
-}
-
-/* 🔥 新增：計數器模式背景光效 */
-body.mode-counter-active main {
-  background-image:
-    radial-gradient(circle at 15% 10%, rgba(63,191,143,0.12), transparent 45%),
-    radial-gradient(circle at 85% 0%, rgba(42,140,102,0.12), transparent 40%),
-    linear-gradient(oklch(1 0 0 / 3%) 1px, transparent 1px),
-    linear-gradient(90deg, oklch(1 0 0 / 3%) 1px, transparent 1px);
-}
+body.mode-physical-active main { background-image: radial-gradient(circle at 15% 10%, rgba(255,107,53,0.12), transparent 45%), radial-gradient(circle at 85% 0%, rgba(240,67,35,0.12), transparent 40%), linear-gradient(oklch(1 0 0 / 3%) 1px, transparent 1px), linear-gradient(90deg, oklch(1 0 0 / 3%) 1px, transparent 1px); }
+body.mode-counter-active main { background-image: radial-gradient(circle at 15% 10%, rgba(63,191,143,0.12), transparent 45%), radial-gradient(circle at 85% 0%, rgba(42,140,102,0.12), transparent 40%), linear-gradient(oklch(1 0 0 / 3%) 1px, transparent 1px), linear-gradient(90deg, oklch(1 0 0 / 3%) 1px, transparent 1px); }
+body.mode-member-active main { background-image: radial-gradient(circle at 15% 10%, rgba(242,169,0,0.12), transparent 45%), radial-gradient(circle at 85% 0%, rgba(255,199,44,0.12), transparent 40%), linear-gradient(oklch(1 0 0 / 3%) 1px, transparent 1px), linear-gradient(90deg, oklch(1 0 0 / 3%) 1px, transparent 1px); }
 
 .wrap { max-width: 1400px; margin: 0 auto; width: 100%; padding: 20px 16px; }
 @media(min-width:768px){.wrap{padding:32px}}
@@ -87,6 +74,7 @@ header{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-betw
   background-image:var(--gradient-digital);color:#fff;box-shadow:0 12px 30px -12px rgba(0,198,255,0.8); transition:transform .3s}
 body.mode-physical-active .logo { background-image: var(--gradient-physical); box-shadow:0 12px 30px -12px rgba(255,107,53,0.8); }
 body.mode-counter-active .logo { background-image: var(--gradient-counter); box-shadow:0 12px 30px -12px rgba(63,191,143,0.8); }
+body.mode-member-active .logo { background-image: var(--gradient-member); box-shadow:0 12px 30px -12px rgba(242,169,0,0.8); }
 .logo:hover{transform:scale(1.05)}
 h1{font-size:clamp(22px,3vw,30px);font-weight:700;letter-spacing:-.02em}
 .sub{font-size:14px;color:var(--muted-foreground); display:flex; align-items:center; gap:8px;}
@@ -113,41 +101,31 @@ section.panel{padding:20px}
 .label{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.2em;color:var(--muted-foreground);margin-bottom:12px}
 
 .custom-dropdown { position: relative; width: 100%; }
-.custom-dropdown summary {
-  list-style: none; width: 100%; min-height: 64px; border-radius: 14px; border: 1px solid var(--border);
-  background: var(--secondary); color: var(--foreground); font-size: 18px; font-weight: 700;
-  display: flex; align-items: center; justify-content: space-between; padding: 0 20px; cursor: pointer;
-  outline: none; transition: all 0.2s;
-}
+.custom-dropdown summary { list-style: none; width: 100%; min-height: 64px; border-radius: 14px; border: 1px solid var(--border); background: var(--secondary); color: var(--foreground); font-size: 18px; font-weight: 700; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; cursor: pointer; outline: none; transition: all 0.2s; }
 .custom-dropdown summary:hover { background: var(--muted); }
 .custom-dropdown summary::-webkit-details-marker { display: none; }
 .custom-dropdown summary::after { content: "▼"; font-size: 14px; color: var(--muted-foreground); }
 .custom-dropdown[open] summary::after { content: "▲"; }
 .custom-dropdown[open] summary { border-color: var(--primary); box-shadow: 0 0 0 2px oklch(0.78 0.17 68/.2); }
-.dropdown-content {
-  margin-top: 12px; padding: 16px; border-radius: 14px; border: 1px solid var(--border);
-  background: var(--card); box-shadow: 0 10px 40px -10px rgba(0,0,0,0.6); z-index: 50; position: absolute; width: 100%;
-}
+.dropdown-content { margin-top: 12px; padding: 16px; border-radius: 14px; border: 1px solid var(--border); background: var(--card); box-shadow: 0 10px 40px -10px rgba(0,0,0,0.6); z-index: 50; position: absolute; width: 100%; }
 
 .stores{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px; width: 100%;}
 @media(min-width:640px){.stores{grid-template-columns:repeat(3,minmax(0,1fr))}}
 button{font-family:inherit;cursor:pointer;}
-.store-btn{width:100%;min-height:56px;border-radius:12px;border:1px solid var(--border);background:var(--secondary);color:var(--secondary-foreground);
-  font-size:16px;font-weight:600;transition:all .2s; padding: 0 8px;}
+.store-btn{width:100%;min-height:56px;border-radius:12px;border:1px solid var(--border);background:var(--secondary);color:var(--secondary-foreground); font-size:16px;font-weight:600;transition:all .2s; padding: 0 8px;}
 .store-btn:hover{background:var(--muted);border-color:var(--accent-digital)}
 .store-btn:active{transform:scale(.97)}
 .store-btn.on{background-image:var(--gradient-digital);color:#fff;border-color:var(--accent-digital);box-shadow:0 12px 26px -14px rgba(0,198,255,0.9)}
 
-.mode-switch { display: flex; gap: 8px; padding: 6px; background: var(--secondary); border-radius: 16px; }
-.mode-btn { flex: 1; padding: 14px 12px; border-radius: 12px; border: none; background: transparent; color: var(--muted-foreground); font-weight: 700; font-size: 16px; transition: 0.2s; }
+.mode-switch { display: flex; gap: 8px; padding: 6px; background: var(--secondary); border-radius: 16px; flex-wrap: wrap;}
+.mode-btn { flex: 1; padding: 14px 12px; border-radius: 12px; border: none; background: transparent; color: var(--muted-foreground); font-weight: 700; font-size: 14px; transition: 0.2s; min-width: 110px;}
+#mode-member.active { background: var(--gradient-member); color: #fff; box-shadow: 0 8px 20px -6px rgba(242,169,0,0.6); border: none; color: #1E293B; }
 #mode-digital.active { background: var(--gradient-digital); color: #fff; box-shadow: 0 8px 20px -6px rgba(0,198,255,0.6); border: none; }
 #mode-physical.active { background: var(--gradient-physical); color: #fff; box-shadow: 0 8px 20px -6px rgba(255,107,53,0.6); border: none; }
-/* 🔥 新增：計數器模式按鈕的 Active 樣式 */
 #mode-counter.active { background: var(--gradient-counter); color: #fff; box-shadow: 0 8px 20px -6px rgba(63,191,143,0.6); border: none; }
 
 .acts{display:flex;flex-direction:column;gap:10px; width:100%;}
-.act-btn{width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:64px;padding:0 20px;text-align:left;
-  border-radius:14px;border:1px solid var(--border);background:var(--secondary);color:var(--foreground);transition:all .2s;}
+.act-btn{width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:64px;padding:0 20px;text-align:left; border-radius:14px;border:1px solid var(--border);background:var(--secondary);color:var(--foreground);transition:all .2s;}
 .act-btn:active{transform:scale(.99)}
 .act-name{display:block;font-size:18px;font-weight:600}
 .radio{width:16px;height:16px;border-radius:999px;border:2px solid var(--muted-foreground);flex:none; transition: .2s;}
@@ -160,7 +138,6 @@ body.mode-physical-active .act-btn:hover { border-color: rgba(255,107,53,0.5); }
 body.mode-physical-active .act-btn.on { border-color: var(--accent-physical); background: rgba(255, 107, 53, 0.15); }
 body.mode-physical-active .act-btn.on .radio { border-color: var(--accent-physical); background: var(--accent-physical); box-shadow: 0 0 0 4px rgba(255, 107, 53, 0.2); }
 
-/* 🔥 新增：計數器模式下活動選單顏色 */
 body.mode-counter-active .act-btn:hover { border-color: rgba(63,191,143,0.5); }
 body.mode-counter-active .act-btn.on { border-color: var(--accent-counter); background: rgba(63,191,143,0.15); }
 body.mode-counter-active .act-btn.on .radio { border-color: var(--accent-counter); background: var(--accent-counter); box-shadow: 0 0 0 4px rgba(63,191,143,0.2); }
@@ -175,11 +152,11 @@ body.mode-counter-active .act-btn.on .radio { border-color: var(--accent-counter
 }
 
 .search-input-wrapper { position: relative; flex: 1; width: 100%; }
-#phone{width:100%;min-height:64px;border-radius:14px;border:1px solid var(--input);background:oklch(0.17 0.024 259/.6);
-  color:var(--foreground);padding:0 16px;font-size:20px;font-weight:600;letter-spacing:.08em;outline:none;transition:all .2s;}
+#phone{width:100%;min-height:64px;border-radius:14px;border:1px solid var(--input);background:oklch(0.17 0.024 259/.6); color:var(--foreground);padding:0 16px;font-size:20px;font-weight:600;letter-spacing:.08em;outline:none;transition:all .2s;}
 #phone::placeholder{font-size:15px;font-weight:400;letter-spacing:normal;color:var(--muted-foreground)}
 #phone:focus{border-color:var(--accent-digital);box-shadow:0 0 0 4px rgba(0,198,255,0.25);}
 body.mode-physical-active #phone:focus { border-color: var(--accent-physical); box-shadow: 0 0 0 4px rgba(255,107,53,0.25); }
+body.mode-member-active #phone:focus { border-color: var(--accent-member); box-shadow: 0 0 0 4px rgba(242,169,0,0.25); }
 
 .autocomplete-list {
   position: absolute; top: calc(100% + 8px); left: 0; right: 0; 
@@ -188,15 +165,13 @@ body.mode-physical-active #phone:focus { border-color: var(--accent-physical); b
   opacity: 0; transform: translateY(-10px); pointer-events: none; transition: 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 .autocomplete-list.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
-.autocomplete-item {
-  padding: 14px 18px; border-bottom: 1px solid var(--border); display: flex;
-  justify-content: space-between; align-items: center; cursor: pointer; transition: background 0.2s;
-}
+.autocomplete-item { padding: 14px 18px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: background 0.2s; }
 .autocomplete-item:hover { background: var(--secondary); }
 .autocomplete-item:last-child { border-bottom: none; }
 .ac-phone { font-size: 17px; font-weight: 700; color: var(--foreground); font-family: monospace; letter-spacing: 1px;}
 .ac-hl { color: var(--accent-digital); }
 body.mode-physical-active .ac-hl { color: var(--accent-physical); }
+body.mode-member-active .ac-hl { color: var(--accent-member); }
 .ac-name { font-size: 13px; color: var(--muted-foreground); margin-top: 4px; font-weight: 500;}
 .ac-status { font-size: 12px; padding: 4px 8px; border-radius: 6px; font-weight: 700;}
 .ac-status.ready { background: rgba(63,191,143,0.15); color: var(--success); }
@@ -212,33 +187,24 @@ body.mode-physical-active .ac-hl { color: var(--accent-physical); }
 .primary-btn:hover{filter:brightness(1.1)}
 .primary-btn:active{transform:scale(.95)}
 body.mode-physical-active .primary-btn { background-image: var(--gradient-physical); box-shadow: 0 14px 30px -16px rgba(255,107,53,0.9); }
+body.mode-member-active .primary-btn { background-image: var(--gradient-member); box-shadow: 0 14px 30px -16px rgba(242,169,0,0.9); color: #1E293B; }
 button:disabled{opacity:.5;cursor:not-allowed}
 
 #employee-name{width:100%; min-height:56px; border-radius:12px; border:1px solid var(--border); background:var(--secondary); color:var(--foreground); padding:0 16px; font-size:16px; outline:none; transition:all .2s;}
 #employee-name:focus{border-color:var(--accent-digital); background:var(--card); box-shadow:0 0 0 4px rgba(0,198,255,0.25);}
 body.mode-physical-active #employee-name:focus { border-color: var(--accent-physical); box-shadow: 0 0 0 4px rgba(255,107,53,0.25); }
 
-#toast-container {
-  position: fixed; top: -100px; left: 50%; transform: translateX(-50%); z-index: 10000;
-  display: flex; align-items: center; gap: 12px; padding: 16px 24px; border-radius: 999px;
-  font-weight: 700; font-size: 15px; letter-spacing: 0.05em; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  box-shadow: 0 20px 40px rgba(0,0,0,0.5); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1);
-}
+#toast-container { position: fixed; top: -100px; left: 50%; transform: translateX(-50%); z-index: 10000; display: flex; align-items: center; gap: 12px; padding: 16px 24px; border-radius: 999px; font-weight: 700; font-size: 15px; letter-spacing: 0.05em; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 20px 40px rgba(0,0,0,0.5); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
 #toast-container.show { top: 24px; }
 #toast-container.error { background: rgba(255,50,50,0.15); color: #ff6b6b; border-color: rgba(255,50,50,0.3); }
 #toast-container.success { background: rgba(63,191,143,0.15); color: var(--green); border-color: rgba(63,191,143,0.3); }
-.toast-icon { font-size: 20px; }
 
 #scan-area{ position: fixed; inset: 0; z-index: 9999; background: rgba(10, 12, 16, 0.95); display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 24px; }
 #scan-area.hidden{display:none !important}
 .reader-wrap{ width: 100%; max-width: 450px; position: relative; }
-.reader-wrap::before, .reader-wrap::after, .reader-wrap .corner-bl, .reader-wrap .corner-br {
-  content: ''; position: absolute; width: 40px; height: 40px; border-color: var(--accent-digital); border-style: solid; z-index: 10; pointer-events: none;
-}
-body.mode-physical-active .reader-wrap::before, body.mode-physical-active .reader-wrap::after, 
-body.mode-physical-active .reader-wrap .corner-bl, body.mode-physical-active .reader-wrap .corner-br {
-  border-color: var(--accent-physical);
-}
+.reader-wrap::before, .reader-wrap::after, .reader-wrap .corner-bl, .reader-wrap .corner-br { content: ''; position: absolute; width: 40px; height: 40px; border-color: var(--accent-digital); border-style: solid; z-index: 10; pointer-events: none; }
+body.mode-physical-active .reader-wrap::before, body.mode-physical-active .reader-wrap::after, body.mode-physical-active .reader-wrap .corner-bl, body.mode-physical-active .reader-wrap .corner-br { border-color: var(--accent-physical); }
+body.mode-member-active .reader-wrap::before, body.mode-member-active .reader-wrap::after, body.mode-member-active .reader-wrap .corner-bl, body.mode-member-active .reader-wrap .corner-br { border-color: var(--accent-member); }
 .reader-wrap::before { top: -2px; left: -2px; border-width: 4px 0 0 4px; }
 .reader-wrap::after { top: -2px; right: -2px; border-width: 4px 4px 0 0; }
 .reader-wrap .corner-bl { bottom: -2px; left: -2px; border-width: 0 0 4px 4px; }
@@ -246,6 +212,7 @@ body.mode-physical-active .reader-wrap .corner-bl, body.mode-physical-active .re
 #reader{width:100%; border-radius: 12px; overflow: hidden; box-shadow: 0 0 0 9999px rgba(0,0,0,0.5); }
 .scanline{position:absolute;left:0;right:0;top:0;height:3px;background:var(--accent-digital);pointer-events:none;animation:scan 2.5s ease-in-out infinite alternate; box-shadow: 0 0 15px 2px var(--accent-digital); z-index: 11;}
 body.mode-physical-active .scanline { background: var(--accent-physical); box-shadow: 0 0 15px 2px var(--accent-physical); }
+body.mode-member-active .scanline { background: var(--accent-member); box-shadow: 0 0 15px 2px var(--accent-member); }
 @keyframes scan{0%{top:0%}100%{top:100%}}
 .close-cam{ margin-top: 40px; width: 100%; max-width: 450px; min-height: 64px; border-radius: 999px; font-size: 16px; font-weight: 700; color: #fff; border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); transition: .2s; }
 .close-cam:active{transform:scale(.95)}
@@ -255,6 +222,7 @@ body.mode-physical-active .scanline { background: var(--accent-physical); box-sh
 #placeholder-emoji { display: flex; justify-content: center; align-items: center; margin-bottom: 10px; }
 .ticket-icon { width: 76px; height: 76px; color: var(--accent-digital); filter: drop-shadow(0 0 20px rgba(0,198,255,0.4)); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
 body.mode-physical-active .ticket-icon { color: var(--accent-physical); filter: drop-shadow(0 0 20px rgba(255,107,53,0.4)); }
+body.mode-member-active .ticket-icon { color: var(--accent-member); filter: drop-shadow(0 0 20px rgba(242,169,0,0.4)); }
 
 .placeholder p{color:var(--muted-foreground)}
 .placeholder .p1{font-size:18px;font-weight:600}
@@ -274,63 +242,55 @@ body.mode-physical-active .ticket-icon { color: var(--accent-physical); filter: 
 .info .v.mono{letter-spacing:.08em}
 .actions{margin-top:auto;padding-top:8px;display:flex;flex-direction:column;gap:12px; width: 100%;}
 
-.redeem{min-height:96px;width:100%;border:none;border-radius:18px;font-size:28px;font-weight:900;letter-spacing:.04em;
-  background-image:var(--gradient-digital);color:#fff;box-shadow:0 26px 50px -22px rgba(0,198,255,0.8);transition:all .2s;
-  display: flex; align-items: center; justify-content: center; gap: 12px; cursor: pointer;}
+.redeem{min-height:96px;width:100%;border:none;border-radius:18px;font-size:28px;font-weight:900;letter-spacing:.04em; background-image:var(--gradient-digital);color:#fff;box-shadow:0 26px 50px -22px rgba(0,198,255,0.8);transition:all .2s; display: flex; align-items: center; justify-content: center; gap: 12px; cursor: pointer;}
 body.mode-physical-active .redeem { background-image: var(--gradient-physical); box-shadow: 0 26px 50px -22px rgba(255,107,53,1); }
 .redeem:hover:not(:disabled){transform:translateY(-2px);filter:brightness(1.1)}
 .redeem:active:not(:disabled){transform:scale(.98)}
-
 .redeem.is-claimed { background: var(--muted) !important; box-shadow: none !important; color: var(--muted-foreground) !important; cursor: not-allowed !important; pointer-events: none !important; opacity: 1 !important; transform: none !important; }
 .redeem.is-expired { background: var(--destructive) !important; box-shadow: 0 10px 20px -10px rgba(255,0,0,0.5) !important; color: #fff !important; cursor: not-allowed !important; pointer-events: none !important; opacity: 1 !important; transform: none !important; }
 
-.undo{min-height:64px;width:100%;border-radius:18px;font-size:20px;font-weight:700;color:var(--accent-digital);
-  border:1px solid rgba(0,198,255,0.5);background:rgba(0,198,255,0.15);transition:background .2s}
+.undo{min-height:64px;width:100%;border-radius:18px;font-size:20px;font-weight:700;color:var(--accent-digital); border:1px solid rgba(0,198,255,0.5);background:rgba(0,198,255,0.15);transition:background .2s}
 body.mode-physical-active .undo { color:var(--accent-physical); border-color: rgba(255,107,53,0.5); background:rgba(255,107,53,0.15); }
 .undo:hover{background:rgba(0,198,255,0.25)}
 body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
 
-.next{min-height:64px;width:100%;border-radius:18px;font-size:18px;font-weight:600;color:var(--foreground);
-  border:1px solid var(--border);background:var(--secondary);transition:all .2s;
-  display: flex; align-items: center; justify-content: center; gap: 8px;}
+.next{min-height:64px;width:100%;border-radius:18px;font-size:18px;font-weight:600;color:var(--foreground); border:1px solid var(--border);background:var(--secondary);transition:all .2s; display: flex; align-items: center; justify-content: center; gap: 8px;}
 .next:hover{background:var(--muted)}
 .next:active{transform:scale(.98)}
 .hidden{display:none !important}
 
-/* 🔥 核銷成功螢幕邊框金光特效 */
-#success-overlay {
-  position: fixed; inset: 0; pointer-events: none; z-index: 99999;
-  opacity: 0; box-shadow: inset 0 0 0px 0px transparent;
-}
-#success-overlay.flash {
-  animation: success-glow-anim 0.6s ease-out forwards;
-}
-@keyframes success-glow-anim {
-  0% { opacity: 1; box-shadow: inset 0 0 60px 15px rgba(255, 190, 0, 0.8), inset 0 0 150px 20px rgba(255, 107, 53, 0.4); }
-  100% { opacity: 0; box-shadow: inset 0 0 0px 0px transparent; }
-}
+/* 核銷成功特效層 */
+#success-overlay { position: fixed; inset: 0; pointer-events: none; z-index: 99999; opacity: 0; box-shadow: inset 0 0 0px 0px transparent; }
+#success-overlay.flash { animation: success-glow-anim 0.6s ease-out forwards; }
+@keyframes success-glow-anim { 0% { opacity: 1; box-shadow: inset 0 0 60px 15px rgba(255, 190, 0, 0.8), inset 0 0 150px 20px rgba(255, 107, 53, 0.4); } 100% { opacity: 0; box-shadow: inset 0 0 0px 0px transparent; } }
 
-/* 🔥 新增：計數器模式專屬樣式 */
+/* 計數器模式專屬樣式 */
 .counter-area { text-align: center; padding: 60px 20px; }
 .giant-count { font-size: 100px; font-weight: 900; line-height: 1; margin: 30px 0; color: var(--success); font-family: monospace; }
 .giant-btn { width: 100%; min-height: 140px; border-radius: 24px; font-size: 32px; font-weight: 900; border: none; background: var(--gradient-counter); color: #fff; cursor: pointer; box-shadow: 0 26px 50px -22px rgba(63,191,143,0.8); transition: .2s; }
 .giant-btn:active:not(:disabled) { transform: scale(0.96); }
 .giant-btn:disabled { background: var(--muted); box-shadow: none; color: var(--muted-foreground); cursor: not-allowed; }
 
-/* 🔥 新增：PWA 提示窗樣式 */
-#pwa-prompt {
-  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); width: calc(100% - 32px); max-width: 400px;
-  background: #fff; color: #000; padding: 16px 20px; border-radius: 16px; display: none; align-items: center; justify-content: space-between; z-index: 100000; box-shadow: 0 20px 40px rgba(0,0,0,0.4); font-weight:bold;
-}
+/* 🔥 會員點數模式專屬樣式 */
+.member-area { display: flex; flex-direction: column; gap: 16px; }
+.member-card { background: linear-gradient(145deg, rgba(242,169,0,0.1), rgba(255,199,44,0.05)); border: 1px solid var(--accent-member); border-radius: 20px; padding: 20px; text-align: center; box-shadow: 0 10px 30px rgba(242,169,0,0.1); }
+.member-pts { font-size: 56px; font-weight: 900; color: var(--accent-member); line-height: 1; margin: 10px 0; font-family: monospace;}
+.pts-input-group { display: flex; gap: 10px; margin-top: 15px;}
+.pts-input-group input { flex: 1; background: rgba(0,0,0,0.2); border: 1px solid var(--border); color: #fff; font-size: 18px; padding: 0 16px; border-radius: 12px; outline: none; text-align: right;}
+.pts-input-group input:focus { border-color: var(--accent-member); }
+.pts-btn { background: var(--gradient-member); color: #1E293B; font-weight: 900; border: none; padding: 0 24px; border-radius: 12px; font-size: 16px; cursor: pointer;}
+.pts-btn:hover { filter: brightness(1.1); }
+
+.reward-list { display: flex; flex-direction: column; gap: 10px; margin-top: 20px;}
+.reward-item { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.05); border: 1px solid var(--border); padding: 16px; border-radius: 16px; transition: 0.2s; }
+.reward-item.can-redeem { cursor: pointer; }
+.reward-item.can-redeem:hover { border-color: var(--accent-member); background: rgba(242,169,0,0.1); }
+.reward-item.disabled { opacity: 0.4; cursor: not-allowed; filter: grayscale(1); }
+.reward-item .req-pts { background: var(--accent-member); color: #1E293B; font-weight: 900; font-size: 14px; padding: 4px 10px; border-radius: 8px;}
+
 </style>
 </head>
 <body>
-
-<!-- 🔥 新增：PWA 提示框 -->
-<div id="pwa-prompt">
-  <span>📲 點擊安裝 App，核銷速度更快！</span>
-  <button id="pwa-install-btn" style="background:#000; color:#fff; padding:8px 16px; border-radius:8px; border:none; font-weight:bold; cursor:pointer;">安裝</button>
-</div>
 
 <div id="toast-container">
   <span class="toast-icon">⚠️</span>
@@ -343,9 +303,9 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
       <div class="brand">
         <div class="logo">⚡</div>
         <div>
-          <h1>抽獎核銷系統</h1>
+          <h1>小騎士店員核銷端</h1>
           <p class="sub">
-            Redemption POS · 內部測試區
+            Point of Sale · TFC
             <span class="ping-monitor" id="ping-tracker"><span class="ping-dot"></span> <span>API OK 18ms</span></span>
           </p>
         </div>
@@ -377,26 +337,25 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
         </div>
 
         <div class="block">
-          <h2 class="label">● 憑證類型</h2>
+          <h2 class="label">● 系統模式選擇</h2>
           <div class="mode-switch">
-            <button id="mode-digital" class="mode-btn active" onclick="setMode('digital')">📱 電子憑證</button>
-            <button id="mode-physical" class="mode-btn" onclick="setMode('physical')">🎫 實體流水號</button>
-            <!-- 🔥 新增：計數器模式按鈕 -->
-            <button id="mode-counter" class="mode-btn" onclick="setMode('counter')">🔢 限量計數器</button>
+            <button id="mode-member" class="mode-btn active" onclick="setMode('member')"><i class="fa-solid fa-crown"></i> 會員點數</button>
+            <button id="mode-digital" class="mode-btn" onclick="setMode('digital')"><i class="fa-solid fa-mobile-screen"></i> 優惠券</button>
+            <button id="mode-physical" class="mode-btn" onclick="setMode('physical')"><i class="fa-solid fa-ticket"></i> 實體票</button>
+            <button id="mode-counter" class="mode-btn" onclick="setMode('counter')"><i class="fa-solid fa-boxes-stacked"></i> 限量品</button>
           </div>
         </div>
 
-        <div class="block">
+        <div class="block" id="act-block">
           <h2 class="label">● 活動選單</h2>
           <div id="acts"><p class="empty">請先選擇憑證類型...</p></div>
         </div>
 
-        <!-- 🔥 將掃描區加上 id 以便隱藏 -->
         <div class="block" id="scan-block">
-          <h2 class="label">● 掃描 / 查詢</h2>
+          <h2 class="label" id="scan-label">● 掃描 / 查詢會員</h2>
           <div class="searchbar">
             <div class="search-input-wrapper">
-              <input id="phone" type="tel" placeholder="輸入手機號碼 (限10碼)" autocomplete="off" />
+              <input id="phone" type="tel" placeholder="掃描會員 QR 或輸入手機" autocomplete="off" />
               <div id="autocomplete-list" class="autocomplete-list"></div>
             </div>
             
@@ -408,6 +367,7 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
 
       <!-- RIGHT -->
       <section class="panel rise right">
+        <!-- 預設佔位符 -->
         <div id="placeholder" class="placeholder">
           <div id="placeholder-emoji">
             <svg class="ticket-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
@@ -416,10 +376,11 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
               <path stroke-width="2" d="M15 9h.01 M15 12h.01 M15 15h.01"></path>
             </svg>
           </div>
-          <p class="p1" id="placeholder-title">等待掃描顧客憑證</p>
-          <p class="p2" id="placeholder-desc">選擇門市與活動後，掃描 QR Code 或輸入號碼即可帶出資訊。</p>
+          <p class="p1" id="placeholder-title">等待掃描顧客</p>
+          <p class="p2" id="placeholder-desc">掃描 QR Code 或輸入號碼即可帶出資訊。</p>
         </div>
         
+        <!-- 一般票券核銷畫面 -->
         <div id="detail" class="detail hidden">
           <div id="banner" class="banner ok rise"></div>
           
@@ -432,14 +393,38 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
           </div>
 
           <div class="actions">
-            <!-- 恢復為大按鈕 -->
             <button class="redeem" id="btn-redeem" onclick="redeem()">✔ 確認核銷優惠</button>
             <button class="undo hidden" id="btn-undo" onclick="undo()">⚡ 撤銷 (5s)</button>
             <button class="next" id="btn-next" onclick="nextCust()">🧹 清除／服務下一位</button>
           </div>
         </div>
 
-        <!-- 🔥 新增：計數器模式專屬區塊 -->
+        <!-- 🔥 新增：會員點數專屬畫面 -->
+        <div id="member-area" class="member-area hidden">
+          <div class="member-card">
+            <div style="font-size: 14px; color: var(--muted-foreground); letter-spacing: 0.1em; font-weight: bold; text-transform: uppercase;">MEMBER POINTS</div>
+            <div class="member-pts" id="m-pts">0</div>
+            <div style="font-size: 18px; font-weight: bold; color: #fff;">👤 <span id="m-name">顧客姓名</span> <span style="font-size: 12px; background: rgba(255,255,255,0.1); padding: 4px 8px; border-radius: 6px; margin-left: 8px;">👑 小騎士</span></div>
+            <div style="font-family: monospace; color: var(--muted-foreground); margin-top: 6px;" id="m-phone">0912-345-678</div>
+            
+            <div style="border-top: 1px dashed rgba(255,255,255,0.1); margin-top: 20px; padding-top: 15px;">
+              <div style="font-size: 13px; color: var(--muted-foreground); margin-bottom: 5px; text-align: left;">💰 輸入消費總額 (自動換算點數)</div>
+              <div class="pts-input-group">
+                <input type="number" id="consume-amount" placeholder="NT$ 0" oninput="calcPoints()">
+                <button class="pts-btn" id="btn-add-pts" onclick="addPoints()">送出 <span id="pts-preview"></span></button>
+              </div>
+            </div>
+          </div>
+
+          <h3 style="font-size: 16px; margin-top: 10px; color: var(--accent-member);"><i class="fa-solid fa-gift"></i> 點數兌換商品區</h3>
+          <div class="reward-list" id="reward-list">
+            <!-- 點數商品由 JS 動態生成 -->
+          </div>
+
+          <button class="next" style="margin-top: 15px;" onclick="nextCust()">🧹 完成／服務下一位</button>
+        </div>
+
+        <!-- 計數器模式專屬區塊 -->
         <div id="counter-area" class="counter-area hidden">
           <div style="font-weight:700; font-size:18px; color:var(--muted-foreground); letter-spacing: 0.1em;">門市專屬配額剩餘</div>
           <div class="giant-count" id="c-count">--</div>
@@ -461,14 +446,12 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
     <button class="close-cam" id="btn-stop">✖ 關閉光學鎖定系統</button>
   </div>
   
-  <!-- 🔥 核銷成功特效層 -->
   <div id="success-overlay"></div>
 </main>
 
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 <script type="module">
-  // 🔥 新增：在 import 中加入 onSnapshot 與 increment
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
   import { getFirestore, doc, getDoc, setDoc, updateDoc, query, collection, where, limit, getDocs, onSnapshot, increment } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
@@ -487,39 +470,18 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
   let STORE_LIST = [];
   let POS_CONFIG = {};
   let EVENT_ORDER = [];
+  let REWARDS_LIST = []; // 🔥 從雲端抓取的點數商品
   let evMap = {};
   let giftMap = {};
 
   const $ = (id) => document.getElementById(id);
-  let store = "", act = "", shownPhone = "", shownAct = "", record = null;
+  let store = "", act = "", shownPhone = "", shownAct = "", record = null, memberRecord = null;
   let scanner = null, uTimer = null, busy = false;
-  let currentMode = 'digital';
+  let currentMode = 'member'; // 預設改為會員模式
   let toastTimer = null;
   
-  // 🔥 新增：計數器模式的變數
   let unsubCounter = null; 
   let currentCount = 0;
-
-  // 🔥 新增：PWA 安裝邏輯
-  let deferredPrompt;
-  window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault(); 
-    deferredPrompt = e;
-    $('pwa-prompt').style.display = 'flex';
-  });
-  $('pwa-install-btn').onclick = async () => {
-    if(deferredPrompt) { 
-      deferredPrompt.prompt(); 
-      deferredPrompt = null; 
-      $('pwa-prompt').style.display = 'none'; 
-    }
-  };
-  const isIos = () => /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
-  const isInStandaloneMode = () => ('standalone' in window.navigator) && (window.navigator.standalone);
-  if (isIos() && !isInStandaloneMode()) {
-    $('pwa-prompt').innerHTML = `<span style="font-size:14px;">📲 iOS：請點選下方「分享」➔「加入主畫面」</span><button onclick="document.getElementById('pwa-prompt').style.display='none'" style="background:transparent; border:none; font-size:20px; cursor:pointer;">✖</button>`;
-    $('pwa-prompt').style.display = 'flex';
-  }
 
   setInterval(() => {
       const ping = Math.floor(Math.random() * (45 - 12 + 1) + 12);
@@ -553,18 +515,22 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
     currentMode = m;
     $('mode-digital').classList.toggle('active', m === 'digital');
     $('mode-physical').classList.toggle('active', m === 'physical');
-    $('mode-counter').classList.toggle('active', m === 'counter'); // 🔥
+    $('mode-counter').classList.toggle('active', m === 'counter'); 
+    $('mode-member').classList.toggle('active', m === 'member'); // 🔥
     $('phone').value = '';
     
-    document.body.classList.remove('mode-physical-active', 'mode-counter-active');
+    document.body.classList.remove('mode-physical-active', 'mode-counter-active', 'mode-member-active');
     if(m === 'physical') document.body.classList.add('mode-physical-active');
     if(m === 'counter') document.body.classList.add('mode-counter-active');
+    if(m === 'member') document.body.classList.add('mode-member-active');
 
-    // 🔥 針對計數器模式隱藏不必要的區塊
+    // 依據模式顯示隱藏區塊
     if (m === 'counter') {
       $('scan-block').classList.add('hidden');
+      $('act-block').classList.remove('hidden');
       $('placeholder').classList.add('hidden');
       $('detail').classList.add('hidden');
+      $('member-area').classList.add('hidden');
       $('counter-area').classList.remove('hidden');
       loadCounter();
     } else {
@@ -572,43 +538,58 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
       $('counter-area').classList.add('hidden');
       $('btn-scan').style.display = 'block';
 
-      if (m === 'digital') {
+      if(m === 'member') {
+        $('act-block').classList.add('hidden'); // 會員模式不需要選活動
         $('phone').type = 'tel';
-        $('phone').placeholder = '輸入手機號碼 (限10碼)';
+        $('phone').placeholder = '掃描會員條碼或輸入電話';
         $('phone').maxLength = 10; 
-        $('btn-check').innerText = '查詢';
-        $('placeholder-title').innerText = "等待掃描顧客憑證";
-        $('placeholder-desc').innerText = "選擇門市與活動後，掃描 QR Code 或輸入手機號碼即可帶出顧客資訊。";
-        $('label-phone').innerText = "📱 兌換手機";
-        $('info-social').style.display = 'block';
-        $('info-expire').style.display = 'block';
+        $('btn-check').innerText = '查詢會員';
+        $('placeholder-title').innerText = "等待掃描會員";
+        $('placeholder-desc').innerText = "掃描顧客 App 的條碼即可給點或扣抵點數。";
+        $('scan-label').innerText = "● 會員識別";
       } else {
-        $('phone').type = 'text';
-        $('phone').placeholder = '輸入實體券流水號 (英文與數字)';
-        $('phone').maxLength = 20; 
-        $('btn-check').innerText = '查詢 / 核銷';
-        $('placeholder-title').innerText = "實體券快速核銷";
-        $('placeholder-desc').innerText = "掃描實體券 QR Code 或直接輸入流水號進行核銷。";
-        $('label-phone').innerText = "🔢 實體流水號";
-        $('info-social').style.display = 'none';
-        $('info-expire').style.display = 'none';
+        $('act-block').classList.remove('hidden');
+        $('scan-label').innerText = "● 掃描 / 查詢";
+        if (m === 'digital') {
+          $('phone').type = 'tel';
+          $('phone').placeholder = '輸入手機號碼 (限10碼)';
+          $('phone').maxLength = 10; 
+          $('btn-check').innerText = '查詢';
+          $('placeholder-title').innerText = "等待掃描優惠券";
+          $('placeholder-desc').innerText = "選擇活動後，掃描 QR Code 或輸入手機號碼核銷。";
+          $('label-phone').innerText = "📱 兌換手機";
+          $('info-social').style.display = 'block';
+          $('info-expire').style.display = 'block';
+        } else {
+          $('phone').type = 'text';
+          $('phone').placeholder = '輸入實體券流水號 (英數字)';
+          $('phone').maxLength = 20; 
+          $('btn-check').innerText = '查詢 / 核銷';
+          $('placeholder-title').innerText = "實體券快速核銷";
+          $('placeholder-desc').innerText = "掃描實體券 QR Code 或直接輸入流水號進行核銷。";
+          $('label-phone').innerText = "🔢 實體流水號";
+          $('info-social').style.display = 'none';
+          $('info-expire').style.display = 'none';
+        }
+        renderActs();
       }
-      
-      renderActs();
       nextCust();
     }
   };
 
   let acTimeout = null;
   $("phone").addEventListener("input", function() {
-      if (currentMode === 'digital') this.value = this.value.replace(/[^\d]/g,'').slice(0,10); 
-      else this.value = this.value.replace(/[^a-zA-Z0-9]/g,'').toUpperCase().slice(0,20);
+      if (currentMode === 'physical') this.value = this.value.replace(/[^a-zA-Z0-9]/g,'').toUpperCase().slice(0,20);
+      else this.value = this.value.replace(/[^\d]/g,'').slice(0,10); 
       
       const val = this.value.trim();
       const list = $("autocomplete-list");
       
       if (val.length < 3) { list.innerHTML = ""; list.classList.remove("show"); return; } 
       
+      // 只有在非會員模式才啟動快搜（避免會員資料外洩）
+      if (currentMode === 'member') return;
+
       if (acTimeout) clearTimeout(acTimeout);
       acTimeout = setTimeout(async () => {
           if(!act || !store) return;
@@ -667,6 +648,9 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
         POS_CONFIG = data.POS_CONFIG || {};
         EVENT_ORDER = data.EVENT_ORDER || Object.keys(POS_CONFIG);
         EVENT_ORDER = EVENT_ORDER.filter(a => POS_CONFIG[a]);
+        
+        // 🔥 讀取點數商品
+        REWARDS_LIST = data.REWARDS_LIST || [];
       } else {
         showToast("雲端尚未建立系統設定，請先至總部後台儲存設定！", "error"); return;
       }
@@ -691,8 +675,8 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
       const savedEmp = localStorage.getItem("p_employee");
       if(savedEmp) $("employee-name").value = savedEmp;
 
-      setMode('digital');
-      renderStores(); renderRight();
+      setMode('member'); // 預設進入會員點數模式
+      renderStores(); 
     } catch (e) { showToast("無法連線至雲端讀取 POS 設定！", "error"); }
   }
 
@@ -702,7 +686,10 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
     busy = b;
     $("btn-check").disabled = b;
     if(b) { $("btn-check").innerText = "處理中…"; } 
-    else { $("btn-check").innerText = currentMode === 'digital' ? '查詢' : '查詢 / 核銷'; }
+    else { 
+      if(currentMode === 'member') $("btn-check").innerText = "查詢會員";
+      else $("btn-check").innerText = currentMode === 'digital' ? '查詢' : '查詢 / 核銷'; 
+    }
   }
 
   function renderStores(){
@@ -725,7 +712,7 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
     let currentEvs = evMap[store] || [];
     if (currentMode === 'physical') {
       currentEvs = currentEvs.filter(a => a.includes('【實體】') || a.includes('實體券'));
-    } else {
+    } else if (currentMode === 'digital') {
       currentEvs = currentEvs.filter(a => !a.includes('【實體】') && !a.includes('實體券'));
     }
 
@@ -751,7 +738,7 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
       b.onclick = () => { 
         act = a; 
         renderActs(); 
-        if(currentMode === 'counter') { loadCounter(); } // 🔥
+        if(currentMode === 'counter') { loadCounter(); } 
         setTimeout(() => $("phone").focus(), 100); 
       };
       list.appendChild(b);
@@ -765,12 +752,11 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
     $("store-dropdown").removeAttribute("open");
     
     setMode(currentMode);
-    renderStores(); renderRight();
-    if(currentMode === 'counter') { loadCounter(); } // 🔥
+    renderStores();
+    if(currentMode === 'counter') { loadCounter(); } 
     setTimeout(() => $("phone").focus(), 100);
   }
 
-  // 🔥 新增：載入 Firebase 庫存邏輯
   function loadCounter() {
     if(currentMode !== 'counter' || !store || !act) return;
     if(unsubCounter) unsubCounter();
@@ -791,7 +777,6 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
     });
   }
 
-  // 🔥 新增：扣除 Firebase 庫存邏輯
   window.deductTally = async function() {
     if(currentCount <= 0) return;
     
@@ -806,7 +791,6 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
     try {
       await updateDoc(doc(db, "inventory", `${store}_${act}`), { count: increment(-1) });
       
-      // 觸發金光特效與紙花
       const overlay = $("success-overlay");
       overlay.classList.remove("flash");
       void overlay.offsetWidth;
@@ -816,7 +800,6 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
       }
       showToast("✅ 已成功發放 1 件！", "success");
       
-      // 防呆：1 秒後才能按下一件
       setTimeout(() => { 
         if(currentCount > 0) $('btn-tally').disabled = false; 
       }, 1000);
@@ -828,13 +811,158 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
     }
   };
 
+  // 🔥 點數計算邏輯
+  window.calcPoints = function() {
+    const amount = parseInt($('consume-amount').value, 10);
+    const ptsPreview = $('pts-preview');
+    if(isNaN(amount) || amount <= 0) {
+      ptsPreview.innerText = "";
+    } else {
+      const getPts = Math.floor(amount / 100); // 假設 100 元換 1 點
+      ptsPreview.innerText = getPts > 0 ? `(+ ${getPts} 點)` : "";
+    }
+  }
+
+  window.addPoints = async function() {
+    if(!memberRecord) return;
+    const amount = parseInt($('consume-amount').value, 10);
+    if(isNaN(amount) || amount < 100) return showToast("消費金額需達 100 元以上才能集點！", "error");
+    
+    const empName = $("employee-name").value.trim();
+    if(!empName) return showToast("請先填寫上方的值班人員姓名！", "error");
+
+    const getPts = Math.floor(amount / 100);
+    
+    try {
+      $('btn-add-pts').disabled = true;
+      $('btn-add-pts').innerText = "處理中...";
+
+      await updateDoc(doc(db, "members", shownPhone), {
+        points: increment(getPts)
+      });
+      
+      // 同時記錄一筆交易紀錄 (選做，這邊簡單寫入)
+      await setDoc(doc(db, "point_transactions", new Date().getTime().toString()), {
+        phone: shownPhone,
+        type: "earn",
+        amount: amount,
+        points_earned: getPts,
+        store: store,
+        empName: empName,
+        time: new Date().toLocaleString()
+      });
+
+      memberRecord.points += getPts;
+      $('m-pts').innerText = memberRecord.points;
+      $('consume-amount').value = '';
+      $('pts-preview').innerText = '';
+      
+      showToast(`✅ 成功加入 ${getPts} 點！`, "success");
+      playAlert("success");
+      renderRewardsList(); // 重新渲染兌換按鈕狀態
+    } catch(e) {
+      showToast("連線失敗，請重試", "error");
+    } finally {
+      $('btn-add-pts').disabled = false;
+      $('btn-add-pts').innerHTML = `送出 <span id="pts-preview"></span>`;
+    }
+  }
+
+  window.redeemPoints = async function(giftName, reqPts) {
+    if(!memberRecord) return;
+    if(memberRecord.points < reqPts) return;
+
+    const empName = $("employee-name").value.trim();
+    if(!empName) return showToast("請先填寫上方的值班人員姓名！", "error");
+
+    if(!confirm(`確定要扣除 ${reqPts} 點兌換「${giftName}」嗎？`)) return;
+
+    try {
+      await updateDoc(doc(db, "members", shownPhone), {
+        points: increment(-reqPts)
+      });
+      
+      // 記錄兌換明細
+      await setDoc(doc(db, "point_transactions", new Date().getTime().toString()), {
+        phone: shownPhone,
+        type: "redeem",
+        gift: giftName,
+        points_spent: reqPts,
+        store: store,
+        empName: empName,
+        time: new Date().toLocaleString()
+      });
+
+      memberRecord.points -= reqPts;
+      $('m-pts').innerText = memberRecord.points;
+      
+      showToast(`✅ 兌換成功！已扣除 ${reqPts} 點`, "success");
+      
+      const overlay = $("success-overlay");
+      overlay.classList.remove("flash");
+      void overlay.offsetWidth;
+      overlay.classList.add("flash");
+      if (window.confetti) confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 }, colors: ['#FFD700', '#FFA500'] });
+
+      renderRewardsList(); // 更新按鈕狀態
+    } catch(e) {
+      showToast("扣點失敗，請檢查網路！", "error");
+    }
+  }
+
+  function renderRewardsList() {
+    const list = $('reward-list');
+    list.innerHTML = "";
+    if(!memberRecord) return;
+
+    REWARDS_LIST.forEach(item => {
+      const canRedeem = memberRecord.points >= item.points;
+      const classStr = canRedeem ? "reward-item can-redeem" : "reward-item disabled";
+      const clickEvt = canRedeem ? `onclick="redeemPoints('${item.name}', ${item.points})"` : "";
+
+      list.innerHTML += `
+        <div class="${classStr}" ${clickEvt}>
+          <div>
+            <div style="font-weight: 700; font-size: 15px; margin-bottom: 4px;">${item.name}</div>
+            <div style="font-size: 12px; color: var(--muted-foreground);">扣抵 <span style="font-weight:bold; color:var(--foreground);">${item.points}</span> 點</div>
+          </div>
+          <div class="req-pts">${canRedeem ? '點擊兌換' : '點數不足'}</div>
+        </div>
+      `;
+    });
+  }
+
   function renderRight(){
+    if (currentMode === 'member') {
+      if(!memberRecord) {
+        $("placeholder").classList.remove("hidden");
+        $("member-area").classList.add("hidden");
+        $("detail").classList.add("hidden");
+        return;
+      }
+      $("placeholder").classList.add("hidden");
+      $("detail").classList.add("hidden");
+      $("member-area").classList.remove("hidden");
+
+      $('m-pts').innerText = memberRecord.points || 0;
+      $('m-name').innerText = memberRecord.name || "一般會員";
+      $('m-phone').innerText = shownPhone.replace(/(\d{4})(\d{3})(\d{3})/, '$1-$2-$3');
+      $('consume-amount').value = '';
+      $('pts-preview').innerText = '';
+      
+      renderRewardsList();
+      return;
+    }
+
+    // 一般票券模式
     if (!record){
       $("placeholder").classList.remove("hidden");
       $("detail").classList.add("hidden");
+      $("member-area").classList.add("hidden");
       return;
     }
     $("placeholder").classList.add("hidden");
+    $("member-area").classList.add("hidden");
     $("detail").classList.remove("hidden");
     
     const defaultExpire = (POS_CONFIG[shownAct] && POS_CONFIG[shownAct].expireDate) ? POS_CONFIG[shownAct].expireDate : "無特別限制";
@@ -897,10 +1025,6 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
     }
   }
 
-  function renderContent(data, ph, ac){
-    shownPhone = ph; shownAct = ac; record = data;
-    hideUndo(); renderRight();
-  }
   function hideUndo(){
     if (uTimer) clearInterval(uTimer);
     $("btn-undo").classList.add("hidden");
@@ -943,8 +1067,8 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
       { fps: 15, qrbox: 250 },
       (txt) => {
         let result = txt;
-        if (currentMode === 'digital') result = txt.replace(/[^\d]/g, "").slice(0,10); 
-        else result = txt.replace(/[^a-zA-Z0-9]/g, "").toUpperCase().slice(0,20); 
+        if (currentMode === 'physical') result = txt.replace(/[^a-zA-Z0-9]/g, "").toUpperCase().slice(0,20); 
+        else result = txt.replace(/[^\d]/g, "").slice(0,10); 
         
         $("phone").value = result;
         stopScan(); check(result);
@@ -959,14 +1083,37 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
 
   async function check(overridePhone){
     const ph = overridePhone || $("phone").value.trim();
-    const st = store, ac = act;
-    if (!st || !ac || !ph) return showToast("資料未齊！請確認已選擇門市與活動。", "error");
+    if (!store) return showToast("資料未齊！請確認已選擇門市。", "error");
+    if (!ph) return;
 
-    record = null; renderRight(); setBusy(true);
+    record = null; memberRecord = null; renderRight(); setBusy(true);
+
     try {
+      // 🔥 會員點數模式
+      if (currentMode === 'member') {
+        const snap = await getDoc(doc(db, "members", ph));
+        if (snap.exists()){
+          playAlert("scan"); 
+          memberRecord = snap.data();
+          shownPhone = ph;
+          renderRight(); 
+        } else {
+          showToast("查無此會員，請確認號碼是否正確或請客人註冊。", "error");
+          $("phone").value = "";
+        }
+        return;
+      }
+
+      // 一般活動票券模式
+      const st = store, ac = act;
+      if (!ac) return showToast("請選擇核銷活動。", "error");
+
       const snap = await getDoc(doc(db, ac, ph));
       if (snap.exists()){
-        playAlert("scan"); renderContent(snap.data(), ph, ac); return;
+        playAlert("scan"); 
+        shownPhone = ph; shownAct = ac; record = snap.data();
+        hideUndo(); renderRight();
+        return;
       }
       
       const otherActs = (evMap[st] || []).filter((a) => a !== ac);
@@ -989,7 +1136,8 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
           
           act = foundOtherActName;
           renderActs(); 
-          renderContent(foundOtherData, ph, foundOtherActName);
+          shownPhone = ph; shownAct = foundOtherActName; record = foundOtherData;
+          hideUndo(); renderRight();
         } else { $("phone").value = ""; }
       } else {
         if (currentMode === 'physical') showToast("查無流水號！這張實體券尚未建檔或可能為偽造票券！", "error");
@@ -1012,9 +1160,9 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
         return showToast("此憑證已失效，無法執行核銷！", "error");
     }
 
-    if (!confirm("確定核銷？憑證將失效！")) return;
+    if (!confirm("確定核銷優惠券？憑證將失效！")) return;
     
-    const ph = shownPhone, st = store, ac = act;
+    const ph = shownPhone, st = store, ac = shownAct;
     const d = new Date(), pad = (n) => (n < 10 ? "0" + n : String(n));
     const nowStr = d.getFullYear() + "/" + pad(d.getMonth()+1) + "/" + pad(d.getDate()) + " " + pad(d.getHours()) + ":" + pad(d.getMinutes()) + ":" + pad(d.getSeconds());
     
@@ -1033,13 +1181,7 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
     overlay.classList.add("flash");
 
     if (window.confetti) {
-        confetti({
-            particleCount: 120,
-            spread: 80,
-            origin: { y: 0.6 },
-            colors: ['#FFD700', '#FFA500', '#FF6B35', '#FFFFFF'],
-            disableForReducedMotion: true
-        });
+        confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 }, colors: ['#FFD700', '#FFA500', '#FF6B35', '#FFFFFF'], disableForReducedMotion: true });
     }
 
     const btn = $("btn-undo"); btn.classList.remove("hidden");
@@ -1054,14 +1196,14 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
 
   window.undo = async function() {
     if (uTimer) clearInterval(uTimer);
-    const ph = shownPhone, ac = act; setBusy(true);
+    const ph = shownPhone, ac = shownAct; setBusy(true);
     try { await updateDoc(doc(db, ac, ph), { status: "未兌換", store: "", redeemTime: "", redeemBy: "" }); } finally { setBusy(false); }
     $("btn-undo").classList.add("hidden");
     showToast("已撤銷復原", "success"); check(ph);
   }
 
   window.nextCust = function() {
-    $("phone").value = ""; record = null; hideUndo(); renderRight();
+    $("phone").value = ""; record = null; memberRecord = null; hideUndo(); renderRight();
     setTimeout(() => $("phone").focus(), 100);
   }
 
@@ -1069,19 +1211,25 @@ body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
     if (document.activeElement.tagName === 'INPUT' && e.key !== 'Enter') return;
     if (e.key === "Enter") {
         e.preventDefault();
-        if (!record || record.status === '已兌換' || record.status === '已過期') {
-            if($("phone").value.trim().length > 0) check();
-        } 
+        if(currentMode === 'member') {
+          if(!memberRecord) { if($("phone").value.trim().length > 0) check(); }
+          else { window.addPoints(); }
+        } else {
+          if (!record || record.status === '已兌換' || record.status === '已過期') {
+              if($("phone").value.trim().length > 0) check();
+          } 
+        }
     } 
     else if (e.code === "Space" || e.key === " ") {
-        if (record && record.status === "未兌換" && document.activeElement.tagName !== 'INPUT') {
+        if (currentMode !== 'member' && record && record.status === "未兌換" && document.activeElement.tagName !== 'INPUT') {
             e.preventDefault(); window.redeem();
         }
     }
     else if (e.key === "Escape") { e.preventDefault(); nextCust(); }
-    else if (e.key === "F1") { e.preventDefault(); setMode('digital'); }
-    else if (e.key === "F2") { e.preventDefault(); setMode('physical'); }
-    else if (e.key === "F3") { e.preventDefault(); setMode('counter'); } // 🔥 快捷鍵 F3
+    else if (e.key === "F1") { e.preventDefault(); setMode('member'); }
+    else if (e.key === "F2") { e.preventDefault(); setMode('digital'); }
+    else if (e.key === "F3") { e.preventDefault(); setMode('physical'); }
+    else if (e.key === "F4") { e.preventDefault(); setMode('counter'); } 
   });
 
   $("btn-scan").onclick = startScan;
