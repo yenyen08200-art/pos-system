@@ -1,298 +1,397 @@
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="zh-TW">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>德州小騎士 VIP 會員</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet" />
-<script>
-  tailwind.config = {
-    theme: {
-      extend: {
-        colors: { navy: '#0B2B5E', navyDeep: '#071D42', gold: '#F2A900' },
-        fontFamily: { tc: ['"Noto Sans TC"', 'sans-serif'] },
-      },
-    },
-  };
-</script>
-<style>
-  html, body { -webkit-tap-highlight-color: transparent; }
-  body { font-family: "Noto Sans TC", sans-serif; }
-  @keyframes floatOrb {
-    0%   { transform: translate(-10%, -10%) scale(1); }
-    50%  { transform: translate(15%, 10%) scale(1.18); }
-    100% { transform: translate(-10%, -10%) scale(1); }
-  }
-  .orb {
-    animation: floatOrb 26s ease-in-out infinite;
-    background: radial-gradient(circle at 50% 50%, rgba(242,169,0,.85), rgba(242,169,0,.18) 55%, rgba(242,169,0,0) 72%);
-    filter: blur(70px);
-  }
-  @media (prefers-reduced-motion: reduce) { .orb { animation: none; } }
-  .glass { background: rgba(255,255,255,.12); backdrop-filter: blur(18px) saturate(140%); border: 1px solid rgba(255,255,255,.32); }
-  .glass-strong { background: rgba(255,255,255,.18); backdrop-filter: blur(22px) saturate(150%); border: 1px solid rgba(255,255,255,.38); }
-  .field { background: #ffffff; color: #0B2B5E; }
-  .field::placeholder { color: #6B7A94; }
-  .field:focus { outline: 4px solid #F2A900; outline-offset: 2px; }
-  .glow-btn { box-shadow: 0 0 0 1px rgba(255,255,255,.35), 0 14px 40px rgba(242,169,0,.45); }
-  select.field { appearance: none; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 24 24' fill='none' stroke='%230B2B5E' stroke-width='3' stroke-linecap='round'><polyline points='6 9 12 15 18 9'/></svg>");
-    background-repeat: no-repeat; background-position: right 14px center; padding-right: 52px; }
-</style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>小騎士會員中心</title>
+  
+  <link rel="manifest" href='data:application/manifest+json;base64,eyJuYW1lIjoi5b635bee5bCP6aiO5aOrIFZJUCIsInNob3J0X25hbWUiOiLlsI_poI7lo6sgVklQIiwic3RhcnRfdXJsIjoiLiIsImRpc3BsYXkiOiJzdGFuZGFsb25lIiwiYmFja2dyb3VuZF9jb2xvciI6IiNGRkRGNTAiLCJ0aGVtZV9jb2xvciI6IiNiOTkxNWEifQ=='>
+  <link rel="apple-touch-icon" href="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Square_logo.svg/512px-Square_logo.svg.png">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+  <style>
+    :root {
+      /* 德州小騎士經典藍黃配色 */
+      --brand-blue: #0B2B5E;
+      --brand-blue-light: #1A4B9C;
+      --brand-yellow: #F2A900;
+      --brand-yellow-light: #FFC72C;
+      --ink: #1E293B;
+      --ink-soft: #64748B;
+      --glass: rgba(255, 255, 255, 0.65);
+      --glass-nav: rgba(255, 255, 255, 0.85);
+      --stroke: rgba(255, 255, 255, 0.8);
+      --radius: 24px;
+      --shadow: 0 20px 40px -10px rgba(11, 43, 94, 0.15);
+    }
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;min-width:0}
+    html,body{max-width:100%;overflow-x:hidden}
+    html{height:100%}
+    body{
+      margin:0;padding:20px 16px 90px;
+      font-family:"Inter","Noto Sans TC",-apple-system,sans-serif;
+      color:var(--ink);
+      /* 藍黃氛圍漸層背景 */
+      background: linear-gradient(145deg, #e6f0fa 0%, #fffdf5 100%);
+      background-attachment:fixed;
+      min-height:100vh;position:relative;
+      display:flex;justify-content:center;align-items:flex-start;
+    }
+    
+    body::before{
+      content:"";position:fixed;inset:-50%;z-index:0;pointer-events:none;opacity:.3;
+      background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/><feColorMatrix type='saturate' values='0'/></filter><rect width='160' height='160' filter='url(%23n)' opacity='.5'/></svg>");
+      animation:grain 8s steps(6) infinite;
+    }
+    @keyframes grain{ 0%,100%{transform:translate3d(0,0,0)}20%{transform:translate3d(-6px,4px,0)} 40%{transform:translate3d(5px,-6px,0)}60%{transform:translate3d(-4px,-3px,0)}80%{transform:translate3d(6px,5px,0)} }
+    
+    /* 藍黃動態光暈 */
+    body::after{
+      content:"";position:fixed;width:500px;height:500px;top:-100px;right:-100px;z-index:0;
+      border-radius:50%;filter:blur(90px);pointer-events:none;
+      background:radial-gradient(circle, rgba(242, 169, 0, 0.4), transparent 70%);
+      animation:breathe 6s ease-in-out infinite alternate;
+    }
+    .blue-glow {
+      position:fixed;width:550px;height:550px;bottom:-100px;left:-150px;z-index:0;
+      border-radius:50%;filter:blur(100px);pointer-events:none;
+      background:radial-gradient(circle, rgba(11, 43, 94, 0.25), transparent 70%);
+      animation:breathe 7s ease-in-out infinite alternate-reverse;
+    }
+    @keyframes breathe { 0% { opacity: 0.6; transform: scale(0.9); } 100% { opacity: 1; transform: scale(1.1); } }
+
+    .shell{width:100%;max-width:420px;position:relative;z-index:1;display:flex;flex-direction:column;gap:16px}
+    
+    /* 毛玻璃核心元件 */
+    .glass{
+      position:relative;overflow:hidden;background:var(--glass);
+      backdrop-filter:blur(30px) saturate(150%);-webkit-backdrop-filter:blur(30px) saturate(150%);
+      border:1px solid var(--stroke);border-radius:var(--radius);
+      box-shadow:var(--shadow),inset 0 1px 0 rgba(255,255,255,1);
+    }
+    
+    /* 頂部品牌 Header */
+    .header-bar {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 18px 20px; margin-bottom: 5px;
+    }
+    .header-bar h1 {
+      margin: 0; font-size: 20px; font-weight: 800; font-style: italic; letter-spacing: 0.05em;
+      background: linear-gradient(135deg, var(--brand-blue-light), var(--brand-blue));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .pts-badge {
+      background: var(--brand-yellow); color: var(--brand-blue);
+      padding: 6px 14px; border-radius: 20px; font-weight: 800; font-size: 13px;
+      box-shadow: 0 4px 10px rgba(242, 169, 0, 0.4);
+    }
+
+    .tab-content { display: none; animation: fadeIn 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); }
+    .tab-content.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: none; } }
+
+    section.card{padding:26px 20px;}
+
+    /* 會員 QR 區塊 */
+    .qr-hero {
+      text-align: center; background: linear-gradient(160deg, rgba(255,255,255,0.8), rgba(255,255,255,0.4));
+      border: 1px solid white; border-radius: 24px; padding: 30px 20px;
+      box-shadow: inset 0 2px 0 white, 0 10px 30px rgba(11, 43, 94, 0.08);
+      margin-bottom: 20px; position: relative;
+    }
+    .qr-box {
+      background: white; padding: 12px; border-radius: 20px; display: inline-block;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.08); margin-bottom: 16px; border: 1px solid #eaeaea;
+    }
+    .qr-img { width: 160px; height: 160px; display: block; }
+    .phone-display { font-size: 22px; font-weight: 800; color: var(--brand-blue); letter-spacing: 0.1em; }
+    .scan-hint { font-size: 12px; color: var(--ink-soft); font-weight: 600; margin-top: 6px; letter-spacing: 0.05em;}
+
+    /* 點數商城區塊 */
+    .section-title { font-size: 16px; font-weight: 800; color: var(--brand-blue); margin: 0 0 14px; display: flex; justify-content: space-between; align-items: center;}
+    .section-title span { font-size: 12px; color: var(--ink-soft); font-weight: 600; cursor: pointer;}
+    
+    .reward-list { display: flex; flex-direction: column; gap: 12px; }
+    .reward-item {
+      display: flex; align-items: center; justify-content: space-between;
+      background: rgba(255,255,255,0.5); border: 1px solid rgba(255,255,255,0.8);
+      padding: 14px 18px; border-radius: 18px; backdrop-filter: blur(10px);
+    }
+    .reward-item .item-name { font-weight: 700; font-size: 14px; color: var(--ink); }
+    .reward-item .req-pts {
+      background: var(--brand-blue); color: white; padding: 4px 10px;
+      border-radius: 12px; font-size: 11px; font-weight: 700;
+    }
+
+    /* 表單元件 (未登入時顯示) */
+    .field{margin-bottom:18px;}
+    label{display:block;font-size:11px;letter-spacing:.1em;color:var(--brand-blue);margin-bottom:8px;font-weight:700;}
+    input{
+      width:100%;padding:16px;border-radius:16px;
+      border:1px solid rgba(255,255,255,0.9);background:rgba(255,255,255,0.6);
+      color:var(--ink);font-size:15px;font-weight:600;outline:none;
+      transition:all .3s;box-shadow:inset 0 2px 4px rgba(0,0,0,0.02);
+    }
+    input:focus{ background:rgba(255,255,255,0.9);border-color:var(--brand-blue); box-shadow:0 0 0 3px rgba(11, 43, 94, 0.1); }
+    
+    .btn-otp {
+      padding: 0 16px; border-radius: 14px; font-size: 13px; font-weight: 700;
+      background: rgba(11, 43, 94, 0.1); color: var(--brand-blue); border: 1px solid rgba(11, 43, 94, 0.2);
+      cursor: pointer; white-space: nowrap;
+    }
+    
+    button.primary-btn {
+      width:100%;padding:18px;border-radius:18px;font-size:15px;font-weight:700;
+      color:var(--brand-blue); border: none;
+      background: linear-gradient(135deg, var(--brand-yellow-light), var(--brand-yellow));
+      box-shadow:0 10px 25px -10px rgba(242, 169, 0, 0.6); cursor:pointer;
+      transition: transform 0.2s;
+    }
+    button.primary-btn:active { transform: scale(0.98); }
+    button.primary-btn:disabled { opacity: 0.6; filter: grayscale(1); }
+
+    /* 底部懸浮毛玻璃導覽列 */
+    .bottom-nav {
+      position: fixed; bottom: 0; left: 0; width: 100%;
+      background: var(--glass-nav); border-top: 1px solid rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%);
+      display: flex; justify-content: space-around; padding: 12px 0;
+      padding-bottom: calc(12px + env(safe-area-inset-bottom));
+      z-index: 100; box-shadow: 0 -10px 30px rgba(11, 43, 94, 0.05);
+    }
+    .nav-item {
+      text-align: center; color: var(--ink-soft); font-size: 10px; font-weight: 700;
+      flex: 1; cursor: pointer; transition: 0.3s;
+    }
+    .nav-item i { font-size: 22px; margin-bottom: 6px; display: block; transition: 0.3s; }
+    .nav-item.active { color: var(--brand-blue); }
+    .nav-item.active i { transform: translateY(-3px); }
+  </style>
 </head>
-<body class="bg-navy text-white font-tc antialiased">
+<body>
+  <div class="blue-glow"></div>
 
-  <!-- 背景光暈 -->
-  <div class="fixed inset-0 -z-10 bg-navy overflow-hidden">
-    <div class="orb absolute top-[8%] left-[-15%] h-[520px] w-[520px] rounded-full"></div>
-  </div>
+  <main class="shell">
+    <header class="glass header-bar">
+      <h1>Texas Chick</h1>
+      <div class="pts-badge" id="header-points">未登入</div>
+    </header>
 
-  <main class="mx-auto min-h-screen w-full max-w-[480px] px-5 pb-40 pt-8">
-
-    <!-- ============ 檢視 A：會員註冊 ============ -->
-    <section id="view-register">
-      <header class="text-center">
-        <p class="text-lg font-medium tracking-widest text-gold">德州小騎士</p>
-        <h1 class="mt-2 text-4xl font-black leading-tight">加入 VIP 會員</h1>
-        <p class="mt-3 text-lg text-white/90">填寫資料，立刻開始累積點數</p>
-      </header>
-
-      <form id="register-form" class="glass mt-8 rounded-3xl p-6 shadow-2xl" novalidate>
-        <div>
-          <label for="name" class="mb-2 block text-xl font-bold">姓名</label>
-          <input id="name" name="name" type="text" autocomplete="name" placeholder="請輸入您的姓名"
-                 class="field w-full rounded-2xl border-2 border-white/60 px-5 py-4 text-xl font-medium shadow-inner" />
-        </div>
-
-        <div class="mt-6">
-          <label for="phone" class="mb-2 block text-xl font-bold">手機號碼</label>
-          <input id="phone" name="phone" type="tel" inputmode="numeric" autocomplete="tel" maxlength="10" placeholder="09xx-xxx-xxx"
-                 class="field w-full rounded-2xl border-2 border-white/60 px-5 py-4 text-xl font-medium tracking-wider shadow-inner" />
-        </div>
-
-        <div class="mt-6">
-          <span class="mb-3 block text-xl font-bold">性別</span>
-          <div id="gender-group" class="grid grid-cols-3 gap-3" role="group" aria-label="性別">
-            <button type="button" data-gender="男" class="gender-pill rounded-2xl border-2 border-white/50 bg-white/15 px-3 py-4 text-xl font-bold text-white">男</button>
-            <button type="button" data-gender="女" class="gender-pill rounded-2xl border-2 border-white/50 bg-white/15 px-3 py-4 text-xl font-bold text-white">女</button>
-            <button type="button" data-gender="其他" class="gender-pill rounded-2xl border-2 border-white/50 bg-white/15 px-3 py-4 text-xl font-bold text-white">其他</button>
+    <!-- 登入驗證區塊 (若無紀錄則顯示) -->
+    <div id="tab-login" class="tab-content active">
+      <section class="glass card">
+        <h2 style="margin: 0 0 8px; color: var(--brand-blue); font-weight: 800; font-size: 22px;">會員開通與登入</h2>
+        <p style="font-size: 13px; color: var(--ink-soft); margin-bottom: 24px; line-height: 1.5;">請輸入您的手機號碼以啟用會員專屬集點與優惠功能。</p>
+        
+        <div class="field">
+          <label>手機號碼 (限 09 開頭)</label>
+          <div style="display: flex; gap: 8px;">
+            <input id="phone" type="tel" inputmode="numeric" placeholder="0912345678" style="flex: 1;" oninput="this.value = this.value.replace(/\D/g,'').slice(0,10);">
+            <button type="button" id="btn-send-otp" class="btn-otp" onclick="sendOTP()">取得驗證碼</button>
           </div>
         </div>
-
-        <div class="mt-6">
-          <label for="source" class="mb-2 block text-xl font-bold">消息來源</label>
-          <select id="source" class="field w-full rounded-2xl border-2 border-white/60 px-5 py-4 text-xl font-medium shadow-inner">
-            <option value="">請選擇</option>
-            <option>親友介紹</option>
-            <option>門市海報</option>
-            <option>臉書 Facebook</option>
-            <option>Instagram</option>
-            <option>網路搜尋</option>
-            <option>其他</option>
-          </select>
+        
+        <div class="field" id="otp-field" style="display: none;">
+          <label>簡訊驗證碼</label>
+          <input id="otp_code" type="tel" inputmode="numeric" placeholder="請輸入 6 位數" maxlength="6" oninput="this.value=this.value.replace(/\D/g,'')">
         </div>
 
-        <div class="mt-6">
-          <label for="otp" class="mb-2 block text-xl font-bold">簡訊驗證碼</label>
-          <div class="flex gap-3">
-            <input id="otp" type="text" inputmode="numeric" maxlength="6" placeholder="6 位數字"
-                   class="field w-full min-w-0 rounded-2xl border-2 border-white/60 px-5 py-4 text-2xl font-bold tracking-[0.3em] shadow-inner" />
-            <button type="button" id="otp-btn"
-                    class="shrink-0 rounded-2xl border-2 border-gold bg-white/15 px-4 py-4 text-lg font-bold text-gold">取得驗證碼</button>
-          </div>
-          <p id="otp-hint" class="mt-3 hidden text-lg font-medium text-gold"></p>
+        <button class="primary-btn" id="btn-login" onclick="loginMember()">立即啟用會員</button>
+      </section>
+    </div>
+
+    <!-- 會員卡區塊 -->
+    <div id="tab-member" class="tab-content">
+      <div class="qr-hero">
+        <div class="qr-box">
+          <canvas id="member-qr" class="qr-img"></canvas>
         </div>
-
-        <button type="submit"
-                class="glow-btn mt-8 w-full rounded-2xl bg-gold py-5 text-2xl font-black text-navy">立即開通會員</button>
-
-        <p class="mt-4 text-center text-base leading-relaxed text-white/80">送出即表示同意會員條款與個人資料使用聲明</p>
-      </form>
-    </section>
-
-    <!-- ============ 檢視 B：會員專區 ============ -->
-    <section id="view-member" class="hidden">
-      <header class="flex items-center justify-between">
-        <div class="flex items-center gap-3">
-          <div class="grid h-14 w-14 place-items-center rounded-2xl bg-gold text-2xl font-black text-navy">騎</div>
-          <div>
-            <p class="text-lg font-bold leading-tight">德州小騎士</p>
-            <p class="text-base text-white/80">VIP 會員專區</p>
-          </div>
-        </div>
-        <div class="rounded-full bg-gold px-5 py-3 text-2xl font-black text-navy shadow-lg">150 點</div>
-      </header>
-
-      <!-- 會員卡 -->
-      <div class="glass-strong mt-7 rounded-3xl p-6 text-center shadow-2xl">
-        <p class="text-xl font-bold">王小明 的會員卡</p>
-        <div class="mx-auto mt-5 w-fit rounded-2xl bg-white p-4 shadow-xl">
-          <svg viewBox="0 0 100 100" class="h-52 w-52" role="img" aria-label="會員 QR Code">
-            <rect width="100" height="100" fill="#fff"/>
-            <g fill="#0B2B5E">
-              <rect x="6" y="6" width="24" height="24"/><rect x="70" y="6" width="24" height="24"/><rect x="6" y="70" width="24" height="24"/>
-              <rect x="12" y="12" width="12" height="12" fill="#fff"/><rect x="76" y="12" width="12" height="12" fill="#fff"/><rect x="12" y="76" width="12" height="12" fill="#fff"/>
-              <rect x="40" y="8" width="6" height="6"/><rect x="52" y="8" width="6" height="6"/><rect x="46" y="20" width="6" height="6"/>
-              <rect x="40" y="32" width="6" height="6"/><rect x="58" y="26" width="6" height="6"/><rect x="8" y="40" width="6" height="6"/>
-              <rect x="20" y="46" width="6" height="6"/><rect x="32" y="40" width="6" height="6"/><rect x="44" y="46" width="6" height="6"/>
-              <rect x="56" y="40" width="6" height="6"/><rect x="68" y="46" width="6" height="6"/><rect x="80" y="40" width="6" height="6"/>
-              <rect x="88" y="52" width="6" height="6"/><rect x="70" y="60" width="6" height="6"/><rect x="58" y="66" width="6" height="6"/>
-              <rect x="46" y="60" width="6" height="6"/><rect x="34" y="66" width="6" height="6"/><rect x="40" y="78" width="6" height="6"/>
-              <rect x="52" y="86" width="6" height="6"/><rect x="64" y="78" width="6" height="6"/><rect x="76" y="86" width="6" height="6"/>
-              <rect x="86" y="72" width="6" height="6"/><rect x="70" y="72" width="6" height="6"/><rect x="22" y="58" width="6" height="6"/>
-            </g>
-          </svg>
-        </div>
-        <p class="mt-5 text-3xl font-black tracking-wider">0912-345-678</p>
-        <p class="mt-2 text-lg text-white/90">結帳時請出示此條碼</p>
+        <div class="phone-display" id="display-phone">0900-000-000</div>
+        <div class="scan-hint">結帳時請出示此條碼，即可累積 Points</div>
       </div>
 
-      <!-- 點數兌換 -->
-      <h2 class="mt-9 text-2xl font-black">點數兌換</h2>
-      <ul class="mt-4 space-y-3">
-        <li class="glass flex items-center justify-between rounded-2xl px-5 py-5">
-          <span class="text-xl font-bold">大份黃金脆薯</span>
-          <span class="rounded-full bg-gold px-4 py-2 text-lg font-black text-navy">300 點</span>
-        </li>
-        <li class="glass flex items-center justify-between rounded-2xl px-5 py-5">
-          <span class="text-xl font-bold">香辣小炸雞</span>
-          <span class="rounded-full bg-gold px-4 py-2 text-lg font-black text-navy">450 點</span>
-        </li>
-        <li class="glass flex items-center justify-between rounded-2xl px-5 py-5">
-          <span class="text-xl font-bold">冰紅茶（大）</span>
-          <span class="rounded-full bg-gold px-4 py-2 text-lg font-black text-navy">200 點</span>
-        </li>
-        <li class="glass flex items-center justify-between rounded-2xl px-5 py-5">
-          <span class="text-xl font-bold">德州招牌雞腿堡</span>
-          <span class="rounded-full bg-gold px-4 py-2 text-lg font-black text-navy">600 點</span>
-        </li>
-      </ul>
+      <div class="section-title">
+        點數兌換商城 <span>查看全部 <i class="fa-solid fa-chevron-right"></i></span>
+      </div>
+      <div class="reward-list">
+        <div class="reward-item">
+          <span class="item-name">大份黃金脆薯</span>
+          <span class="req-pts">300 點</span>
+        </div>
+        <div class="reward-item">
+          <span class="item-name">香酥雞塊 (6塊)</span>
+          <span class="req-pts">500 點</span>
+        </div>
+        <div class="reward-item">
+          <span class="item-name">單層香辣炸雞堡</span>
+          <span class="req-pts">800 點</span>
+        </div>
+      </div>
+    </div>
 
-      <button type="button" id="back-btn" class="mt-8 w-full rounded-2xl border-2 border-white/40 bg-white/10 py-4 text-lg font-bold text-white">返回註冊頁面</button>
-    </section>
+    <div id="recaptcha-container"></div>
   </main>
 
-  <!-- 底部導覽列 -->
-  <nav class="fixed inset-x-0 bottom-0 z-20">
-    <div class="mx-auto max-w-[480px] px-4 pb-4">
-      <div class="glass-strong flex items-stretch justify-around rounded-3xl px-2 py-3 shadow-2xl">
-        <button type="button" data-nav="coupon" class="nav-btn flex flex-1 flex-col items-center gap-1 rounded-2xl py-2 text-white/85">
-          <svg class="h-8 w-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9V6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v3a3 3 0 0 0 0 6v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-3a3 3 0 0 0 0-6Z"/><path d="M14 8v8"/></svg>
-          <span class="text-base font-bold">領取優惠</span>
-        </button>
-        <button type="button" data-nav="card" class="nav-btn flex flex-1 flex-col items-center gap-1 rounded-2xl py-2 text-white/85">
-          <svg class="h-8 w-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="3"/><path d="M2 10h20M6 15h5"/></svg>
-          <span class="text-base font-bold">會員卡</span>
-        </button>
-        <button type="button" data-nav="store" class="nav-btn flex flex-1 flex-col items-center gap-1 rounded-2xl py-2 text-white/85">
-          <svg class="h-8 w-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s7-5.5 7-11a7 7 0 1 0-14 0c0 5.5 7 11 7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg>
-          <span class="text-base font-bold">門市資訊</span>
-        </button>
-      </div>
+  <nav class="bottom-nav">
+    <div class="nav-item active" id="nav-member" onclick="switchTab('member')">
+      <i class="fa-solid fa-id-card"></i>
+      會員卡
+    </div>
+    <div class="nav-item" id="nav-coupon" onclick="alert('優惠券匣即將開放！')">
+      <i class="fa-solid fa-ticket"></i>
+      優惠券
+    </div>
+    <div class="nav-item" id="nav-store" onclick="alert('門市地圖即將開放！')">
+      <i class="fa-solid fa-store"></i>
+      門市資訊
     </div>
   </nav>
 
-<script>
-(function () {
-  var viewRegister = document.getElementById('view-register');
-  var viewMember = document.getElementById('view-member');
-  var navBtns = document.querySelectorAll('.nav-btn');
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  import { getAuth, RecaptchaVerifier, signInWithPhoneNumber } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-  function setActiveNav(key) {
-    navBtns.forEach(function (b) {
-      var on = b.dataset.nav === key;
-      b.classList.toggle('bg-gold', on);
-      b.classList.toggle('text-navy', on);
-      b.classList.toggle('text-white/85', !on);
-      b.setAttribute('aria-current', on ? 'page' : 'false');
-    });
-  }
+  const firebaseConfig = {
+    apiKey: "AIzaSyBINQuYtYZA8RLfwm51AfGLTYj1TX_UcFo",
+    authDomain: "texas-chick-event.firebaseapp.com",
+    projectId: "texas-chick-event",
+    storageBucket: "texas-chick-event.firebasestorage.app",
+    messagingSenderId: "281248037440",
+    appId: "1:281248037440:web:20c32ba4136ea7c57ffda5"
+  };
 
-  function showView(name) {
-    viewRegister.classList.toggle('hidden', name !== 'register');
-    viewMember.classList.toggle('hidden', name !== 'member');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  const auth = getAuth(app);
+  auth.languageCode = 'zh-TW';
 
-  // 性別選擇
-  var selectedGender = '';
-  document.querySelectorAll('.gender-pill').forEach(function (pill) {
-    pill.addEventListener('click', function () {
-      selectedGender = pill.dataset.gender;
-      document.querySelectorAll('.gender-pill').forEach(function (p) {
-        var on = p === pill;
-        p.classList.toggle('bg-gold', on);
-        p.classList.toggle('text-navy', on);
-        p.classList.toggle('border-gold', on);
-        p.classList.toggle('bg-white/15', !on);
-        p.classList.toggle('text-white', !on);
-        p.classList.toggle('border-white/50', !on);
-        p.setAttribute('aria-pressed', on ? 'true' : 'false');
-      });
-    });
-  });
+  const $ = id => document.getElementById(id);
+  let confirmationResult = null;
+  let recaptchaVerifier = null;
+  let currentPhone = "";
 
-  // 取得驗證碼倒數
-  var otpBtn = document.getElementById('otp-btn');
-  var otpHint = document.getElementById('otp-hint');
-  var timer = null;
-  otpBtn.addEventListener('click', function () {
-    var phone = document.getElementById('phone').value.replace(/\D/g, '');
-    if (phone.length < 10) {
-      otpHint.textContent = '請先輸入正確的 10 碼手機號碼';
-      otpHint.classList.remove('hidden');
-      document.getElementById('phone').focus();
-      return;
-    }
-    if (timer) return;
-    otpHint.textContent = '驗證碼已發送，請查看手機簡訊';
-    otpHint.classList.remove('hidden');
-    var left = 60;
-    otpBtn.disabled = true;
-    otpBtn.classList.add('opacity-60');
-    otpBtn.textContent = left + ' 秒';
-    timer = setInterval(function () {
-      left -= 1;
-      otpBtn.textContent = left + ' 秒';
-      if (left <= 0) {
-        clearInterval(timer); timer = null;
-        otpBtn.disabled = false;
-        otpBtn.classList.remove('opacity-60');
-        otpBtn.textContent = '重新取得';
+  window.switchTab = switchTab;
+  window.sendOTP = sendOTP;
+  window.loginMember = loginMember;
+
+  // 檢查是否已登入
+  function checkLoginStatus() {
+    let savedPhone = localStorage.getItem('member_phone');
+    
+    // 如果在領獎頁面有紀錄，無縫接軌登入
+    if (!savedPhone) {
+      const keys = Object.keys(localStorage);
+      for (let key of keys) {
+        if (key.startsWith('p_') && key.endsWith('_phone')) {
+          savedPhone = localStorage.getItem(key);
+          localStorage.setItem('member_phone', savedPhone);
+          break;
+        }
       }
-    }, 1000);
-  });
+    }
 
-  // 送出註冊
-  document.getElementById('register-form').addEventListener('submit', function (e) {
-    e.preventDefault();
-    var name = document.getElementById('name').value.trim();
-    var phone = document.getElementById('phone').value.replace(/\D/g, '');
-    var otp = document.getElementById('otp').value.replace(/\D/g, '');
-    if (!name) { otpHint.textContent = '請輸入姓名'; otpHint.classList.remove('hidden'); document.getElementById('name').focus(); return; }
-    if (phone.length < 10) { otpHint.textContent = '請輸入正確的手機號碼'; otpHint.classList.remove('hidden'); document.getElementById('phone').focus(); return; }
-    if (!selectedGender) { otpHint.textContent = '請選擇性別'; otpHint.classList.remove('hidden'); return; }
-    if (otp.length !== 6) { otpHint.textContent = '請輸入 6 位數驗證碼'; otpHint.classList.remove('hidden'); document.getElementById('otp').focus(); return; }
-    showView('member');
-    setActiveNav('card');
-  });
+    if (savedPhone) {
+      currentPhone = savedPhone;
+      showMemberDashboard(savedPhone);
+    } else {
+      switchTab('login');
+    }
+  }
 
-  document.getElementById('back-btn').addEventListener('click', function () {
-    showView('register');
-    setActiveNav('coupon');
-  });
-
-  navBtns.forEach(function (b) {
-    b.addEventListener('click', function () {
-      setActiveNav(b.dataset.nav);
-      showView(b.dataset.nav === 'card' ? 'member' : 'register');
+  function showMemberDashboard(phone) {
+    switchTab('member');
+    $('display-phone').innerText = phone.replace(/(\d{4})(\d{3})(\d{3})/, '$1-$2-$3');
+    
+    new QRious({
+      element: $('member-qr'),
+      value: phone,
+      size: 200,
+      foreground: '#0B2B5E'
     });
-  });
 
-  setActiveNav('coupon');
-})();
+    // 監聽 Firebase 資料庫，即時更新點數
+    onSnapshot(doc(db, "members", phone), (docSnap) => {
+      if (docSnap.exists()) {
+        $('header-points').innerText = (docSnap.data().points || 0) + " Points";
+      } else {
+        $('header-points').innerText = "0 Points";
+        setDoc(doc(db, "members", phone), { points: 0, joinDate: new Date().toLocaleString() }, { merge: true });
+      }
+    });
+  }
+
+  function switchTab(tabId) {
+    // 隱藏登入頁與會員頁
+    $('tab-login').classList.remove('active');
+    $('tab-member').classList.remove('active');
+    
+    // 顯示目標頁
+    if(tabId === 'login') {
+      $('tab-login').classList.add('active');
+      document.querySelector('.bottom-nav').style.display = 'none'; // 登入時隱藏底部導覽
+    } else {
+      $('tab-member').classList.add('active');
+      document.querySelector('.bottom-nav').style.display = 'flex';
+    }
+  }
+
+  function initRecaptcha() {
+    if (!recaptchaVerifier) {
+      recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', { 'size': 'invisible' });
+    }
+  }
+
+  async function sendOTP() {
+    const ph = $('phone').value;
+    if(ph.length !== 10 || !ph.startsWith('09')) return alert("⚠️ 請輸入 09 開頭的十碼手機號碼");
+    
+    const btn = $('btn-send-otp'); btn.disabled = true; btn.innerText = "發送中...";
+    initRecaptcha();
+
+    try {
+      confirmationResult = await signInWithPhoneNumber(auth, "+886" + ph.substring(1), recaptchaVerifier);
+      $('otp-field').style.display = 'block';
+      
+      let timeLeft = 60; btn.innerText = `重新發送 (${timeLeft}s)`;
+      const timer = setInterval(() => {
+        timeLeft--; if(timeLeft <= 0) { clearInterval(timer); btn.innerText = "取得驗證碼"; btn.disabled = false; } 
+        else { btn.innerText = `重新發送 (${timeLeft}s)`; }
+      }, 1000);
+    } catch (error) {
+      alert("❌ 發送失敗，請稍後再試。"); btn.innerText = "取得驗證碼"; btn.disabled = false;
+    }
+  }
+
+  async function loginMember() {
+    const ph = $('phone').value;
+    const otp = $('otp_code').value;
+
+    if(ph.length !== 10) return alert("⚠️ 請輸入完整手機號碼");
+    if(!confirmationResult) return alert("⚠️ 請先取得驗證碼");
+    if(otp.length !== 6) return alert("⚠️ 請輸入 6 位數簡訊驗證碼");
+
+    const btn = $('btn-login'); btn.disabled = true; btn.innerText = "驗證中...";
+    try {
+      await confirmationResult.confirm(otp);
+      // 登入成功，儲存並切換畫面
+      localStorage.setItem('member_phone', ph);
+      showMemberDashboard(ph);
+    } catch (error) {
+      btn.disabled = false; btn.innerText = "立即啟用會員";
+      alert("❌ 驗證碼錯誤或已過期！");
+    }
+  }
+
+  // 網頁載入時啟動檢查
+  checkLoginStatus();
 </script>
 </body>
 </html>
