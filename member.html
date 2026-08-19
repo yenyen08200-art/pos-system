@@ -1,406 +1,298 @@
 <!DOCTYPE html>
-<html lang="en" class="bg-[#0B2B5E]">
+<html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <meta name="theme-color" content="#0B2B5E" />
-  <title>Texas Chick &middot; VIP Membership</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@600;700;800&display=swap" rel="stylesheet" />
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: {
-            sans: ['Manrope', 'ui-sans-serif', 'system-ui'],
-            display: ['Sora', 'ui-sans-serif', 'system-ui'],
-          },
-          colors: {
-            navy: {
-              950: '#061A3C',
-              900: '#0B2B5E',
-              800: '#123C7A',
-            },
-            gold: {
-              light: '#FFC72C',
-              DEFAULT: '#F2A900',
-            },
-          },
-          boxShadow: {
-            'gold-glow': '0 0 60px -10px rgba(242,169,0,0.55)',
-            'card': '0 30px 80px -20px rgba(0,0,0,0.65)',
-          },
-        },
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>德州小騎士 VIP 會員</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet" />
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: { navy: '#0B2B5E', navyDeep: '#071D42', gold: '#F2A900' },
+        fontFamily: { tc: ['"Noto Sans TC"', 'sans-serif'] },
       },
-    };
-  </script>
-  <style>
-    html, body { -webkit-font-smoothing: antialiased; }
-    body { font-family: 'Manrope', sans-serif; }
-
-    /* ---- Animated glowing mesh orbs ---- */
-    @keyframes drift {
-      0%   { transform: translate(0,0) scale(1); }
-      50%  { transform: translate(6%, -4%) scale(1.15); }
-      100% { transform: translate(0,0) scale(1); }
-    }
-    @keyframes driftSlow {
-      0%   { transform: translate(0,0) scale(1.05); }
-      50%  { transform: translate(-8%, 6%) scale(0.95); }
-      100% { transform: translate(0,0) scale(1.05); }
-    }
-    .orb-gold  { animation: drift 14s ease-in-out infinite; }
-    .orb-blue  { animation: driftSlow 18s ease-in-out infinite; }
-
-    @keyframes floaty {
-      0%,100% { transform: translateY(0) rotateX(0) rotateY(0); }
-      50%     { transform: translateY(-14px); }
-    }
-    .floaty { animation: floaty 6s ease-in-out infinite; }
-
-    @keyframes shimmer {
-      0%   { background-position: -200% center; }
-      100% { background-position: 200% center; }
-    }
-    .card-sheen {
-      background: linear-gradient(115deg, rgba(255,255,255,0) 30%, rgba(255,255,255,0.35) 50%, rgba(255,255,255,0) 70%);
-      background-size: 200% 100%;
-      animation: shimmer 6s linear infinite;
-    }
-
-    @keyframes riseUp {
-      from { transform: translateY(60px); opacity: 0; }
-      to   { transform: translateY(0); opacity: 1; }
-    }
-    .rise { animation: riseUp 0.9s cubic-bezier(0.16,1,0.3,1) both; }
-
-    @keyframes fadeUp {
-      from { transform: translateY(24px); opacity: 0; }
-      to   { transform: translateY(0); opacity: 1; }
-    }
-    .fade-up { animation: fadeUp 0.7s cubic-bezier(0.16,1,0.3,1) both; }
-
-    .view { display: none !important; }
-    .view.active { display: flex !important; }
-
-    /* Gold gradient text */
-    .text-gold-grad {
-      background: linear-gradient(180deg, #FFD873 0%, #F2A900 100%);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-    }
-
-    /* Tilt hover for the card */
-    .tilt-wrap { perspective: 1200px; }
-
-    ::-webkit-scrollbar { width: 0; height: 0; }
-  </style>
+    },
+  };
+</script>
+<style>
+  html, body { -webkit-tap-highlight-color: transparent; }
+  body { font-family: "Noto Sans TC", sans-serif; }
+  @keyframes floatOrb {
+    0%   { transform: translate(-10%, -10%) scale(1); }
+    50%  { transform: translate(15%, 10%) scale(1.18); }
+    100% { transform: translate(-10%, -10%) scale(1); }
+  }
+  .orb {
+    animation: floatOrb 26s ease-in-out infinite;
+    background: radial-gradient(circle at 50% 50%, rgba(242,169,0,.85), rgba(242,169,0,.18) 55%, rgba(242,169,0,0) 72%);
+    filter: blur(70px);
+  }
+  @media (prefers-reduced-motion: reduce) { .orb { animation: none; } }
+  .glass { background: rgba(255,255,255,.12); backdrop-filter: blur(18px) saturate(140%); border: 1px solid rgba(255,255,255,.32); }
+  .glass-strong { background: rgba(255,255,255,.18); backdrop-filter: blur(22px) saturate(150%); border: 1px solid rgba(255,255,255,.38); }
+  .field { background: #ffffff; color: #0B2B5E; }
+  .field::placeholder { color: #6B7A94; }
+  .field:focus { outline: 4px solid #F2A900; outline-offset: 2px; }
+  .glow-btn { box-shadow: 0 0 0 1px rgba(255,255,255,.35), 0 14px 40px rgba(242,169,0,.45); }
+  select.field { appearance: none; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 24 24' fill='none' stroke='%230B2B5E' stroke-width='3' stroke-linecap='round'><polyline points='6 9 12 15 18 9'/></svg>");
+    background-repeat: no-repeat; background-position: right 14px center; padding-right: 52px; }
+</style>
 </head>
+<body class="bg-navy text-white font-tc antialiased">
 
-<body class="bg-navy-900 text-white overflow-x-hidden selection:bg-gold/30">
-
-  <!-- ============ Shared animated background ============ -->
-  <div class="fixed inset-0 -z-10 overflow-hidden bg-navy-950">
-    <div class="absolute inset-0 bg-[radial-gradient(120%_80%_at_50%_-10%,#123C7A_0%,#0B2B5E_45%,#061A3C_100%)]"></div>
-    <div class="orb-gold absolute -top-32 left-1/2 -translate-x-1/2 h-[520px] w-[520px] rounded-full bg-gold/40 blur-[120px]"></div>
-    <div class="orb-blue absolute top-1/3 -left-40 h-[460px] w-[460px] rounded-full bg-navy-800/70 blur-[120px]"></div>
-    <div class="orb-gold absolute bottom-[-140px] right-[-80px] h-[420px] w-[420px] rounded-full bg-gold-light/25 blur-[130px]"></div>
-    <!-- subtle grid -->
-    <div class="absolute inset-0 opacity-[0.04] bg-[linear-gradient(to_right,#fff_1px,transparent_1px),linear-gradient(to_bottom,#fff_1px,transparent_1px)] bg-[size:52px_52px]"></div>
+  <!-- 背景光暈 -->
+  <div class="fixed inset-0 -z-10 bg-navy overflow-hidden">
+    <div class="orb absolute top-[8%] left-[-15%] h-[520px] w-[520px] rounded-full"></div>
   </div>
 
-  <!-- ================================================================== -->
-  <!-- VIEW A — VIP ONBOARDING                                            -->
-  <!-- ================================================================== -->
-  <section id="view-onboarding" class="view active min-h-[100dvh] w-full flex items-center justify-center px-5 py-12">
-    <div class="w-full max-w-md">
+  <main class="mx-auto min-h-screen w-full max-w-[480px] px-5 pb-40 pt-8">
 
-      <!-- Brand mark -->
-      <div class="fade-up flex flex-col items-center text-center mb-8" style="animation-delay:.05s">
-        <div class="mb-5 inline-flex items-center gap-2 rounded-full border border-gold/30 bg-white/5 px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.25em] text-gold-light backdrop-blur-xl">
-          <span class="h-1.5 w-1.5 rounded-full bg-gold-light shadow-gold-glow"></span>
-          Members Only
-        </div>
-        <h1 class="font-display text-4xl font-extrabold tracking-tight leading-none">
-          Texas <span class="text-gold-grad">Chick</span>
-        </h1>
-        <p class="mt-3 text-sm text-white/55 max-w-xs leading-relaxed">
-          Join the Golden Circle. Unlock exclusive rewards, priority perks &amp; a digital VIP pass.
-        </p>
-      </div>
+    <!-- ============ 檢視 A：會員註冊 ============ -->
+    <section id="view-register">
+      <header class="text-center">
+        <p class="text-lg font-medium tracking-widest text-gold">德州小騎士</p>
+        <h1 class="mt-2 text-4xl font-black leading-tight">加入 VIP 會員</h1>
+        <p class="mt-3 text-lg text-white/90">填寫資料，立刻開始累積點數</p>
+      </header>
 
-      <!-- Frosted glass registration panel -->
-      <div class="rise relative rounded-[28px] border border-white/15 bg-white/10 p-7 shadow-card backdrop-blur-2xl"
-           style="animation-delay:.15s">
-        <!-- glow ring -->
-        <div class="pointer-events-none absolute -inset-px rounded-[28px] bg-gradient-to-b from-white/25 to-transparent opacity-40"></div>
-
-        <div class="relative">
-          <h2 class="font-display text-xl font-bold mb-1">Create your VIP profile</h2>
-          <p class="text-xs text-white/50 mb-6">Takes less than 30 seconds.</p>
-
-          <form id="signup-form" class="space-y-6">
-            <!-- Name -->
-            <div class="group">
-              <label class="block text-[11px] font-semibold uppercase tracking-widest text-white/40 mb-2">Full Name</label>
-              <input id="f-name" type="text" required placeholder="Jane Doe"
-                class="w-full bg-transparent border-b border-white/20 pb-2 text-base text-white placeholder-white/25 outline-none transition-colors focus:border-gold-light" />
-            </div>
-
-            <!-- Phone -->
-            <div class="group">
-              <label class="block text-[11px] font-semibold uppercase tracking-widest text-white/40 mb-2">Phone Number</label>
-              <input id="f-phone" type="tel" required placeholder="+1 (555) 000-0000"
-                class="w-full bg-transparent border-b border-white/20 pb-2 text-base text-white placeholder-white/25 outline-none transition-colors focus:border-gold-light" />
-            </div>
-
-            <!-- Gender pills -->
-            <div>
-              <label class="block text-[11px] font-semibold uppercase tracking-widest text-white/40 mb-3">Gender</label>
-              <div id="gender-group" class="flex gap-2.5">
-                <button type="button" data-val="Female" class="pill flex-1 rounded-full border border-white/20 px-4 py-2.5 text-sm font-medium text-white/70 transition-all">Female</button>
-                <button type="button" data-val="Male" class="pill flex-1 rounded-full border border-white/20 px-4 py-2.5 text-sm font-medium text-white/70 transition-all">Male</button>
-                <button type="button" data-val="Other" class="pill flex-1 rounded-full border border-white/20 px-4 py-2.5 text-sm font-medium text-white/70 transition-all">Other</button>
-              </div>
-            </div>
-
-            <!-- Discovery source -->
-            <div>
-              <label class="block text-[11px] font-semibold uppercase tracking-widest text-white/40 mb-2">How did you find us?</label>
-              <div class="relative">
-                <select id="f-source"
-                  class="w-full appearance-none bg-transparent border-b border-white/20 pb-2 text-base text-white outline-none transition-colors focus:border-gold-light [&>option]:bg-navy-900">
-                  <option value="" class="text-white/25">Select an option</option>
-                  <option>Instagram</option>
-                  <option>TikTok</option>
-                  <option>A friend</option>
-                  <option>Walked past the store</option>
-                  <option>Google Search</option>
-                </select>
-                <svg class="pointer-events-none absolute right-1 top-1.5 h-4 w-4 text-white/40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
-              </div>
-            </div>
-
-            <!-- Submit -->
-            <button type="submit"
-              class="group relative w-full overflow-hidden rounded-2xl bg-gradient-to-r from-gold to-gold-light py-4 text-base font-bold text-navy-950 shadow-gold-glow transition-transform active:scale-[0.98]">
-              <span class="card-sheen absolute inset-0"></span>
-              <span class="relative flex items-center justify-center gap-2">
-                Unlock VIP Access
-                <svg class="h-5 w-5 transition-transform group-hover:translate-x-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-              </span>
-            </button>
-          </form>
-        </div>
-      </div>
-
-      <p class="fade-up mt-6 text-center text-[11px] text-white/30" style="animation-delay:.3s">
-        By joining you agree to receive golden offers. No spam, only perks.
-      </p>
-    </div>
-  </section>
-
-  <!-- ================================================================== -->
-  <!-- VIEW B — THE VIP DIGITAL PASS                                       -->
-  <!-- ================================================================== -->
-  <section id="view-pass" class="view min-h-[100dvh] w-full flex flex-col">
-
-    <!-- Blue top area -->
-    <div class="relative flex-1 px-6 pt-10 pb-40">
-      <!-- top bar -->
-      <div class="mx-auto flex max-w-md items-center justify-between">
+      <form id="register-form" class="glass mt-8 rounded-3xl p-6 shadow-2xl" novalidate>
         <div>
-          <p class="text-[11px] font-semibold uppercase tracking-[0.25em] text-gold-light">VIP Member</p>
-          <p id="greet-name" class="font-display text-lg font-bold">Welcome back</p>
+          <label for="name" class="mb-2 block text-xl font-bold">姓名</label>
+          <input id="name" name="name" type="text" autocomplete="name" placeholder="請輸入您的姓名"
+                 class="field w-full rounded-2xl border-2 border-white/60 px-5 py-4 text-xl font-medium shadow-inner" />
         </div>
-        <button id="logout-btn" class="flex h-11 w-11 items-center justify-center rounded-full border border-white/15 bg-white/5 backdrop-blur-xl transition-colors hover:bg-white/10" aria-label="Sign out">
-          <svg class="h-5 w-5 text-white/70" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+
+        <div class="mt-6">
+          <label for="phone" class="mb-2 block text-xl font-bold">手機號碼</label>
+          <input id="phone" name="phone" type="tel" inputmode="numeric" autocomplete="tel" maxlength="10" placeholder="09xx-xxx-xxx"
+                 class="field w-full rounded-2xl border-2 border-white/60 px-5 py-4 text-xl font-medium tracking-wider shadow-inner" />
+        </div>
+
+        <div class="mt-6">
+          <span class="mb-3 block text-xl font-bold">性別</span>
+          <div id="gender-group" class="grid grid-cols-3 gap-3" role="group" aria-label="性別">
+            <button type="button" data-gender="男" class="gender-pill rounded-2xl border-2 border-white/50 bg-white/15 px-3 py-4 text-xl font-bold text-white">男</button>
+            <button type="button" data-gender="女" class="gender-pill rounded-2xl border-2 border-white/50 bg-white/15 px-3 py-4 text-xl font-bold text-white">女</button>
+            <button type="button" data-gender="其他" class="gender-pill rounded-2xl border-2 border-white/50 bg-white/15 px-3 py-4 text-xl font-bold text-white">其他</button>
+          </div>
+        </div>
+
+        <div class="mt-6">
+          <label for="source" class="mb-2 block text-xl font-bold">消息來源</label>
+          <select id="source" class="field w-full rounded-2xl border-2 border-white/60 px-5 py-4 text-xl font-medium shadow-inner">
+            <option value="">請選擇</option>
+            <option>親友介紹</option>
+            <option>門市海報</option>
+            <option>臉書 Facebook</option>
+            <option>Instagram</option>
+            <option>網路搜尋</option>
+            <option>其他</option>
+          </select>
+        </div>
+
+        <div class="mt-6">
+          <label for="otp" class="mb-2 block text-xl font-bold">簡訊驗證碼</label>
+          <div class="flex gap-3">
+            <input id="otp" type="text" inputmode="numeric" maxlength="6" placeholder="6 位數字"
+                   class="field w-full min-w-0 rounded-2xl border-2 border-white/60 px-5 py-4 text-2xl font-bold tracking-[0.3em] shadow-inner" />
+            <button type="button" id="otp-btn"
+                    class="shrink-0 rounded-2xl border-2 border-gold bg-white/15 px-4 py-4 text-lg font-bold text-gold">取得驗證碼</button>
+          </div>
+          <p id="otp-hint" class="mt-3 hidden text-lg font-medium text-gold"></p>
+        </div>
+
+        <button type="submit"
+                class="glow-btn mt-8 w-full rounded-2xl bg-gold py-5 text-2xl font-black text-navy">立即開通會員</button>
+
+        <p class="mt-4 text-center text-base leading-relaxed text-white/80">送出即表示同意會員條款與個人資料使用聲明</p>
+      </form>
+    </section>
+
+    <!-- ============ 檢視 B：會員專區 ============ -->
+    <section id="view-member" class="hidden">
+      <header class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="grid h-14 w-14 place-items-center rounded-2xl bg-gold text-2xl font-black text-navy">騎</div>
+          <div>
+            <p class="text-lg font-bold leading-tight">德州小騎士</p>
+            <p class="text-base text-white/80">VIP 會員專區</p>
+          </div>
+        </div>
+        <div class="rounded-full bg-gold px-5 py-3 text-2xl font-black text-navy shadow-lg">150 點</div>
+      </header>
+
+      <!-- 會員卡 -->
+      <div class="glass-strong mt-7 rounded-3xl p-6 text-center shadow-2xl">
+        <p class="text-xl font-bold">王小明 的會員卡</p>
+        <div class="mx-auto mt-5 w-fit rounded-2xl bg-white p-4 shadow-xl">
+          <svg viewBox="0 0 100 100" class="h-52 w-52" role="img" aria-label="會員 QR Code">
+            <rect width="100" height="100" fill="#fff"/>
+            <g fill="#0B2B5E">
+              <rect x="6" y="6" width="24" height="24"/><rect x="70" y="6" width="24" height="24"/><rect x="6" y="70" width="24" height="24"/>
+              <rect x="12" y="12" width="12" height="12" fill="#fff"/><rect x="76" y="12" width="12" height="12" fill="#fff"/><rect x="12" y="76" width="12" height="12" fill="#fff"/>
+              <rect x="40" y="8" width="6" height="6"/><rect x="52" y="8" width="6" height="6"/><rect x="46" y="20" width="6" height="6"/>
+              <rect x="40" y="32" width="6" height="6"/><rect x="58" y="26" width="6" height="6"/><rect x="8" y="40" width="6" height="6"/>
+              <rect x="20" y="46" width="6" height="6"/><rect x="32" y="40" width="6" height="6"/><rect x="44" y="46" width="6" height="6"/>
+              <rect x="56" y="40" width="6" height="6"/><rect x="68" y="46" width="6" height="6"/><rect x="80" y="40" width="6" height="6"/>
+              <rect x="88" y="52" width="6" height="6"/><rect x="70" y="60" width="6" height="6"/><rect x="58" y="66" width="6" height="6"/>
+              <rect x="46" y="60" width="6" height="6"/><rect x="34" y="66" width="6" height="6"/><rect x="40" y="78" width="6" height="6"/>
+              <rect x="52" y="86" width="6" height="6"/><rect x="64" y="78" width="6" height="6"/><rect x="76" y="86" width="6" height="6"/>
+              <rect x="86" y="72" width="6" height="6"/><rect x="70" y="72" width="6" height="6"/><rect x="22" y="58" width="6" height="6"/>
+            </g>
+          </svg>
+        </div>
+        <p class="mt-5 text-3xl font-black tracking-wider">0912-345-678</p>
+        <p class="mt-2 text-lg text-white/90">結帳時請出示此條碼</p>
+      </div>
+
+      <!-- 點數兌換 -->
+      <h2 class="mt-9 text-2xl font-black">點數兌換</h2>
+      <ul class="mt-4 space-y-3">
+        <li class="glass flex items-center justify-between rounded-2xl px-5 py-5">
+          <span class="text-xl font-bold">大份黃金脆薯</span>
+          <span class="rounded-full bg-gold px-4 py-2 text-lg font-black text-navy">300 點</span>
+        </li>
+        <li class="glass flex items-center justify-between rounded-2xl px-5 py-5">
+          <span class="text-xl font-bold">香辣小炸雞</span>
+          <span class="rounded-full bg-gold px-4 py-2 text-lg font-black text-navy">450 點</span>
+        </li>
+        <li class="glass flex items-center justify-between rounded-2xl px-5 py-5">
+          <span class="text-xl font-bold">冰紅茶（大）</span>
+          <span class="rounded-full bg-gold px-4 py-2 text-lg font-black text-navy">200 點</span>
+        </li>
+        <li class="glass flex items-center justify-between rounded-2xl px-5 py-5">
+          <span class="text-xl font-bold">德州招牌雞腿堡</span>
+          <span class="rounded-full bg-gold px-4 py-2 text-lg font-black text-navy">600 點</span>
+        </li>
+      </ul>
+
+      <button type="button" id="back-btn" class="mt-8 w-full rounded-2xl border-2 border-white/40 bg-white/10 py-4 text-lg font-bold text-white">返回註冊頁面</button>
+    </section>
+  </main>
+
+  <!-- 底部導覽列 -->
+  <nav class="fixed inset-x-0 bottom-0 z-20">
+    <div class="mx-auto max-w-[480px] px-4 pb-4">
+      <div class="glass-strong flex items-stretch justify-around rounded-3xl px-2 py-3 shadow-2xl">
+        <button type="button" data-nav="coupon" class="nav-btn flex flex-1 flex-col items-center gap-1 rounded-2xl py-2 text-white/85">
+          <svg class="h-8 w-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9V6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v3a3 3 0 0 0 0 6v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-3a3 3 0 0 0 0-6Z"/><path d="M14 8v8"/></svg>
+          <span class="text-base font-bold">領取優惠</span>
+        </button>
+        <button type="button" data-nav="card" class="nav-btn flex flex-1 flex-col items-center gap-1 rounded-2xl py-2 text-white/85">
+          <svg class="h-8 w-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="3"/><path d="M2 10h20M6 15h5"/></svg>
+          <span class="text-base font-bold">會員卡</span>
+        </button>
+        <button type="button" data-nav="store" class="nav-btn flex flex-1 flex-col items-center gap-1 rounded-2xl py-2 text-white/85">
+          <svg class="h-8 w-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s7-5.5 7-11a7 7 0 1 0-14 0c0 5.5 7 11 7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg>
+          <span class="text-base font-bold">門市資訊</span>
         </button>
       </div>
-
-      <!-- Points -->
-      <div class="mx-auto mt-8 max-w-md text-center fade-up">
-        <div class="flex items-start justify-center gap-2">
-          <span id="points-value" class="font-display text-[92px] font-extrabold leading-none tracking-tight text-gold-grad drop-shadow-[0_4px_30px_rgba(242,169,0,0.35)]">150</span>
-        </div>
-        <p class="mt-1 text-sm font-medium uppercase tracking-[0.3em] text-white/55">Golden Points</p>
-      </div>
-
-      <!-- The Pass card -->
-      <div class="tilt-wrap mx-auto mt-10 max-w-md">
-        <div id="vip-card" class="floaty relative overflow-hidden rounded-[26px] border border-white/20 p-6 shadow-card"
-             style="background:linear-gradient(135deg,#123C7A 0%,#0B2B5E 55%,#061A3C 100%); transition:transform .15s ease-out;">
-          <!-- metallic sheen -->
-          <div class="card-sheen pointer-events-none absolute inset-0 opacity-60"></div>
-          <div class="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-gold/30 blur-3xl"></div>
-
-          <div class="relative flex items-start justify-between">
-            <div>
-              <p class="font-display text-xl font-extrabold tracking-tight">Texas <span class="text-gold-grad">Chick</span></p>
-              <p class="mt-0.5 text-[10px] font-semibold uppercase tracking-[0.3em] text-gold-light/80">Black Card &middot; VIP</p>
-            </div>
-            <!-- chip -->
-            <div class="h-8 w-11 rounded-md bg-gradient-to-br from-gold-light to-gold shadow-inner"></div>
-          </div>
-
-          <div class="relative mt-6 flex items-end justify-between gap-4">
-            <!-- details -->
-            <div class="flex-1">
-              <p class="text-[10px] font-semibold uppercase tracking-widest text-white/40">Member</p>
-              <p id="card-phone" class="mt-1 font-display text-lg font-bold tracking-wide">+1 (555) 000-0000</p>
-              <p class="mt-4 text-[10px] font-semibold uppercase tracking-widest text-white/40">Valid Thru</p>
-              <p class="mt-0.5 text-sm font-semibold text-white/80">12 / 29</p>
-            </div>
-
-            <!-- QR placeholder -->
-            <div class="rounded-2xl bg-white p-2.5 shadow-lg">
-              <div id="qr" class="h-24 w-24 grid grid-cols-5 grid-rows-5 gap-0.5"></div>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
+  </nav>
 
-    <!-- White bottom sheet -->
-    <div class="rise relative z-10 -mt-24 rounded-t-[36px] bg-white px-6 pt-7 pb-10 text-navy-900 shadow-[0_-20px_60px_-20px_rgba(0,0,0,0.5)]">
-      <div class="mx-auto max-w-md">
-        <!-- grabber -->
-        <div class="mx-auto mb-6 h-1.5 w-12 rounded-full bg-navy-900/15"></div>
+<script>
+(function () {
+  var viewRegister = document.getElementById('view-register');
+  var viewMember = document.getElementById('view-member');
+  var navBtns = document.querySelectorAll('.nav-btn');
 
-        <div class="mb-5 flex items-center justify-between">
-          <div>
-            <h2 class="font-display text-2xl font-extrabold">Rewards Vault</h2>
-            <p class="text-sm text-navy-900/50">Redeem your golden points</p>
-          </div>
-          <div class="flex h-11 w-11 items-center justify-center rounded-full bg-navy-900 text-gold-light">
-            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 12v10H4V12M2 7h20v5H2zM12 22V7M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7zM12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
-          </div>
-        </div>
-
-        <!-- Rewards list -->
-        <ul id="rewards-list" class="space-y-3"></ul>
-      </div>
-    </div>
-  </section>
-
-  <script>
-    // ---------- Data ----------
-    var rewards = [
-      { name: 'Signature Fries',        desc: 'Golden, crispy, legendary',      points: 80,  emoji: '🍟' },
-      { name: 'Spicy Crispy Chicken',   desc: 'The house classic',              points: 120, emoji: '🍗' },
-      { name: 'Loaded Cheese Bites',    desc: 'Melted perfection',              points: 150, emoji: '🧀' },
-      { name: 'VIP Combo Meal',         desc: 'Chicken + fries + drink',        points: 220, emoji: '🍱' },
-      { name: 'Free Dessert Waffle',    desc: 'Sweet golden finish',            points: 300, emoji: '🧇' },
-    ];
-
-    var state = { name: '', phone: '', gender: '', source: '', points: 150 };
-
-    // ---------- Elements ----------
-    var viewOnboarding = document.getElementById('view-onboarding');
-    var viewPass       = document.getElementById('view-pass');
-
-    // ---------- Gender pills ----------
-    var genderGroup = document.getElementById('gender-group');
-    genderGroup.addEventListener('click', function (e) {
-      var btn = e.target.closest('.pill');
-      if (!btn) return;
-      Array.prototype.forEach.call(genderGroup.querySelectorAll('.pill'), function (p) {
-        p.classList.remove('bg-gradient-to-r','from-gold','to-gold-light','text-navy-950','border-transparent','shadow-gold-glow','font-bold');
-        p.classList.add('text-white/70','border-white/20');
-      });
-      btn.classList.add('bg-gradient-to-r','from-gold','to-gold-light','text-navy-950','border-transparent','shadow-gold-glow','font-bold');
-      btn.classList.remove('text-white/70','border-white/20');
-      state.gender = btn.getAttribute('data-val');
+  function setActiveNav(key) {
+    navBtns.forEach(function (b) {
+      var on = b.dataset.nav === key;
+      b.classList.toggle('bg-gold', on);
+      b.classList.toggle('text-navy', on);
+      b.classList.toggle('text-white/85', !on);
+      b.setAttribute('aria-current', on ? 'page' : 'false');
     });
+  }
 
-    // ---------- Build a faux QR code ----------
-    function buildQR() {
-      var qr = document.getElementById('qr');
-      qr.innerHTML = '';
-      // deterministic-ish pattern with fixed finder corners
-      for (var i = 0; i < 25; i++) {
-        var cell = document.createElement('div');
-        var on = Math.random() > 0.5;
-        // finder patterns (corners) forced on
-        if (i === 0 || i === 4 || i === 20) on = true;
-        cell.className = 'rounded-[1px] ' + (on ? 'bg-navy-950' : 'bg-transparent');
-        qr.appendChild(cell);
+  function showView(name) {
+    viewRegister.classList.toggle('hidden', name !== 'register');
+    viewMember.classList.toggle('hidden', name !== 'member');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // 性別選擇
+  var selectedGender = '';
+  document.querySelectorAll('.gender-pill').forEach(function (pill) {
+    pill.addEventListener('click', function () {
+      selectedGender = pill.dataset.gender;
+      document.querySelectorAll('.gender-pill').forEach(function (p) {
+        var on = p === pill;
+        p.classList.toggle('bg-gold', on);
+        p.classList.toggle('text-navy', on);
+        p.classList.toggle('border-gold', on);
+        p.classList.toggle('bg-white/15', !on);
+        p.classList.toggle('text-white', !on);
+        p.classList.toggle('border-white/50', !on);
+        p.setAttribute('aria-pressed', on ? 'true' : 'false');
+      });
+    });
+  });
+
+  // 取得驗證碼倒數
+  var otpBtn = document.getElementById('otp-btn');
+  var otpHint = document.getElementById('otp-hint');
+  var timer = null;
+  otpBtn.addEventListener('click', function () {
+    var phone = document.getElementById('phone').value.replace(/\D/g, '');
+    if (phone.length < 10) {
+      otpHint.textContent = '請先輸入正確的 10 碼手機號碼';
+      otpHint.classList.remove('hidden');
+      document.getElementById('phone').focus();
+      return;
+    }
+    if (timer) return;
+    otpHint.textContent = '驗證碼已發送，請查看手機簡訊';
+    otpHint.classList.remove('hidden');
+    var left = 60;
+    otpBtn.disabled = true;
+    otpBtn.classList.add('opacity-60');
+    otpBtn.textContent = left + ' 秒';
+    timer = setInterval(function () {
+      left -= 1;
+      otpBtn.textContent = left + ' 秒';
+      if (left <= 0) {
+        clearInterval(timer); timer = null;
+        otpBtn.disabled = false;
+        otpBtn.classList.remove('opacity-60');
+        otpBtn.textContent = '重新取得';
       }
-    }
+    }, 1000);
+  });
 
-    // ---------- Render rewards ----------
-    function renderRewards() {
-      var list = document.getElementById('rewards-list');
-      list.innerHTML = '';
-      rewards.forEach(function (r, idx) {
-        var unlocked = state.points >= r.points;
-        var li = document.createElement('li');
-        li.className = 'fade-up flex items-center gap-4 rounded-2xl border border-navy-900/5 bg-navy-900/[0.02] p-3.5 pr-4 transition-shadow hover:shadow-md';
-        li.style.animationDelay = (0.05 * idx) + 's';
-        li.innerHTML =
-          '<div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-navy-900 to-navy-800 text-2xl">' + r.emoji + '</div>' +
-          '<div class="min-w-0 flex-1">' +
-            '<p class="font-display text-base font-bold leading-tight">' + r.name + '</p>' +
-            '<p class="truncate text-xs text-navy-900/45">' + r.desc + '</p>' +
-          '</div>' +
-          '<div class="flex flex-col items-end gap-1">' +
-            '<span class="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-gold to-gold-light px-3 py-1 text-xs font-extrabold text-navy-950 shadow-[0_4px_14px_-4px_rgba(242,169,0,0.7)]">' +
-              '<svg class="h-3 w-3" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.3 6.9.6-5.2 4.6 1.6 6.8L12 17.3 5.8 20.9l1.6-6.8L2.2 8.9l6.9-.6z"/></svg>' +
-              r.points +
-            '</span>' +
-            (unlocked
-              ? '<span class="text-[10px] font-semibold uppercase tracking-wide text-emerald-600">Available</span>'
-              : '<span class="text-[10px] font-semibold uppercase tracking-wide text-navy-900/35">' + (r.points - state.points) + ' pts away</span>') +
-          '</div>';
-        list.appendChild(li);
-      });
-    }
+  // 送出註冊
+  document.getElementById('register-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var name = document.getElementById('name').value.trim();
+    var phone = document.getElementById('phone').value.replace(/\D/g, '');
+    var otp = document.getElementById('otp').value.replace(/\D/g, '');
+    if (!name) { otpHint.textContent = '請輸入姓名'; otpHint.classList.remove('hidden'); document.getElementById('name').focus(); return; }
+    if (phone.length < 10) { otpHint.textContent = '請輸入正確的手機號碼'; otpHint.classList.remove('hidden'); document.getElementById('phone').focus(); return; }
+    if (!selectedGender) { otpHint.textContent = '請選擇性別'; otpHint.classList.remove('hidden'); return; }
+    if (otp.length !== 6) { otpHint.textContent = '請輸入 6 位數驗證碼'; otpHint.classList.remove('hidden'); document.getElementById('otp').focus(); return; }
+    showView('member');
+    setActiveNav('card');
+  });
 
-    // ---------- Switch views ----------
-    function showPass() {
-      viewOnboarding.classList.remove('active');
-      viewPass.classList.add('active');
-      document.getElementById('greet-name').textContent = state.name ? ('Welcome, ' + state.name.split(' ')[0]) : 'Welcome back';
-      document.getElementById('card-phone').textContent = state.phone || '+1 (555) 000-0000';
-      document.getElementById('points-value').textContent = state.points;
-      buildQR();
-      renderRewards();
-      window.scrollTo(0, 0);
-    }
-    function showOnboarding() {
-      viewPass.classList.remove('active');
-      viewOnboarding.classList.add('active');
-      window.scrollTo(0, 0);
-    }
+  document.getElementById('back-btn').addEventListener('click', function () {
+    showView('register');
+    setActiveNav('coupon');
+  });
 
-    // ---------- Form submit ----------
-    document.getElementById('signup-form').addEventListener('submit', function (e) {
-      e.preventDefault();
-      state.name   = document.getElementById('f-name').value.trim();
-      state.phone  = document.getElementById('f-phone').value.trim();
-      state.source = document.getElementById('f-source').value;
-      showPass();
+  navBtns.forEach(function (b) {
+    b.addEventListener('click', function () {
+      setActiveNav(b.dataset.nav);
+      showView(b.dataset.nav === 'card' ? 'member' : 'register');
     });
+  });
 
-    document.getElementById('logout-btn').addEventListener('click', showOnboarding);
-
-    // ---------- Card 3D tilt ----------
-    (function () {
-      var card = document.getElementById('vip-card');
-      var wrap = card.parentElement;
-      wrap.addEventListener('mousemove', function (e) {
-        var r = card.getBoundingClientRect();
-        var px = (e.clientX - r.left) / r.width - 0.5;
-        var py = (e.clientY - r.top) / r.height - 0.5;
-        card.style.transform = 'rotateY(' + (px * 12) + 'deg) rotateX(' + (-py * 12) + 'deg) translateY(-6px)';
-      });
-      wrap.addEventListener('mouseleave', function () {
-        card.style.transform = '';
-      });
-    })();
-  </script>
+  setActiveNav('coupon');
+})();
+</script>
 </body>
 </html>
