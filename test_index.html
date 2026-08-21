@@ -3,15 +3,16 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+<!-- 🔥 新增：Apple PWA 專用 Meta -->
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>德州小騎士 | 門市 POS 核銷與點數系統</title>
+<title>抽獎核銷系統 | 門市 POS 兌換平台</title>
+<!-- 🔥 新增：PWA Manifest -->
 <link rel="manifest" href="./manifest.json">
 <link rel="apple-touch-icon" href="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Square_logo.svg/512px-Square_logo.svg.png">
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Space+Grotesk:wght@500;700;900&display=swap" />
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
 :root{
   --background:oklch(0.17 0.024 259);
@@ -61,9 +62,29 @@ main {
   background-size: auto,auto,44px 44px,44px 44px;
 }
 
-body.mode-physical-active main { background-image: radial-gradient(circle at 15% 10%, rgba(255,107,53,0.12), transparent 45%), radial-gradient(circle at 85% 0%, rgba(240,67,35,0.12), transparent 40%), linear-gradient(oklch(1 0 0 / 3%) 1px, transparent 1px), linear-gradient(90deg, oklch(1 0 0 / 3%) 1px, transparent 1px); }
-body.mode-counter-active main { background-image: radial-gradient(circle at 15% 10%, rgba(63,191,143,0.12), transparent 45%), radial-gradient(circle at 85% 0%, rgba(42,140,102,0.12), transparent 40%), linear-gradient(oklch(1 0 0 / 3%) 1px, transparent 1px), linear-gradient(90deg, oklch(1 0 0 / 3%) 1px, transparent 1px); }
-body.mode-member-active main { background-image: radial-gradient(circle at 15% 10%, rgba(242,169,0,0.12), transparent 45%), radial-gradient(circle at 85% 0%, rgba(255,199,44,0.12), transparent 40%), linear-gradient(oklch(1 0 0 / 3%) 1px, transparent 1px), linear-gradient(90deg, oklch(1 0 0 / 3%) 1px, transparent 1px); }
+body.mode-physical-active main {
+  background-image:
+    radial-gradient(circle at 15% 10%, rgba(255,107,53,0.12), transparent 45%),
+    radial-gradient(circle at 85% 0%, rgba(240,67,35,0.12), transparent 40%),
+    linear-gradient(oklch(1 0 0 / 3%) 1px, transparent 1px),
+    linear-gradient(90deg, oklch(1 0 0 / 3%) 1px, transparent 1px);
+}
+
+body.mode-counter-active main {
+  background-image:
+    radial-gradient(circle at 15% 10%, rgba(63,191,143,0.12), transparent 45%),
+    radial-gradient(circle at 85% 0%, rgba(42,140,102,0.12), transparent 40%),
+    linear-gradient(oklch(1 0 0 / 3%) 1px, transparent 1px),
+    linear-gradient(90deg, oklch(1 0 0 / 3%) 1px, transparent 1px);
+}
+
+body.mode-member-active main {
+  background-image:
+    radial-gradient(circle at 15% 10%, rgba(242,169,0,0.12), transparent 45%),
+    radial-gradient(circle at 85% 0%, rgba(255,199,44,0.12), transparent 40%),
+    linear-gradient(oklch(1 0 0 / 3%) 1px, transparent 1px),
+    linear-gradient(90deg, oklch(1 0 0 / 3%) 1px, transparent 1px);
+}
 
 .wrap { max-width: 1400px; margin: 0 auto; width: 100%; padding: 20px 16px; }
 @media(min-width:768px){.wrap{padding:32px}}
@@ -203,10 +224,10 @@ body.mode-physical-active .primary-btn { background-image: var(--gradient-physic
 body.mode-member-active .primary-btn { background-image: var(--gradient-member); box-shadow: 0 14px 30px -16px rgba(242,169,0,0.9); color: #1E293B; }
 button:disabled{opacity:.5;cursor:not-allowed}
 
-#employee-name{width:100%; min-height:56px; border-radius:12px; border:1px solid var(--border); background:var(--secondary); color:var(--foreground); padding:0 16px; font-size:16px; outline:none; transition:all .2s;}
-#employee-name:focus{border-color:var(--accent-digital); background:var(--card); box-shadow:0 0 0 4px rgba(0,198,255,0.25);}
-body.mode-physical-active #employee-name:focus { border-color: var(--accent-physical); box-shadow: 0 0 0 4px rgba(255,107,53,0.25); }
-body.mode-member-active #employee-name:focus { border-color: var(--accent-member); box-shadow: 0 0 0 4px rgba(242,169,0,0.25); }
+/* 🔥 更新：讓員工編號變成唯讀，強制透過九宮格輸入 */
+#employee-name{
+  width:100%; min-height:56px; border-radius:12px; border:1px solid var(--border); background:rgba(0,0,0,0.3); color:#fff; padding:0 16px; font-size:16px; margin-bottom: 20px; outline:none; text-align:center; font-family:monospace; font-weight:bold; letter-spacing:0.1em;
+}
 
 #toast-container {
   position: fixed; top: -100px; left: 50%; transform: translateX(-50%); z-index: 10000;
@@ -330,6 +351,48 @@ body.mode-member-active .undo:hover { background: rgba(242,169,0,0.25); }
 }
 .member-list-item:hover { transform: translateY(-2px); border-color: var(--accent-member); background: rgba(242,169,0,0.1); }
 .member-list-item.disabled { opacity: 0.4; filter: grayscale(1); pointer-events: none; }
+
+/* 🔥 九宮格登入介面專屬樣式 */
+#pos-login-screen {
+  position: fixed; inset: 0; z-index: 100000;
+  background: radial-gradient(circle at 50% 50%, rgba(0,198,255,0.1), var(--background) 80%);
+  display: flex; flex-direction: column; justify-content: center; align-items: center;
+  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+}
+.login-panel {
+  background: linear-gradient(160deg, rgba(255,255,255,0.05), rgba(255,255,255,0.01));
+  border: 1px solid rgba(255,255,255,0.1); border-radius: 32px;
+  padding: 30px; width: 100%; max-width: 360px;
+  box-shadow: 0 30px 60px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1);
+  text-align: center;
+}
+.login-logo {
+  width: 70px; height: 70px; border-radius: 20px; font-size: 36px;
+  background: var(--gradient-digital); color: #fff; margin: 0 auto 15px;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 10px 25px -5px rgba(0,198,255,0.6);
+}
+.login-title { font-size: 20px; font-weight: 700; margin-bottom: 24px; letter-spacing: 0.1em; color: var(--foreground); }
+.pin-display-box {
+  background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 16px; height: 64px; margin-bottom: 24px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 32px; font-family: monospace; font-weight: 900; letter-spacing: 0.2em; color: var(--accent-digital);
+  box-shadow: inset 0 4px 10px rgba(0,0,0,0.5); text-shadow: 0 0 10px rgba(0,198,255,0.5);
+}
+.pin-display-box.error { color: #ff4757; text-shadow: 0 0 10px rgba(255,71,87,0.5); animation: shake 0.4s; }
+@keyframes shake { 0%,100%{transform:translateX(0);} 25%{transform:translateX(-5px);} 75%{transform:translateX(5px);} }
+.keypad-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.keypad-btn {
+  background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 16px; height: 64px; font-size: 24px; font-weight: 700; color: #fff;
+  cursor: pointer; transition: 0.1s; display: flex; align-items: center; justify-content: center; font-family: "Space Grotesk", sans-serif;
+}
+.keypad-btn:active { transform: scale(0.92); background: rgba(255,255,255,0.15); }
+.keypad-btn.btn-clear { background: rgba(255,71,87,0.1); color: #ff4757; border-color: rgba(255,71,87,0.3); }
+.keypad-btn.btn-clear:active { background: rgba(255,71,87,0.3); }
+.keypad-btn.btn-submit { background: var(--gradient-digital); color: #fff; border: none; box-shadow: 0 8px 20px -5px rgba(0,198,255,0.6); }
+.keypad-btn.btn-submit:active { box-shadow: 0 4px 10px -5px rgba(0,198,255,0.6); }
 </style>
 </head>
 <body>
@@ -345,7 +408,33 @@ body.mode-member-active .undo:hover { background: rgba(242,169,0,0.25); }
   <span id="toast-msg">系統訊息</span>
 </div>
 
-<main>
+<!-- 🔥 九宮格登入介面 -->
+<div id="pos-login-screen">
+  <div class="login-panel">
+    <div class="login-logo">⚡</div>
+    <div class="login-title">小騎士 POS 登入</div>
+    
+    <div class="pin-display-box" id="pin-display"></div>
+    
+    <div class="keypad-grid">
+      <button class="keypad-btn" onclick="addPin('7')">7</button>
+      <button class="keypad-btn" onclick="addPin('8')">8</button>
+      <button class="keypad-btn" onclick="addPin('9')">9</button>
+      <button class="keypad-btn" onclick="addPin('4')">4</button>
+      <button class="keypad-btn" onclick="addPin('5')">5</button>
+      <button class="keypad-btn" onclick="addPin('6')">6</button>
+      <button class="keypad-btn" onclick="addPin('1')">1</button>
+      <button class="keypad-btn" onclick="addPin('2')">2</button>
+      <button class="keypad-btn" onclick="addPin('3')">3</button>
+      <button class="keypad-btn btn-clear" onclick="clearPin()">✖</button>
+      <button class="keypad-btn" onclick="addPin('0')">0</button>
+      <button class="keypad-btn btn-submit" onclick="submitPin()">✔</button>
+    </div>
+  </div>
+</div>
+
+<!-- 🔥 主系統被登入層擋住 -->
+<main id="main-app" style="filter: blur(10px); pointer-events: none; transition: 0.4s;">
   <div class="wrap">
     <header>
       <div class="brand">
@@ -358,10 +447,9 @@ body.mode-member-active .undo:hover { background: rgba(242,169,0,0.25); }
           </p>
         </div>
       </div>
-      <div class="panel status">
-        <span class="dot"><i></i><i></i></span>
-        <span style="color:var(--muted-foreground)">今日值班門市</span>
-        <span id="duty" style="font-weight:600">尚未選擇</span>
+      <div class="status" style="background: rgba(255,255,255,0.05); padding: 8px 16px; border-radius: 12px; font-size: 14px;">
+        門市：<span id="duty" style="font-weight:bold; color:var(--accent-member);">尚未選擇</span>
+        <button onclick="showLoginScreen()" style="background:transparent; border:1px solid rgba(255,255,255,0.2); color:#fff; padding:4px 8px; border-radius:6px; font-size:12px; margin-left:10px; cursor:pointer;">登出</button>
       </div>
     </header>
 
@@ -381,15 +469,14 @@ body.mode-member-active .undo:hover { background: rgba(242,169,0,0.25); }
 
         <div class="block">
           <h2 class="label">● 值班人員 (必填)</h2>
-          <input id="employee-name" type="text" placeholder="請輸入您的姓名或代號">
+          <input id="employee-name" type="text" readonly style="text-align:center; font-family:monospace; font-weight:bold; letter-spacing:0.1em;">
         </div>
 
         <div class="block">
           <h2 class="label">● 系統模式選擇</h2>
           <div class="mode-switch">
-            <!-- 🔥 精簡為三大模式 -->
             <button id="mode-member" class="mode-btn active" onclick="setMode('member')">👤 會員 / 優惠</button>
-            <button id="mode-physical" class="mode-btn" onclick="setMode('physical')">🎫 實體券</button>
+            <button id="mode-physical" class="mode-btn" onclick="setMode('physical')">🎫 實體票</button>
             <button id="mode-counter" class="mode-btn" onclick="setMode('counter')">🎁 限量品</button>
           </div>
         </div>
@@ -522,6 +609,7 @@ body.mode-member-active .undo:hover { background: rgba(242,169,0,0.25); }
   let POS_CONFIG = {};
   let EVENT_ORDER = [];
   
+  // 🔥 新增：來自 admin 的設定變數
   let REWARDS_LIST = [];
   let GIFT_LIST = [];
   let POINT_RATE = 100;
@@ -541,8 +629,44 @@ body.mode-member-active .undo:hover { background: rgba(242,169,0,0.25); }
   let currentMode = 'member'; 
   let toastTimer = null;
   
+  // 計數器模式的變數
   let unsubCounter = null; 
   let currentCount = 0;
+
+  // 🔥 九宮格登入邏輯
+  let currentPin = '';
+  window.addPin = function(num) {
+    if(currentPin.length < 10) currentPin += num;
+    $('pin-display').innerText = '*'.repeat(currentPin.length);
+    $('pin-display').classList.remove('error');
+  }
+  window.clearPin = function() {
+    currentPin = '';
+    $('pin-display').innerText = '';
+    $('pin-display').classList.remove('error');
+  }
+  window.submitPin = function() {
+    if(currentPin.length === 0) return;
+    
+    // 儲存代號
+    localStorage.setItem("p_employee", currentPin);
+    $("employee-name").value = currentPin;
+    
+    // 隱藏登入畫面，解鎖主系統
+    $('pos-login-screen').style.display = 'none';
+    $('main-app').style.filter = 'none';
+    $('main-app').style.pointerEvents = 'auto';
+    
+    showToast(`✅ 值班人員 ${currentPin} 登入成功！`, 'success');
+  }
+  window.showLoginScreen = function() {
+    localStorage.removeItem("p_employee");
+    $("employee-name").value = '';
+    clearPin();
+    $('pos-login-screen').style.display = 'flex';
+    $('main-app').style.filter = 'blur(10px)';
+    $('main-app').style.pointerEvents = 'none';
+  }
 
   let deferredPrompt;
   window.addEventListener('beforeinstallprompt', (e) => {
@@ -604,6 +728,7 @@ body.mode-member-active .undo:hover { background: rgba(242,169,0,0.25); }
     if(m === 'counter') document.body.classList.add('mode-counter-active');
     if(m === 'member') document.body.classList.add('mode-member-active');
 
+    // 依據模式顯示隱藏區塊
     if (m === 'counter') {
       $('scan-block').classList.add('hidden');
       $('act-block').classList.remove('hidden');
@@ -614,7 +739,7 @@ body.mode-member-active .undo:hover { background: rgba(242,169,0,0.25); }
       renderActs();
     } else if (m === 'member') {
       $('scan-block').classList.remove('hidden');
-      $('act-block').classList.add('hidden'); 
+      $('act-block').classList.add('hidden'); // 會員模式不需選活動
       $('counter-area').classList.add('hidden');
       $('btn-scan').style.display = 'block';
 
@@ -629,7 +754,7 @@ body.mode-member-active .undo:hover { background: rgba(242,169,0,0.25); }
       $('info-social').style.display = 'block';
       $('info-expire').style.display = 'block';
       
-      nextCust(); 
+      nextCust(); // 重置畫面
     } else if (m === 'physical') {
       $('scan-block').classList.remove('hidden');
       $('act-block').classList.remove('hidden');
@@ -653,6 +778,7 @@ body.mode-member-active .undo:hover { background: rgba(242,169,0,0.25); }
 
   let acTimeout = null;
   $("phone").addEventListener("input", function() {
+      // 只有實體券允許英文，其他都是電話號碼
       if (currentMode === 'physical') this.value = this.value.replace(/[^a-zA-Z0-9]/g,'').toUpperCase().slice(0,20);
       else this.value = this.value.replace(/[^\d]/g,'').slice(0,10); 
       
@@ -660,6 +786,8 @@ body.mode-member-active .undo:hover { background: rgba(242,169,0,0.25); }
       const list = $("autocomplete-list");
       
       if (val.length < 3) { list.innerHTML = ""; list.classList.remove("show"); return; } 
+      
+      // 實體模式 & 會員模式都不支援快搜 (避免個資外洩或無意義查詢)
       if (currentMode === 'member' || currentMode === 'physical') return;
 
       if (acTimeout) clearTimeout(acTimeout);
@@ -721,6 +849,7 @@ body.mode-member-active .undo:hover { background: rgba(242,169,0,0.25); }
         EVENT_ORDER = data.EVENT_ORDER || Object.keys(POS_CONFIG);
         EVENT_ORDER = EVENT_ORDER.filter(a => POS_CONFIG[a]);
 
+        // 🔥 載入點數與限量品設定
         REWARDS_LIST = data.REWARDS_LIST || [];
         GIFT_LIST = data.GIFT_LIST || [];
         POINT_RATE = data.POINT_RATE || 100;
@@ -754,10 +883,16 @@ body.mode-member-active .undo:hover { background: rgba(242,169,0,0.25); }
       if (savedStore && evMap[savedStore]) { store = savedStore; act = (evMap[savedStore] || [])[0] || ""; } 
       else if (STORE_LIST.length > 0) { store = STORE_LIST[0]; act = (evMap[store] || [])[0] || ""; }
 
-      const savedEmp = localStorage.getItem("p_employee");
-      if(savedEmp) $("employee-name").value = savedEmp;
+      // 檢查一開始是否已經登入過
+      const savedEmpPin = localStorage.getItem("p_employee");
+      if(savedEmpPin) {
+        $("employee-name").value = savedEmpPin;
+        $('pos-login-screen').style.display = 'none';
+        $('main-app').style.filter = 'none';
+        $('main-app').style.pointerEvents = 'auto';
+      }
 
-      setMode('member'); 
+      setMode('member'); // 預設進入會員/優惠合併模式
       renderStores(); 
     } catch (e) { showToast("無法連線至雲端讀取 POS 設定！", "error"); }
   }
@@ -835,6 +970,7 @@ body.mode-member-active .undo:hover { background: rgba(242,169,0,0.25); }
     setTimeout(() => $("phone").focus(), 100);
   }
 
+  // ---------------- 計數器限量品邏輯 ----------------
   function loadCounter() {
     if(currentMode !== 'counter' || !store || !act) return;
     if(unsubCounter) unsubCounter();
@@ -861,9 +997,8 @@ body.mode-member-active .undo:hover { background: rgba(242,169,0,0.25); }
     const empName = $("employee-name").value.trim();
     if(!empName) { 
         $("employee-name").focus(); 
-        return showToast("請先填寫上方的「值班人員」姓名！", "error"); 
+        return showToast("請先登入上方的值班人員！", "error"); 
     }
-    localStorage.setItem("p_employee", empName); 
 
     $('btn-tally').disabled = true;
     try {
@@ -889,6 +1024,7 @@ body.mode-member-active .undo:hover { background: rgba(242,169,0,0.25); }
     }
   };
 
+  // ---------------- 點數計算與給點邏輯 ----------------
   window.calcPoints = function() {
     const amount = parseInt($('consume-amount').value, 10);
     const ptsPreview = $('pts-preview');
@@ -906,7 +1042,7 @@ body.mode-member-active .undo:hover { background: rgba(242,169,0,0.25); }
     if(isNaN(amount) || amount < POINT_RATE) return showToast(`消費需達 ${POINT_RATE} 元以上！`, "error");
     
     const empName = $("employee-name").value.trim();
-    if(!empName) return showToast("請先填寫上方的值班人員姓名！", "error");
+    if(!empName) return showToast("請先登入值班人員！", "error");
 
     const getPts = Math.floor(amount / POINT_RATE);
     
@@ -918,6 +1054,7 @@ body.mode-member-active .undo:hover { background: rgba(242,169,0,0.25); }
         points: increment(getPts)
       });
       
+      // 同時記錄一筆交易紀錄
       await setDoc(doc(db, "point_transactions", new Date().getTime().toString()), {
         phone: shownPhone,
         type: "earn",
@@ -935,7 +1072,7 @@ body.mode-member-active .undo:hover { background: rgba(242,169,0,0.25); }
       
       showToast(`✅ 成功加入 ${getPts} 點！`, "success");
       playAlert("success");
-      renderRewardsList(); 
+      renderRewardsList(); // 重新渲染兌換按鈕狀態
     } catch(e) {
       showToast("連線失敗，請重試", "error");
     } finally {
@@ -949,7 +1086,7 @@ body.mode-member-active .undo:hover { background: rgba(242,169,0,0.25); }
     if(memberRecord.points < reqPts) return;
 
     const empName = $("employee-name").value.trim();
-    if(!empName) return showToast("請先填寫上方的值班人員姓名！", "error");
+    if(!empName) return showToast("請先登入值班人員！", "error");
 
     if(!confirm(`確定要扣除 ${reqPts} 點兌換「${giftName}」嗎？`)) return;
 
@@ -958,6 +1095,7 @@ body.mode-member-active .undo:hover { background: rgba(242,169,0,0.25); }
         points: increment(-reqPts)
       });
       
+      // 記錄兌換明細
       await setDoc(doc(db, "point_transactions", new Date().getTime().toString()), {
         phone: shownPhone,
         type: "redeem",
@@ -979,7 +1117,7 @@ body.mode-member-active .undo:hover { background: rgba(242,169,0,0.25); }
       overlay.classList.add("flash");
       if (window.confetti) confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 }, colors: ['#FFD700', '#FFA500'] });
 
-      renderRewardsList(); 
+      renderRewardsList(); // 更新按鈕狀態
     } catch(e) {
       showToast("扣點失敗，請檢查網路！", "error");
     }
@@ -1133,6 +1271,7 @@ body.mode-member-active .undo:hover { background: rgba(242,169,0,0.25); }
           hideUndo(); renderRight(); return;
         }
         
+        // 尋找其他實體活動
         const otherActs = (evMap[store] || []).filter(a => a !== ac && (a.includes('【實體】') || a.includes('實體券')));
         let foundOtherData = null, foundOtherActName = "";
         for (const otherAct of otherActs){
@@ -1238,19 +1377,20 @@ body.mode-member-active .undo:hover { background: rgba(242,169,0,0.25); }
     $('reward-list').innerHTML = html;
   }
 
+  // 點擊電子券，進入原本的核銷明細頁面 (完美保留 5s 撤銷特效)
   window.prepRedeemCoupon = function(actName) {
       shownAct = actName;
       record = userCouponsData[actName];
       
       $("member-area").classList.add("hidden");
-      renderRight(); 
+      renderRight(); // This will show the "detail" view with the giant redeem button
   }
 
   window.redeem = async function() {
     const empName = $("employee-name").value.trim();
     if(!empName) { 
         $("employee-name").focus(); 
-        return showToast("請先填寫上方的「值班人員」姓名！", "error"); 
+        return showToast("請先登入上方的值班人員！", "error"); 
     }
     localStorage.setItem("p_employee", empName); 
 
@@ -1299,7 +1439,7 @@ body.mode-member-active .undo:hover { background: rgba(242,169,0,0.25); }
     try { await updateDoc(doc(db, ac, ph), { status: "未兌換", store: "", redeemTime: "", redeemBy: "" }); } finally { setBusy(false); }
     $("btn-undo").classList.add("hidden");
     showToast("已撤銷復原", "success"); 
-    check(ph); 
+    check(ph); // 重新檢查會退回會員面板
   }
 
   window.nextCust = function() {
