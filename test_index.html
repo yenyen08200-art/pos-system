@@ -172,7 +172,6 @@ body.mode-counter-active .act-btn.on .radio { border-color: var(--accent-counter
 
 .empty{border:1px dashed var(--border);border-radius:14px;padding:24px;text-align:center;font-size:14px;color:var(--muted-foreground)}
 
-/* 🔥 重新設計的搜尋框與相機按鈕排版 */
 .searchbar { display: flex; flex-direction: column; gap: 12px; width: 100%; }
 .search-actions { display: flex; gap: 10px; width: 100%; }
 #phone { 
@@ -446,7 +445,6 @@ body.mode-member-active .undo { color:var(--accent-member); border-color: rgba(2
 
         <div id="scan-block">
           <span class="label" id="scan-label">● 掃描 / 查詢會員</span>
-          <!-- 🔥 重構的掃描與查詢區域 -->
           <div class="searchbar">
             <input id="phone" type="tel" placeholder="輸入手機號碼" autocomplete="off" />
             <div class="search-actions">
@@ -568,6 +566,7 @@ body.mode-member-active .undo { color:var(--accent-member); border-color: rgba(2
 
   let evMap = {};
   let giftMap = {};
+  let storeGiftMap = {}; // 🔥 新增：儲存各門市「確實有庫存」的活動贈品名單
 
   const $ = (id) => document.getElementById(id);
   let store = "", act = "", shownPhone = "", shownAct = "", record = null;
@@ -814,6 +813,25 @@ body.mode-member-active .undo { color:var(--accent-member); border-color: rgba(2
       giftMap = {};
       for (const a in POS_CONFIG) { giftMap[a] = POS_CONFIG[a].gift; }
 
+      // 🔥 新增：即時監聽庫存表，建立「門市 -> 有庫存的活動贈品」對應關係
+      onSnapshot(collection(db, "inventory"), (snap) => {
+        storeGiftMap = {};
+        snap.forEach(docSnap => {
+          let d = docSnap.data();
+          if (!storeGiftMap[d.store]) storeGiftMap[d.store] = [];
+          // 確保該贈品還存在於全域的 GIFT_LIST 中（防呆），且還沒被加進去過
+          if (GIFT_LIST.includes(d.act) && !storeGiftMap[d.store].includes(d.act)) {
+              storeGiftMap[d.store].push(d.act);
+          }
+        });
+        
+        // 如果當下正好在「活動贈品」模式，而且有選門市，就自動刷新畫面上的選項
+        if (currentMode === 'counter' && store) {
+           renderActs();
+           loadCounter();
+        }
+      });
+
       if (savedStore && STORE_LIST.includes(savedStore)) {
           store = savedStore; 
       } else if (STORE_LIST.length > 0) {
@@ -859,7 +877,8 @@ body.mode-member-active .undo { color:var(--accent-member); border-color: rgba(2
     if (currentMode === 'physical') {
       currentList = (evMap[store] || []).filter(a => a.includes('【實體】') || a.includes('實體券'));
     } else if (currentMode === 'counter') {
-      currentList = GIFT_LIST;
+      // 🔥 修改：這裡改吃我們即時過濾出來的專屬門市贈品清單
+      currentList = storeGiftMap[store] || [];
     }
 
     if(currentList.length === 0) { 
