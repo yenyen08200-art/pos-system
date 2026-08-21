@@ -378,7 +378,7 @@
 
         <div class="table-toolbar">
           <span id="result-count">顯示 0 筆結果</span>
-          <!-- 🔥 補回 debounce 呼叫 -->
+          <!-- 🔥 已經補好 keyup / input 的 debounce 觸發器 -->
           <input id="search-box" class="search-box" type="text" placeholder="🔍 搜尋號碼或姓名..." oninput="debounceRenderTable()">
         </div>
 
@@ -839,7 +839,7 @@
       }
       element.classList.add('active');
       
-      // 🔥 更新：切換到行銷活動管理時，也要確保下拉選單更新
+      // 更新：切換到行銷活動管理時，也要確保下拉選單更新
       if (viewId === 'lottery-ui' || viewId === 'issue-ui' || viewId === 'config-event') {
         const actSelectHtml = document.getElementById('act-select').innerHTML;
         let cleanHtml = actSelectHtml.replace(/<option value="ALL_OVERVIEW">🌐 總覽 \(所有活動\)<\/option>/g, '');
@@ -1001,6 +1001,7 @@
       triggerSaveHint();
     };
 
+    // 確保完全清除 Firebase 上的庫存連動
     window.deleteGiftItem = async function(idx) {
       const giftName = globalGiftList[idx];
       if(confirm(`確定要刪除「${giftName}」嗎？\n⚠️ 注意：這將連帶刪除「所有門市對應的庫存紀錄」，此操作立即生效！`)) {
@@ -1222,7 +1223,7 @@
 
       try {
         const configRef = doc(db, "system", "config");
-        await setDoc(configRef, {
+        await updateDoc(configRef, {
           EVENT_CONFIG: globalEventConfig,
           STORE_LIST: globalStoreList,
           POS_CONFIG: globalPosConfig,
@@ -1234,7 +1235,7 @@
           GIFT_LIST: globalGiftList,
           MEMBER_SYSTEM_ACTIVE: isMemberSystemActive,
           lastUpdated: new Date().toLocaleString()
-        }, { merge: true });
+        });
         
         alert("✅ 系統設定已成功同步至雲端！");
         
