@@ -187,32 +187,6 @@ body.mode-counter-active .act-btn.on .radio { border-color: var(--accent-counter
 body.mode-physical-active #phone:focus { border-color: var(--accent-physical); box-shadow: 0 0 0 4px rgba(255,107,53,0.25); }
 body.mode-member-active #phone:focus { border-color: var(--accent-member); box-shadow: 0 0 0 4px rgba(242,169,0,0.25); }
 
-.autocomplete-list {
-  position: absolute; top: calc(100% + 8px); left: 0; right: 0; 
-  background: var(--card); border: 1px solid var(--border); border-radius: 14px;
-  box-shadow: 0 20px 50px rgba(0,0,0,0.8); z-index: 100; max-height: 280px; overflow-y: auto;
-  opacity: 0; transform: translateY(-10px); pointer-events: none; transition: 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
-}
-.autocomplete-list.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
-.autocomplete-item {
-  padding: 14px 18px; border-bottom: 1px solid var(--border); display: flex;
-  justify-content: space-between; align-items: center; cursor: pointer; transition: background 0.2s;
-}
-.autocomplete-item:hover { background: var(--secondary); }
-.autocomplete-item:last-child { border-bottom: none; }
-.ac-phone { font-size: 17px; font-weight: 700; color: var(--foreground); font-family: monospace; letter-spacing: 1px;}
-.ac-hl { color: var(--accent-digital); }
-body.mode-physical-active .ac-hl { color: var(--accent-physical); }
-body.mode-member-active .ac-hl { color: var(--accent-member); }
-.ac-name { font-size: 13px; color: var(--muted-foreground); margin-top: 4px; font-weight: 500;}
-.ac-status { font-size: 12px; padding: 4px 8px; border-radius: 6px; font-weight: 700;}
-.ac-status.ready { background: rgba(63,191,143,0.15); color: var(--success); }
-.ac-status.done { background: rgba(255,255,255,0.05); color: var(--muted-foreground); }
-
-.icon-btn{min-height:64px;padding:0 20px;font-size:24px;border-radius:14px;border:1px solid var(--border);background:var(--secondary);color:var(--foreground);transition:all .2s}
-.icon-btn:hover{background:var(--muted)}
-.icon-btn:active{transform:scale(.95)}
-
 .primary-btn{min-height:64px;padding:0 28px;font-size:18px;font-weight:700;border:none;border-radius:14px;
   background-image:var(--gradient-digital);color:#fff;box-shadow:0 14px 30px -16px rgba(0,198,255,0.9);transition:all .2s;
   display: flex; align-items: center; justify-content: center; gap: 8px;}
@@ -304,8 +278,6 @@ body.mode-member-active .redeem { background-image: var(--gradient-member); box-
 body.mode-physical-active .undo { color:var(--accent-physical); border-color: rgba(255,107,53,0.5); background:rgba(255,107,53,0.15); }
 body.mode-member-active .undo { color:var(--accent-member); border-color: rgba(242,169,0,0.5); background:rgba(242,169,0,0.15); }
 .undo:hover{background:rgba(0,198,255,0.25)}
-body.mode-physical-active .undo:hover { background: rgba(255,107,53,0.25); }
-body.mode-member-active .undo:hover { background: rgba(242,169,0,0.25); }
 
 .next{min-height:64px;width:100%;border-radius:18px;font-size:18px;font-weight:600;color:var(--foreground);
   border:1px solid var(--border);background:var(--secondary);transition:all .2s;
@@ -364,7 +336,7 @@ body.mode-member-active .undo:hover { background: rgba(242,169,0,0.25); }
   display: flex; align-items: center; justify-content: center;
   box-shadow: 0 10px 25px -5px rgba(0,198,255,0.6);
 }
-.login-title { font-size: 20px; font-weight: 700; margin-bottom: 24px; letter-spacing: 0.1em; color: var(--foreground); }
+.login-title { font-size: 20px; font-weight: 700; margin-bottom: 24px; letter-spacing: 0.1em; color: var(--foreground); transition: color 0.3s; }
 
 #login-store-select {
   width: 100%; padding: 14px 16px; border-radius: 12px; background: rgba(0,0,0,0.3); color: #fff; 
@@ -408,7 +380,7 @@ body.mode-member-active .undo:hover { background: rgba(242,169,0,0.25); }
   <span id="toast-msg">系統訊息</span>
 </div>
 
-<!-- 🔥 極速版登入介面 (完全免 Firebase Auth 驗證，只要代號對、門市選好秒進！) -->
+<!-- 🔥 極速版登入介面 (修復了防呆與清空閃爍問題) -->
 <div id="pos-login-screen">
   <div class="login-panel">
     <div class="login-logo">⚡</div>
@@ -467,6 +439,7 @@ body.mode-member-active .undo:hover { background: rgba(242,169,0,0.25); }
 
         <span class="label">系統模式</span>
         <div class="mode-switch">
+          <!-- 🔥 會員按鈕會根據 admin 設定動態更改文字或隱藏 -->
           <button id="mode-member" class="mode-btn active" onclick="setMode('member')">👤 會員 / 優惠</button>
           <button id="mode-physical" class="mode-btn" onclick="setMode('physical')">🎫 實體券</button>
           <button id="mode-counter" class="mode-btn" onclick="setMode('counter')">🎁 限量品</button>
@@ -589,6 +562,7 @@ body.mode-member-active .undo:hover { background: rgba(242,169,0,0.25); }
   let REWARDS_LIST = [];
   let GIFT_LIST = [];
   let POINT_RATE = 100;
+  // 🔥 新增的會員功能總開關
   let isMemberSystemActive = true;
 
   let evMap = {};
@@ -606,41 +580,46 @@ body.mode-member-active .undo:hover { background: rgba(242,169,0,0.25); }
   let unsubCounter = null; 
   let currentCount = 0;
 
-  // 🔥 極速版九宮格登入邏輯 (完全捨棄 Firebase Auth 驗證，秒進！)
+  // 🔥 修正：登入防呆機制
   let currentPin = '';
+  let loginErrorTimer = null; // 用來防止多次點擊導致錯誤文字閃爍的問題
+  
   window.addPin = function(num) {
     if(currentPin.length < 10) currentPin += num;
     $('pin-display').innerText = '*'.repeat(currentPin.length);
     $('pin-display').classList.remove('error');
+    $('login-status-text').innerText = '小騎士 POS 登入';
+    $('login-status-text').style.color = "var(--foreground)";
   }
+  
   window.clearPin = function() {
     currentPin = '';
     $('pin-display').innerText = '';
     $('pin-display').classList.remove('error');
+    $('login-status-text').innerText = '小騎士 POS 登入';
+    $('login-status-text').style.color = "var(--foreground)";
   }
 
   window.submitPin = function() {
     if(currentPin.length === 0) return;
     
     const selectedStore = $('login-store-select').value;
+    
+    // 檢查是否有選取門市，若無則報錯，但不清空輸入的密碼
     if(!selectedStore) {
-       $('pin-display').classList.add('error');
-       $('login-status-text').innerText = '❌ 請先選擇上方門市！';
-       currentPin = '';
-       setTimeout(() => { $('pin-display').classList.remove('error'); $('pin-display').innerText = ''; $('login-status-text').innerText = '小騎士 POS 登入'; }, 1500);
+       showLoginError('❌ 請先從上方選擇您所在的門市！');
        return;
     }
 
     const VALID_PINS = ["001"]; 
     if (!VALID_PINS.includes(currentPin)) {
-      $('pin-display').classList.add('error');
-      $('login-status-text').innerText = '❌ 查無此員工編號';
-      currentPin = '';
-      setTimeout(() => { $('pin-display').classList.remove('error'); $('pin-display').innerText = ''; $('login-status-text').innerText = '小騎士 POS 登入'; }, 1500);
+      showLoginError('❌ 查無此員工編號或密碼錯誤');
+      currentPin = ''; // 只有密碼錯誤才清空輸入框
+      setTimeout(() => { $('pin-display').innerText = ''; }, 400); 
       return;
     }
     
-    // 驗證通過，直接解鎖！
+    // 驗證通過，寫入資料並解鎖
     localStorage.setItem("p_employee", currentPin);
     $("employee-name").value = currentPin;
 
@@ -651,6 +630,20 @@ body.mode-member-active .undo:hover { background: rgba(242,169,0,0.25); }
     $('main-app').style.pointerEvents = 'auto';
     
     showToast(`✅ 值班人員 ${currentPin} 登入成功！`, 'success');
+  }
+
+  // 獨立出的錯誤顯示函式，避免畫面閃爍
+  function showLoginError(msg) {
+      if(loginErrorTimer) clearTimeout(loginErrorTimer);
+      $('pin-display').classList.add('error');
+      $('login-status-text').innerText = msg;
+      $('login-status-text').style.color = "#ff4757";
+      
+      loginErrorTimer = setTimeout(() => { 
+          $('pin-display').classList.remove('error'); 
+          $('login-status-text').innerText = '小騎士 POS 登入'; 
+          $('login-status-text').style.color = "var(--foreground)";
+      }, 2000);
   }
 
   window.showLoginScreen = function() {
@@ -746,6 +739,8 @@ body.mode-member-active .undo:hover { background: rgba(242,169,0,0.25); }
       $('btn-scan').style.display = 'block';
 
       $('phone').type = 'tel';
+      
+      // 🔥 如果關閉了會員系統，只顯示查詢電子券
       $('phone').placeholder = isMemberSystemActive ? '掃描會員 QR 或輸入手機號碼' : '掃描電子券 QR 或輸入手機號碼';
       $('phone').maxLength = 10; 
       $('btn-check').innerText = '查詢';
@@ -780,6 +775,8 @@ body.mode-member-active .undo:hover { background: rgba(242,169,0,0.25); }
   async function initPOS() {
     try {
       const configSnap = await getDoc(doc(db, "system", "config"));
+      const savedStore = localStorage.getItem("p_store");
+
       if (configSnap.exists()) {
         const data = configSnap.data();
         STORE_LIST = data.STORE_LIST || [];
@@ -791,14 +788,21 @@ body.mode-member-active .undo:hover { background: rgba(242,169,0,0.25); }
         GIFT_LIST = data.GIFT_LIST || [];
         POINT_RATE = data.POINT_RATE || 100;
         
+        // 🔥 讀取從 admin.html 設定的會員系統總開關
         isMemberSystemActive = data.MEMBER_SYSTEM_ACTIVE !== undefined ? data.MEMBER_SYSTEM_ACTIVE : true;
 
+        // 🔥 登入畫面的門市下拉選單優化：自動選取上次登入的門市
         const loginStoreSelect = $('login-store-select');
-        loginStoreSelect.innerHTML = '<option value="" style="color:#000;">請先選擇值班門市</option>' + 
-          STORE_LIST.map(s => `<option value="${s}" style="color:#000;">${s}</option>`).join('');
+        let optionsHtml = '<option value="" style="color:#000;">請先選擇值班門市</option>';
+        STORE_LIST.forEach(s => {
+          let selected = (savedStore === s) ? "selected" : "";
+          optionsHtml += `<option value="${s}" style="color:#000;" ${selected}>${s}</option>`;
+        });
+        loginStoreSelect.innerHTML = optionsHtml;
       }
 
-      $('mode-member').innerHTML = isMemberSystemActive ? '👤 會員 / 優惠' : '📱 優惠券';
+      // 🔥 依據 admin 開關狀態隱藏或更改文字
+      $('mode-member').innerHTML = isMemberSystemActive ? '👤 會員 / 優惠' : '📱 電子優惠券';
       $('member-points-card').style.display = isMemberSystemActive ? 'block' : 'none';
       $('reward-title').style.display = isMemberSystemActive ? 'block' : 'none';
       $('reward-list').style.display = isMemberSystemActive ? 'grid' : 'none';
@@ -816,10 +820,8 @@ body.mode-member-active .undo:hover { background: rgba(242,169,0,0.25); }
       giftMap = {};
       for (const a in POS_CONFIG) { giftMap[a] = POS_CONFIG[a].gift; }
 
-      const savedStore = localStorage.getItem("p_store");
       if (savedStore && STORE_LIST.includes(savedStore)) {
           store = savedStore; 
-          $('login-store-select').value = savedStore;
       } else if (STORE_LIST.length > 0) {
           store = STORE_LIST[0];
       }
