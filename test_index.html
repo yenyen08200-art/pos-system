@@ -172,31 +172,19 @@ body.mode-counter-active .act-btn.on .radio { border-color: var(--accent-counter
 
 .empty{border:1px dashed var(--border);border-radius:14px;padding:24px;text-align:center;font-size:14px;color:var(--muted-foreground)}
 
-/* 🔥 重構的群組化搜尋框樣式 */
-.searchbar { display: flex; gap: 10px; width: 100%; align-items: stretch; flex-direction: column; }
-@media(min-width:640px){ .searchbar { flex-direction: row; } }
-
-.input-group { 
-  display: flex; flex: 1; border-radius: 14px; border: 1px solid var(--input); 
-  background: oklch(0.17 0.024 259/.6); overflow: hidden; transition: all 0.2s;
-  min-height: 56px;
-}
-.input-group:focus-within { border-color: var(--accent-digital); box-shadow: 0 0 0 4px rgba(0,198,255,0.25); }
-body.mode-physical-active .input-group:focus-within { border-color: var(--accent-physical); box-shadow: 0 0 0 4px rgba(255,107,53,0.25); }
-body.mode-member-active .input-group:focus-within { border-color: var(--accent-member); box-shadow: 0 0 0 4px rgba(242,169,0,0.25); }
-
-#btn-scan { 
-  background: rgba(255,255,255,0.05); border: none; color: var(--muted-foreground); 
-  padding: 0 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; 
-  border-right: 1px solid var(--input); transition: 0.2s; 
-}
-#btn-scan:hover { background: rgba(255,255,255,0.1); color: #fff; }
+/* 🔥 重新設計的搜尋框與相機按鈕排版 */
+.searchbar { display: flex; flex-direction: column; gap: 12px; width: 100%; }
+.search-actions { display: flex; gap: 10px; width: 100%; }
 #phone { 
-  flex: 1; width: 100%; background: transparent; border: none; 
-  color: var(--foreground); padding: 0 16px; font-size: 18px; font-weight: 600; 
-  letter-spacing: 0.08em; outline: none; 
+  width: 100%; min-height: 56px; border-radius: 14px; border: 1px solid var(--input); 
+  background: oklch(0.17 0.024 259/.6); color: var(--foreground); 
+  padding: 0 16px; font-size: 18px; font-weight: 600; letter-spacing: 0.08em; 
+  outline: none; transition: all 0.2s; 
 }
+#phone:focus { border-color: var(--accent-digital); box-shadow: 0 0 0 4px rgba(0,198,255,0.25); }
 #phone::placeholder{font-size:15px;font-weight:400;letter-spacing:normal;color:var(--muted-foreground)}
+body.mode-physical-active #phone:focus { border-color: var(--accent-physical); box-shadow: 0 0 0 4px rgba(255,107,53,0.25); }
+body.mode-member-active #phone:focus { border-color: var(--accent-member); box-shadow: 0 0 0 4px rgba(242,169,0,0.25); }
 
 .primary-btn{min-height:56px;padding:0 24px;font-size:16px;font-weight:700;border:none;border-radius:14px;
   background-image:var(--gradient-digital);color:#fff;box-shadow:0 14px 30px -16px rgba(0,198,255,0.9);transition:all .2s;
@@ -241,7 +229,7 @@ body.mode-member-active .reader-wrap .corner-bl, body.mode-member-active .reader
 body.mode-physical-active .scanline { background: var(--accent-physical); box-shadow: 0 0 15px 2px var(--accent-physical); }
 body.mode-member-active .scanline { background: var(--accent-member); box-shadow: 0 0 15px 2px var(--accent-member); }
 @keyframes scan{0%{top:0%}100%{top:100%}}
-.close-cam{ margin-top: 40px; width: 100%; max-width: 450px; min-height: 64px; border-radius: 999px; font-size: 16px; font-weight: 700; color: #fff; border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); transition: .2s; }
+.close-cam{ margin-top: 40px; width: 100%; max-width: 450px; min-height: 64px; border-radius: 999px; font-size: 16px; font-weight: 700; color: #fff; border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); transition: .2s; cursor: pointer; }
 .close-cam:active{transform:scale(.95)}
 
 .right{display:flex;flex-direction:column}
@@ -446,7 +434,6 @@ body.mode-member-active .undo { color:var(--accent-member); border-color: rgba(2
 
         <span class="label">系統模式</span>
         <div class="mode-switch">
-          <!-- 文字更改：電子優惠券 -> 電子券 -->
           <button id="mode-member" class="mode-btn active" onclick="setMode('member')">👤 會員 / 電子券</button>
           <button id="mode-physical" class="mode-btn" onclick="setMode('physical')">🎫 實體券</button>
           <button id="mode-counter" class="mode-btn" onclick="setMode('counter')">🎁 活動贈品</button>
@@ -458,16 +445,17 @@ body.mode-member-active .undo { color:var(--accent-member); border-color: rgba(2
         </div>
 
         <div id="scan-block">
-          <span class="label" id="scan-label">掃描會員</span>
-          <!-- 🔥 優化排版：輸入框與相機整合在一起 -->
+          <span class="label" id="scan-label">● 掃描 / 查詢會員</span>
+          <!-- 🔥 重構的掃描與查詢區域 -->
           <div class="searchbar">
-            <div class="input-group">
-              <button id="btn-scan" onclick="startScan()">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
+            <input id="phone" type="tel" placeholder="輸入手機號碼" autocomplete="off" />
+            <div class="search-actions">
+              <button id="btn-scan" class="primary-btn" onclick="startScan()" style="flex: 1; background: rgba(255,255,255,0.08); color: var(--foreground); border: 1px solid rgba(255,255,255,0.2); box-shadow: none;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:8px;"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
+                相機掃描
               </button>
-              <input id="phone" type="tel" placeholder="輸入手機號碼" autocomplete="off" />
+              <button class="primary-btn" id="btn-check" onclick="check()" style="flex: 1;">查詢</button>
             </div>
-            <button class="primary-btn" id="btn-check" onclick="check()">查詢</button>
           </div>
         </div>
       </section>
@@ -544,7 +532,8 @@ body.mode-member-active .undo { color:var(--accent-member); border-color: rgba(2
       <div id="reader"></div>
       <div class="scanline"></div>
     </div>
-    <button class="close-cam" id="btn-stop">✖ 關閉光學鎖定系統</button>
+    <!-- 🔥 掃描相機的關閉按鈕文字簡化 -->
+    <button class="close-cam" id="btn-stop">✖ 關閉</button>
   </div>
   
   <div id="success-overlay"></div>
@@ -722,6 +711,7 @@ body.mode-member-active .undo { color:var(--accent-member); border-color: rgba(2
   };
   window.alert = function(msg) { showToast(msg, 'error'); };
 
+  // 🔥 優化：動態切換掃描區塊的文字
   window.setMode = function(m) {
     currentMode = m;
     $('mode-member').classList.toggle('active', m === 'member');
@@ -746,15 +736,14 @@ body.mode-member-active .undo { color:var(--accent-member); border-color: rgba(2
       $('scan-block').classList.remove('hidden');
       $('act-block').classList.add('hidden'); 
       $('counter-area').classList.add('hidden');
-      $('btn-scan').style.display = 'flex';
 
       $('phone').type = 'tel';
-      $('phone').placeholder = isMemberSystemActive ? '掃描會員或輸入號碼' : '掃描電子券或輸入號碼';
+      $('phone').placeholder = '輸入手機號碼';
       $('phone').maxLength = 10; 
       $('btn-check').innerText = '查詢';
       $('placeholder-title').innerText = isMemberSystemActive ? "等待掃描會員 / 憑證" : "等待掃描電子券";
       $('placeholder-desc').innerText = isMemberSystemActive ? "掃描 QR Code 即可帶出會員點數與所有優惠券資訊。" : "掃描 QR Code 即可一鍵帶出所有電子券資訊。";
-      $('scan-label').innerText = isMemberSystemActive ? "● 掃描 / 查詢會員" : "● 掃描電子券";
+      $('scan-label').innerText = isMemberSystemActive ? "● 掃描 / 查詢會員" : "● 掃描 / 查詢電子券";
       $('info-social').style.display = 'block';
       $('info-expire').style.display = 'block';
       
@@ -763,7 +752,6 @@ body.mode-member-active .undo { color:var(--accent-member); border-color: rgba(2
       $('scan-block').classList.remove('hidden');
       $('act-block').classList.remove('hidden');
       $('counter-area').classList.add('hidden');
-      $('btn-scan').style.display = 'flex';
 
       $('phone').type = 'text';
       $('phone').placeholder = '輸入實體券流水號';
@@ -772,6 +760,7 @@ body.mode-member-active .undo { color:var(--accent-member); border-color: rgba(2
       $('placeholder-title').innerText = "實體券快速核銷";
       $('placeholder-desc').innerText = "掃描實體券 QR Code 或直接輸入流水號進行核銷。";
       $('label-phone').innerText = "🔢 實體流水號";
+      $('scan-label').innerText = "● 查詢單號"; // 🔥 修改：實體券時標題改為查詢單號
       $('info-social').style.display = 'none';
       $('info-expire').style.display = 'none';
 
@@ -846,7 +835,7 @@ body.mode-member-active .undo { color:var(--accent-member); border-color: rgba(2
     busy = b;
     $("btn-check").disabled = b;
     if(b) { $("btn-check").innerText = "處理中…"; } 
-    else { $("btn-check").innerText = currentMode === 'member' ? '查詢' : '核銷'; }
+    else { $("btn-check").innerText = currentMode === 'physical' ? '核銷' : '查詢'; }
   }
 
   function renderStores(){
@@ -935,7 +924,6 @@ body.mode-member-active .undo { color:var(--accent-member); border-color: rgba(2
 
   window.deductTally = async function() {
     if(currentCount <= 0) return;
-    
     const empName = $("employee-name").value.trim() || '001';
 
     $('btn-tally').disabled = true;
@@ -979,7 +967,6 @@ body.mode-member-active .undo { color:var(--accent-member); border-color: rgba(2
     if(isNaN(amount) || amount < POINT_RATE) return showToast(`消費需達 ${POINT_RATE} 元以上！`, "error");
     
     const empName = $("employee-name").value.trim() || '001';
-
     const getPts = Math.floor(amount / POINT_RATE);
     
     try {
@@ -1085,9 +1072,10 @@ body.mode-member-active .undo { color:var(--accent-member); border-color: rgba(2
     const isExpired = record.status === "已過期" || autoExpired;
     const banner = $("banner");
     
+    // 🔥 優化卡片上方 Banner，清楚顯示已核銷的時間地點
     if (isClaimed) {
       banner.className = "banner bad rise";
-      banner.innerHTML = `❌ 券已失效 / 已領取<small>📌 於 ${record.store || "—"} 兌換</small><small>🕒 ${record.redeemTime || "—"}</small>`;
+      banner.innerHTML = `❌ 券已失效 / 已領取<small style="margin-top:8px;">📍 於 ${record.store || "未知門市"} 兌換</small><small>🕒 ${record.redeemTime || "未知時間"}</small>`;
     } else if (isExpired) {
       banner.className = "banner bad rise";
       banner.innerHTML = `⚠️ 券已逾期失效<small>🕒 系統檢測已過期 (${expireStr})</small>`;
@@ -1253,7 +1241,7 @@ body.mode-member-active .undo { color:var(--accent-member); border-color: rgba(2
     } finally { setBusy(false); }
   }
 
-  // 🔥 優化電子券列表：若為「已核銷」，顯示兌換門市與時間
+  // 🔥 優化：電子券清單也會清楚顯示在哪裡兌換與兌換時間
   function renderUserCoupons() {
      let html = '';
      const acts = Object.keys(userCouponsData);
@@ -1274,8 +1262,8 @@ body.mode-member-active .undo { color:var(--accent-member); border-color: rgba(2
                  rightSide = `
                  <div style="text-align:right;">
                    <div style="background:transparent; color:var(--muted-foreground); font-weight:bold; font-size:14px; margin-bottom:2px;">已核銷</div>
-                   <div style="font-size:11px; color:var(--muted-foreground);">📍 ${c.store || '未知門市'}</div>
-                   <div style="font-size:10px; color:var(--muted-foreground); opacity:0.8; margin-top:2px;">${c.redeemTime || ''}</div>
+                   <div style="font-size:12px; color:var(--muted-foreground);">📍 ${c.store || '未知門市'}</div>
+                   <div style="font-size:11px; color:var(--muted-foreground); opacity:0.8; margin-top:2px;">🕒 ${c.redeemTime || ''}</div>
                  </div>`;
              } else if (isExpired) {
                  rightSide = `<div style="background:transparent; color:var(--muted-foreground); font-weight:bold; font-size:14px;">已過期</div>`;
