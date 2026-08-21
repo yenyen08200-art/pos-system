@@ -613,8 +613,8 @@
         </div>
 
         <div class="config-card">
-          <h2>🎁 門市限量贈品獨立品項設定</h2>
-          <p class="desc">在此設定實體的限量贈品（如馬克杯、公仔），設定後方可分配各門市庫存。</p>
+          <h2>🎁 門市活動贈品獨立品項設定</h2>
+          <p class="desc">在此設定實體的活動贈品（如馬克杯、公仔），設定後方可分配各門市庫存。</p>
           <div class="form-group">
             <input type="text" id="new-gift-name" placeholder="輸入贈品名稱 (例: 小騎士復古馬克杯)">
             <button class="btn-primary" onclick="addGiftItem()">➕ 新增品項</button>
@@ -623,7 +623,7 @@
         </div>
 
         <div class="config-card" style="border-left: 4px solid var(--accent-2);">
-          <h2>📦 限量贈品庫存分配</h2>
+          <h2>📦 活動贈品庫存分配</h2>
           <p class="desc">分配各門市的贈品庫存數量。</p>
           <div class="form-group">
             <div class="field-block">
@@ -631,7 +631,7 @@
               <select id="inv-store"></select>
             </div>
             <div class="field-block">
-              <label>選擇限量贈品</label>
+              <label>選擇活動贈品</label>
               <select id="inv-act"></select>
             </div>
             <div class="field-block">
@@ -644,7 +644,7 @@
 
         <!-- 庫存監控表格 -->
         <div class="config-card">
-          <h2>📊 限量贈品庫存即時監控</h2>
+          <h2>📊 活動贈品庫存即時監控</h2>
           <button class="btn-cancel" onclick="fetchInventoryStats()" style="padding: 8px 16px; font-size:12px; margin-bottom: 10px;">🔄 重新整理數據</button>
           <table class="stats-table">
             <thead>
@@ -774,7 +774,7 @@
     let globalHomeNews = "";
     let globalPointRate = 100;
     let globalRewardsList = [];
-    let globalGiftList = []; // 限量贈品清單
+    let globalGiftList = []; // 活動贈品清單
     
     // 🔥 新增：會員系統開關變數
     let isMemberSystemActive = true;
@@ -914,7 +914,7 @@
         </li>
       `).join('');
 
-      // 限量品
+      // 活動品
       document.getElementById('ui-gift-list').innerHTML = globalGiftList.map((gift, idx) => `
         <li class="item-li">
           <div class="item-info">
@@ -956,7 +956,7 @@
     };
 
     window.deleteGiftItem = function(idx) {
-      if(confirm("確定要刪除這個限量贈品嗎？")) {
+      if(confirm("確定要刪除這個活動贈品嗎？")) {
         globalGiftList.splice(idx, 1);
         renderConfigUI();
         populateAdminDropdown();
