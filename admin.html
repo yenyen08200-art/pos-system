@@ -296,6 +296,7 @@
         <i class="fa-solid fa-chevron-down" style="font-size: 12px; transition: 0.3s;"></i>
       </div>
       <div class="sub-menu" id="config-sub">
+        <!-- 名稱修改與選單分流 -->
         <div class="sidebar-item" onclick="switchView('config-gift', this)">🎁 活動贈品管理</div>
         <div class="sidebar-item" onclick="switchView('config-member', this)">👑 會員系統(未完善)</div>
         <div class="sidebar-item" onclick="switchView('config-store', this)">🏪 門市清單管理</div>
@@ -337,6 +338,7 @@
         </div>
 
         <div class="dashboard">
+          <!-- 修改卡片排列順序 -->
           <div class="stat-card c-total">
             <h3>總發行張數 (依所選條件)</h3>
             <div class="num" id="total-count">0</div>
@@ -376,11 +378,13 @@
 
         <div class="table-toolbar">
           <span id="result-count">顯示 0 筆結果</span>
+          <!-- 🔥 補回 debounce 呼叫 -->
           <input id="search-box" class="search-box" type="text" placeholder="🔍 搜尋號碼或姓名..." oninput="debounceRenderTable()">
         </div>
 
         <div class="table-container">
           <table id="data-table">
+            <!-- 精簡化後的表格表頭 (8 個欄位) -->
             <thead>
               <tr>
                 <th style="width: 40px;"><input type="checkbox" id="check-all" onclick="document.querySelectorAll('.row-check').forEach(cb => cb.checked = this.checked)"></th>
@@ -1509,6 +1513,15 @@
       updateDashboardStats();
     };
 
+    // 🔥 新增：搜尋框防抖功能
+    let searchTimeout = null;
+    window.debounceRenderTable = function() {
+      if(searchTimeout) clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(() => {
+         renderTable();
+      }, 300);
+    };
+
     window.fetchData = async function() {
       const actSelect = document.getElementById('act-select');
       if (!actSelect || !actSelect.value) return;
@@ -1760,6 +1773,7 @@
         tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding: 40px; color: #F07654; font-weight: bold;">找不到資料 🥲</td></tr>`; return;
       }
 
+      // 🔥 精簡化的表格渲染：欄位整併
       tbody.innerHTML = filteredData.map(d => {
         const defaultGift = globalPosConfig[d.act_source]?.gift || '預設活動贈品';
         const defaultExpire = globalPosConfig[d.act_source]?.expireDate || "無特別限制";
@@ -1774,6 +1788,7 @@
         let checkboxHTML = (!d.status || d.status === '未兌換') ? `<input type="checkbox" class="row-check" value="${d.id}" ${isOverview ? 'disabled' : ''}>` : '';
         let actColHTML = isOverview ? `<td><span class="act-tag">${d.act_source}</span></td>` : '';
 
+        // 操作選單 (總覽模式也開放)
         let actionBtnHTML = `
           <details class="kebab-dropdown">
             <summary>⋮</summary>
@@ -1789,6 +1804,7 @@
           </details>
         `;
 
+        // 🔥 資料區塊合併設計
         let customerInfo = `
             <div style="font-weight:bold; font-size:14px; color:var(--text-main);">${d.name || '未知'}</div>
             <div style="font-family:monospace; font-size:13px; color:var(--text-sub);">${d.phone || '-'}</div>
