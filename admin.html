@@ -25,107 +25,32 @@
       --shadow: 0 10px 30px rgba(24, 28, 40, .06);
     }
 
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans TC", sans-serif;
-      background: var(--bg);
-      color: var(--text-main);
-      margin: 0;
-      min-height: 100vh;
-      display: flex;
+      background: var(--bg); color: var(--text-main); margin: 0; min-height: 100vh; display: flex;
     }
 
     /* ================= 🔒 登入畫面 ================= */
-    #login-screen {
-      position: fixed;
-      inset: 0;
-      background: var(--bg);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 1000;
-    }
-
-    .login-card {
-      background: var(--card-bg);
-      padding: 40px;
-      border-radius: 24px;
-      box-shadow: var(--shadow);
-      text-align: center;
-      width: 340px;
-    }
-
+    #login-screen { position: fixed; inset: 0; background: var(--bg); display: flex; justify-content: center; align-items: center; z-index: 1000; }
+    .login-card { background: var(--card-bg); padding: 40px; border-radius: 24px; box-shadow: var(--shadow); text-align: center; width: 340px; }
     .login-card h2 { margin: 0 0 6px; font-size: 22px; }
     .login-card .sub { color: var(--text-sub); font-size: 13px; margin: 0 0 22px; }
-    
-    .login-card input {
-      width: 100%;
-      padding: 14px 16px;
-      font-size: 15px;
-      border: 1px solid #E6EAF0;
-      border-radius: 14px;
-      margin-bottom: 12px;
-      outline: none;
-      background: #F7F9FB;
-    }
-
-    .login-card input:focus {
-      border-color: var(--accent);
-      background: #fff;
-    }
-
-    .login-card button {
-      background: var(--accent);
-      color: #fff;
-      border: none;
-      padding: 14px;
-      font-size: 15px;
-      border-radius: 999px;
-      cursor: pointer;
-      font-weight: 700;
-      width: 100%;
-      transition: .2s;
-    }
-
+    .login-card input { width: 100%; padding: 14px 16px; font-size: 15px; border: 1px solid #E6EAF0; border-radius: 14px; margin-bottom: 12px; outline: none; background: #F7F9FB; }
+    .login-card input:focus { border-color: var(--accent); background: #fff; }
+    .login-card button { background: var(--accent); color: #fff; border: none; padding: 14px; font-size: 15px; border-radius: 999px; cursor: pointer; font-weight: 700; width: 100%; transition: .2s; }
     .login-card button:hover { filter: brightness(1.05); }
     .divider { color: var(--text-sub); font-size: 12px; margin: 16px 0; }
     .btn-google { background: #fff !important; color: var(--text-main) !important; border: 1px solid #E6EAF0 !important; }
     .btn-google:hover { background: #F7F9FB !important; }
 
     /* ================= 🧭 側邊欄 ================= */
-    .sidebar {
-      width: 260px;
-      flex: 0 0 260px;
-      background: var(--sidebar-bg);
-      color: #fff;
-      padding: 28px 20px;
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-      position: sticky;
-      top: 0;
-    }
-
+    .sidebar { width: 260px; flex: 0 0 260px; background: var(--sidebar-bg); color: #fff; padding: 28px 20px; display: flex; flex-direction: column; height: 100vh; position: sticky; top: 0; }
     .sidebar-brand h2 { margin: 0 0 4px; font-size: 20px; letter-spacing: .5px; }
     .sidebar-brand p { margin: 0; font-size: 12px; color: #8E96A8; }
     .sidebar-menu { margin-top: 38px; display: flex; flex-direction: column; gap: 8px; }
-    
-    .sidebar-item {
-      padding: 13px 16px;
-      border-radius: 14px;
-      color: #A9B1C2;
-      font-weight: 600;
-      font-size: 14px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      cursor: pointer;
-      transition: .2s;
-    }
-
+    .sidebar-item { padding: 13px 16px; border-radius: 14px; color: #A9B1C2; font-weight: 600; font-size: 14px; display: flex; align-items: center; gap: 10px; cursor: pointer; transition: .2s; }
     .sidebar-item:hover { background: rgba(255, 255, 255, .06); color: #fff; }
     .sidebar-item.active { background: #F3F5F8; color: #1A1C24; font-weight: 800; }
     
@@ -137,20 +62,7 @@
     .sub-menu .sidebar-item.active { background: var(--accent); color: #fff; font-weight: 700; border-radius: 8px; margin: 0 8px; }
 
     .sidebar-footer { margin-top: auto; padding-top: 20px; }
-    
-    .btn-logout {
-      width: 100%;
-      background: rgba(255, 255, 255, .08);
-      color: #fff;
-      border: 1px solid rgba(255, 255, 255, .12);
-      padding: 12px;
-      border-radius: 999px;
-      font-weight: 700;
-      font-size: 14px;
-      cursor: pointer;
-      transition: .2s;
-    }
-
+    .btn-logout { width: 100%; background: rgba(255, 255, 255, .08); color: #fff; border: 1px solid rgba(255, 255, 255, .12); padding: 12px; border-radius: 999px; font-weight: 700; font-size: 14px; cursor: pointer; transition: .2s; }
     .btn-logout:hover { background: var(--accent); border-color: var(--accent); }
     .mobile-logout { display: none; }
 
@@ -159,115 +71,27 @@
     .view-section.active { display: block; animation: fadeIn 0.3s; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
     
-    #main-app {
-      flex: 1;
-      padding: 32px 40px;
-      display: none;
-      overflow-y: auto;
-      height: 100vh;
-    }
-    
+    #main-app { flex: 1; padding: 32px 40px; display: none; overflow-y: auto; height: 100vh; }
     .container { max-width: 1200px; margin: 0 auto; }
 
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 16px;
-      gap: 16px;
-      flex-wrap: wrap;
-    }
-
-    h1 {
-      margin: 0;
-      font-size: 30px;
-      font-weight: 800;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .live-badge {
-      background: var(--accent);
-      color: #fff;
-      font-size: 10px;
-      font-weight: 800;
-      padding: 5px 10px;
-      border-radius: 999px;
-      animation: pulse 1.5s infinite;
-    }
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; gap: 16px; flex-wrap: wrap; }
+    h1 { margin: 0; font-size: 30px; font-weight: 800; display: flex; align-items: center; gap: 12px; }
+    .live-badge { background: var(--accent); color: #fff; font-size: 10px; font-weight: 800; padding: 5px 10px; border-radius: 999px; animation: pulse 1.5s infinite; }
     @keyframes pulse { 0%, 100% { opacity: 1 } 50% { opacity: .45 } }
 
     /* ================= Toolbar UI ================= */
-    .toolbar-card {
-      background: var(--card-bg);
-      border-radius: 16px;
-      padding: 16px 24px;
-      box-shadow: var(--shadow);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 16px;
-      margin-bottom: 24px;
-      border: 1px solid #E6EAF0;
-    }
-
+    .toolbar-card { background: var(--card-bg); border-radius: 16px; padding: 16px 24px; box-shadow: var(--shadow); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 24px; border: 1px solid #E6EAF0; }
     .toolbar-group { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
-    
-    .toolbar-item {
-      padding: 10px 18px;
-      font-size: 14px;
-      font-weight: 700;
-      border-radius: 10px;
-      border: 1px solid #E6EAF0;
-      background: #fff;
-      color: var(--text-main);
-      outline: none;
-      cursor: pointer;
-      transition: .2s;
-      font-family: inherit;
-    }
-
+    .toolbar-item { padding: 10px 18px; font-size: 14px; font-weight: 700; border-radius: 10px; border: 1px solid #E6EAF0; background: #fff; color: var(--text-main); outline: none; cursor: pointer; transition: .2s; font-family: inherit; }
     .toolbar-item:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
     .toolbar-item:disabled { opacity: 0.5; cursor: not-allowed; }
-    
     .toolbar-btn-primary { background: var(--sidebar-bg); color: #fff; border: none; }
     .toolbar-btn-primary:hover:not(:disabled) { background: #2A2D38; color: #fff; }
-    
     .toolbar-btn-success { background: var(--green); color: #fff; border: none; }
     .toolbar-btn-success:hover:not(:disabled) { filter: brightness(1.05); color: #fff; }
-    
-    .date-filter-box {
-      display: flex;
-      align-items: center;
-      border: 1px solid #E6EAF0;
-      border-radius: 10px;
-      overflow: hidden;
-      background: #fff;
-    }
-
-    .date-filter-box input {
-      border: none;
-      padding: 10px 12px;
-      font-weight: 600;
-      outline: none;
-      background: transparent;
-      font-family: inherit;
-      color: var(--text-main);
-    }
-
-    .date-filter-box button {
-      border: none;
-      background: transparent;
-      padding: 0 16px;
-      color: var(--text-sub);
-      font-weight: 600;
-      cursor: pointer;
-      border-left: 1px solid #E6EAF0;
-      transition: .2s;
-    }
-
+    .date-filter-box { display: flex; align-items: center; border: 1px solid #E6EAF0; border-radius: 10px; overflow: hidden; background: #fff; }
+    .date-filter-box input { border: none; padding: 10px 12px; font-weight: 600; outline: none; background: transparent; font-family: inherit; color: var(--text-main); }
+    .date-filter-box button { border: none; background: transparent; padding: 0 16px; color: var(--text-sub); font-weight: 600; cursor: pointer; border-left: 1px solid #E6EAF0; transition: .2s; }
     .date-filter-box button:hover { color: var(--accent); background: #fdfdfd; }
 
     /* ================= Dashboard UI ================= */
@@ -314,17 +138,13 @@
 
     /* ================= Kebab Menu ================= */
     .kebab-dropdown { position: relative; flex-shrink: 0; }
-    .kebab-dropdown summary {
-      list-style: none; background: #fff; border: 1px solid #E6EAF0; font-size: 20px; font-weight: bold; color: var(--text-sub); cursor: pointer; width: 44px; height: 44px; border-radius: 12px; transition: .2s; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,0.02);
-    }
+    .kebab-dropdown summary { list-style: none; background: #fff; border: 1px solid #E6EAF0; font-size: 20px; font-weight: bold; color: var(--text-sub); cursor: pointer; width: 44px; height: 44px; border-radius: 12px; transition: .2s; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,0.02); }
     .kebab-dropdown summary::-webkit-details-marker { display: none; }
     .kebab-dropdown summary:hover { background: #F4F6F8; color: var(--accent); border-color: #D1D5DB; }
     .kebab-dropdown[open] summary { background: var(--text-main); color: #fff; border-color: var(--text-main); }
-    .kebab-menu {
-      position: absolute; right: 0; top: calc(100% + 8px); background: #fff; border: 1px solid #E6EAF0; border-radius: 14px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); width: 170px; display: flex; flex-direction: column; overflow: hidden; z-index: 9999; animation: fade-in-kebab 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
-    }
+    .kebab-menu { position: absolute; right: 0; top: calc(100% + 8px); background: #fff; border: 1px solid #E6EAF0; border-radius: 14px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); width: 170px; display: flex; flex-direction: column; overflow: hidden; z-index: 9999; animation: fade-in-kebab 0.2s cubic-bezier(0.2, 0.8, 0.2, 1); }
     @keyframes fade-in-kebab { from { opacity: 0; transform: translateY(-10px) scale(0.95); transform-origin: top right; } to { opacity: 1; transform: translateY(0) scale(1); transform-origin: top right; } }
-    .kebab-menu button { text-align: left; padding: 14px 18px; background: transparent; border: none; border-radius: 0; font-size: 14px; font-weight: 600; color: var(--text-main); transition: .2s; display: flex; align-items: center; gap: 10px; width: 100%; cursor: pointer; }
+    .kebab-menu button { text-align: left; padding: 14px 18px; background: transparent; border: none; border-radius: 0; font-size: 14px; font-weight: 600; color: var(--text-main); transition: .2s; display: flex; align-items: center; gap: 10px; width: 100%; cursor: pointer;}
     .kebab-menu button:hover { background: #F7F9FB; color: var(--accent); }
     .kebab-menu button.danger { color: #ef4444; border-top: 1px solid #F1F3F7; }
     .kebab-menu button.danger:hover { background: #fef2f2; color: #ef4444; }
@@ -384,6 +204,16 @@
     .stats-table th { background: #F4F6F8; padding: 10px; border: 1px solid #E6EAF0; }
     .stats-table td { padding: 10px; border: 1px solid #E6EAF0; }
 
+    /* 🔥 新增：功能開關開關樣式 */
+    .toggle-switch {
+      position: relative; width: 44px; height: 24px; background: #cbd5e1; border-radius: 12px; cursor: pointer; transition: 0.3s; flex-shrink: 0; display: inline-block;
+    }
+    .toggle-switch.active { background: var(--green); }
+    .toggle-switch::after {
+      content: ''; position: absolute; top: 2px; left: 2px; width: 20px; height: 20px; background: white; border-radius: 50%; transition: 0.3s; box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    .toggle-switch.active::after { transform: translateX(20px); }
+
     /* ================= 手機版 RWD ================= */
     @media (max-width:768px){
       body { flex-direction: column; }
@@ -423,7 +253,7 @@
       <h2 id="qr-modal-title">🎫 專屬兌換碼</h2>
       <p id="qr-modal-name" style="font-size: 16px; font-weight: bold; margin-bottom: 20px; color: var(--text-main);"></p>
       <img id="qr-modal-img" src="" alt="QR Code" style="width: 220px; height: 220px; border-radius: 12px; border: 1px solid #E6EAF0; margin: 0 auto 20px; box-shadow: 0 8px 20px rgba(0,0,0,0.08);">
-      <p id="qr-modal-code" style="font-size: 28px; font-weight: 900; letter-spacing: 2px; margin-bottom: 24px; color: var(--accent);"></p>
+      <p id="qr-modal-code" style="font-size: 28px; font-weight: 900; letter-spacing: 2px; margin-bottom: 24px; color: var(--primary);"></p>
       <button class="btn-cancel" style="width:100%;" onclick="closeQrModal()">關閉視窗</button>
     </div>
   </div>
@@ -457,7 +287,7 @@
       <div class="sidebar-item" onclick="switchView('lottery-ui', this)">🎉 社群抽獎發券中心</div>
       <div class="sidebar-item" onclick="switchView('payroll-ui', this)">💸 薪資單群發系統</div>
       
-      <!-- 🔥 系統設定中心 (子選單版) -->
+      <!-- 系統設定中心 (子選單版) -->
       <div class="sidebar-item has-sub" onclick="toggleSubMenu('config-sub', this)">
         <div style="display: flex; align-items: center; gap: 10px;">⚙️ 系統設定中心</div>
         <i class="fa-solid fa-chevron-down" style="font-size: 12px; transition: 0.3s;"></i>
@@ -731,6 +561,17 @@
           <h1>📱 APP設定與庫存</h1>
         </div>
 
+        <!-- 🔥 新增：會員系統總開關 -->
+        <div class="config-card" style="border: 2px solid var(--green); background: rgba(63, 191, 143, 0.05);">
+          <h2>👑 會員與點數系統總開關</h2>
+          <p class="desc" style="color: var(--text-main);">此開關控制前台 (member.html) 及核銷端 (test_index.html) 是否顯示會員與點數相關功能。關閉時，系統將作為純粹的「電子票夾與核銷工具」運作。</p>
+          <div style="display: flex; align-items: center; gap: 15px;">
+            <span style="font-weight: bold; font-size: 16px;">系統狀態：</span>
+            <div class="toggle-switch active" id="sys-member-toggle" onclick="toggleMemberSystem()"></div>
+            <span id="sys-member-status-text" style="font-weight: bold; color: var(--green);">已啟用 (ON)</span>
+          </div>
+        </div>
+
         <div class="config-card">
           <h2>📱 App 首頁視覺與點數比例設定</h2>
           <p class="desc">設定會員中心首頁的大圖輪播、情報圖片及消費給點比例。</p>
@@ -801,7 +642,7 @@
           <button class="btn-primary" onclick="setInventory()">更新門市庫存</button>
         </div>
 
-        <!-- 🔥 新增：庫存監控表格 -->
+        <!-- 庫存監控表格 -->
         <div class="config-card">
           <h2>📊 限量贈品庫存即時監控</h2>
           <button class="btn-cancel" onclick="fetchInventoryStats()" style="padding: 8px 16px; font-size:12px; margin-bottom: 10px;">🔄 重新整理數據</button>
@@ -934,6 +775,9 @@
     let globalPointRate = 100;
     let globalRewardsList = [];
     let globalGiftList = []; // 限量贈品清單
+    
+    // 🔥 新增：會員系統開關變數
+    let isMemberSystemActive = true;
 
     document.addEventListener('click', function(e) {
       if (!e.target.closest('.kebab-dropdown')) {
@@ -954,7 +798,6 @@
       document.getElementById('qr-modal').style.display = 'none';
     };
 
-    // 🔥 子選單展開收合邏輯
     window.toggleSubMenu = function(menuId, el) {
       const menu = document.getElementById(menuId);
       const icon = el.querySelector('.fa-chevron-down');
@@ -968,20 +811,16 @@
     };
 
     window.switchView = function(viewId, element) {
-      // 移除所有主視圖的 active
       document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
       document.getElementById('view-' + viewId).classList.add('active');
       
-      // 移除所有側邊欄項目的 active
       document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
       
-      // 如果點擊的是子選單，保持母選單的高亮狀態
       if(element.parentElement.classList.contains('sub-menu')) {
         element.parentElement.previousElementSibling.classList.add('active');
       }
       element.classList.add('active');
       
-      // 處理下拉選單同步
       if (viewId === 'lottery-ui' || viewId === 'issue-ui') {
         const actSelectHtml = document.getElementById('act-select').innerHTML;
         let cleanHtml = actSelectHtml.replace(/<option value="ALL_OVERVIEW">🌐 總覽 \(所有活動\)<\/option>/g, '');
@@ -1007,7 +846,6 @@
       let storeHtml = globalStoreList.map(s => `<option value="${s}">${s}</option>`).join('');
       if(document.getElementById('inv-store')) document.getElementById('inv-store').innerHTML = storeHtml;
       
-      // 限量贈品下拉選單改為讀取 globalGiftList
       let invActHtml = globalGiftList.map(g => `<option value="${g}">${g}</option>`).join('');
       if(document.getElementById('inv-act')) document.getElementById('inv-act').innerHTML = invActHtml;
       
@@ -1015,7 +853,7 @@
     }
 
     function renderConfigUI() {
-      // 1. 渲染門市清單
+      // 門市
       document.getElementById('ui-store-list').innerHTML = globalStoreList.map((store, idx) => `
         <li class="item-li">
           <div class="item-info"><strong>🏪 ${store}</strong></div>
@@ -1023,7 +861,7 @@
         </li>
       `).join('');
 
-      // 2. 渲染活動清單
+      // 活動
       document.getElementById('ui-event-list').innerHTML = globalEventOrder.map(actName => {
         const pwd = globalEventConfig[actName];
         const giftInfo = globalPosConfig[actName];
@@ -1058,7 +896,7 @@
         `;
       }).join('');
 
-      // 3. 渲染點數商品清單
+      // 點數商品
       document.getElementById('ui-reward-list').innerHTML = globalRewardsList.map((item, idx) => `
         <li class="item-li">
           <div class="item-info">
@@ -1076,7 +914,7 @@
         </li>
       `).join('');
 
-      // 4. 渲染限量贈品清單
+      // 限量品
       document.getElementById('ui-gift-list').innerHTML = globalGiftList.map((gift, idx) => `
         <li class="item-li">
           <div class="item-info">
@@ -1085,9 +923,28 @@
           <button class="btn-danger" onclick="deleteGiftItem(${idx})">🗑️ 刪除</button>
         </li>
       `).join('');
+
+      // 🔥 更新總開關狀態UI
+      const toggleBtn = document.getElementById('sys-member-toggle');
+      const toggleText = document.getElementById('sys-member-status-text');
+      if(isMemberSystemActive) {
+        toggleBtn.classList.add('active');
+        toggleText.innerText = "已啟用 (ON)";
+        toggleText.style.color = "var(--green)";
+      } else {
+        toggleBtn.classList.remove('active');
+        toggleText.innerText = "已停用 (OFF)";
+        toggleText.style.color = "var(--text-sub)";
+      }
     }
 
-    // 限量贈品操作邏輯
+    // 🔥 總開關邏輯
+    window.toggleMemberSystem = function() {
+      isMemberSystemActive = !isMemberSystemActive;
+      renderConfigUI();
+      triggerSaveHint();
+    };
+
     window.addGiftItem = function() {
       const val = document.getElementById('new-gift-name').value.trim();
       if(!val) return;
@@ -1107,45 +964,38 @@
       }
     };
 
-    // 點數商品管理邏輯
     window.addReward = function() {
       const name = document.getElementById('new-reward-name').value.trim();
       const points = parseInt(document.getElementById('new-reward-points').value, 10);
       const img_url = document.getElementById('new-reward-img').value.trim();
 
       if(!name || isNaN(points)) return alert("請填寫商品名稱與所需點數！");
-      
       globalRewardsList.push({ name, points, img_url });
       
       document.getElementById('new-reward-name').value = '';
       document.getElementById('new-reward-points').value = '';
       document.getElementById('new-reward-img').value = '';
       
-      renderConfigUI();
-      triggerSaveHint();
+      renderConfigUI(); triggerSaveHint();
     };
 
     window.deleteReward = function(idx) {
       if(confirm("確定要刪除這個兌換商品嗎？")) {
-        globalRewardsList.splice(idx, 1);
-        renderConfigUI();
-        triggerSaveHint();
+        globalRewardsList.splice(idx, 1); renderConfigUI(); triggerSaveHint();
       }
     };
 
     window.moveRewardUp = function(idx) {
       if(idx > 0) {
         [globalRewardsList[idx-1], globalRewardsList[idx]] = [globalRewardsList[idx], globalRewardsList[idx-1]];
-        renderConfigUI();
-        triggerSaveHint();
+        renderConfigUI(); triggerSaveHint();
       }
     };
 
     window.moveRewardDown = function(idx) {
       if(idx < globalRewardsList.length - 1) {
         [globalRewardsList[idx], globalRewardsList[idx+1]] = [globalRewardsList[idx+1], globalRewardsList[idx]];
-        renderConfigUI();
-        triggerSaveHint();
+        renderConfigUI(); triggerSaveHint();
       }
     };
 
@@ -1160,8 +1010,7 @@
       const idx = globalEventOrder.indexOf(actName);
       if(idx > 0) {
         [globalEventOrder[idx-1], globalEventOrder[idx]] = [globalEventOrder[idx], globalEventOrder[idx-1]];
-        renderConfigUI();
-        triggerSaveHint();
+        renderConfigUI(); triggerSaveHint();
       }
     };
 
@@ -1169,12 +1018,10 @@
       const idx = globalEventOrder.indexOf(actName);
       if(idx < globalEventOrder.length - 1 && idx !== -1) {
         [globalEventOrder[idx], globalEventOrder[idx+1]] = [globalEventOrder[idx+1], globalEventOrder[idx]];
-        renderConfigUI();
-        triggerSaveHint();
+        renderConfigUI(); triggerSaveHint();
       }
     };
 
-    // 🔥 將所有「儲存至雲端」按鈕變成紅色警告色
     function triggerSaveHint() {
       const saveBtns = document.querySelectorAll('.btn-save-cloud');
       saveBtns.forEach(btn => {
@@ -1190,15 +1037,13 @@
       if(globalStoreList.includes(val)) return alert("門市已存在！");
       globalStoreList.push(val);
       input.value = '';
-      renderConfigUI();
-      triggerSaveHint();
+      renderConfigUI(); triggerSaveHint();
     };
     
     window.deleteStore = function(idx) {
       if(confirm("確定刪除此門市？\n(記得操作完要按下『儲存至雲端』才會生效喔)")) {
         globalStoreList.splice(idx, 1);
-        renderConfigUI();
-        triggerSaveHint();
+        renderConfigUI(); triggerSaveHint();
       }
     };
 
@@ -1273,8 +1118,7 @@
         delete globalEventConfig[actName];
         delete globalPosConfig[actName];
         globalEventOrder = globalEventOrder.filter(n => n !== actName);
-        renderConfigUI();
-        triggerSaveHint();
+        renderConfigUI(); triggerSaveHint();
       }
     };
 
@@ -1285,11 +1129,9 @@
       } else {
           globalPosConfig[actName].active = false;
       }
-      renderConfigUI();
-      triggerSaveHint();
+      renderConfigUI(); triggerSaveHint();
     };
 
-    // 🔥 儲存所有設定至雲端 (多個按鈕一起連動)
     window.saveConfigToCloud = async function() {
       if(!confirm("⚠️ 確定要將設定寫入資料庫嗎？\n按下確定後，全台門市 POS 及會員 App 將立刻套用最新設定！")) return;
       
@@ -1313,6 +1155,8 @@
           REWARDS_LIST: globalRewardsList,
           POINT_RATE: globalPointRate,
           GIFT_LIST: globalGiftList,
+          // 🔥 寫入總開關狀態
+          MEMBER_SYSTEM_ACTIVE: isMemberSystemActive,
           lastUpdated: new Date().toLocaleString()
         }, { merge: true });
         
@@ -1352,6 +1196,9 @@
           globalHomeNews = data.home_news_url || "";
           globalPointRate = data.POINT_RATE || 100;
           globalGiftList = data.GIFT_LIST || [];
+
+          // 🔥 讀取總開關狀態 (若沒設定過預設為 true)
+          isMemberSystemActive = data.MEMBER_SYSTEM_ACTIVE !== undefined ? data.MEMBER_SYSTEM_ACTIVE : true;
 
           document.getElementById('cfg-home-banner').value = globalHomeBanner;
           document.getElementById('cfg-home-news').value = globalHomeNews;
@@ -1461,7 +1308,6 @@
       }
     };
 
-    // ================= 社群抽獎 =================
     window.runLottery = async function() {
       const act = document.getElementById('lottery-act').value;
       const rawText = document.getElementById('lottery-raw-list').value.trim();
@@ -1482,7 +1328,6 @@
       lines.forEach(line => {
         let l = line.trim();
         if (!l) return;
-        
         if (l.includes('"user_name"') || l.includes('user_name')) return;
         
         let username = "";
@@ -1513,9 +1358,7 @@
         }
       });
 
-      if (candidateList.length === 0) {
-          return alert("⚠️ 無法解析名單，請確認貼上的格式是否正確！");
-      }
+      if (candidateList.length === 0) return alert("⚠️ 無法解析名單，請確認貼上的格式是否正確！");
 
       let validParticipants = candidateList;
       if (keyword !== "") {
@@ -1546,7 +1389,6 @@
         }
         
         const winners = validParticipants.slice(0, count);
-        
         let resultHTML = `<h3 style="margin-top:0; color:var(--green); font-size:18px;">🎉 抽獎完成！抽出 ${count} 名得獎者：</h3>`;
         
         for (let i = 0; i < winners.length; i++) {
@@ -1592,7 +1434,6 @@
       }
     };
 
-    // ================= 儀表板 & 日期篩選 & 批次核銷 =================
     window.clearDateFilter = function() {
       document.getElementById('date-filter').value = '';
       updateDashboardStats();
@@ -1738,12 +1579,8 @@
       if (!actSelect || !actSelect.value) return;
       const act = actSelect.value;
       
-      if (act === 'ALL_OVERVIEW') {
-          return alert("🛑 總覽模式下無法進行智慧結算，請選擇單一具體活動。");
-      }
-      if (act.includes('(已下架)')) {
-          return alert("🛑 該活動已下架結束，無需再進行掃描結算！");
-      }
+      if (act === 'ALL_OVERVIEW') return alert("🛑 總覽模式下無法進行智慧結算，請選擇單一具體活動。");
+      if (act.includes('(已下架)')) return alert("🛑 該活動已下架結束，無需再進行掃描結算！");
       
       const defaultExpire = globalPosConfig[act]?.expireDate || "";
 
@@ -2016,7 +1853,6 @@
       }
     });
 
-    // ================= 🔥 新增：庫存設定與監控邏輯 =================
     window.setInventory = async function() {
       const s = document.getElementById('inv-store').value;
       const a = document.getElementById('inv-act').value;
@@ -2029,7 +1865,7 @@
         let used = snap.exists() ? (snap.data().usedCount || 0) : 0;
         await setDoc(docRef, { count: c, store: s, act: a, usedCount: used, lastUpdated: new Date().toLocaleString() });
         alert("✅ 庫存更新成功！");
-        fetchInventoryStats(); // 更新表格
+        fetchInventoryStats(); 
       } catch(e) {
         console.error(e); alert("更新庫存失敗！");
       }
@@ -2054,7 +1890,6 @@
       } catch(e) { console.error("獲取庫存監控失敗"); }
     }
 
-    // ================= 人事系統 =================
     let payrollData = [];
     window.parsePayroll = function() {
       const raw = document.getElementById('payroll-raw').value.trim();
