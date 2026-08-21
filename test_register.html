@@ -25,6 +25,7 @@
       --glass:rgba(255,255,255,.45); --glass-soft:rgba(255,255,255,.25);
       --stroke:rgba(255,255,255,.6); --radius:28px;
       --shadow:0 30px 70px -28px rgba(35,42,35,.25);
+      --accent-member: #F2A900; /* 新增會員專屬金黃色 */
     }
     *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;min-width:0}
     html,body{max-width:100%;overflow-x:hidden}
@@ -195,6 +196,15 @@
     }
     .family-btn:hover { background: rgba(185,145,90,.2); border: 1px solid rgba(185,145,90,.6); }
 
+    /* 🔥 總開關連動的會員中心入口按鈕 */
+    #btn-goto-member {
+      display: none; /* 預設隱藏，由系統設定決定是否顯示 */
+      margin-top: 15px; background: linear-gradient(135deg, var(--accent-member), #FFC72C);
+      color: #1E293B; border: none; font-weight: 800; font-size: 15px; letter-spacing: 0.1em;
+      box-shadow: 0 10px 25px rgba(242,169,0,0.4); text-decoration: none; text-align: center;
+    }
+    #btn-goto-member:hover { filter: brightness(1.1); transform: translateY(-2px); }
+
     #ticket-card{text-align:center}
     .notice{
       background:rgba(185,145,90,.16);border:1px solid rgba(185,145,90,.42);
@@ -331,6 +341,9 @@
       
       <button class="switch-btn" onclick="switchAct()">🔄 切換 / 領取其他活動</button>
       <button class="family-btn" onclick="refillForFamily()">➕ 幫親友代領 (重新填單)</button>
+      
+      <!-- 🔥 隱藏開關：引導前往會員中心 -->
+      <a href="member.html" class="submit-btn" id="btn-goto-member" style="display: flex; align-items: center; justify-content: center; margin-top: 20px;">👑 前往我的會員中心</a>
     </section>
 
     <div id="recaptcha-container"></div>
@@ -363,6 +376,7 @@
   let unsubscribe = null;
   let EVENT_SECRETS = {}; 
   let POS_CONFIG = {}; 
+  let isMemberSystemActive = true; // 🔥 新增：全域開關變數
   
   let confirmationResult = null;
   let recaptchaVerifier = null;
@@ -384,6 +398,9 @@
         const data = configSnap.data();
         EVENT_SECRETS = data.EVENT_CONFIG || {};
         POS_CONFIG = data.POS_CONFIG || {}; 
+        
+        // 🔥 讀取總開關狀態
+        isMemberSystemActive = data.MEMBER_SYSTEM_ACTIVE !== undefined ? data.MEMBER_SYSTEM_ACTIVE : true;
 
         let EVENT_ORDER = data.EVENT_ORDER || Object.keys(EVENT_SECRETS);
         EVENT_ORDER = EVENT_ORDER.filter(a => EVENT_SECRETS[a]);
@@ -569,6 +586,9 @@
   function renderTicket(act, name, soc, ph) {
     $('form-section').style.display = 'none';
     $('ticket-card').style.display = 'block';
+    
+    // 🔥 依據開關設定，決定是否顯示會員中心按鈕
+    $('btn-goto-member').style.display = isMemberSystemActive ? 'flex' : 'none';
     
     $('r-act').innerText = act; 
     $('r-name').innerText = name; 
