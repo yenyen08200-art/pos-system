@@ -117,7 +117,7 @@ section.panel{padding:20px}
 .rise{animation:rise .45s cubic-bezier(.2,.7,.3,1) both}
 @keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
 .block+.block{margin-top:24px}
-.label{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.2em;color:var(--muted-foreground);margin-bottom:12px}
+.label{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.2em;color:var(--muted-foreground);margin-bottom:12px;display:block;}
 
 .custom-dropdown { position: relative; width: 100%; }
 .custom-dropdown summary {
@@ -155,7 +155,7 @@ button{font-family:inherit;cursor:pointer;}
 .act-btn{width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:64px;padding:0 20px;text-align:left;
   border-radius:14px;border:1px solid var(--border);background:var(--secondary);color:var(--foreground);transition:all .2s;}
 .act-btn:active{transform:scale(.99)}
-.act-name{display:block;font-size:18px;font-weight:600}
+.act-name{display:block;font-size:16px;font-weight:600}
 .radio{width:16px;height:16px;border-radius:999px;border:2px solid var(--muted-foreground);flex:none; transition: .2s;}
 
 .act-btn:hover{background:var(--muted);border-color:rgba(0,198,255,0.5)}
@@ -172,22 +172,33 @@ body.mode-counter-active .act-btn.on .radio { border-color: var(--accent-counter
 
 .empty{border:1px dashed var(--border);border-radius:14px;padding:24px;text-align:center;font-size:14px;color:var(--muted-foreground)}
 
-.searchbar{display:flex;flex-direction:column;gap:10px; width: 100%;}
-@media(min-width:640px){
-  .searchbar { flex-direction: row; }
-  #btn-scan { width: 80px; flex-shrink: 0;}
-  #btn-check { min-width: 120px; flex-shrink: 0;}
+/* 🔥 重構的群組化搜尋框樣式 */
+.searchbar { display: flex; gap: 10px; width: 100%; align-items: stretch; flex-direction: column; }
+@media(min-width:640px){ .searchbar { flex-direction: row; } }
+
+.input-group { 
+  display: flex; flex: 1; border-radius: 14px; border: 1px solid var(--input); 
+  background: oklch(0.17 0.024 259/.6); overflow: hidden; transition: all 0.2s;
+  min-height: 56px;
 }
+.input-group:focus-within { border-color: var(--accent-digital); box-shadow: 0 0 0 4px rgba(0,198,255,0.25); }
+body.mode-physical-active .input-group:focus-within { border-color: var(--accent-physical); box-shadow: 0 0 0 4px rgba(255,107,53,0.25); }
+body.mode-member-active .input-group:focus-within { border-color: var(--accent-member); box-shadow: 0 0 0 4px rgba(242,169,0,0.25); }
 
-.search-input-wrapper { position: relative; flex: 1; width: 100%; }
-#phone{width:100%;min-height:64px;border-radius:14px;border:1px solid var(--input);background:oklch(0.17 0.024 259/.6);
-  color:var(--foreground);padding:0 16px;font-size:20px;font-weight:600;letter-spacing:.08em;outline:none;transition:all .2s;}
+#btn-scan { 
+  background: rgba(255,255,255,0.05); border: none; color: var(--muted-foreground); 
+  padding: 0 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; 
+  border-right: 1px solid var(--input); transition: 0.2s; 
+}
+#btn-scan:hover { background: rgba(255,255,255,0.1); color: #fff; }
+#phone { 
+  flex: 1; width: 100%; background: transparent; border: none; 
+  color: var(--foreground); padding: 0 16px; font-size: 18px; font-weight: 600; 
+  letter-spacing: 0.08em; outline: none; 
+}
 #phone::placeholder{font-size:15px;font-weight:400;letter-spacing:normal;color:var(--muted-foreground)}
-#phone:focus{border-color:var(--accent-digital);box-shadow:0 0 0 4px rgba(0,198,255,0.25);}
-body.mode-physical-active #phone:focus { border-color: var(--accent-physical); box-shadow: 0 0 0 4px rgba(255,107,53,0.25); }
-body.mode-member-active #phone:focus { border-color: var(--accent-member); box-shadow: 0 0 0 4px rgba(242,169,0,0.25); }
 
-.primary-btn{min-height:64px;padding:0 28px;font-size:18px;font-weight:700;border:none;border-radius:14px;
+.primary-btn{min-height:56px;padding:0 24px;font-size:16px;font-weight:700;border:none;border-radius:14px;
   background-image:var(--gradient-digital);color:#fff;box-shadow:0 14px 30px -16px rgba(0,198,255,0.9);transition:all .2s;
   display: flex; align-items: center; justify-content: center; gap: 8px;}
 .primary-btn:hover{filter:brightness(1.1)}
@@ -195,10 +206,6 @@ body.mode-member-active #phone:focus { border-color: var(--accent-member); box-s
 body.mode-physical-active .primary-btn { background-image: var(--gradient-physical); box-shadow: 0 14px 30px -16px rgba(255,107,53,0.9); }
 body.mode-member-active .primary-btn { background-image: var(--gradient-member); box-shadow: 0 14px 30px -16px rgba(242,169,0,0.9); color: #1E293B; }
 button:disabled{opacity:.5;cursor:not-allowed}
-
-#employee-name{
-  width:100%; min-height:56px; border-radius:12px; border:1px solid var(--border); background:rgba(0,0,0,0.3); color:#fff; padding:0 16px; font-size:16px; margin-bottom: 20px; outline:none; text-align:center; font-family:monospace; font-weight:bold; letter-spacing:0.1em; cursor: not-allowed;
-}
 
 #toast-container {
   position: fixed; top: -100px; left: 50%; transform: translateX(-50%); z-index: 10000;
@@ -315,7 +322,7 @@ body.mode-member-active .undo { color:var(--accent-member); border-color: rgba(2
   padding: 16px; border-radius: 14px; transition: transform 0.2s; margin-bottom: 10px; cursor: pointer;
 }
 .member-list-item:hover { transform: translateY(-2px); border-color: var(--accent-member); background: rgba(242,169,0,0.1); }
-.member-list-item.disabled { opacity: 0.4; filter: grayscale(1); pointer-events: none; }
+.member-list-item.disabled { opacity: 0.6; pointer-events: none; }
 
 #pos-login-screen {
   position: fixed; inset: 0; z-index: 100000;
@@ -360,11 +367,7 @@ body.mode-member-active .undo { color:var(--accent-member); border-color: rgba(2
   background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
   border-radius: 16px; height: 64px; font-size: 24px; font-weight: 700; color: #fff;
   cursor: pointer; transition: 0.1s; display: flex; align-items: center; justify-content: center; font-family: "Space Grotesk", sans-serif;
-  
-  /* 🔥 新增：防止雙擊放大、禁止選取文字 */
-  touch-action: manipulation;
-  user-select: none;
-  -webkit-user-select: none;
+  touch-action: manipulation; user-select: none; -webkit-user-select: none;
 }
 .keypad-btn:active { transform: scale(0.92); background: rgba(255,255,255,0.15); }
 .keypad-btn.btn-clear { background: rgba(255,71,87,0.1); color: #ff4757; border-color: rgba(255,71,87,0.3); }
@@ -385,7 +388,6 @@ body.mode-member-active .undo { color:var(--accent-member); border-color: rgba(2
   <span id="toast-msg">系統訊息</span>
 </div>
 
-<!-- 🔥 極速版登入介面 (修復了防呆與清空閃爍問題) -->
 <div id="pos-login-screen">
   <div class="login-panel">
     <div class="login-logo">⚡</div>
@@ -439,15 +441,15 @@ body.mode-member-active .undo { color:var(--accent-member); border-color: rgba(2
           <div class="dropdown-content"><div class="stores" id="stores"></div></div>
         </details>
 
-        <span class="label">值班代號</span>
-        <input id="employee-name" type="text" readonly style="text-align:center; font-family:monospace; font-weight:bold; letter-spacing:0.1em; cursor: not-allowed;">
+        <!-- 隱藏值班代號 (保留欄位讓程式可以抓取 001) -->
+        <input id="employee-name" type="hidden" value="001">
 
         <span class="label">系統模式</span>
         <div class="mode-switch">
-          <!-- 🔥 會員按鈕會根據 admin 設定動態更改文字或隱藏 -->
-          <button id="mode-member" class="mode-btn active" onclick="setMode('member')">👤 會員 / 優惠</button>
+          <!-- 文字更改：電子優惠券 -> 電子券 -->
+          <button id="mode-member" class="mode-btn active" onclick="setMode('member')">👤 會員 / 電子券</button>
           <button id="mode-physical" class="mode-btn" onclick="setMode('physical')">🎫 實體券</button>
-          <button id="mode-counter" class="mode-btn" onclick="setMode('counter')">🎁 限量品</button>
+          <button id="mode-counter" class="mode-btn" onclick="setMode('counter')">🎁 活動贈品</button>
         </div>
 
         <div id="act-block" class="hidden">
@@ -457,10 +459,12 @@ body.mode-member-active .undo { color:var(--accent-member); border-color: rgba(2
 
         <div id="scan-block">
           <span class="label" id="scan-label">掃描會員</span>
+          <!-- 🔥 優化排版：輸入框與相機整合在一起 -->
           <div class="searchbar">
-            <!-- 🔥 補回這顆相機按鈕，程式就不會報錯卡死了 -->
-            <button id="btn-scan" class="icon-btn" onclick="startScan()">📷</button>
-            <div class="search-input-wrapper" style="flex:1;">
+            <div class="input-group">
+              <button id="btn-scan" onclick="startScan()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
+              </button>
               <input id="phone" type="tel" placeholder="輸入手機號碼" autocomplete="off" />
             </div>
             <button class="primary-btn" id="btn-check" onclick="check()">查詢</button>
@@ -571,7 +575,6 @@ body.mode-member-active .undo { color:var(--accent-member); border-color: rgba(2
   let REWARDS_LIST = [];
   let GIFT_LIST = [];
   let POINT_RATE = 100;
-  // 🔥 新增的會員功能總開關
   let isMemberSystemActive = true;
 
   let evMap = {};
@@ -589,12 +592,11 @@ body.mode-member-active .undo { color:var(--accent-member); border-color: rgba(2
   let unsubCounter = null; 
   let currentCount = 0;
 
-  // 🔥 修正：登入防呆機制
   let currentPin = '';
-  let loginErrorTimer = null; // 用來防止多次點擊導致錯誤文字閃爍的問題
+  let loginErrorTimer = null; 
   
   window.addPin = function(num) {
-    if (navigator.vibrate) navigator.vibrate(20); // 🔥 新增：Android 手機按鍵微震動
+    if (navigator.vibrate) navigator.vibrate(20);
     if(currentPin.length < 10) currentPin += num;
     $('pin-display').innerText = '*'.repeat(currentPin.length);
     $('pin-display').classList.remove('error');
@@ -603,7 +605,7 @@ body.mode-member-active .undo { color:var(--accent-member); border-color: rgba(2
   }
   
   window.clearPin = function() {
-    if (navigator.vibrate) navigator.vibrate(20); // 🔥 新增震動
+    if (navigator.vibrate) navigator.vibrate(20);
     currentPin = '';
     $('pin-display').innerText = '';
     $('pin-display').classList.remove('error');
@@ -612,12 +614,11 @@ body.mode-member-active .undo { color:var(--accent-member); border-color: rgba(2
   }
 
   window.submitPin = function() {
-    if (navigator.vibrate) navigator.vibrate(20); // 🔥 新增震動
+    if (navigator.vibrate) navigator.vibrate(20);
     if(currentPin.length === 0) return;
     
     const selectedStore = $('login-store-select').value;
     
-    // 檢查是否有選取門市，若無則報錯，但不清空輸入的密碼
     if(!selectedStore) {
        showLoginError('❌ 請先從上方選擇您所在的門市！');
        return;
@@ -626,12 +627,11 @@ body.mode-member-active .undo { color:var(--accent-member); border-color: rgba(2
     const VALID_PINS = ["001"]; 
     if (!VALID_PINS.includes(currentPin)) {
       showLoginError('❌ 查無此員工編號或密碼錯誤');
-      currentPin = ''; // 只有密碼錯誤才清空輸入框
+      currentPin = ''; 
       setTimeout(() => { $('pin-display').innerText = ''; }, 400); 
       return;
     }
     
-    // 驗證通過，寫入資料並解鎖
     localStorage.setItem("p_employee", currentPin);
     $("employee-name").value = currentPin;
 
@@ -641,10 +641,9 @@ body.mode-member-active .undo { color:var(--accent-member); border-color: rgba(2
     $('main-app').style.filter = 'none';
     $('main-app').style.pointerEvents = 'auto';
     
-    showToast(`✅ 值班人員 ${currentPin} 登入成功！`, 'success');
+    showToast(`✅ 登入成功！`, 'success');
   }
 
-  // 獨立出的錯誤顯示函式，避免畫面閃爍
   function showLoginError(msg) {
       if(loginErrorTimer) clearTimeout(loginErrorTimer);
       $('pin-display').classList.add('error');
@@ -660,14 +659,13 @@ body.mode-member-active .undo { color:var(--accent-member); border-color: rgba(2
 
   window.showLoginScreen = function() {
     localStorage.removeItem("p_employee");
-    $("employee-name").value = '';
+    $("employee-name").value = '001';
     clearPin();
     $('pos-login-screen').style.display = 'flex';
     $('main-app').style.filter = 'blur(10px)';
     $('main-app').style.pointerEvents = 'none';
   }
 
-  // 檢查是否已經登入過
   function checkAutoLogin() {
     const savedEmpPin = localStorage.getItem("p_employee");
     if(savedEmpPin) {
@@ -748,17 +746,15 @@ body.mode-member-active .undo { color:var(--accent-member); border-color: rgba(2
       $('scan-block').classList.remove('hidden');
       $('act-block').classList.add('hidden'); 
       $('counter-area').classList.add('hidden');
-      $('btn-scan').style.display = 'block';
+      $('btn-scan').style.display = 'flex';
 
       $('phone').type = 'tel';
-      
-      // 🔥 如果關閉了會員系統，只顯示查詢電子券
-      $('phone').placeholder = isMemberSystemActive ? '掃描會員 QR 或輸入手機號碼' : '掃描電子券 QR 或輸入手機號碼';
+      $('phone').placeholder = isMemberSystemActive ? '掃描會員或輸入號碼' : '掃描電子券或輸入號碼';
       $('phone').maxLength = 10; 
       $('btn-check').innerText = '查詢';
-      $('placeholder-title').innerText = isMemberSystemActive ? "等待掃描會員 / 憑證" : "等待掃描電子優惠券";
-      $('placeholder-desc').innerText = isMemberSystemActive ? "掃描 QR Code 即可帶出會員點數與所有優惠券資訊。" : "掃描 QR Code 即可一鍵帶出所有優惠券資訊。";
-      $('scan-label').innerText = isMemberSystemActive ? "● 掃描 / 查詢會員" : "● 掃描優惠券";
+      $('placeholder-title').innerText = isMemberSystemActive ? "等待掃描會員 / 憑證" : "等待掃描電子券";
+      $('placeholder-desc').innerText = isMemberSystemActive ? "掃描 QR Code 即可帶出會員點數與所有優惠券資訊。" : "掃描 QR Code 即可一鍵帶出所有電子券資訊。";
+      $('scan-label').innerText = isMemberSystemActive ? "● 掃描 / 查詢會員" : "● 掃描電子券";
       $('info-social').style.display = 'block';
       $('info-expire').style.display = 'block';
       
@@ -767,12 +763,12 @@ body.mode-member-active .undo { color:var(--accent-member); border-color: rgba(2
       $('scan-block').classList.remove('hidden');
       $('act-block').classList.remove('hidden');
       $('counter-area').classList.add('hidden');
-      $('btn-scan').style.display = 'block';
+      $('btn-scan').style.display = 'flex';
 
       $('phone').type = 'text';
-      $('phone').placeholder = '輸入實體券流水號 (英文與數字)';
+      $('phone').placeholder = '輸入實體券流水號';
       $('phone').maxLength = 20; 
-      $('btn-check').innerText = '查詢 / 核銷';
+      $('btn-check').innerText = '核銷';
       $('placeholder-title').innerText = "實體券快速核銷";
       $('placeholder-desc').innerText = "掃描實體券 QR Code 或直接輸入流水號進行核銷。";
       $('label-phone').innerText = "🔢 實體流水號";
@@ -800,10 +796,8 @@ body.mode-member-active .undo { color:var(--accent-member); border-color: rgba(2
         GIFT_LIST = data.GIFT_LIST || [];
         POINT_RATE = data.POINT_RATE || 100;
         
-        // 🔥 讀取從 admin.html 設定的會員系統總開關
         isMemberSystemActive = data.MEMBER_SYSTEM_ACTIVE !== undefined ? data.MEMBER_SYSTEM_ACTIVE : true;
 
-        // 🔥 登入畫面的門市下拉選單優化：自動選取上次登入的門市
         const loginStoreSelect = $('login-store-select');
         let optionsHtml = '<option value="" style="color:#000;">請先選擇值班門市</option>';
         STORE_LIST.forEach(s => {
@@ -813,8 +807,7 @@ body.mode-member-active .undo { color:var(--accent-member); border-color: rgba(2
         loginStoreSelect.innerHTML = optionsHtml;
       }
 
-      // 🔥 依據 admin 開關狀態隱藏或更改文字
-      $('mode-member').innerHTML = isMemberSystemActive ? '👤 會員 / 優惠' : '📱 電子優惠券';
+      $('mode-member').innerHTML = isMemberSystemActive ? '👤 會員 / 電子券' : '📱 電子券';
       $('member-points-card').style.display = isMemberSystemActive ? 'block' : 'none';
       $('reward-title').style.display = isMemberSystemActive ? 'block' : 'none';
       $('reward-list').style.display = isMemberSystemActive ? 'grid' : 'none';
@@ -853,7 +846,7 @@ body.mode-member-active .undo { color:var(--accent-member); border-color: rgba(2
     busy = b;
     $("btn-check").disabled = b;
     if(b) { $("btn-check").innerText = "處理中…"; } 
-    else { $("btn-check").innerText = currentMode === 'member' ? '查詢' : '查詢 / 核銷'; }
+    else { $("btn-check").innerText = currentMode === 'member' ? '查詢' : '核銷'; }
   }
 
   function renderStores(){
@@ -881,7 +874,7 @@ body.mode-member-active .undo { color:var(--accent-member); border-color: rgba(2
     }
 
     if(currentList.length === 0) { 
-      box.innerHTML = `<p class="empty">此門市目前無開放的${currentMode === 'physical' ? '實體' : '限量'}項目</p>`; 
+      box.innerHTML = `<p class="empty">此門市目前無開放的${currentMode === 'physical' ? '實體' : '活動贈品'}項目</p>`; 
       act = ""; 
       return; 
     }
@@ -931,7 +924,7 @@ body.mode-member-active .undo { color:var(--accent-member); border-color: rgba(2
         currentCount = d.data().count;
         $('c-count').innerText = currentCount;
         $('btn-tally').disabled = currentCount <= 0;
-        $('btn-tally').innerText = currentCount <= 0 ? "庫存已用盡" : "🎁 發出 1 件";
+        $('btn-tally').innerText = currentCount <= 0 ? "贈品庫存已空" : "🎁 發出 1 件";
       } else {
         $('c-count').innerText = "未設配額"; 
         $('btn-tally').disabled = true;
@@ -943,11 +936,7 @@ body.mode-member-active .undo { color:var(--accent-member); border-color: rgba(2
   window.deductTally = async function() {
     if(currentCount <= 0) return;
     
-    const empName = $("employee-name").value.trim();
-    if(!empName) { 
-        $("employee-name").focus(); 
-        return showToast("請先登入值班人員！", "error"); 
-    }
+    const empName = $("employee-name").value.trim() || '001';
 
     $('btn-tally').disabled = true;
     try {
@@ -989,8 +978,7 @@ body.mode-member-active .undo { color:var(--accent-member); border-color: rgba(2
     const amount = parseInt($('consume-amount').value, 10);
     if(isNaN(amount) || amount < POINT_RATE) return showToast(`消費需達 ${POINT_RATE} 元以上！`, "error");
     
-    const empName = $("employee-name").value.trim();
-    if(!empName) return showToast("請先登入值班人員！", "error");
+    const empName = $("employee-name").value.trim() || '001';
 
     const getPts = Math.floor(amount / POINT_RATE);
     
@@ -1032,8 +1020,7 @@ body.mode-member-active .undo { color:var(--accent-member); border-color: rgba(2
     if(!memberRecord) return;
     if(memberRecord.points < reqPts) return;
 
-    const empName = $("employee-name").value.trim();
-    if(!empName) return showToast("請先登入值班人員！", "error");
+    const empName = $("employee-name").value.trim() || '001';
 
     if(!confirm(`確定要扣除 ${reqPts} 點兌換「${giftName}」嗎？`)) return;
 
@@ -1100,13 +1087,13 @@ body.mode-member-active .undo { color:var(--accent-member); border-color: rgba(2
     
     if (isClaimed) {
       banner.className = "banner bad rise";
-      banner.innerHTML = `❌ 券已失效 / 已領取<small>📌 於 ${record.store || "—"} 兌換</small><small>🕒 ${record.redeemTime || "—"}</small><small>👤 核銷人員：${record.redeemBy || "—"}</small>`;
+      banner.innerHTML = `❌ 券已失效 / 已領取<small>📌 於 ${record.store || "—"} 兌換</small><small>🕒 ${record.redeemTime || "—"}</small>`;
     } else if (isExpired) {
       banner.className = "banner bad rise";
       banner.innerHTML = `⚠️ 券已逾期失效<small>🕒 系統檢測已過期 (${expireStr})</small>`;
     } else {
       banner.className = "banner ok rise";
-      banner.innerHTML = "✅ 有效優惠券";
+      banner.innerHTML = "✅ 有效憑證";
     }
 
     const displayGift = record.gift || giftMap[shownAct] || "未設定餐點";
@@ -1266,6 +1253,7 @@ body.mode-member-active .undo { color:var(--accent-member); border-color: rgba(2
     } finally { setBusy(false); }
   }
 
+  // 🔥 優化電子券列表：若為「已核銷」，顯示兌換門市與時間
   function renderUserCoupons() {
      let html = '';
      const acts = Object.keys(userCouponsData);
@@ -1279,16 +1267,29 @@ body.mode-member-active .undo { color:var(--accent-member); border-color: rgba(2
              const gift = c.gift || POS_CONFIG[actName]?.gift || '未設定';
              
              const classStr = (isRedeemed || isExpired) ? "member-list-item disabled" : "member-list-item";
-             const statusTxt = isRedeemed ? "已核銷" : (isExpired ? "已過期" : "點擊核銷");
              const clickEvt = (isRedeemed || isExpired) ? "" : `onclick="prepRedeemCoupon('${actName}')"`;
+
+             let rightSide = '';
+             if (isRedeemed) {
+                 rightSide = `
+                 <div style="text-align:right;">
+                   <div style="background:transparent; color:var(--muted-foreground); font-weight:bold; font-size:14px; margin-bottom:2px;">已核銷</div>
+                   <div style="font-size:11px; color:var(--muted-foreground);">📍 ${c.store || '未知門市'}</div>
+                   <div style="font-size:10px; color:var(--muted-foreground); opacity:0.8; margin-top:2px;">${c.redeemTime || ''}</div>
+                 </div>`;
+             } else if (isExpired) {
+                 rightSide = `<div style="background:transparent; color:var(--muted-foreground); font-weight:bold; font-size:14px;">已過期</div>`;
+             } else {
+                 rightSide = `<div style="background:var(--gradient-digital); color:#fff; padding:6px 12px; border-radius:8px; font-weight:bold; font-size:14px;">點擊核銷</div>`;
+             }
 
              html += `
              <div class="${classStr}" ${clickEvt}>
-                <div>
+                <div style="flex:1; padding-right: 10px;">
                   <div style="font-size:12px; color:var(--accent-digital); font-weight:bold; margin-bottom:4px;">${actName}</div>
-                  <div style="font-weight:bold; font-size:16px; color:#fff;">🎁 ${gift}</div>
+                  <div style="font-weight:bold; font-size:16px; color:#fff; line-height: 1.3;">🎁 ${gift}</div>
                 </div>
-                <div style="background:${(isRedeemed || isExpired) ? 'transparent' : 'var(--gradient-digital)'}; color:${(isRedeemed || isExpired) ? 'var(--muted-foreground)' : '#fff'}; padding:6px 12px; border-radius:8px; font-weight:bold; font-size:14px;">${statusTxt}</div>
+                ${rightSide}
              </div>`;
          });
      }
@@ -1328,12 +1329,7 @@ body.mode-member-active .undo { color:var(--accent-member); border-color: rgba(2
   }
 
   window.redeem = async function() {
-    const empName = $("employee-name").value.trim();
-    if(!empName) { 
-        $("employee-name").focus(); 
-        return showToast("請先登入上方的值班人員！", "error"); 
-    }
-    localStorage.setItem("p_employee", empName); 
+    const empName = $("employee-name").value.trim() || '001';
 
     if (record && (record.status === "已兌換" || record.status === "已過期")) {
         playAlert("error"); 
