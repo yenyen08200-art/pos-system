@@ -204,7 +204,7 @@
     .stats-table th { background: #F4F6F8; padding: 10px; border: 1px solid #E6EAF0; }
     .stats-table td { padding: 10px; border: 1px solid #E6EAF0; }
 
-    /* 🔥 新增：功能開關開關樣式 */
+    /* 🔥 功能開關開關樣式 */
     .toggle-switch {
       position: relative; width: 44px; height: 24px; background: #cbd5e1; border-radius: 12px; cursor: pointer; transition: 0.3s; flex-shrink: 0; display: inline-block;
     }
@@ -293,7 +293,9 @@
         <i class="fa-solid fa-chevron-down" style="font-size: 12px; transition: 0.3s;"></i>
       </div>
       <div class="sub-menu" id="config-sub">
-        <div class="sidebar-item" onclick="switchView('config-app', this)">📱 APP設定與庫存</div>
+        <!-- 🔥 名稱修改與選單分流 -->
+        <div class="sidebar-item" onclick="switchView('config-gift', this)">🎁 活動贈品管理</div>
+        <div class="sidebar-item" onclick="switchView('config-member', this)">👑 會員系統(未完善)</div>
         <div class="sidebar-item" onclick="switchView('config-store', this)">🏪 門市清單管理</div>
         <div class="sidebar-item" onclick="switchView('config-event', this)">🎯 行銷活動管理</div>
       </div>
@@ -333,17 +335,18 @@
         </div>
 
         <div class="dashboard">
+          <!-- 🔥 修改卡片排列順序 -->
           <div class="stat-card c-total">
             <h3>總發行張數 (依所選條件)</h3>
             <div class="num" id="total-count">0</div>
           </div>
-          <div class="stat-card c-redeemed">
-            <h3>已核銷</h3>
-            <div class="num" id="redeemed-count">0</div>
-          </div>
           <div class="stat-card c-rate">
             <h3>📊 總兌換率</h3>
             <div class="num" id="rate-count">0.0%</div>
+          </div>
+          <div class="stat-card c-redeemed">
+            <h3>已核銷</h3>
+            <div class="num" id="redeemed-count">0</div>
           </div>
           <div class="stat-card c-unredeemed">
             <h3>待核銷</h3>
@@ -391,6 +394,7 @@
                 <th onclick="setSort('redeemBy')">👤 核銷人員 <span class="sort-icon" id="sort-redeemBy">▼</span></th>
                 <th onclick="setSort('expireDate')">⏳ 使用期限 <span class="sort-icon" id="sort-expireDate">▼</span></th>
                 <th onclick="setSort('timestamp')">📅 領券時間 <span class="sort-icon" id="sort-timestamp">▼</span></th>
+                <!-- 🔥 保留操作欄位，讓總覽也可看見 -->
                 <th id="col-action">⚙️ 管理操作</th>
               </tr>
             </thead>
@@ -555,13 +559,12 @@
         </div>
       </div>
 
-      <!-- ================= 🔥 子選單視圖：APP設定與庫存 ================= -->
-      <div id="view-config-app" class="view-section">
+      <!-- ================= 🔥 子選單視圖：會員系統(未完善) ================= -->
+      <div id="view-config-member" class="view-section">
         <div class="header">
-          <h1>📱 APP設定與庫存</h1>
+          <h1>👑 會員系統 (未完善)</h1>
         </div>
 
-        <!-- 🔥 新增：會員系統總開關 -->
         <div class="config-card" style="border: 2px solid var(--green); background: rgba(63, 191, 143, 0.05);">
           <h2>👑 會員與點數系統總開關</h2>
           <p class="desc" style="color: var(--text-main);">此開關控制前台 (member.html) 及核銷端 (test_index.html) 是否顯示會員與點數相關功能。關閉時，系統將作為純粹的「電子票夾與核銷工具」運作。</p>
@@ -612,17 +615,31 @@
           <ul class="item-list" id="ui-reward-list" style="margin-top: 15px;"></ul>
         </div>
 
+        <div class="config-card save-cloud-container">
+          <h2>💾 同步至資料庫</h2>
+          <button class="btn-primary btn-save-cloud" style="width:100%; font-size:18px; padding: 16px;" onclick="saveConfigToCloud()">💾 儲存所有設定至雲端 (即時生效)</button>
+        </div>
+      </div>
+
+      <!-- ================= 🔥 子選單視圖：活動贈品管理 ================= -->
+      <div id="view-config-gift" class="view-section">
+        <div class="header">
+          <h1>🎁 活動贈品管理</h1>
+        </div>
+
         <div class="config-card">
           <h2>🎁 門市活動贈品獨立品項設定</h2>
-          <p class="desc">在此設定實體的活動贈品（如馬克杯、公仔），設定後方可分配各門市庫存。</p>
+          <p class="desc">在此設定實體的活動贈品（如馬克杯、公仔、隨餐附贈小物），設定後方可分配各門市庫存。</p>
           <div class="form-group">
             <input type="text" id="new-gift-name" placeholder="輸入贈品名稱 (例: 小騎士復古馬克杯)">
-            <button class="btn-primary" onclick="addGiftItem()">➕ 新增品項</button>
+            <button id="btn-add-gift" class="btn-primary" onclick="addGiftItem()">➕ 新增品項</button>
+            <button id="btn-cancel-gift-edit" class="btn-cancel" style="display:none;" onclick="cancelEditGift()">❌ 取消</button>
           </div>
           <ul class="item-list" id="ui-gift-list"></ul>
         </div>
 
-        <div class="config-card" style="border-left: 4px solid var(--accent-2);">
+        <!-- 🔥 取消左側的橘色邊框，與上方卡片統一風格 -->
+        <div class="config-card">
           <h2>📦 活動贈品庫存分配</h2>
           <p class="desc">分配各門市的贈品庫存數量。</p>
           <div class="form-group">
@@ -774,9 +791,9 @@
     let globalHomeNews = "";
     let globalPointRate = 100;
     let globalRewardsList = [];
-    let globalGiftList = []; // 活動贈品清單
+    let globalGiftList = []; // 限量贈品清單
+    let editingGiftIdx = null; // 🔥 新增：紀錄正在編輯的贈品索引
     
-    // 🔥 新增：會員系統開關變數
     let isMemberSystemActive = true;
 
     document.addEventListener('click', function(e) {
@@ -829,7 +846,7 @@
         if(document.getElementById('batch-act')) document.getElementById('batch-act').innerHTML = cleanHtml;
       }
 
-      if (viewId === 'config-app') { fetchInventoryStats(); }
+      if (viewId === 'config-gift') { fetchInventoryStats(); } // 🔥 名稱更新連動
     };
 
     function populateAdminDropdown() {
@@ -914,17 +931,25 @@
         </li>
       `).join('');
 
-      // 活動品
+      // 🔥 更新：活動贈品（加入編輯、上下移動、刪除）
       document.getElementById('ui-gift-list').innerHTML = globalGiftList.map((gift, idx) => `
         <li class="item-li">
           <div class="item-info">
             <strong>🎁 ${gift}</strong>
           </div>
-          <button class="btn-danger" onclick="deleteGiftItem(${idx})">🗑️ 刪除</button>
+          <details class="kebab-dropdown">
+            <summary>⋮</summary>
+            <div class="kebab-menu">
+              <button onclick="editGiftItem(${idx})">✏️ 編輯品項</button>
+              <button onclick="moveGiftUp(${idx})">🔼 向上移動</button>
+              <button onclick="moveGiftDown(${idx})">🔽 向下移動</button>
+              <button class="danger" onclick="deleteGiftItem(${idx})">🗑️ 刪除</button>
+            </div>
+          </details>
         </li>
       `).join('');
 
-      // 🔥 更新總開關狀態UI
+      // 更新總開關狀態UI
       const toggleBtn = document.getElementById('sys-member-toggle');
       const toggleText = document.getElementById('sys-member-status-text');
       if(isMemberSystemActive) {
@@ -938,18 +963,44 @@
       }
     }
 
-    // 🔥 總開關邏輯
+    // 總開關邏輯
     window.toggleMemberSystem = function() {
       isMemberSystemActive = !isMemberSystemActive;
       renderConfigUI();
       triggerSaveHint();
     };
 
+    // 🔥 新增：活動贈品的編輯與移動邏輯
+    window.editGiftItem = function(idx) {
+        editingGiftIdx = idx;
+        document.getElementById('new-gift-name').value = globalGiftList[idx];
+        const btn = document.getElementById('btn-add-gift');
+        btn.innerText = "💾 儲存修改";
+        btn.style.background = "#3FBF8F";
+        document.getElementById('btn-cancel-gift-edit').style.display = 'inline-block';
+    };
+
+    window.cancelEditGift = function() {
+        editingGiftIdx = null;
+        document.getElementById('new-gift-name').value = '';
+        const btn = document.getElementById('btn-add-gift');
+        btn.innerText = "➕ 新增品項";
+        btn.style.background = "var(--accent)";
+        document.getElementById('btn-cancel-gift-edit').style.display = 'none';
+    };
+
     window.addGiftItem = function() {
       const val = document.getElementById('new-gift-name').value.trim();
       if(!val) return;
-      if(!globalGiftList.includes(val)) globalGiftList.push(val);
-      document.getElementById('new-gift-name').value = '';
+
+      if (editingGiftIdx !== null) {
+          globalGiftList[editingGiftIdx] = val; // 儲存編輯
+          cancelEditGift();
+      } else {
+          if(!globalGiftList.includes(val)) globalGiftList.push(val); // 新增
+          document.getElementById('new-gift-name').value = '';
+      }
+
       renderConfigUI();
       populateAdminDropdown();
       triggerSaveHint();
@@ -961,6 +1012,20 @@
         renderConfigUI();
         populateAdminDropdown();
         triggerSaveHint();
+      }
+    };
+
+    window.moveGiftUp = function(idx) {
+      if(idx > 0) {
+        [globalGiftList[idx-1], globalGiftList[idx]] = [globalGiftList[idx], globalGiftList[idx-1]];
+        renderConfigUI(); triggerSaveHint();
+      }
+    };
+
+    window.moveGiftDown = function(idx) {
+      if(idx < globalGiftList.length - 1) {
+        [globalGiftList[idx], globalGiftList[idx+1]] = [globalGiftList[idx+1], globalGiftList[idx]];
+        renderConfigUI(); triggerSaveHint();
       }
     };
 
@@ -1155,7 +1220,6 @@
           REWARDS_LIST: globalRewardsList,
           POINT_RATE: globalPointRate,
           GIFT_LIST: globalGiftList,
-          // 🔥 寫入總開關狀態
           MEMBER_SYSTEM_ACTIVE: isMemberSystemActive,
           lastUpdated: new Date().toLocaleString()
         }, { merge: true });
@@ -1197,7 +1261,6 @@
           globalPointRate = data.POINT_RATE || 100;
           globalGiftList = data.GIFT_LIST || [];
 
-          // 🔥 讀取總開關狀態 (若沒設定過預設為 true)
           isMemberSystemActive = data.MEMBER_SYSTEM_ACTIVE !== undefined ? data.MEMBER_SYSTEM_ACTIVE : true;
 
           document.getElementById('cfg-home-banner').value = globalHomeBanner;
@@ -1454,7 +1517,7 @@
       
       if (act === 'ALL_OVERVIEW') {
           colAct.style.display = 'table-cell';
-          colAction.style.display = 'none'; 
+          colAction.style.display = 'table-cell'; // 🔥 讓總覽也顯示操作選項
           btnBatch.disabled = true;
           btnExpire.disabled = true;
           document.getElementById('check-all').disabled = true;
@@ -1474,7 +1537,7 @@
               await Promise.all(fetchPromises);
               updateDashboardStats();
           } catch(e) {
-              tbody.innerHTML = '<tr><td colspan="12" style="text-align:center; padding: 40px; color: red;">載入總覽失敗，請重試。</td></tr>';
+              tbody.innerHTML = '<tr><td colspan="13" style="text-align:center; padding: 40px; color: red;">載入總覽失敗，請重試。</td></tr>';
           }
       } else {
           colAct.style.display = 'none';
@@ -1687,7 +1750,7 @@
       document.getElementById('result-count').innerText = `顯示 ${filteredData.length} 筆結果`;
 
       if (filteredData.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="12" style="text-align:center; padding: 40px; color: #F07654; font-weight: bold;">找不到資料 🥲</td></tr>`; return;
+        tbody.innerHTML = `<tr><td colspan="13" style="text-align:center; padding: 40px; color: #F07654; font-weight: bold;">找不到資料 🥲</td></tr>`; return;
       }
 
       tbody.innerHTML = filteredData.map(d => {
@@ -1704,23 +1767,21 @@
         let checkboxHTML = (!d.status || d.status === '未兌換') ? `<input type="checkbox" class="row-check" value="${d.id}" ${isOverview ? 'disabled' : ''}>` : '';
         let actColHTML = isOverview ? `<td><span class="act-tag">${d.act_source}</span></td>` : '';
 
-        let actionBtnHTML = ``;
-        if(!isOverview) {
-            actionBtnHTML = `
-              <details class="kebab-dropdown">
-                <summary>⋮</summary>
-                <div class="kebab-menu">
-                  <button onclick="showQrCode('${d.phone}', '${d.name}')">📱 顯示 QR Code</button>
-            `;
-            if (d.status === '已兌換' || d.status === '已過期') {
-                actionBtnHTML += `<button onclick="resetSingleTicket('${d.id}', '${d.act_source}')">↻ 復原未兌換狀態</button>`;
-            }
-            actionBtnHTML += `
-                  <button class="danger" onclick="deleteSingleTicket('${d.id}', '${d.act_source}')">🗑️ 刪除紀錄</button>
-                </div>
-              </details>
-            `;
+        // 🔥 確保總覽模式下也有操作選單
+        let actionBtnHTML = `
+          <details class="kebab-dropdown">
+            <summary>⋮</summary>
+            <div class="kebab-menu">
+              <button onclick="showQrCode('${d.phone}', '${d.name}')">📱 顯示 QR Code</button>
+        `;
+        if (d.status === '已兌換' || d.status === '已過期') {
+            actionBtnHTML += `<button onclick="resetSingleTicket('${d.id}', '${d.act_source}')">↻ 復原未兌換狀態</button>`;
         }
+        actionBtnHTML += `
+              <button class="danger" onclick="deleteSingleTicket('${d.id}', '${d.act_source}')">🗑️ 刪除紀錄</button>
+            </div>
+          </details>
+        `;
 
         return `
           <tr>
@@ -1736,7 +1797,7 @@
             <td style="font-weight:bold; color:var(--text-sub);">${d.redeemBy || '-'}</td>
             <td style="font-weight:bold; color:var(--text-main);">${displayExpire}</td>
             <td class="time-text">${d.timestamp || '-'}</td>
-            ${!isOverview ? `<td>${actionBtnHTML}</td>` : ''}
+            <td>${actionBtnHTML}</td>
           </tr>
         `;
       }).join('');
