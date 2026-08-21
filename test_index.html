@@ -3,16 +3,15 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
-<!-- 🔥 新增：Apple PWA 專用 Meta -->
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>抽獎核銷系統 | 門市 POS 兌換平台</title>
-<!-- 🔥 新增：PWA Manifest -->
+<title>德州小騎士 | 門市 POS 核銷與點數系統</title>
 <link rel="manifest" href="./manifest.json">
 <link rel="apple-touch-icon" href="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Square_logo.svg/512px-Square_logo.svg.png">
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Space+Grotesk:wght@500;700;900&display=swap" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
 :root{
   --background:oklch(0.17 0.024 259);
@@ -62,29 +61,9 @@ main {
   background-size: auto,auto,44px 44px,44px 44px;
 }
 
-body.mode-physical-active main {
-  background-image:
-    radial-gradient(circle at 15% 10%, rgba(255,107,53,0.12), transparent 45%),
-    radial-gradient(circle at 85% 0%, rgba(240,67,35,0.12), transparent 40%),
-    linear-gradient(oklch(1 0 0 / 3%) 1px, transparent 1px),
-    linear-gradient(90deg, oklch(1 0 0 / 3%) 1px, transparent 1px);
-}
-
-body.mode-counter-active main {
-  background-image:
-    radial-gradient(circle at 15% 10%, rgba(63,191,143,0.12), transparent 45%),
-    radial-gradient(circle at 85% 0%, rgba(42,140,102,0.12), transparent 40%),
-    linear-gradient(oklch(1 0 0 / 3%) 1px, transparent 1px),
-    linear-gradient(90deg, oklch(1 0 0 / 3%) 1px, transparent 1px);
-}
-
-body.mode-member-active main {
-  background-image:
-    radial-gradient(circle at 15% 10%, rgba(242,169,0,0.12), transparent 45%),
-    radial-gradient(circle at 85% 0%, rgba(255,199,44,0.12), transparent 40%),
-    linear-gradient(oklch(1 0 0 / 3%) 1px, transparent 1px),
-    linear-gradient(90deg, oklch(1 0 0 / 3%) 1px, transparent 1px);
-}
+body.mode-physical-active main { background-image: radial-gradient(circle at 15% 10%, rgba(255,107,53,0.12), transparent 45%), radial-gradient(circle at 85% 0%, rgba(240,67,35,0.12), transparent 40%), linear-gradient(oklch(1 0 0 / 3%) 1px, transparent 1px), linear-gradient(90deg, oklch(1 0 0 / 3%) 1px, transparent 1px); }
+body.mode-counter-active main { background-image: radial-gradient(circle at 15% 10%, rgba(63,191,143,0.12), transparent 45%), radial-gradient(circle at 85% 0%, rgba(42,140,102,0.12), transparent 40%), linear-gradient(oklch(1 0 0 / 3%) 1px, transparent 1px), linear-gradient(90deg, oklch(1 0 0 / 3%) 1px, transparent 1px); }
+body.mode-member-active main { background-image: radial-gradient(circle at 15% 10%, rgba(242,169,0,0.12), transparent 45%), radial-gradient(circle at 85% 0%, rgba(255,199,44,0.12), transparent 40%), linear-gradient(oklch(1 0 0 / 3%) 1px, transparent 1px), linear-gradient(90deg, oklch(1 0 0 / 3%) 1px, transparent 1px); }
 
 .wrap { max-width: 1400px; margin: 0 auto; width: 100%; padding: 20px 16px; }
 @media(min-width:768px){.wrap{padding:32px}}
@@ -451,8 +430,8 @@ body.mode-member-active .undo:hover { background: rgba(242,169,0,0.25); }
         
         <!-- 🔥 全新：會員與優惠券合併總覽畫面 -->
         <div id="member-area" class="detail hidden">
-           <!-- 會員點數面板 -->
-           <div class="info" style="margin-bottom: 16px; border-color:var(--accent-member); background:rgba(242,169,0,0.1);">
+           <!-- 會員點數面板 (將被隱藏，如果開關被關閉) -->
+           <div id="member-points-card" class="info" style="margin-bottom: 16px; border-color:var(--accent-member); background:rgba(242,169,0,0.1);">
              <div class="k" style="color:var(--accent-member)">MEMBER POINTS</div>
              <div class="v mono" id="m-pts" style="font-size:48px; color:var(--accent-member)">0</div>
              <div style="font-size: 16px; font-weight: bold; margin-top:8px;">👤 <span id="m-name"></span> <span id="m-phone" style="font-size:12px; opacity:0.7;"></span></div>
@@ -467,7 +446,7 @@ body.mode-member-active .undo:hover { background: rgba(242,169,0,0.25); }
            <div class="label" style="margin-bottom: 8px;">🎟️ 可用活動優惠券</div>
            <div id="user-coupons-list" style="display:grid; gap:8px; margin-bottom:20px;"></div>
 
-           <div class="label" style="margin-bottom: 8px;">🎁 點數兌換商品</div>
+           <div class="label" id="reward-title" style="margin-bottom: 8px;">🎁 點數兌換商品</div>
            <div id="reward-list" style="display:grid; gap:8px;"></div>
            
            <div class="actions">
@@ -543,10 +522,12 @@ body.mode-member-active .undo:hover { background: rgba(242,169,0,0.25); }
   let POS_CONFIG = {};
   let EVENT_ORDER = [];
   
-  // 🔥 新增：來自 admin 的設定變數
   let REWARDS_LIST = [];
   let GIFT_LIST = [];
   let POINT_RATE = 100;
+  
+  // 🔥 新增：會員系統開關變數
+  let isMemberSystemActive = true;
 
   let evMap = {};
   let giftMap = {};
@@ -554,17 +535,15 @@ body.mode-member-active .undo:hover { background: rgba(242,169,0,0.25); }
   const $ = (id) => document.getElementById(id);
   let store = "", act = "", shownPhone = "", shownAct = "", record = null;
   let memberRecord = null;
-  let userCouponsData = {}; // 存放客人抽到的所有電子券
+  let userCouponsData = {}; 
 
   let scanner = null, uTimer = null, busy = false;
-  let currentMode = 'member'; // 預設改為會員模式
+  let currentMode = 'member'; 
   let toastTimer = null;
   
-  // 計數器模式的變數
   let unsubCounter = null; 
   let currentCount = 0;
 
-  // PWA 安裝邏輯
   let deferredPrompt;
   window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault(); 
@@ -625,7 +604,6 @@ body.mode-member-active .undo:hover { background: rgba(242,169,0,0.25); }
     if(m === 'counter') document.body.classList.add('mode-counter-active');
     if(m === 'member') document.body.classList.add('mode-member-active');
 
-    // 依據模式顯示隱藏區塊
     if (m === 'counter') {
       $('scan-block').classList.add('hidden');
       $('act-block').classList.remove('hidden');
@@ -636,21 +614,22 @@ body.mode-member-active .undo:hover { background: rgba(242,169,0,0.25); }
       renderActs();
     } else if (m === 'member') {
       $('scan-block').classList.remove('hidden');
-      $('act-block').classList.add('hidden'); // 會員模式不需選活動
+      $('act-block').classList.add('hidden'); 
       $('counter-area').classList.add('hidden');
       $('btn-scan').style.display = 'block';
 
       $('phone').type = 'tel';
-      $('phone').placeholder = '掃描會員 QR 或輸入手機號碼';
+      // 🔥 依照開關調整提示文字
+      $('phone').placeholder = isMemberSystemActive ? '掃描會員 QR 或輸入手機號碼' : '掃描電子券 QR 或輸入手機號碼';
       $('phone').maxLength = 10; 
       $('btn-check').innerText = '查詢';
-      $('placeholder-title').innerText = "等待掃描會員 / 憑證";
-      $('placeholder-desc').innerText = "掃描 QR Code 即可帶出會員點數與所有優惠券資訊。";
-      $('label-phone').innerText = "📱 會員手機";
+      $('placeholder-title').innerText = isMemberSystemActive ? "等待掃描會員 / 憑證" : "等待掃描電子優惠券";
+      $('placeholder-desc').innerText = isMemberSystemActive ? "掃描 QR Code 即可帶出會員點數與所有優惠券資訊。" : "掃描 QR Code 即可一鍵帶出所有優惠券資訊。";
+      $('scan-label').innerText = isMemberSystemActive ? "● 掃描 / 查詢會員" : "● 掃描優惠券";
       $('info-social').style.display = 'block';
       $('info-expire').style.display = 'block';
       
-      nextCust(); // 重置畫面
+      nextCust(); 
     } else if (m === 'physical') {
       $('scan-block').classList.remove('hidden');
       $('act-block').classList.remove('hidden');
@@ -674,7 +653,6 @@ body.mode-member-active .undo:hover { background: rgba(242,169,0,0.25); }
 
   let acTimeout = null;
   $("phone").addEventListener("input", function() {
-      // 只有實體券允許英文，其他都是電話號碼
       if (currentMode === 'physical') this.value = this.value.replace(/[^a-zA-Z0-9]/g,'').toUpperCase().slice(0,20);
       else this.value = this.value.replace(/[^\d]/g,'').slice(0,10); 
       
@@ -682,8 +660,6 @@ body.mode-member-active .undo:hover { background: rgba(242,169,0,0.25); }
       const list = $("autocomplete-list");
       
       if (val.length < 3) { list.innerHTML = ""; list.classList.remove("show"); return; } 
-      
-      // 實體模式 & 會員模式都不支援快搜 (避免個資外洩或無意義查詢)
       if (currentMode === 'member' || currentMode === 'physical') return;
 
       if (acTimeout) clearTimeout(acTimeout);
@@ -745,13 +721,21 @@ body.mode-member-active .undo:hover { background: rgba(242,169,0,0.25); }
         EVENT_ORDER = data.EVENT_ORDER || Object.keys(POS_CONFIG);
         EVENT_ORDER = EVENT_ORDER.filter(a => POS_CONFIG[a]);
 
-        // 🔥 載入點數與限量品設定
         REWARDS_LIST = data.REWARDS_LIST || [];
         GIFT_LIST = data.GIFT_LIST || [];
         POINT_RATE = data.POINT_RATE || 100;
+        
+        // 🔥 讀取開關狀態 (預設開啟)
+        isMemberSystemActive = data.MEMBER_SYSTEM_ACTIVE !== undefined ? data.MEMBER_SYSTEM_ACTIVE : true;
       } else {
         showToast("雲端尚未建立系統設定，請先至總部後台儲存設定！", "error"); return;
       }
+
+      // 🔥 依據開關改變 UI 狀態
+      $('mode-member').innerHTML = isMemberSystemActive ? '👤 會員 / 優惠' : '📱 優惠券';
+      $('member-points-card').style.display = isMemberSystemActive ? 'block' : 'none';
+      $('reward-title').style.display = isMemberSystemActive ? 'block' : 'none';
+      $('reward-list').style.display = isMemberSystemActive ? 'grid' : 'none';
 
       evMap = {};
       STORE_LIST.forEach(s => {
@@ -773,7 +757,7 @@ body.mode-member-active .undo:hover { background: rgba(242,169,0,0.25); }
       const savedEmp = localStorage.getItem("p_employee");
       if(savedEmp) $("employee-name").value = savedEmp;
 
-      setMode('member'); // 預設進入會員/優惠合併模式
+      setMode('member'); 
       renderStores(); 
     } catch (e) { showToast("無法連線至雲端讀取 POS 設定！", "error"); }
   }
@@ -851,7 +835,6 @@ body.mode-member-active .undo:hover { background: rgba(242,169,0,0.25); }
     setTimeout(() => $("phone").focus(), 100);
   }
 
-  // ---------------- 計數器限量品邏輯 ----------------
   function loadCounter() {
     if(currentMode !== 'counter' || !store || !act) return;
     if(unsubCounter) unsubCounter();
@@ -906,7 +889,6 @@ body.mode-member-active .undo:hover { background: rgba(242,169,0,0.25); }
     }
   };
 
-  // ---------------- 點數計算與給點邏輯 ----------------
   window.calcPoints = function() {
     const amount = parseInt($('consume-amount').value, 10);
     const ptsPreview = $('pts-preview');
@@ -936,7 +918,6 @@ body.mode-member-active .undo:hover { background: rgba(242,169,0,0.25); }
         points: increment(getPts)
       });
       
-      // 同時記錄一筆交易紀錄
       await setDoc(doc(db, "point_transactions", new Date().getTime().toString()), {
         phone: shownPhone,
         type: "earn",
@@ -954,7 +935,7 @@ body.mode-member-active .undo:hover { background: rgba(242,169,0,0.25); }
       
       showToast(`✅ 成功加入 ${getPts} 點！`, "success");
       playAlert("success");
-      renderRewardsList(); // 重新渲染兌換按鈕狀態
+      renderRewardsList(); 
     } catch(e) {
       showToast("連線失敗，請重試", "error");
     } finally {
@@ -1152,7 +1133,6 @@ body.mode-member-active .undo:hover { background: rgba(242,169,0,0.25); }
           hideUndo(); renderRight(); return;
         }
         
-        // 尋找其他實體活動
         const otherActs = (evMap[store] || []).filter(a => a !== ac && (a.includes('【實體】') || a.includes('實體券')));
         let foundOtherData = null, foundOtherActName = "";
         for (const otherAct of otherActs){
@@ -1175,12 +1155,20 @@ body.mode-member-active .undo:hover { background: rgba(242,169,0,0.25); }
         }
       } 
       else if (currentMode === 'member') {
-        // 1. 抓取會員點數資料
-        const memSnap = await getDoc(doc(db, "members", ph));
-        memberRecord = memSnap.exists() ? memSnap.data() : { points: 0, name: "非會員 (可核銷電子券)" };
+        // 🔥 如果開關開啟，才抓會員點數
+        if (isMemberSystemActive) {
+            const memSnap = await getDoc(doc(db, "members", ph));
+            memberRecord = memSnap.exists() ? memSnap.data() : { points: 0, name: "非註冊會員" };
+            $('m-pts').innerText = memberRecord.points || 0;
+            $('m-name').innerText = memberRecord.name || "非註冊顧客";
+            $('m-phone').innerText = ph;
+            $('consume-amount').value = ''; $('pts-preview').innerText = '';
+            renderRewardsList();
+        }
+        
         shownPhone = ph;
         
-        // 2. 抓取所有電子優惠券資料
+        // 抓取所有電子優惠券資料
         let digitalActs = EVENT_ORDER.filter(a => !a.includes('【實體】') && !a.includes('實體券') && POS_CONFIG[a]?.active !== false);
         await Promise.all(digitalActs.map(async (a) => {
             const cSnap = await getDoc(doc(db, a, ph));
@@ -1191,22 +1179,12 @@ body.mode-member-active .undo:hover { background: rgba(242,169,0,0.25); }
         }));
 
         playAlert("scan");
-        
-        // 3. 渲染會員合併面板
-        $('m-pts').innerText = memberRecord.points;
-        $('m-name').innerText = memberRecord.name;
-        $('m-phone').innerText = ph;
-        $('consume-amount').value = ''; $('pts-preview').innerText = '';
-
         renderUserCoupons();
-        renderRewardsList();
-        
         $("member-area").classList.remove("hidden");
       }
     } finally { setBusy(false); }
   }
 
-  // 渲染客人擁有的電子券
   function renderUserCoupons() {
      let html = '';
      const acts = Object.keys(userCouponsData);
@@ -1260,13 +1238,12 @@ body.mode-member-active .undo:hover { background: rgba(242,169,0,0.25); }
     $('reward-list').innerHTML = html;
   }
 
-  // 點擊電子券，進入原本的核銷明細頁面 (完美保留 5s 撤銷特效)
   window.prepRedeemCoupon = function(actName) {
       shownAct = actName;
       record = userCouponsData[actName];
       
       $("member-area").classList.add("hidden");
-      renderRight(); // This will show the "detail" view with the giant redeem button
+      renderRight(); 
   }
 
   window.redeem = async function() {
@@ -1322,7 +1299,7 @@ body.mode-member-active .undo:hover { background: rgba(242,169,0,0.25); }
     try { await updateDoc(doc(db, ac, ph), { status: "未兌換", store: "", redeemTime: "", redeemBy: "" }); } finally { setBusy(false); }
     $("btn-undo").classList.add("hidden");
     showToast("已撤銷復原", "success"); 
-    check(ph); // 重新檢查會退回會員面板
+    check(ph); 
   }
 
   window.nextCust = function() {
