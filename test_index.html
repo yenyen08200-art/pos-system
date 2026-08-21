@@ -60,9 +60,29 @@ main {
   background-size: auto,auto,44px 44px,44px 44px;
 }
 
-body.mode-physical-active main { background-image: radial-gradient(circle at 15% 10%, rgba(255,107,53,0.12), transparent 45%), radial-gradient(circle at 85% 0%, rgba(240,67,35,0.12), transparent 40%), linear-gradient(oklch(1 0 0 / 3%) 1px, transparent 1px), linear-gradient(90deg, oklch(1 0 0 / 3%) 1px, transparent 1px); }
-body.mode-counter-active main { background-image: radial-gradient(circle at 15% 10%, rgba(63,191,143,0.12), transparent 45%), radial-gradient(circle at 85% 0%, rgba(42,140,102,0.12), transparent 40%), linear-gradient(oklch(1 0 0 / 3%) 1px, transparent 1px), linear-gradient(90deg, oklch(1 0 0 / 3%) 1px, transparent 1px); }
-body.mode-member-active main { background-image: radial-gradient(circle at 15% 10%, rgba(242,169,0,0.12), transparent 45%), radial-gradient(circle at 85% 0%, rgba(255,199,44,0.12), transparent 40%), linear-gradient(oklch(1 0 0 / 3%) 1px, transparent 1px), linear-gradient(90deg, oklch(1 0 0 / 3%) 1px, transparent 1px); }
+body.mode-physical-active main {
+  background-image:
+    radial-gradient(circle at 15% 10%, rgba(255,107,53,0.12), transparent 45%),
+    radial-gradient(circle at 85% 0%, rgba(240,67,35,0.12), transparent 40%),
+    linear-gradient(oklch(1 0 0 / 3%) 1px, transparent 1px),
+    linear-gradient(90deg, oklch(1 0 0 / 3%) 1px, transparent 1px);
+}
+
+body.mode-counter-active main {
+  background-image:
+    radial-gradient(circle at 15% 10%, rgba(63,191,143,0.12), transparent 45%),
+    radial-gradient(circle at 85% 0%, rgba(42,140,102,0.12), transparent 40%),
+    linear-gradient(oklch(1 0 0 / 3%) 1px, transparent 1px),
+    linear-gradient(90deg, oklch(1 0 0 / 3%) 1px, transparent 1px);
+}
+
+body.mode-member-active main {
+  background-image:
+    radial-gradient(circle at 15% 10%, rgba(242,169,0,0.12), transparent 45%),
+    radial-gradient(circle at 85% 0%, rgba(255,199,44,0.12), transparent 40%),
+    linear-gradient(oklch(1 0 0 / 3%) 1px, transparent 1px),
+    linear-gradient(90deg, oklch(1 0 0 / 3%) 1px, transparent 1px);
+}
 
 .wrap { max-width: 1400px; margin: 0 auto; width: 100%; padding: 20px 16px; }
 @media(min-width:768px){.wrap{padding:32px}}
@@ -388,6 +408,7 @@ body.mode-member-active .undo:hover { background: rgba(242,169,0,0.25); }
   <span id="toast-msg">系統訊息</span>
 </div>
 
+<!-- 🔥 極速版登入介面 (完全免 Firebase Auth 驗證，只要代號對、門市選好秒進！) -->
 <div id="pos-login-screen">
   <div class="login-panel">
     <div class="login-logo">⚡</div>
@@ -548,7 +569,6 @@ body.mode-member-active .undo:hover { background: rgba(242,169,0,0.25); }
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
   import { getFirestore, doc, getDoc, setDoc, updateDoc, query, collection, where, limit, getDocs, onSnapshot, increment } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-  import { getAuth, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyBINQuYtYZA8RLfwm51AfGLTYj1TX_UcFo",
@@ -561,7 +581,6 @@ body.mode-member-active .undo:hover { background: rgba(242,169,0,0.25); }
   };
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
-  const auth = getAuth(app);
 
   let STORE_LIST = [];
   let POS_CONFIG = {};
@@ -587,7 +606,7 @@ body.mode-member-active .undo:hover { background: rgba(242,169,0,0.25); }
   let unsubCounter = null; 
   let currentCount = 0;
 
-  // 🔥 九宮格登入邏輯
+  // 🔥 極速版九宮格登入邏輯 (完全捨棄 Firebase Auth 驗證，秒進！)
   let currentPin = '';
   window.addPin = function(num) {
     if(currentPin.length < 10) currentPin += num;
@@ -600,7 +619,7 @@ body.mode-member-active .undo:hover { background: rgba(242,169,0,0.25); }
     $('pin-display').classList.remove('error');
   }
 
-  window.submitPin = async function() {
+  window.submitPin = function() {
     if(currentPin.length === 0) return;
     
     const selectedStore = $('login-store-select').value;
@@ -621,48 +640,39 @@ body.mode-member-active .undo:hover { background: rgba(242,169,0,0.25); }
       return;
     }
     
-    $('login-status-text').innerText = '⏳ 系統連線驗證中...';
-    $('pin-display').classList.remove('error');
+    // 驗證通過，直接解鎖！
+    localStorage.setItem("p_employee", currentPin);
+    $("employee-name").value = currentPin;
 
-    try {
-      // 🔥 直接使用我們剛剛建立好的門市公用帳號進行後台授權
-      await signInWithEmailAndPassword(auth, "pos@texas.com", "texaspos1234");
-      
-      localStorage.setItem("p_employee", currentPin);
-      $("employee-name").value = currentPin;
-
-      selectStore(selectedStore);
-      
-      $('pos-login-screen').style.display = 'none';
-      $('main-app').style.filter = 'none';
-      $('main-app').style.pointerEvents = 'auto';
-      $('login-status-text').innerText = '小騎士 POS 登入'; 
-      
-      showToast(`✅ 值班人員 ${currentPin} 登入成功！`, 'success');
-    } catch (error) {
-      console.error("Firebase Auth 錯誤:", error);
-      $('pin-display').classList.add('error');
-      
-      // 🔥 直接將 Firebase 的錯誤代碼顯示在畫面上，讓你一目了然！
-      $('login-status-text').innerText = '❌ 錯誤: ' + (error.code || '登入失敗');
-      
-      currentPin = '';
-      setTimeout(() => { 
-        $('pin-display').classList.remove('error'); 
-        $('pin-display').innerText = ''; 
-        $('login-status-text').innerText = '小騎士 POS 登入'; 
-      }, 5500);
-    }
+    selectStore(selectedStore);
+    
+    $('pos-login-screen').style.display = 'none';
+    $('main-app').style.filter = 'none';
+    $('main-app').style.pointerEvents = 'auto';
+    
+    showToast(`✅ 值班人員 ${currentPin} 登入成功！`, 'success');
   }
 
-  window.showLoginScreen = async function() {
-    try { await signOut(auth); } catch(e) {}
+  window.showLoginScreen = function() {
     localStorage.removeItem("p_employee");
     $("employee-name").value = '';
     clearPin();
     $('pos-login-screen').style.display = 'flex';
     $('main-app').style.filter = 'blur(10px)';
     $('main-app').style.pointerEvents = 'none';
+  }
+
+  // 檢查是否已經登入過
+  function checkAutoLogin() {
+    const savedEmpPin = localStorage.getItem("p_employee");
+    if(savedEmpPin) {
+      $("employee-name").value = savedEmpPin;
+      $('pos-login-screen').style.display = 'none';
+      $('main-app').style.filter = 'none';
+      $('main-app').style.pointerEvents = 'auto';
+    } else {
+      showLoginScreen();
+    }
   }
 
   let deferredPrompt;
@@ -681,7 +691,7 @@ body.mode-member-active .undo:hover { background: rgba(242,169,0,0.25); }
   const isIos = () => /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
   const isInStandaloneMode = () => ('standalone' in window.navigator) && (window.navigator.standalone);
   if (isIos() && !isInStandaloneMode()) {
-    $('pwa-prompt').innerHTML = `<span style="font-size:14px;">📲 iOS：請點選下方「分享」➔「加入主畫面」</span><button onclick="document.getElementById('pwa-prompt').style.display='none'" style="background:transparent; border:none; font-size:20px; cursor:pointer;">✖</button>`;
+    $('pwa-prompt').innerHTML = `<span style="font-size:14px;">📲 iOS : 請點選下方「分享」➔「加入主畫面」</span><button onclick="document.getElementById('pwa-prompt').style.display='none'" style="background:transparent; border:none; font-size:20px; cursor:pointer;">✖</button>`;
     $('pwa-prompt').style.display = 'flex';
   }
 
@@ -783,7 +793,6 @@ body.mode-member-active .undo:hover { background: rgba(242,169,0,0.25); }
         
         isMemberSystemActive = data.MEMBER_SYSTEM_ACTIVE !== undefined ? data.MEMBER_SYSTEM_ACTIVE : true;
 
-        // 🔥 將門市填入登入畫面的下拉選單
         const loginStoreSelect = $('login-store-select');
         loginStoreSelect.innerHTML = '<option value="" style="color:#000;">請先選擇值班門市</option>' + 
           STORE_LIST.map(s => `<option value="${s}" style="color:#000;">${s}</option>`).join('');
@@ -815,7 +824,8 @@ body.mode-member-active .undo:hover { background: rgba(242,169,0,0.25); }
           store = STORE_LIST[0];
       }
 
-      renderStores(); 
+      renderStores();
+      checkAutoLogin(); 
     } catch (e) { 
       if(e.code !== 'permission-denied') {
         showToast("無法連線至雲端讀取 POS 設定！", "error"); 
@@ -1203,7 +1213,7 @@ body.mode-member-active .undo:hover { background: rgba(242,169,0,0.25); }
         }
         
         if (foundOtherData){
-          if (confirm("❌ 找不到「" + ac + "」的紀錄。\n\n💡 但發現客人有未兌換的「" + foundOtherActName + "」，是否要自動切換過去？")){
+          if (confirm("❌ 找不到 " + ac + " 的紀錄。\n\n💡 但發現客人有未兌換的 " + foundOtherActName + "，是否要自動切換過去？")){
             act = foundOtherActName; renderActs(); 
             shownPhone = ph; shownAct = foundOtherActName; record = foundOtherData;
             hideUndo(); renderRight();
