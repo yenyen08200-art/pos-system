@@ -118,7 +118,6 @@
     .search-box { padding: 12px 18px; border-radius: 999px; border: none; font-size: 14px; width: 300px; outline: none; background: #fff; box-shadow: var(--shadow); color: var(--text-main); }
     
     .table-container { background: var(--card-bg); border-radius: var(--radius); box-shadow: var(--shadow); overflow: auto; max-height: 52vh; padding: 8px; padding-bottom: 120px; }
-    /* 🔥 表格最小寬度縮減，避免超出螢幕 */
     table { width: 100%; border-collapse: separate; border-spacing: 0 4px; min-width: 800px; }
     th, td { padding: 14px 18px; text-align: left; border: none; }
     th { background: #F5F7FA; color: var(--text-sub); font-weight: 700; font-size: 12.5px; position: sticky; top: 0; cursor: pointer; user-select: none; white-space: nowrap; z-index: 10; }
@@ -202,9 +201,9 @@
     /* ================= 庫存監控表格 ================= */
     .stats-table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 14px; }
     .stats-table th { background: #F4F6F8; padding: 10px; border: 1px solid #E6EAF0; }
-    .stats-table td { padding: 10px; border: 1px solid #E6EAF0; }
+    .stats-table td { padding: 10px; border: 1px solid #E6EAF0; vertical-align: middle;}
 
-    /* 🔥 功能開關開關樣式 */
+    /* 功能開關開關樣式 */
     .toggle-switch {
       position: relative; width: 44px; height: 24px; background: #cbd5e1; border-radius: 12px; cursor: pointer; transition: 0.3s; flex-shrink: 0; display: inline-block;
     }
@@ -293,7 +292,7 @@
         <i class="fa-solid fa-chevron-down" style="font-size: 12px; transition: 0.3s;"></i>
       </div>
       <div class="sub-menu" id="config-sub">
-        <!-- 🔥 名稱修改與選單分流 -->
+        <!-- 名稱修改與選單分流 -->
         <div class="sidebar-item" onclick="switchView('config-gift', this)">🎁 活動贈品管理</div>
         <div class="sidebar-item" onclick="switchView('config-member', this)">👑 會員系統(未完善)</div>
         <div class="sidebar-item" onclick="switchView('config-store', this)">🏪 門市清單管理</div>
@@ -335,7 +334,7 @@
         </div>
 
         <div class="dashboard">
-          <!-- 🔥 修改卡片排列順序 -->
+          <!-- 修改卡片排列順序 -->
           <div class="stat-card c-total">
             <h3>總發行張數 (依所選條件)</h3>
             <div class="num" id="total-count">0</div>
@@ -380,7 +379,7 @@
 
         <div class="table-container">
           <table id="data-table">
-            <!-- 🔥 精簡化後的表格表頭 (8 個欄位) -->
+            <!-- 精簡化後的表格表頭 (8 個欄位) -->
             <thead>
               <tr>
                 <th style="width: 40px;"><input type="checkbox" id="check-all" onclick="document.querySelectorAll('.row-check').forEach(cb => cb.checked = this.checked)"></th>
@@ -664,6 +663,8 @@
                 <th>贈品名稱</th>
                 <th>剩餘庫存</th>
                 <th>已發送出去</th>
+                <!-- 🔥 新增了操作欄位 -->
+                <th style="width: 80px;">操作</th>
               </tr>
             </thead>
             <tbody id="inv-stats-tbody"></tbody>
@@ -746,7 +747,6 @@
   </main>
 
   <script type="module">
-    // 🔥 加上 where 用以查詢資料庫刪除庫存
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getFirestore, collection, getDocs, onSnapshot, doc, getDoc, setDoc, updateDoc, deleteDoc, query, limit, where } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
     import { getAuth, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
@@ -781,12 +781,13 @@
     let globalEventOrder = [];
     let editingActName = null; 
     
+    // 視覺與點數商品變數
     let globalHomeBanner = "";
     let globalHomeNews = "";
     let globalPointRate = 100;
     let globalRewardsList = [];
-    let globalGiftList = [];
-    let editingGiftIdx = null;
+    let globalGiftList = []; 
+    let editingGiftIdx = null; 
     
     let isMemberSystemActive = true;
 
@@ -840,7 +841,7 @@
         if(document.getElementById('batch-act')) document.getElementById('batch-act').innerHTML = cleanHtml;
       }
 
-      if (viewId === 'config-gift') { fetchInventoryStats(); }
+      if (viewId === 'config-gift') { fetchInventoryStats(); } 
     };
 
     function populateAdminDropdown() {
@@ -993,7 +994,7 @@
       triggerSaveHint();
     };
 
-    // 🔥 修改：連帶刪除資料庫中的庫存紀錄
+    // 🔥 確保完全清除 Firebase 上的庫存連動
     window.deleteGiftItem = async function(idx) {
       const giftName = globalGiftList[idx];
       if(confirm(`確定要刪除「${giftName}」嗎？\n⚠️ 注意：這將連帶刪除「所有門市對應的庫存紀錄」，此操作立即生效！`)) {
@@ -1003,13 +1004,15 @@
         triggerSaveHint();
         
         try {
-            // 到 inventory 中尋找 act == 該贈品名稱 的文件並刪除
             const q = query(collection(db, "inventory"), where("act", "==", giftName));
             const querySnapshot = await getDocs(q);
+            const deletePromises = [];
             querySnapshot.forEach((docSnap) => {
-                deleteDoc(doc(db, "inventory", docSnap.id));
+                deletePromises.push(deleteDoc(doc(db, "inventory", docSnap.id)));
             });
-            fetchInventoryStats(); // 重新整理下方監控表格
+            await Promise.all(deletePromises); // 🔥 確保全部刪除完畢
+            
+            fetchInventoryStats(); 
             alert(`已成功清除「${giftName}」的庫存紀錄！\n記得點擊最下方【儲存至雲端】來更新總表設定喔！`);
         } catch(e) {
             console.error("清除庫存連動失敗", e);
@@ -1511,6 +1514,7 @@
       const act = actSelect.value;
       const tbody = document.getElementById('table-body');
       const colAct = document.getElementById('col-act');
+      const colAction = document.getElementById('col-action');
       const btnBatch = document.getElementById('btn-batch');
       const btnExpire = document.getElementById('btn-expire');
       
@@ -1519,6 +1523,7 @@
       
       if (act === 'ALL_OVERVIEW') {
           colAct.style.display = 'table-cell';
+          colAction.style.display = 'table-cell';
           btnBatch.disabled = true;
           btnExpire.disabled = true;
           document.getElementById('check-all').disabled = true;
@@ -1542,6 +1547,7 @@
           }
       } else {
           colAct.style.display = 'none';
+          colAction.style.display = 'table-cell';
           btnBatch.disabled = false;
           btnExpire.disabled = false;
           document.getElementById('check-all').disabled = false;
@@ -1753,7 +1759,6 @@
         tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding: 40px; color: #F07654; font-weight: bold;">找不到資料 🥲</td></tr>`; return;
       }
 
-      // 🔥 精簡化的表格渲染：欄位整併
       tbody.innerHTML = filteredData.map(d => {
         const defaultGift = globalPosConfig[d.act_source]?.gift || '預設活動贈品';
         const defaultExpire = globalPosConfig[d.act_source]?.expireDate || "無特別限制";
@@ -1768,7 +1773,6 @@
         let checkboxHTML = (!d.status || d.status === '未兌換') ? `<input type="checkbox" class="row-check" value="${d.id}" ${isOverview ? 'disabled' : ''}>` : '';
         let actColHTML = isOverview ? `<td><span class="act-tag">${d.act_source}</span></td>` : '';
 
-        // 操作選單 (總覽模式也開放)
         let actionBtnHTML = `
           <details class="kebab-dropdown">
             <summary>⋮</summary>
@@ -1784,7 +1788,6 @@
           </details>
         `;
 
-        // 🔥 資料區塊合併設計
         let customerInfo = `
             <div style="font-weight:bold; font-size:14px; color:var(--text-main);">${d.name || '未知'}</div>
             <div style="font-family:monospace; font-size:13px; color:var(--text-sub);">${d.phone || '-'}</div>
@@ -1946,23 +1949,40 @@
       }
     }
 
+    // 庫存監控抓取與新增單獨刪除按鈕
     window.fetchInventoryStats = async function() {
       try {
         const snap = await getDocs(collection(db, "inventory"));
         let html = '';
-        snap.forEach(doc => {
-           let d = doc.data();
+        snap.forEach(docSnap => {
+           let d = docSnap.data();
+           let docId = docSnap.id;
            html += `
             <tr>
               <td>${d.store}</td>
               <td>${d.act}</td>
               <td style="font-weight:bold; color:var(--accent);">${d.count}</td>
               <td>${d.usedCount || 0}</td>
+              <td><button class="btn-danger" style="padding: 6px 12px;" onclick="deleteInventoryRecord('${docId}')">🗑️ 刪除</button></td>
             </tr>
            `;
         });
         document.getElementById('inv-stats-tbody').innerHTML = html;
-      } catch(e) { console.error("獲取庫存監控失敗"); }
+      } catch(e) { console.error("獲取庫存監控失敗", e); }
+    }
+
+    // 🔥 新增：獨立刪除單筆庫存紀錄的按鈕
+    window.deleteInventoryRecord = async function(docId) {
+        if(confirm("確定要刪除這筆庫存分配紀錄嗎？此操作會直接從資料庫移除喔！")) {
+            try {
+                await deleteDoc(doc(db, "inventory", docId));
+                fetchInventoryStats(); 
+                alert("✅ 庫存紀錄已刪除！");
+            } catch(e) {
+                console.error(e);
+                alert("刪除失敗，請檢查權限或網路");
+            }
+        }
     }
 
     let payrollData = [];
