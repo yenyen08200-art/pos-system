@@ -112,7 +112,7 @@
     .chart-box h3 { margin: 0 0 18px; font-size: 15px; font-weight: 800; }
     .chart-canvas { height: 240px; }
     
-    /* ================= 表格 UI ================= */
+    /* ================= 表格 UI (精簡版) ================= */
     .table-toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; gap: 12px; flex-wrap: wrap; }
     .table-toolbar #result-count { color: var(--text-sub); font-size: 13px; font-weight: 600; }
     .search-box { padding: 12px 18px; border-radius: 999px; border: none; font-size: 14px; width: 300px; outline: none; background: #fff; box-shadow: var(--shadow); color: var(--text-main); }
@@ -163,11 +163,9 @@
 
     .btn-primary { background: var(--accent); color: #fff; border: none; padding: 12px 24px; border-radius: 12px; font-weight: 700; cursor: pointer; transition: 0.2s; }
     .btn-primary:hover { filter: brightness(1.1); }
-    /* 🔥 新增強制不折行的紅色按鈕樣式 */
     .btn-danger { background: #fef2f2; color: #ef4444; border: 1px solid #fecaca; padding: 8px 16px; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 12px; transition: .2s; white-space: nowrap; }
     .btn-danger:hover { background: #ef4444; color: #fff; }
     
-    /* 🔥 新增：表格專屬的刪除按鈕，更好看且絕對不折行 */
     .btn-table-del { background: #fef2f2; color: #ef4444; border: 1px solid #fecaca; padding: 6px 12px; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 13px; transition: .2s; white-space: nowrap; display: inline-flex; align-items: center; gap: 6px; }
     .btn-table-del:hover { background: #ef4444; color: #fff; border-color: #ef4444; }
 
@@ -288,7 +286,7 @@
     
     <nav class="sidebar-menu" style="display:flex;">
       <div class="sidebar-item active" onclick="switchView('dashboard', this)">📊 電子兌換卷儀表板</div>
-      <div class="sidebar-item" onclick="switchView('issue-ui', this)">🎟️ 票券發放與建檔</div>
+      <div class="sidebar-item" onclick="switchView('issue-ui', this)">🎟️ 手動補單管理</div>
       <div class="sidebar-item" onclick="switchView('lottery-ui', this)">🎉 社群抽獎發券中心</div>
       <div class="sidebar-item" onclick="switchView('payroll-ui', this)">💸 薪資單群發系統</div>
       
@@ -400,10 +398,10 @@
         </div>
       </div>
 
-      <!-- ================= 視圖 2：票券發放與建檔中心 ================= -->
+      <!-- ================= 視圖 2：手動補單管理 ================= -->
       <div id="view-issue-ui" class="view-section">
         <div class="header">
-          <h1>🎟️ 票券發放與建檔中心</h1>
+          <h1>🎟️ 手動補單管理</h1>
         </div>
 
         <div class="config-card">
@@ -443,42 +441,6 @@
             </div>
           </div>
           <button class="btn-primary" style="width:100%; padding:14px; font-size:16px;" onclick="submitManualTicket()">✅ 確認發券並產生 QR Code</button>
-        </div>
-
-        <div class="config-card">
-          <h2>🎫 實體券批次建檔器</h2>
-          <p class="desc">自動產生連續的流水號並寫入資料庫。門市 POS 將阻擋「未在此建檔過」的偽造實體券。</p>
-          
-          <div class="form-group">
-            <div class="field-block">
-              <label>🎯 綁定實體券活動</label>
-              <select id="batch-act"></select>
-            </div>
-            <div class="field-block">
-              <label>🎁 兌換品項設定</label>
-              <input type="text" id="batch-gift" value="依實體券面標示發放" placeholder="給店員看的提示">
-            </div>
-          </div>
-          
-          <div class="form-group">
-            <div class="field-block">
-              <label>🔤 流水號前綴 (選填)</label>
-              <input type="text" id="batch-prefix" placeholder="例：A">
-            </div>
-            <div class="field-block">
-              <label>🔢 數字位數</label>
-              <input type="number" id="batch-pad" value="3" min="1" placeholder="例：3 (代表 001)">
-            </div>
-            <div class="field-block">
-              <label>▶️ 起始號碼</label>
-              <input type="number" id="batch-start" value="1" min="1">
-            </div>
-            <div class="field-block">
-              <label>⏹️ 結束號碼</label>
-              <input type="number" id="batch-end" value="100" min="1">
-            </div>
-          </div>
-          <button id="btn-run-batch" class="btn-primary" style="width:100%; padding:14px; font-size:16px; background:var(--sidebar-bg);" onclick="runBatch()">🚀 開始批次建檔</button>
         </div>
       </div>
 
@@ -739,6 +701,43 @@
           
           <ul class="item-list" id="ui-event-list" style="margin-top: 20px;"></ul>
         </div>
+        
+        <!-- 🔥 搬移至此：實體券批次建檔器 -->
+        <div class="config-card">
+          <h2>🎫 實體券批次建檔器</h2>
+          <p class="desc">自動產生連續的流水號並寫入資料庫。門市 POS 將阻擋「未在此建檔過」的偽造實體券。</p>
+          
+          <div class="form-group">
+            <div class="field-block">
+              <label>🎯 綁定實體券活動</label>
+              <select id="batch-act"></select>
+            </div>
+            <div class="field-block">
+              <label>🎁 兌換品項設定</label>
+              <input type="text" id="batch-gift" value="依實體券面標示發放" placeholder="給店員看的提示">
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <div class="field-block">
+              <label>🔤 流水號前綴 (選填)</label>
+              <input type="text" id="batch-prefix" placeholder="例：A">
+            </div>
+            <div class="field-block">
+              <label>🔢 數字位數</label>
+              <input type="number" id="batch-pad" value="3" min="1" placeholder="例：3 (代表 001)">
+            </div>
+            <div class="field-block">
+              <label>▶️ 起始號碼</label>
+              <input type="number" id="batch-start" value="1" min="1">
+            </div>
+            <div class="field-block">
+              <label>⏹️ 結束號碼</label>
+              <input type="number" id="batch-end" value="100" min="1">
+            </div>
+          </div>
+          <button id="btn-run-batch" class="btn-primary" style="width:100%; padding:14px; font-size:16px; background:var(--sidebar-bg);" onclick="runBatch()">🚀 開始批次建檔</button>
+        </div>
 
         <div class="config-card save-cloud-container">
           <h2>💾 同步至資料庫</h2>
@@ -836,7 +835,8 @@
       }
       element.classList.add('active');
       
-      if (viewId === 'lottery-ui' || viewId === 'issue-ui') {
+      // 🔥 更新：切換到行銷活動管理時，也要確保下拉選單更新
+      if (viewId === 'lottery-ui' || viewId === 'issue-ui' || viewId === 'config-event') {
         const actSelectHtml = document.getElementById('act-select').innerHTML;
         let cleanHtml = actSelectHtml.replace(/<option value="ALL_OVERVIEW">🌐 總覽 \(所有活動\)<\/option>/g, '');
         if(document.getElementById('lottery-act')) document.getElementById('lottery-act').innerHTML = cleanHtml;
@@ -999,11 +999,27 @@
 
     window.deleteGiftItem = async function(idx) {
       const giftName = globalGiftList[idx];
-      if(confirm(`確定要刪除「${giftName}」嗎？\n⚠️ 注意：此操作無法直接連動刪除下方的個別庫存紀錄，若您想清理下方表格的庫存數字，請直接在下方的表格點擊【垃圾桶】圖示刪除。`)) {
+      if(confirm(`確定要刪除「${giftName}」嗎？\n⚠️ 注意：這將連帶刪除「所有門市對應的庫存紀錄」，此操作立即生效！`)) {
         globalGiftList.splice(idx, 1);
         renderConfigUI();
         populateAdminDropdown();
         triggerSaveHint();
+        
+        try {
+            const q = query(collection(db, "inventory"), where("act", "==", giftName));
+            const querySnapshot = await getDocs(q);
+            const deletePromises = [];
+            querySnapshot.forEach((docSnap) => {
+                deletePromises.push(deleteDoc(doc(db, "inventory", docSnap.id)));
+            });
+            await Promise.all(deletePromises); 
+            
+            fetchInventoryStats(); 
+            alert(`已成功清除「${giftName}」的庫存紀錄！\n記得點擊最下方【儲存至雲端】來更新總表設定喔！`);
+        } catch(e) {
+            console.error("清除庫存連動失敗", e);
+            alert("庫存紀錄清除失敗，請檢查網路連線。");
+        }
       }
     };
 
@@ -1499,6 +1515,7 @@
       const act = actSelect.value;
       const tbody = document.getElementById('table-body');
       const colAct = document.getElementById('col-act');
+      const colAction = document.getElementById('col-action');
       const btnBatch = document.getElementById('btn-batch');
       const btnExpire = document.getElementById('btn-expire');
       
@@ -1507,6 +1524,7 @@
       
       if (act === 'ALL_OVERVIEW') {
           colAct.style.display = 'table-cell';
+          colAction.style.display = 'table-cell';
           btnBatch.disabled = true;
           btnExpire.disabled = true;
           document.getElementById('check-all').disabled = true;
@@ -1530,6 +1548,7 @@
           }
       } else {
           colAct.style.display = 'none';
+          colAction.style.display = 'table-cell';
           btnBatch.disabled = false;
           btnExpire.disabled = false;
           document.getElementById('check-all').disabled = false;
