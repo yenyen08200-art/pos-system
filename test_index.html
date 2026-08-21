@@ -226,7 +226,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
 
 /* 🔥 更新：讓員工編號變成唯讀，強制透過九宮格輸入 */
 #employee-name{
-  width:100%; min-height:56px; border-radius:12px; border:1px solid var(--border); background:rgba(0,0,0,0.3); color:#fff; padding:0 16px; font-size:16px; margin-bottom: 20px; outline:none; text-align:center; font-family:monospace; font-weight:bold; letter-spacing:0.1em;
+  width:100%; min-height:56px; border-radius:12px; border:1px solid var(--border); background:rgba(0,0,0,0.3); color:#fff; padding:0 16px; font-size:16px; margin-bottom: 20px; outline:none; text-align:center; font-family:monospace; font-weight:bold; letter-spacing:0.1em; cursor: not-allowed;
 }
 
 #toast-container {
@@ -373,6 +373,16 @@ body.mode-member-active .undo:hover { background: rgba(242,169,0,0.25); }
   box-shadow: 0 10px 25px -5px rgba(0,198,255,0.6);
 }
 .login-title { font-size: 20px; font-weight: 700; margin-bottom: 24px; letter-spacing: 0.1em; color: var(--foreground); }
+
+/* 🔥 新增：登入畫面的門市選擇下拉選單 */
+#login-store-select {
+  width: 100%; padding: 14px 16px; border-radius: 12px; background: rgba(0,0,0,0.3); color: #fff; 
+  border: 1px solid rgba(255,255,255,0.2); font-size: 16px; outline: none; font-weight: bold; 
+  appearance: none; text-align: center; cursor: pointer; margin-bottom: 20px; transition: 0.2s;
+}
+#login-store-select:focus { border-color: var(--accent-digital); background: rgba(0,0,0,0.5); }
+#login-store-select option { background: var(--secondary); color: #fff; }
+
 .pin-display-box {
   background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1);
   border-radius: 16px; height: 64px; margin-bottom: 24px;
@@ -412,8 +422,15 @@ body.mode-member-active .undo:hover { background: rgba(242,169,0,0.25); }
 <div id="pos-login-screen">
   <div class="login-panel">
     <div class="login-logo">⚡</div>
-    <div class="login-title">小騎士 POS 登入</div>
+    <div class="login-title" id="login-status-text">小騎士 POS 登入</div>
     
+    <!-- 🔥 新增：門市選擇下拉選單 -->
+    <div style="margin-bottom: 20px;">
+      <select id="login-store-select" style="width: 100%; padding: 12px 16px; border-radius: 12px; background: rgba(0,0,0,0.3); color: #fff; border: 1px solid rgba(255,255,255,0.2); font-size: 16px; outline: none; font-weight: bold; appearance: none; text-align: center; cursor: pointer;">
+        <option value="" style="color: #000;">⏳ 載入門市中...</option>
+      </select>
+    </div>
+
     <div class="pin-display-box" id="pin-display"></div>
     
     <div class="keypad-grid">
@@ -440,432 +457,169 @@ body.mode-member-active .undo:hover { background: rgba(242,169,0,0.25); }
       <div class="brand">
         <div class="logo">⚡</div>
         <div>
-          <h1>抽獎核銷系統</h1>
-          <p class="sub">
-            Redemption POS · TFC
-            <span class="ping-monitor" id="ping-tracker"><span class="ping-dot"></span> <span>API OK 18ms</span></span>
-          </p>
+          <h1>店員核銷端</h1>
+          <p class="sub">Point of Sale</p>
         </div>
       </div>
       <div class="status" style="background: rgba(255,255,255,0.05); padding: 8px 16px; border-radius: 12px; font-size: 14px;">
         門市：<span id="duty" style="font-weight:bold; color:var(--accent-member);">尚未選擇</span>
-        <button onclick="showLoginScreen()" style="background:transparent; border:1px solid rgba(255,255,255,0.2); color:#fff; padding:4px 8px; border-radius:6px; font-size:12px; margin-left:10px; cursor:pointer;">登出</button>
+        <button onclick="showLoginScreen()" style="background:transparent; border:1px solid rgba(255,255,255,0.2); color:#fff; padding:4px 8px; border-radius:6px; font-size:12px; margin-left:10px; cursor:pointer;">交班登出</button>
       </div>
     </header>
 
     <div class="grid">
       <!-- LEFT -->
       <section class="panel rise">
-        
-        <div class="block">
-          <h2 class="label">● 選擇門市</h2>
-          <details id="store-dropdown" class="custom-dropdown">
-            <summary id="store-summary">請選擇門市...</summary>
-            <div class="dropdown-content">
-              <div class="stores" id="stores"></div>
-            </div>
-          </details>
+        <details id="store-dropdown" class="custom-dropdown" style="margin-bottom: 20px;">
+          <summary id="store-summary">選擇門市...</summary>
+          <div class="dropdown-content"><div class="stores" id="stores"></div></div>
+        </details>
+
+        <span class="label">值班代號</span>
+        <input id="employee-name" type="text" readonly style="text-align:center; font-family:monospace; font-weight:bold; letter-spacing:0.1em; cursor: not-allowed;">
+
+        <span class="label">系統模式</span>
+        <div class="mode-switch">
+          <button id="mode-member" class="mode-btn active" onclick="setMode('member')">👤 會員 / 優惠</button>
+          <button id="mode-physical" class="mode-btn" onclick="setMode('physical')">🎫 實體券</button>
+          <button id="mode-counter" class="mode-btn" onclick="setMode('counter')">🎁 限量品</button>
         </div>
 
-        <div class="block">
-          <h2 class="label">● 值班人員 (必填)</h2>
-          <input id="employee-name" type="text" readonly style="text-align:center; font-family:monospace; font-weight:bold; letter-spacing:0.1em;">
+        <div id="act-block" class="hidden">
+          <span class="label">選擇活動 / 贈品</span>
+          <div id="acts"></div>
         </div>
 
-        <div class="block">
-          <h2 class="label">● 系統模式選擇</h2>
-          <div class="mode-switch">
-            <button id="mode-member" class="mode-btn active" onclick="setMode('member')">👤 會員 / 優惠</button>
-            <button id="mode-physical" class="mode-btn" onclick="setMode('physical')">🎫 實體票</button>
-            <button id="mode-counter" class="mode-btn" onclick="setMode('counter')">🎁 限量品</button>
-          </div>
-        </div>
-
-        <div class="block" id="act-block">
-          <h2 class="label">● 活動 / 贈品 選單</h2>
-          <div id="acts"><p class="empty">請先選擇憑證類型...</p></div>
-        </div>
-
-        <div class="block" id="scan-block">
-          <h2 class="label" id="scan-label">● 掃描 / 查詢</h2>
+        <div id="scan-block">
+          <span class="label" id="scan-label">掃描會員</span>
           <div class="searchbar">
-            <div class="search-input-wrapper">
-              <input id="phone" type="tel" placeholder="掃描會員 QR 或輸入手機" autocomplete="off" />
-              <div id="autocomplete-list" class="autocomplete-list"></div>
-            </div>
-            
-            <button class="icon-btn" id="btn-scan" aria-label="掃描 QR Code">📷</button>
-            <button class="primary-btn" id="btn-check">查詢</button>
+            <input id="phone" type="tel" placeholder="輸入手機號碼" autocomplete="off" />
+            <button class="primary-btn" id="btn-check" onclick="check()">查詢</button>
           </div>
         </div>
       </section>
 
       <!-- RIGHT -->
       <section class="panel rise right">
-        <!-- 預設佔位圖 -->
-        <div id="placeholder" class="placeholder">
-          <div id="placeholder-emoji">
-            <svg class="ticket-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"></path>
-              <path d="M9 7v10"></path>
-              <path stroke-width="2" d="M15 9h.01 M15 12h.01 M15 15h.01"></path>
-            </svg>
-          </div>
-          <p class="p1" id="placeholder-title">等待掃描會員 / 憑證</p>
-          <p class="p2" id="placeholder-desc">掃描 QR Code 即可帶出會員點數與所有優惠券資訊。</p>
+        <!-- 預設畫面 -->
+        <div id="placeholder">
+          <h2 style="color: var(--muted-foreground); margin-top: 40px;">等待掃描...</h2>
+          <p style="color: var(--muted-foreground); font-size: 14px; margin-top: 10px;">請輸入號碼進行核銷。</p>
+        </div>
+
+        <!-- 載入中 -->
+        <div id="loading-area" class="hidden">
+          <h2 style="color: var(--accent-member); margin-top: 40px;">🔄 雲端讀取中...</h2>
         </div>
         
-        <!-- 🔥 全新：會員與優惠券合併總覽畫面 -->
-        <div id="member-area" class="detail hidden">
-           <!-- 會員點數面板 (將被隱藏，如果開關被關閉) -->
-           <div id="member-points-card" class="info" style="margin-bottom: 16px; border-color:var(--accent-member); background:rgba(242,169,0,0.1);">
-             <div class="k" style="color:var(--accent-member)">MEMBER POINTS</div>
-             <div class="v mono" id="m-pts" style="font-size:48px; color:var(--accent-member)">0</div>
-             <div style="font-size: 16px; font-weight: bold; margin-top:8px;">👤 <span id="m-name"></span> <span id="m-phone" style="font-size:12px; opacity:0.7;"></span></div>
-             
-             <!-- 給點區域 -->
-             <div style="margin-top: 16px; display:flex; gap:8px;">
-               <input type="number" id="consume-amount" placeholder="輸入消費總額 (自動換算)" style="flex:1; border-radius:12px; border:1px solid var(--border); background:rgba(0,0,0,0.2); color:#fff; padding:0 16px; font-size:16px; outline:none;" oninput="calcPoints()">
-               <button class="primary-btn" id="btn-add-pts" style="min-height: 48px; font-size:15px; padding: 0 16px; background:var(--gradient-member); color:#1E293B;" onclick="addPoints()">給點 <span id="pts-preview" style="margin-left: 4px;"></span></button>
-             </div>
-           </div>
-
-           <div class="label" style="margin-bottom: 8px;">🎟️ 可用活動優惠券</div>
-           <div id="user-coupons-list" style="display:grid; gap:8px; margin-bottom:20px;"></div>
-
-           <div class="label" id="reward-title" style="margin-bottom: 8px;">🎁 點數兌換商品</div>
-           <div id="reward-list" style="display:grid; gap:8px;"></div>
-           
-           <div class="actions">
-             <button class="next" onclick="nextCust()">🧹 完成／服務下一位</button>
-           </div>
-        </div>
-
-        <!-- 🎫 原始核銷明細畫面 (用於實體券 & 點擊優惠券時切換顯示) -->
-        <div id="detail" class="detail hidden">
-          <div id="banner" class="banner ok rise"></div>
-          
-          <div class="cards">
-            <div class="info"><div class="k" id="label-phone">📱 兌換手機</div><div class="v mono" id="v-phone">—</div></div>
-            <div class="info"><div class="k">👤 顧客姓名</div><div class="v" id="v-name">—</div></div>
-            <div class="info" id="info-social"><div class="k">🔗 社群帳號</div><div class="v" id="v-social">—</div></div>
-            <div class="info" id="info-expire"><div class="k">⏳ 使用期限</div><div class="v" id="v-expire">—</div></div>
-            <div class="info hl" style="grid-column: 1 / -1;"><div class="k">🎁 兌換餐點</div><div class="v" id="v-gift">—</div></div>
+        <!-- 會員模式畫面 -->
+        <div id="member-area" class="member-area hidden">
+          <div id="member-points-card" class="member-card">
+            <div style="font-size: 12px; color: var(--muted-foreground); font-weight: bold;">MEMBER POINTS</div>
+            <div class="member-pts" id="m-pts">0</div>
+            <div style="font-size: 18px; font-weight: bold; color: #fff;">👤 <span id="m-name"></span> <span style="font-size: 12px; background: rgba(255,255,255,0.1); padding: 4px 8px; border-radius: 6px; margin-left: 8px;">👑 小騎士</span></div>
+            <div style="font-family: monospace; color: var(--muted-foreground); margin-top: 4px;" id="m-phone"></div>
+            
+            <div style="border-top: 1px dashed rgba(255,255,255,0.1); margin-top: 20px; padding-top: 15px;">
+              <div style="font-size: 13px; color: var(--muted-foreground); margin-bottom: 5px; text-align: left;">💰 輸入消費總額給點 (<span id="rate-hint">100</span>元/點)</div>
+              <div class="pts-input-group">
+                <input type="number" id="consume-amount" placeholder="NT$ 0" oninput="calcPoints()">
+                <button class="pts-btn" id="btn-add-pts" onclick="addPoints()">送出 <span id="pts-preview"></span></button>
+              </div>
+            </div>
           </div>
 
-          <div class="actions">
-            <!-- 恢復為大按鈕 -->
-            <button class="redeem" id="btn-redeem" onclick="redeem()">✔ 確認核銷優惠</button>
-            <button class="undo hidden" id="btn-undo" onclick="undo()">⚡ 撤銷 (5s)</button>
-            <button class="next" id="btn-next" onclick="nextCust()">🧹 清除／服務下一位</button>
-          </div>
+          <h3 class="section-title">🎟️ 客人擁有的活動票券</h3>
+          <div id="user-coupons-list" style="margin-bottom: 20px;"></div>
+
+          <h3 class="section-title" id="reward-title">🎁 點數兌換商品區</h3>
+          <div id="reward-list"></div>
+
+          <button class="next" onclick="nextCust()">🧹 完成／服務下一位</button>
         </div>
 
-        <!-- 🎁 限量計數器模式 -->
-        <div id="counter-area" class="counter-area hidden">
-          <div style="font-weight:700; font-size:18px; color:var(--muted-foreground); letter-spacing: 0.1em;">門市專屬配額剩餘</div>
+        <!-- 核銷明細畫面 -->
+        <div id="detail" class="member-area hidden">
+          <div id="banner" class="banner ok"></div>
+          <div class="info-box">
+            <div style="font-size: 12px; color: var(--muted-foreground);" id="v-label">實體流水號</div>
+            <div style="font-size: 20px; font-weight: bold; margin-bottom: 10px; font-family: monospace;" id="v-phone"></div>
+            <div style="font-size: 12px; color: var(--muted-foreground);">兌換品項 (請核對紙本)</div>
+            <div style="font-size: 22px; font-weight: 900; color: #fff;" id="v-gift"></div>
+          </div>
+          <button class="primary-btn" id="btn-redeem" style="width: 100%; min-height: 80px; font-size: 24px;" onclick="redeem()">確認核銷</button>
+          <button class="primary-btn hidden" id="btn-undo" onclick="undo()" style="width: 100%; margin-top: 10px; font-size: 20px; min-height: 60px; background: rgba(255,71,87,0.1); color:#ff4757; border: 1px solid rgba(255,71,87,0.5);">⚡ 撤銷 (5s)</button>
+          <button class="next" onclick="nextCust()" style="margin-top: 20px;">🧹 清除／下一位</button>
+        </div>
+
+        <!-- 限量品畫面 -->
+        <div id="counter-area" class="hidden" style="width: 100%;">
+          <div style="font-weight:bold; color:var(--muted-foreground);">門市專屬配額剩餘</div>
           <div class="giant-count" id="c-count">--</div>
           <button id="btn-tally" class="giant-btn" onclick="deductTally()">🎁 發出 1 件</button>
-          <p style="margin-top:24px; font-size:14px; color:var(--muted-foreground);">店員直接點擊扣除，雲端即時同步，防呆鎖死。</p>
         </div>
 
       </section>
     </div>
   </div>
-  
-  <div id="scan-area" class="hidden">
-    <div class="reader-wrap">
-      <div class="corner-bl"></div>
-      <div class="corner-br"></div>
-      <div id="reader"></div>
-      <div class="scanline"></div>
-    </div>
-    <button class="close-cam" id="btn-stop">✖ 關閉光學鎖定系統</button>
-  </div>
-  
-  <!-- 🔥 核銷成功特效層 -->
   <div id="success-overlay"></div>
 </main>
 
-<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-  import { getFirestore, doc, getDoc, setDoc, updateDoc, query, collection, where, limit, getDocs, onSnapshot, increment } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  import { getFirestore, doc, getDoc, setDoc, updateDoc, onSnapshot, increment } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  import { getAuth, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js"; // 🔥 引入 Auth
 
   const firebaseConfig = {
     apiKey: "AIzaSyBINQuYtYZA8RLfwm51AfGLTYj1TX_UcFo",
     authDomain: "texas-chick-event.firebaseapp.com",
     projectId: "texas-chick-event",
-    storageBucket: "texas-chick-event.firebasestorage.app",
-    messagingSenderId: "281248037440",
-    appId: "1:281248037440:web:20c32ba4136ea7c57ffda5",
-    measurementId: "G-HZ6334WB3B"
+    storageBucket: "texas-chick-event.firebasestorage.app"
   };
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
-
-  let STORE_LIST = [];
-  let POS_CONFIG = {};
-  let EVENT_ORDER = [];
-  
-  // 🔥 新增：來自 admin 的設定變數
-  let REWARDS_LIST = [];
-  let GIFT_LIST = [];
-  let POINT_RATE = 100;
-  
-  // 🔥 新增：會員系統開關變數
-  let isMemberSystemActive = true;
-
-  let evMap = {};
-  let giftMap = {};
+  const auth = getAuth(app); // 🔥 初始化 Auth
 
   const $ = (id) => document.getElementById(id);
-  let store = "", act = "", shownPhone = "", shownAct = "", record = null;
-  let memberRecord = null;
-  let userCouponsData = {}; 
-
-  let scanner = null, uTimer = null, busy = false;
-  let currentMode = 'member'; 
-  let toastTimer = null;
   
-  // 計數器模式的變數
-  let unsubCounter = null; 
-  let currentCount = 0;
-
-  // 🔥 九宮格登入邏輯
-  let currentPin = '';
-  window.addPin = function(num) {
-    if(currentPin.length < 10) currentPin += num;
-    $('pin-display').innerText = '*'.repeat(currentPin.length);
-    $('pin-display').classList.remove('error');
-  }
-  window.clearPin = function() {
-    currentPin = '';
-    $('pin-display').innerText = '';
-    $('pin-display').classList.remove('error');
-  }
-  window.submitPin = function() {
-    if(currentPin.length === 0) return;
-    
-    // 儲存代號
-    localStorage.setItem("p_employee", currentPin);
-    $("employee-name").value = currentPin;
-    
-    // 隱藏登入畫面，解鎖主系統
-    $('pos-login-screen').style.display = 'none';
-    $('main-app').style.filter = 'none';
-    $('main-app').style.pointerEvents = 'auto';
-    
-    showToast(`✅ 值班人員 ${currentPin} 登入成功！`, 'success');
-  }
-  window.showLoginScreen = function() {
-    localStorage.removeItem("p_employee");
-    $("employee-name").value = '';
-    clearPin();
-    $('pos-login-screen').style.display = 'flex';
-    $('main-app').style.filter = 'blur(10px)';
-    $('main-app').style.pointerEvents = 'none';
-  }
-
-  let deferredPrompt;
-  window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault(); 
-    deferredPrompt = e;
-    $('pwa-prompt').style.display = 'flex';
-  });
-  $('pwa-install-btn').onclick = async () => {
-    if(deferredPrompt) { 
-      deferredPrompt.prompt(); 
-      deferredPrompt = null; 
-      $('pwa-prompt').style.display = 'none'; 
-    }
-  };
-  const isIos = () => /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
-  const isInStandaloneMode = () => ('standalone' in window.navigator) && (window.navigator.standalone);
-  if (isIos() && !isInStandaloneMode()) {
-    $('pwa-prompt').innerHTML = `<span style="font-size:14px;">📲 iOS：請點選下方「分享」➔「加入主畫面」</span><button onclick="document.getElementById('pwa-prompt').style.display='none'" style="background:transparent; border:none; font-size:20px; cursor:pointer;">✖</button>`;
-    $('pwa-prompt').style.display = 'flex';
-  }
-
-  setInterval(() => {
-      const ping = Math.floor(Math.random() * (45 - 12 + 1) + 12);
-      document.querySelector('#ping-tracker span:last-child').innerText = `API OK ${ping}ms`;
-  }, 3000);
-
-  window.showToast = function(msg, type = 'error') {
-      const toast = $('toast-container');
-      const icon = toast.querySelector('.toast-icon');
-      const text = $('toast-msg');
-      
-      toast.className = ''; 
-      toast.classList.add(type);
-      icon.innerText = type === 'success' ? '✅' : '🚨';
-      text.innerText = msg;
-      
-      toast.classList.add('show');
-      if (type === 'error') playAlert("error");
-      else if (type === 'success') playAlert("success");
-      
-      if(toastTimer) clearTimeout(toastTimer);
-      toastTimer = setTimeout(() => { toast.classList.remove('show'); }, 3500);
-  };
-  window.alert = function(msg) { showToast(msg, 'error'); };
-
-  $("employee-name").addEventListener("change", function(e) {
-      localStorage.setItem("p_employee", e.target.value.trim());
-  });
-
-  window.setMode = function(m) {
-    currentMode = m;
-    $('mode-member').classList.toggle('active', m === 'member');
-    $('mode-physical').classList.toggle('active', m === 'physical');
-    $('mode-counter').classList.toggle('active', m === 'counter'); 
-    $('phone').value = '';
-    
-    document.body.classList.remove('mode-physical-active', 'mode-counter-active', 'mode-member-active');
-    if(m === 'physical') document.body.classList.add('mode-physical-active');
-    if(m === 'counter') document.body.classList.add('mode-counter-active');
-    if(m === 'member') document.body.classList.add('mode-member-active');
-
-    // 依據模式顯示隱藏區塊
-    if (m === 'counter') {
-      $('scan-block').classList.add('hidden');
-      $('act-block').classList.remove('hidden');
-      $('placeholder').classList.add('hidden');
-      $('detail').classList.add('hidden');
-      $('member-area').classList.add('hidden');
-      $('counter-area').classList.remove('hidden');
-      renderActs();
-    } else if (m === 'member') {
-      $('scan-block').classList.remove('hidden');
-      $('act-block').classList.add('hidden'); // 會員模式不需選活動
-      $('counter-area').classList.add('hidden');
-      $('btn-scan').style.display = 'block';
-
-      $('phone').type = 'tel';
-      // 🔥 依照開關調整提示文字
-      $('phone').placeholder = isMemberSystemActive ? '掃描會員 QR 或輸入手機號碼' : '掃描電子券 QR 或輸入手機號碼';
-      $('phone').maxLength = 10; 
-      $('btn-check').innerText = '查詢';
-      $('placeholder-title').innerText = isMemberSystemActive ? "等待掃描會員 / 憑證" : "等待掃描電子優惠券";
-      $('placeholder-desc').innerText = isMemberSystemActive ? "掃描 QR Code 即可帶出會員點數與所有優惠券資訊。" : "掃描 QR Code 即可一鍵帶出所有優惠券資訊。";
-      $('scan-label').innerText = isMemberSystemActive ? "● 掃描 / 查詢會員" : "● 掃描優惠券";
-      $('info-social').style.display = 'block';
-      $('info-expire').style.display = 'block';
-      
-      nextCust(); // 重置畫面
-    } else if (m === 'physical') {
-      $('scan-block').classList.remove('hidden');
-      $('act-block').classList.remove('hidden');
-      $('counter-area').classList.add('hidden');
-      $('btn-scan').style.display = 'block';
-
-      $('phone').type = 'text';
-      $('phone').placeholder = '輸入實體券流水號 (英文與數字)';
-      $('phone').maxLength = 20; 
-      $('btn-check').innerText = '查詢 / 核銷';
-      $('placeholder-title').innerText = "實體券快速核銷";
-      $('placeholder-desc').innerText = "掃描實體券 QR Code 或直接輸入流水號進行核銷。";
-      $('label-phone').innerText = "🔢 實體流水號";
-      $('info-social').style.display = 'none';
-      $('info-expire').style.display = 'none';
-
-      renderActs();
-      nextCust();
-    }
-  };
-
-  let acTimeout = null;
-  $("phone").addEventListener("input", function() {
-      // 只有實體券允許英文，其他都是電話號碼
-      if (currentMode === 'physical') this.value = this.value.replace(/[^a-zA-Z0-9]/g,'').toUpperCase().slice(0,20);
-      else this.value = this.value.replace(/[^\d]/g,'').slice(0,10); 
-      
-      const val = this.value.trim();
-      const list = $("autocomplete-list");
-      
-      if (val.length < 3) { list.innerHTML = ""; list.classList.remove("show"); return; } 
-      
-      // 實體模式 & 會員模式都不支援快搜 (避免個資外洩或無意義查詢)
-      if (currentMode === 'member' || currentMode === 'physical') return;
-
-      if (acTimeout) clearTimeout(acTimeout);
-      acTimeout = setTimeout(async () => {
-          if(!act || !store) return;
-          try {
-              const q = query(collection(db, act), 
-                  where("phone", ">=", val), 
-                  where("phone", "<=", val + '\uf8ff'), 
-                  limit(5)
-              );
-              const snap = await getDocs(q);
-              if(snap.empty) { list.innerHTML = ""; list.classList.remove("show"); return; }
-              
-              let html = "";
-              snap.forEach(doc => {
-                  const d = doc.data();
-                  const isReady = (!d.status || d.status === "未兌換");
-                  const statusClass = isReady ? "ready" : "done";
-                  const statusText = isReady ? "可兌換" : (d.status || "已失效");
-                  
-                  const highlightedPhone = d.phone.replace(new RegExp(`(${val})`, 'i'), `<span class="ac-hl">$1</span>`);
-                  
-                  html += `
-                  <div class="autocomplete-item" onclick="selectAutocomplete('${d.phone}')">
-                      <div>
-                          <div class="ac-phone">${highlightedPhone}</div>
-                          <div class="ac-name">👤 ${d.name || "實體券"} | 🎁 ${d.gift || "預設贈品"}</div>
-                      </div>
-                      <div class="ac-status ${statusClass}">${statusText}</div>
-                  </div>`;
-              });
-              list.innerHTML = html;
-              list.classList.add("show");
-          } catch(e) { console.error("快搜發生錯誤", e); }
-      }, 300);
-  });
-
-  window.selectAutocomplete = function(ph) {
-      $("phone").value = ph;
-      $("autocomplete-list").innerHTML = "";
-      $("autocomplete-list").classList.remove("show");
-      check(ph); 
-  };
+  let STORE_LIST = [], EVENT_ORDER = [], REWARDS_LIST = [], GIFT_LIST = [];
+  let POINT_RATE = 100;
+  let POS_CONFIG = {};
+  let isMemberSystemActive = true; 
   
-  document.addEventListener("click", function (e) {
-      if (e.target !== $("phone")) {
-          $("autocomplete-list").classList.remove("show");
-      }
-  });
+  let store = "", act = "", shownPhone = "", shownAct = "", record = null, memberRecord = null;
+  let userCouponsData = {};
+  let currentMode = 'member', currentCount = 0, unsubCounter = null, uTimer = null;
+  let evMap = {}, giftMap = {};
 
+  // 🔥 程式進入點：先不檢查權限，直接讀取系統設定 (Firebase Rules 允許 allow read: if true)
   async function initPOS() {
     try {
-      const configSnap = await getDoc(doc(db, "system", "config"));
-      if (configSnap.exists()) {
-        const data = configSnap.data();
+      const snap = await getDoc(doc(db, "system", "config"));
+      if (snap.exists()) {
+        const data = snap.data();
         STORE_LIST = data.STORE_LIST || [];
         POS_CONFIG = data.POS_CONFIG || {};
-        EVENT_ORDER = data.EVENT_ORDER || Object.keys(POS_CONFIG);
-        EVENT_ORDER = EVENT_ORDER.filter(a => POS_CONFIG[a]);
-
-        // 🔥 載入點數與限量品設定
+        EVENT_ORDER = data.EVENT_ORDER || [];
         REWARDS_LIST = data.REWARDS_LIST || [];
         GIFT_LIST = data.GIFT_LIST || [];
         POINT_RATE = data.POINT_RATE || 100;
-        
-        // 🔥 讀取開關狀態 (預設開啟)
         isMemberSystemActive = data.MEMBER_SYSTEM_ACTIVE !== undefined ? data.MEMBER_SYSTEM_ACTIVE : true;
-      } else {
-        showToast("雲端尚未建立系統設定，請先至總部後台儲存設定！", "error"); return;
+        
+        $('rate-hint').innerText = POINT_RATE;
+        $('mode-member').innerHTML = isMemberSystemActive ? '👤 會員 / 優惠' : '📱 優惠券';
+        $('member-points-card').style.display = isMemberSystemActive ? 'block' : 'none';
+        $('reward-title').style.display = isMemberSystemActive ? 'block' : 'none';
+        $('reward-list').style.display = isMemberSystemActive ? 'grid' : 'none';
+
+        // 🔥 將門市名單塞入登入畫面的下拉選單
+        const loginStoreSelect = $('login-store-select');
+        loginStoreSelect.innerHTML = '<option value="" style="color:#000;">請先選擇值班門市</option>' + 
+          STORE_LIST.map(s => `<option value="${s}" style="color:#000;">${s}</option>`).join('');
       }
 
-      // 🔥 依據開關改變 UI 狀態
-      $('mode-member').innerHTML = isMemberSystemActive ? '👤 會員 / 優惠' : '📱 優惠券';
-      $('member-points-card').style.display = isMemberSystemActive ? 'block' : 'none';
-      $('reward-title').style.display = isMemberSystemActive ? 'block' : 'none';
-      $('reward-list').style.display = isMemberSystemActive ? 'grid' : 'none';
-
+      // 整理活動地圖
       evMap = {};
       STORE_LIST.forEach(s => {
         evMap[s] = [];
@@ -875,36 +629,124 @@ body.mode-member-active .undo:hover { background: rgba(242,169,0,0.25); }
           if (cfg.stores === "ALL" || (Array.isArray(cfg.stores) && cfg.stores.includes(s))) { evMap[s].push(a); }
         });
       });
-
       giftMap = {};
       for (const a in POS_CONFIG) { giftMap[a] = POS_CONFIG[a].gift; }
 
       const savedStore = localStorage.getItem("p_store");
-      if (savedStore && evMap[savedStore]) { store = savedStore; act = (evMap[savedStore] || [])[0] || ""; } 
-      else if (STORE_LIST.length > 0) { store = STORE_LIST[0]; act = (evMap[store] || [])[0] || ""; }
+      if (savedStore && STORE_LIST.includes(savedStore)) {
+          store = savedStore; 
+          $('login-store-select').value = savedStore; // 自動幫登入畫面的選單選好
+      } else if (STORE_LIST.length > 0) {
+          store = STORE_LIST[0];
+      }
 
-      // 檢查一開始是否已經登入過
+      renderStores();
+      setMode('member'); 
+    } catch (e) { 
+      if(e.code !== 'permission-denied') {
+        showToast("無法連線至雲端讀取設定！"); 
+      }
+    }
+  }
+
+  // 🔥 啟動時先讀取設定，再檢查是否已登入
+  async function startApp() {
+    await initPOS();
+    
+    auth.onAuthStateChanged((user) => {
       const savedEmpPin = localStorage.getItem("p_employee");
-      if(savedEmpPin) {
+      if (user && user.email === 'pos@texas.com' && savedEmpPin) {
         $("employee-name").value = savedEmpPin;
         $('pos-login-screen').style.display = 'none';
         $('main-app').style.filter = 'none';
         $('main-app').style.pointerEvents = 'auto';
+      } else {
+        showLoginScreen();
       }
-
-      setMode('member'); // 預設進入會員/優惠合併模式
-      renderStores(); 
-    } catch (e) { showToast("無法連線至雲端讀取 POS 設定！", "error"); }
+    });
   }
 
-  initPOS();
+  startApp();
 
-  function setBusy(b){
-    busy = b;
-    $("btn-check").disabled = b;
-    if(b) { $("btn-check").innerText = "處理中…"; } 
-    else { $("btn-check").innerText = currentMode === 'member' ? '查詢' : '查詢 / 核銷'; }
+  // 🔥 九宮格登入邏輯
+  let currentPin = '';
+  window.addPin = function(num) {
+    if(currentPin.length < 10) currentPin += num;
+    $('pin-display').innerText = '*'.repeat(currentPin.length);
+    $('pin-display').classList.remove('error');
   }
+  
+  window.clearPin = function() {
+    currentPin = '';
+    $('pin-display').innerText = '';
+    $('pin-display').classList.remove('error');
+  }
+  
+  window.submitPin = async function() {
+    if(currentPin.length === 0) return;
+    
+    // 檢查是否有選門市
+    const selectedStore = $('login-store-select').value;
+    if(!selectedStore) {
+       $('pin-display').classList.add('error');
+       $('login-status-text').innerText = '❌ 請先選擇上方門市！';
+       currentPin = '';
+       setTimeout(() => { $('pin-display').classList.remove('error'); $('pin-display').innerText = ''; $('login-status-text').innerText = '小騎士 POS 登入'; }, 1500);
+       return;
+    }
+
+    // 嚴格限制防呆名單 (未來有新人可以在這裡加 "002", "003")
+    const VALID_PINS = ["001"]; 
+    if (!VALID_PINS.includes(currentPin)) {
+      $('pin-display').classList.add('error');
+      $('login-status-text').innerText = '❌ 查無此員工編號';
+      currentPin = '';
+      setTimeout(() => { $('pin-display').classList.remove('error'); $('pin-display').innerText = ''; $('login-status-text').innerText = '小騎士 POS 登入'; }, 1500);
+      return;
+    }
+    
+    $('login-status-text').innerText = '⏳ 系統連線驗證中...';
+    $('pin-display').classList.remove('error');
+
+    try {
+      await signInWithEmailAndPassword(auth, "pos@texas.com", "texaspos1234");
+      
+      localStorage.setItem("p_employee", currentPin);
+      $("employee-name").value = currentPin;
+
+      // 儲存選擇的門市並切換
+      selectStore(selectedStore);
+      
+      $('pos-login-screen').style.display = 'none';
+      $('main-app').style.filter = 'none';
+      $('main-app').style.pointerEvents = 'auto';
+      $('login-status-text').innerText = '小騎士 POS 登入'; 
+      
+      showToast(`✅ 值班人員 ${currentPin} 登入成功！`, 'success');
+    } catch (error) {
+      console.error(error);
+      $('pin-display').classList.add('error');
+      $('login-status-text').innerText = '❌ 連線登入失敗，請重試';
+      currentPin = '';
+      setTimeout(() => { $('pin-display').classList.remove('error'); $('pin-display').innerText = ''; $('login-status-text').innerText = '小騎士 POS 登入'; }, 1500);
+    }
+  }
+
+  window.showLoginScreen = async function() {
+    try { await signOut(auth); } catch(e) {}
+    localStorage.removeItem("p_employee");
+    $("employee-name").value = '';
+    clearPin();
+    $('pos-login-screen').style.display = 'flex';
+    $('main-app').style.filter = 'blur(10px)';
+    $('main-app').style.pointerEvents = 'none';
+  }
+
+  window.showToast = function(msg, type = 'error') {
+      $('toast-msg').innerText = msg;
+      $('toast-container').style.display = 'flex';
+      setTimeout(() => $('toast-container').style.display = 'none', 3000);
+  };
 
   function renderStores(){
     const box = $("stores"); box.innerHTML = "";
@@ -919,60 +761,66 @@ body.mode-member-active .undo:hover { background: rgba(242,169,0,0.25); }
     $("store-summary").innerText = store ? `已選擇：${store}` : "請選擇門市...";
   }
 
-  function renderActs(){
-    const box = $("acts"); box.innerHTML = "";
-    if (!store){ box.innerHTML = '<p class="empty">請先選擇門市</p>'; return; }
-    
-    let currentList = [];
-    if (currentMode === 'physical') {
-      currentList = (evMap[store] || []).filter(a => a.includes('【實體】') || a.includes('實體券'));
-    } else if (currentMode === 'counter') {
-      currentList = GIFT_LIST;
-    }
-
-    if(currentList.length === 0) { 
-      box.innerHTML = `<p class="empty">此門市目前無開放的${currentMode === 'physical' ? '實體' : '限量'}項目</p>`; 
-      act = ""; 
-      return; 
-    }
-
-    if (!currentList.includes(act)) {
-       act = currentList[0];
-    }
-
-    const list = document.createElement("div");
-    list.className = "acts";
-    currentList.forEach((a) => {
-      const b = document.createElement("button");
-      b.className = "act-btn" + (act === a ? " on" : "");
-      
-      b.innerHTML = '<span><span class="act-name"></span></span><span class="radio"></span>';
-      b.querySelector(".act-name").innerText = a;
-      b.onclick = () => { 
-        act = a; 
-        renderActs(); 
-        if(currentMode === 'counter') { loadCounter(); } 
-        setTimeout(() => $("phone").focus(), 100); 
-      };
-      list.appendChild(b);
-    });
-    box.appendChild(list);
-  }
-
   function selectStore(s){
     store = s; localStorage.setItem("p_store", s);
     act = (evMap[s] || [])[0] || ""; record = null;
     $("store-dropdown").removeAttribute("open");
-    
-    setMode(currentMode);
     renderStores(); 
-    if(currentMode === 'counter') { loadCounter(); } 
-    setTimeout(() => $("phone").focus(), 100);
+    setMode(currentMode);
   }
 
-  // ---------------- 計數器限量品邏輯 ----------------
+  window.setMode = function(m) {
+    currentMode = m;
+    ['member', 'physical', 'counter'].forEach(type => {
+      $(`mode-${type}`).classList.toggle('active', m === type);
+      document.body.classList.toggle(`mode-${type}-active`, m === type);
+    });
+    
+    $('phone').value = '';
+    nextCust(); 
+
+    if (m === 'member') {
+      $('act-block').classList.add('hidden');
+      $('scan-block').classList.remove('hidden');
+      $('phone').placeholder = isMemberSystemActive ? '掃描會員 QR 或輸入手機號碼' : '掃描電子券 QR 或輸入手機號碼';
+      $('scan-label').innerText = isMemberSystemActive ? "● 掃描 / 查詢會員" : "● 掃描優惠券";
+    } else if (m === 'physical') {
+      $('act-block').classList.remove('hidden');
+      $('scan-block').classList.remove('hidden');
+      $('phone').placeholder = '輸入流水號';
+      $('scan-label').innerText = "● 輸入實體券號";
+      renderActs();
+    } else if (m === 'counter') {
+      $('act-block').classList.remove('hidden');
+      $('scan-block').classList.add('hidden');
+      renderActs();
+    }
+  };
+
+  function renderActs() {
+    const box = $("acts"); box.innerHTML = "";
+    if (!store) { box.innerHTML = '<p style="color:var(--muted-foreground)">請先選擇門市</p>'; return; }
+    
+    let currentList = [];
+    if (currentMode === 'physical') list = EVENT_ORDER.filter(a => (a.includes('【實體】') || a.includes('實體券')) && POS_CONFIG[a]?.active !== false);
+    else if (currentMode === 'counter') list = GIFT_LIST;
+
+    if(currentList.length === 0) { box.innerHTML = '<p style="color:var(--muted-foreground)">無可用項目</p>'; act = ""; return; }
+    if(!list.includes(act)) act = list[0];
+
+    list.forEach(a => {
+      const b = document.createElement("button");
+      b.className = "act-btn" + (act === a ? " on" : "");
+      b.innerText = a;
+      b.onclick = () => { act = a; renderActs(); if(currentMode === 'counter') loadCounter(); };
+      box.appendChild(b);
+    });
+
+    if(currentMode === 'counter') loadCounter();
+  }
+
   function loadCounter() {
-    if(currentMode !== 'counter' || !store || !act) return;
+    if(!store || !act) return;
     if(unsubCounter) unsubCounter();
     $('c-count').innerText = "載入中";
     $('btn-tally').disabled = true;
@@ -986,371 +834,213 @@ body.mode-member-active .undo:hover { background: rgba(242,169,0,0.25); }
       } else {
         $('c-count').innerText = "未設配額"; 
         $('btn-tally').disabled = true;
-        $('btn-tally').innerText = "請總部設定配額";
       }
     });
   }
 
   window.deductTally = async function() {
     if(currentCount <= 0) return;
-    
     const empName = $("employee-name").value.trim();
-    if(!empName) { 
-        $("employee-name").focus(); 
-        return showToast("請先登入上方的值班人員！", "error"); 
-    }
 
     $('btn-tally').disabled = true;
     try {
       await updateDoc(doc(db, "inventory", `${store}_${act}`), { count: increment(-1), usedCount: increment(1) });
-      
-      const overlay = $("success-overlay");
-      overlay.classList.remove("flash");
-      void overlay.offsetWidth;
-      overlay.classList.add("flash");
-      if (window.confetti) {
-          confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 }, colors: ['#FFD700', '#FFA500', '#FF6B35', '#FFFFFF'], disableForReducedMotion: true });
-      }
-      showToast("✅ 已成功發放 1 件！", "success");
-      
-      setTimeout(() => { 
-        if(currentCount > 0) $('btn-tally').disabled = false; 
-      }, 1000);
-      
-    } catch(e) { 
-      console.error(e);
-      showToast("扣除失敗，請檢查網路連線", "error"); 
-      $('btn-tally').disabled = false;
-    }
+      showToast("✅ 已成功發放！");
+      setTimeout(() => { if(currentCount > 0) $('btn-tally').disabled = false; }, 1000);
+    } catch(e) { showToast("扣除失敗！"); $('btn-tally').disabled = false; }
   };
 
-  // ---------------- 點數計算與給點邏輯 ----------------
   window.calcPoints = function() {
     const amount = parseInt($('consume-amount').value, 10);
     const ptsPreview = $('pts-preview');
-    if(isNaN(amount) || amount <= 0) {
-      ptsPreview.innerText = "";
-    } else {
-      const getPts = Math.floor(amount / POINT_RATE);
-      ptsPreview.innerText = getPts > 0 ? `(+ ${getPts} 點)` : "";
-    }
+    if(isNaN(amount) || amount <= 0) $('pts-preview').innerText = "";
+    else $('pts-preview').innerText = `(+ ${Math.floor(amount / POINT_RATE)} 點)`;
   }
 
   window.addPoints = async function() {
     if(!memberRecord) return;
     const amount = parseInt($('consume-amount').value, 10);
-    if(isNaN(amount) || amount < POINT_RATE) return showToast(`消費需達 ${POINT_RATE} 元以上！`, "error");
-    
+    if(isNaN(amount) || amount < POINT_RATE) return showToast(`消費需達 ${POINT_RATE} 元以上！`);
     const empName = $("employee-name").value.trim();
-    if(!empName) return showToast("請先登入值班人員！", "error");
 
     const getPts = Math.floor(amount / POINT_RATE);
-    
+    $('btn-add-pts').disabled = true;
+
     try {
-      $('btn-add-pts').disabled = true;
-      $('btn-add-pts').innerText = "處理中...";
-
-      await updateDoc(doc(db, "members", shownPhone), {
-        points: increment(getPts)
-      });
-      
-      // 同時記錄一筆交易紀錄
+      await updateDoc(doc(db, "members", shownPhone), { points: increment(getPts) });
       await setDoc(doc(db, "point_transactions", new Date().getTime().toString()), {
-        phone: shownPhone,
-        type: "earn",
-        amount: amount,
-        points_earned: getPts,
-        store: store,
-        empName: empName,
-        time: new Date().toLocaleString()
+        phone: shownPhone, type: "earn", amount: amount, points_earned: getPts, store: store, empName: empName, time: new Date().toLocaleString()
       });
-
       memberRecord.points += getPts;
       $('m-pts').innerText = memberRecord.points;
-      $('consume-amount').value = '';
-      $('pts-preview').innerText = '';
-      
-      showToast(`✅ 成功加入 ${getPts} 點！`, "success");
-      playAlert("success");
-      renderRewardsList(); // 重新渲染兌換按鈕狀態
-    } catch(e) {
-      showToast("連線失敗，請重試", "error");
-    } finally {
-      $('btn-add-pts').disabled = false;
-      $('btn-add-pts').innerHTML = `給點 <span id="pts-preview"></span>`;
-    }
+      $('consume-amount').value = ''; $('pts-preview').innerText = '';
+      showToast(`✅ 成功加入 ${getPts} 點！`);
+      renderRewardsList();
+    } catch(e) { showToast("連線失敗"); }
+    finally { $('btn-add-pts').disabled = false; }
   }
 
-  window.redeemPoints = async function(giftName, reqPts) {
-    if(!memberRecord) return;
-    if(memberRecord.points < reqPts) return;
-
-    const empName = $("employee-name").value.trim();
-    if(!empName) return showToast("請先登入值班人員！", "error");
-
-    if(!confirm(`確定要扣除 ${reqPts} 點兌換「${giftName}」嗎？`)) return;
-
-    try {
-      await updateDoc(doc(db, "members", shownPhone), {
-        points: increment(-reqPts)
-      });
-      
-      // 記錄兌換明細
-      await setDoc(doc(db, "point_transactions", new Date().getTime().toString()), {
-        phone: shownPhone,
-        type: "redeem",
-        gift: giftName,
-        points_spent: reqPts,
-        store: store,
-        empName: empName,
-        time: new Date().toLocaleString()
-      });
-
-      memberRecord.points -= reqPts;
-      $('m-pts').innerText = memberRecord.points;
-      
-      showToast(`✅ 兌換成功！已扣除 ${reqPts} 點`, "success");
-      
-      const overlay = $("success-overlay");
-      overlay.classList.remove("flash");
-      void overlay.offsetWidth;
-      overlay.classList.add("flash");
-      if (window.confetti) confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 }, colors: ['#FFD700', '#FFA500'] });
-
-      renderRewardsList(); // 更新按鈕狀態
-    } catch(e) {
-      showToast("扣點失敗，請檢查網路！", "error");
-    }
-  }
-
-  function renderRight(){
-    if (!record){
-      $("placeholder").classList.remove("hidden");
-      $("detail").classList.add("hidden");
-      return;
-    }
-    $("placeholder").classList.add("hidden");
-    $("member-area").classList.add("hidden");
-    $("detail").classList.remove("hidden");
-    
-    const defaultExpire = (POS_CONFIG[shownAct] && POS_CONFIG[shownAct].expireDate) ? POS_CONFIG[shownAct].expireDate : "無特別限制";
-    const expireStr = record.expireDate || defaultExpire;
-
-    let autoExpired = false;
-    if (record.status !== "已過期" && record.status !== "已兌換" && expireStr && expireStr !== "無特別限制" && !expireStr.includes("依紙本券面")) {
-        const today = new Date(); today.setHours(0,0,0,0);
-        const regex = /(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})/g;
-        let match; let lastDate = null;
-        while ((match = regex.exec(expireStr)) !== null) { lastDate = new Date(match[1], parseInt(match[2])-1, match[3]); }
-        if (lastDate && lastDate < today) {
-            autoExpired = true; record.status = "已過期"; 
-            updateDoc(doc(db, shownAct, shownPhone), { status: "已過期", redeemTime: "逾期未換 (前台自動攔截)" });
-        }
-    }
-
-    const isClaimed = record.status === "已兌換";
-    const isExpired = record.status === "已過期" || autoExpired;
-    const banner = $("banner");
-    
-    if (isClaimed) {
-      banner.className = "banner bad rise";
-      banner.innerHTML = `❌ 券已失效 / 已領取<small>📌 於 ${record.store || "—"} 兌換</small><small>🕒 ${record.redeemTime || "—"}</small><small>👤 核銷人員：${record.redeemBy || "—"}</small>`;
-    } else if (isExpired) {
-      banner.className = "banner bad rise";
-      banner.innerHTML = `⚠️ 券已逾期失效<small>🕒 系統檢測已過期 (${expireStr})</small>`;
-    } else {
-      banner.className = "banner ok rise";
-      banner.innerHTML = "✅ 有效優惠券";
-    }
-
-    const displayGift = record.gift || giftMap[shownAct] || "未設定餐點";
-    $("v-phone").innerText = shownPhone;
-    $("v-name").innerText = record.name || "—";
-    $("v-expire").innerText = expireStr;
-    
-    if (currentMode === 'physical') {
-        $("v-social").innerText = record.social_id || "實體紙本憑證";
-        $("v-gift").innerHTML = `<span style="color:var(--primary);font-weight:900;font-size:22px;">${displayGift}</span> <span style="font-size:12px;color:var(--muted-foreground);display:block;margin-top:4px;">⚠️ 貼心防偽提示：請確認系統帶出之品項與紙本標示相符</span>`;
-    } else {
-        $("v-social").innerText = record.social_id || "未提供";
-        $("v-gift").innerText = displayGift;
-    }
-    
-    const redeemBtn = $("btn-redeem");
-    redeemBtn.className = "redeem"; 
-    redeemBtn.disabled = false;
-
-    if (isClaimed) {
-        redeemBtn.innerText = "已兌換完畢";
-        redeemBtn.disabled = true;
-        redeemBtn.classList.add("is-claimed");
-    } else if (isExpired) {
-        redeemBtn.innerText = "已過期無法核銷";
-        redeemBtn.disabled = true;
-        redeemBtn.classList.add("is-expired");
-    } else {
-        redeemBtn.innerText = "✔ 確認核銷優惠";
-    }
-  }
-
-  function hideUndo(){
-    if (uTimer) clearInterval(uTimer);
-    $("btn-undo").classList.add("hidden");
-  }
-
-  let audioCtx = null;
-  function playAlert(type){
-    if (navigator.vibrate){
-      if (type === "scan") navigator.vibrate([150]);
-      if (type === "error") navigator.vibrate([300]);
-      if (type === "success") navigator.vibrate([100,50,100,50,200]);
-    }
-    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
-    if (!audioCtx) return;
-    if (audioCtx.state === "suspended") audioCtx.resume();
-    const osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
-    osc.connect(gain); gain.connect(audioCtx.destination);
-    if (type === "scan"){
-      osc.frequency.value = 1200; osc.type = "sine";
-      gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-      osc.start(); osc.stop(audioCtx.currentTime + 0.1);
-    } else if (type === "error"){
-      osc.frequency.value = 300; osc.type = "square";
-      gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
-      osc.start(); osc.stop(audioCtx.currentTime + 0.3);
-    } else {
-      osc.frequency.setValueAtTime(800, audioCtx.currentTime);
-      osc.frequency.linearRampToValueAtTime(1200, audioCtx.currentTime + 0.2);
-      osc.type = "sine";
-      gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-      osc.start(); osc.stop(audioCtx.currentTime + 0.3);
-    }
-  }
-
-  async function startScan(){
-    $("scan-area").classList.remove("hidden");
-    if (!scanner) scanner = new Html5Qrcode("reader");
-    scanner.start(
-      { facingMode: "environment" },
-      { fps: 15, qrbox: 250 },
-      (txt) => {
-        let result = txt;
-        if (currentMode === 'physical') result = txt.replace(/[^a-zA-Z0-9]/g, "").toUpperCase().slice(0,20); 
-        else result = txt.replace(/[^\d]/g, "").slice(0,10); 
-        
-        $("phone").value = result;
-        stopScan(); check(result);
-      },
-      () => {}
-    ).catch(() => showToast("無相機權限或裝置不支援相機！", "error"));
-  }
-  function stopScan(){
-    if (scanner && scanner.isScanning) scanner.stop();
-    $("scan-area").classList.add("hidden");
-  }
-
-  // 🔥 合併查詢：實體券 vs 數位會員(點數+電子券)
-  async function check(overridePhone){
-    const ph = overridePhone || $("phone").value.trim();
-    if (!store) return showToast("請確認已選擇門市。", "error");
+  window.check = async function() {
+    const ph = $("phone").value.trim().toUpperCase();
+    if (!store) return showToast("請選擇門市！");
     if (!ph) return;
 
-    record = null; memberRecord = null; userCouponsData = {};
-    $("placeholder").classList.add("hidden");
-    $("detail").classList.add("hidden");
-    $("member-area").classList.add("hidden");
-    
-    setBusy(true);
+    $('placeholder').classList.add('hidden');
+    $('member-area').classList.add('hidden');
+    $('detail').classList.add('hidden');
+    $('counter-area').classList.add('hidden');
+    $('loading-area').classList.remove('hidden');
 
-    try {
-      if (currentMode === 'physical') {
-        const ac = act;
-        const snap = await getDoc(doc(db, ac, ph));
-        if (snap.exists()){
-          playAlert("scan"); shownPhone = ph; shownAct = ac; record = snap.data();
-          hideUndo(); renderRight(); return;
-        }
-        
-        // 尋找其他實體活動
-        const otherActs = (evMap[store] || []).filter(a => a !== ac && (a.includes('【實體】') || a.includes('實體券')));
-        let foundOtherData = null, foundOtherActName = "";
-        for (const otherAct of otherActs){
-          const otherSnap = await getDoc(doc(db, otherAct, ph));
-          if (otherSnap.exists()){
-            const data = otherSnap.data();
-            if (data.status !== "已兌換"){ foundOtherData = data; foundOtherActName = otherAct; break; }
-          }
-        }
-        
-        if (foundOtherData){
-          if (confirm("❌ 找不到「" + ac + "」的紀錄。\n\n💡 但發現客人有未兌換的「" + foundOtherActName + "」，是否要自動切換過去？")){
-            act = foundOtherActName; renderActs(); 
-            shownPhone = ph; shownAct = foundOtherActName; record = foundOtherData;
-            hideUndo(); renderRight();
-          } else { $("phone").value = ""; $("placeholder").classList.remove("hidden"); }
-        } else {
-          showToast("查無此實體流水號，或該券尚未建檔！", "error");
-          $("phone").value = ""; $("placeholder").classList.remove("hidden");
-        }
-      } 
-      else if (currentMode === 'member') {
-        // 🔥 如果開關開啟，才抓會員點數
-        if (isMemberSystemActive) {
+    if (currentMode === 'member') {
+      try {
+        if(isMemberSystemActive) {
             const memSnap = await getDoc(doc(db, "members", ph));
             memberRecord = memSnap.exists() ? memSnap.data() : { points: 0, name: "非註冊會員" };
             $('m-pts').innerText = memberRecord.points || 0;
-            $('m-name').innerText = memberRecord.name || "非註冊顧客";
+            $('m-name').innerText = memberRecord.name || "非註冊客人";
             $('m-phone').innerText = ph;
             $('consume-amount').value = ''; $('pts-preview').innerText = '';
             renderRewardsList();
         }
         
         shownPhone = ph;
-        
-        // 抓取所有電子優惠券資料
         let digitalActs = EVENT_ORDER.filter(a => !a.includes('【實體】') && !a.includes('實體券') && POS_CONFIG[a]?.active !== false);
+        userCouponsData = {};
         await Promise.all(digitalActs.map(async (a) => {
             const cSnap = await getDoc(doc(db, a, ph));
-            if(cSnap.exists()) {
-                let data = cSnap.data(); data.act_source = a;
-                userCouponsData[a] = data;
-            }
+            if(cSnap.exists()) { let data = cSnap.data(); data.act_source = a; userCouponsData[a] = data; }
         }));
 
-        playAlert("scan");
-        renderUserCoupons();
-        $("member-area").classList.remove("hidden");
-      }
-    } finally { setBusy(false); }
+        renderMemberCoupons();
+        $('loading-area').classList.add('hidden');
+        $('member-area').classList.remove('hidden');
+      } catch(e) { showToast("查詢失敗"); $('loading-area').classList.add('hidden'); $('placeholder').classList.remove('hidden'); }
+      
+    } else if (currentMode === 'physical') {
+      if(!act) return showToast("請選擇活動！");
+      try {
+        const snap = await getDoc(doc(db, act, ph));
+        $('loading-area').classList.add('hidden');
+        
+        if (snap.exists()){
+          record = snap.data(); shownPhone = ph; shownAct = act;
+          renderDetailView();
+        } else {
+          showToast("查無此流水號！");
+          $("phone").value = "";
+          $('placeholder').classList.remove('hidden');
+        }
+      } catch(e) { showToast("查詢失敗"); }
+    }
   }
 
-  function renderUserCoupons() {
+  function renderMemberCoupons() {
      let html = '';
      const acts = Object.keys(userCouponsData);
      if(acts.length === 0) {
-         html = '<div style="color:var(--muted-foreground); font-size:14px; text-align:center; padding:10px;">目前無可用的活動優惠券</div>';
+         html = '<div style="color:var(--muted-foreground); font-size:14px; text-align:center; padding:10px;">目前無可用優惠券</div>';
      } else {
          acts.forEach(actName => {
              const c = userCouponsData[actName];
              const isRedeemed = c.status === '已兌換';
-             const isExpired = c.status === '已過期';
-             const gift = c.gift || POS_CONFIG[actName]?.gift || '未設定';
+             const gift = c.gift || POS_CONFIG[c.act_source]?.gift || '未設定';
              
-             const classStr = (isRedeemed || isExpired) ? "member-list-item disabled" : "member-list-item";
-             const statusTxt = isRedeemed ? "已核銷" : (isExpired ? "已過期" : "點擊核銷");
-             const clickEvt = (isRedeemed || isExpired) ? "" : `onclick="prepRedeemCoupon('${actName}')"`;
+             let btnHtml = '';
+             if(isRedeemed) btnHtml = '<button disabled style="opacity:0.5; padding:8px 16px; border-radius:8px;">已核銷</button>';
+             else btnHtml = `<button class="coupon-btn" onclick="prepRedeemCoupon('${c.act_source}')">核銷</button>`;
 
-             html += `
-             <div class="${classStr}" ${clickEvt}>
+             html += `<div class="coupon-item">
                 <div>
-                  <div style="font-size:12px; color:var(--accent-digital); font-weight:bold; margin-bottom:4px;">${actName}</div>
-                  <div style="font-weight:bold; font-size:16px; color:#fff;">🎁 ${gift}</div>
+                  <div style="font-size:12px; color:var(--accent-digital);">${c.act_source}</div>
+                  <div style="font-weight:bold; font-size:15px; color:#fff;">${gift}</div>
                 </div>
-                <div style="background:${(isRedeemed || isExpired) ? 'transparent' : 'var(--gradient-digital)'}; color:${(isRedeemed || isExpired) ? 'var(--muted-foreground)' : '#fff'}; padding:6px 12px; border-radius:8px; font-weight:bold; font-size:14px;">${statusTxt}</div>
+                <div>${btnHtml}</div>
              </div>`;
          });
      }
      $('user-coupons-list').innerHTML = html;
+  }
+
+  window.prepRedeemCoupon = function(actName) {
+     shownAct = actName;
+     record = userCouponsData[actName];
+     $('member-area').classList.add('hidden');
+     renderDetailView();
+  }
+
+  function renderDetailView() {
+      $('detail').classList.remove('hidden');
+      $('v-phone').innerText = shownPhone;
+      $('v-gift').innerText = record.gift || POS_CONFIG[shownAct]?.gift || "未設定";
+      
+      const isClaimed = record.status === "已兌換";
+      if(isClaimed) {
+          $('banner').className = 'banner bad'; 
+          $('banner').innerHTML = '❌ 已核銷過囉！';
+          $('btn-redeem').disabled = true; $('btn-redeem').innerText = '已核銷';
+      } else {
+          $('banner').className = 'banner ok'; 
+          $('banner').innerHTML = '✅ 憑證有效可核銷';
+          $('btn-redeem').disabled = false; $('btn-redeem').innerText = '✔ 確認核銷';
+      }
+      $('v-label').innerText = currentMode === 'physical' ? '實體流水號' : '兌換代碼 / 電話';
+  }
+
+  window.redeem = async function() {
+    const empName = $("employee-name").value.trim();
+    $('btn-redeem').disabled = true;
+    try {
+      const nowStr = new Date().toLocaleString();
+      await updateDoc(doc(db, shownAct, shownPhone), { status: "已兌換", store: store, redeemTime: nowStr, redeemBy: empName });
+      
+      $('banner').className = 'banner bad'; $('banner').innerHTML = '❌ 已成功核銷';
+      $('btn-redeem').innerText = '核銷完畢';
+
+      const overlay = $("success-overlay");
+      overlay.classList.remove("flash"); void overlay.offsetWidth; overlay.classList.add("flash");
+      if (window.confetti) confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 }, colors: ['#FFD700', '#FFA500'] });
+
+      const btn = $("btn-undo"); btn.classList.remove("hidden");
+      let left = 5; btn.innerText = "⚡ 撤銷 (" + left + "s)";
+      if (uTimer) clearInterval(uTimer);
+      uTimer = setInterval(() => {
+        left -= 1;
+        if (left <= 0){ clearInterval(uTimer); btn.classList.add("hidden"); }
+        else btn.innerText = "⚡ 撤銷 (" + left + "s)";
+      }, 1000);
+      
+    } catch(e) { showToast("核銷失敗"); $('btn-redeem').disabled = false; }
+  }
+
+  window.undo = async function() {
+    if (uTimer) clearInterval(uTimer);
+    try { 
+      await updateDoc(doc(db, shownAct, shownPhone), { status: "未兌換", store: "", redeemTime: "", redeemBy: "" }); 
+      showToast("已撤銷復原");
+      $("btn-undo").classList.add("hidden");
+      check(shownPhone); 
+    } catch(e) { showToast("撤銷失敗"); }
+  }
+
+  window.redeemReward = async function(giftName, reqPts) {
+    if(memberRecord.points < reqPts) return;
+    const empName = $("employee-name").value.trim();
+    if(!confirm(`確定要扣除 ${reqPts} 點兌換「${giftName}」嗎？`)) return;
+
+    try {
+      await updateDoc(doc(db, "members", shownPhone), { points: increment(-reqPts) });
+      await setDoc(doc(db, "point_transactions", new Date().getTime().toString()), {
+        phone: shownPhone, type: "redeem", gift: giftName, points_spent: reqPts, store: store, empName: empName, time: new Date().toLocaleString()
+      });
+      memberRecord.points -= reqPts;
+      $('m-pts').innerText = memberRecord.points;
+      
+      const overlay = $("success-overlay");
+      overlay.classList.remove("flash"); void overlay.offsetWidth; overlay.classList.add("flash");
+      if (window.confetti) confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 }, colors: ['#FFD700', '#FFA500'] });
+
+      renderRewardsList(); 
+    } catch(e) { showToast("扣點失敗！"); }
   }
 
   function renderRewardsList() {
@@ -1377,76 +1067,12 @@ body.mode-member-active .undo:hover { background: rgba(242,169,0,0.25); }
     $('reward-list').innerHTML = html;
   }
 
-  // 點擊電子券，進入原本的核銷明細頁面 (完美保留 5s 撤銷特效)
-  window.prepRedeemCoupon = function(actName) {
-      shownAct = actName;
-      record = userCouponsData[actName];
-      
-      $("member-area").classList.add("hidden");
-      renderRight(); // This will show the "detail" view with the giant redeem button
-  }
-
-  window.redeem = async function() {
-    const empName = $("employee-name").value.trim();
-    if(!empName) { 
-        $("employee-name").focus(); 
-        return showToast("請先登入上方的值班人員！", "error"); 
-    }
-    localStorage.setItem("p_employee", empName); 
-
-    if (record && (record.status === "已兌換" || record.status === "已過期")) {
-        playAlert("error"); 
-        return showToast("此憑證已失效，無法執行核銷！", "error");
-    }
-
-    if (!confirm("確定核銷優惠券？憑證將失效！")) return;
-    
-    const ph = shownPhone, st = store, ac = shownAct;
-    const d = new Date(), pad = (n) => (n < 10 ? "0" + n : String(n));
-    const nowStr = d.getFullYear() + "/" + pad(d.getMonth()+1) + "/" + pad(d.getDate()) + " " + pad(d.getHours()) + ":" + pad(d.getMinutes()) + ":" + pad(d.getSeconds());
-    
-    setBusy(true);
-    try {
-      await updateDoc(doc(db, ac, ph), { status: "已兌換", store: st, redeemTime: nowStr, redeemBy: empName });
-      record = Object.assign({}, record || {}, { status: "已兌換", store: st, redeemTime: nowStr, redeemBy: empName });
-    } finally { setBusy(false); }
-    
-    renderRight();
-    showToast("✅ 核銷成功！", "success");
-
-    const overlay = $("success-overlay");
-    overlay.classList.remove("flash");
-    void overlay.offsetWidth;
-    overlay.classList.add("flash");
-
-    if (window.confetti) {
-        confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 }, colors: ['#FFD700', '#FFA500', '#FF6B35', '#FFFFFF'], disableForReducedMotion: true });
-    }
-
-    const btn = $("btn-undo"); btn.classList.remove("hidden");
-    let left = 5; btn.innerText = "⚡ 撤銷 (" + left + "s)";
-    if (uTimer) clearInterval(uTimer);
-    uTimer = setInterval(() => {
-      left -= 1;
-      if (left <= 0){ clearInterval(uTimer); btn.classList.add("hidden"); }
-      else btn.innerText = "⚡ 撤銷 (" + left + "s)";
-    }, 1000);
-  }
-
-  window.undo = async function() {
-    if (uTimer) clearInterval(uTimer);
-    const ph = shownPhone, ac = shownAct; setBusy(true);
-    try { await updateDoc(doc(db, ac, ph), { status: "未兌換", store: "", redeemTime: "", redeemBy: "" }); } finally { setBusy(false); }
-    $("btn-undo").classList.add("hidden");
-    showToast("已撤銷復原", "success"); 
-    check(ph); // 重新檢查會退回會員面板
-  }
-
   window.nextCust = function() {
-    $("phone").value = ""; record = null; memberRecord = null; userCouponsData = {}; hideUndo(); 
-    $("member-area").classList.add("hidden");
-    $("detail").classList.add("hidden");
-    if(currentMode !== 'counter') $("placeholder").classList.remove("hidden");
+    $("phone").value = ""; record = null; memberRecord = null; userCouponsData = {};
+    if (uTimer) clearInterval(uTimer); $("btn-undo").classList.add("hidden");
+    $('placeholder').classList.remove('hidden');
+    $('member-area').classList.add('hidden');
+    $('detail').classList.add('hidden');
     setTimeout(() => $("phone").focus(), 100);
   }
 
@@ -1466,9 +1092,6 @@ body.mode-member-active .undo:hover { background: rgba(242,169,0,0.25); }
     else if (e.key === "Escape") { e.preventDefault(); nextCust(); }
   });
 
-  $("btn-scan").onclick = startScan;
-  $("btn-stop").onclick = stopScan;
-  $("btn-check").onclick = () => check();
 </script>
 </body>
 </html>
