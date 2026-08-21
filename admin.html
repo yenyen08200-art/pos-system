@@ -112,13 +112,14 @@
     .chart-box h3 { margin: 0 0 18px; font-size: 15px; font-weight: 800; }
     .chart-canvas { height: 240px; }
     
-    /* ================= 表格 UI ================= */
+    /* ================= 表格 UI (精簡版) ================= */
     .table-toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; gap: 12px; flex-wrap: wrap; }
     .table-toolbar #result-count { color: var(--text-sub); font-size: 13px; font-weight: 600; }
     .search-box { padding: 12px 18px; border-radius: 999px; border: none; font-size: 14px; width: 300px; outline: none; background: #fff; box-shadow: var(--shadow); color: var(--text-main); }
     
     .table-container { background: var(--card-bg); border-radius: var(--radius); box-shadow: var(--shadow); overflow: auto; max-height: 52vh; padding: 8px; padding-bottom: 120px; }
-    table { width: 100%; border-collapse: separate; border-spacing: 0 4px; min-width: 980px; }
+    /* 🔥 表格最小寬度縮減，避免超出螢幕 */
+    table { width: 100%; border-collapse: separate; border-spacing: 0 4px; min-width: 800px; }
     th, td { padding: 14px 18px; text-align: left; border: none; }
     th { background: #F5F7FA; color: var(--text-sub); font-weight: 700; font-size: 12.5px; position: sticky; top: 0; cursor: pointer; user-select: none; white-space: nowrap; z-index: 10; }
     th:first-child { border-radius: 12px 0 0 12px; }
@@ -128,12 +129,11 @@
     
     tbody tr { transition: .15s; }
     tbody tr:hover { background: #FAFBFC; }
-    tbody td { border-bottom: 1px solid #F1F3F7; font-size: 14px; }
+    tbody td { border-bottom: 1px solid #F1F3F7; font-size: 14px; vertical-align: middle; }
     
     .status-yes { color: var(--green); font-weight: 800; background: rgba(63, 191, 143, .12); padding: 5px 12px; border-radius: 999px; font-size: 12px; }
     .status-no { color: var(--accent); font-weight: 800; background: rgba(240, 118, 84, .12); padding: 5px 12px; border-radius: 999px; font-size: 12px; }
     .status-expired { color: #8A93A5; font-weight: 800; background: rgba(138, 147, 165, .12); padding: 5px 12px; border-radius: 999px; font-size: 12px; }
-    .time-text { font-size: 13px; color: var(--text-sub); }
     .act-tag { background: #E6EAF0; color: var(--text-main); font-size: 11px; padding: 4px 8px; border-radius: 6px; font-weight: 700; display: inline-block; white-space: nowrap; }
 
     /* ================= Kebab Menu ================= */
@@ -380,21 +380,16 @@
 
         <div class="table-container">
           <table id="data-table">
+            <!-- 🔥 精簡化後的表格表頭 (8 個欄位) -->
             <thead>
               <tr>
-                <th><input type="checkbox" id="check-all" onclick="document.querySelectorAll('.row-check').forEach(cb => cb.checked = this.checked)"></th>
+                <th style="width: 40px;"><input type="checkbox" id="check-all" onclick="document.querySelectorAll('.row-check').forEach(cb => cb.checked = this.checked)"></th>
                 <th id="col-act" style="display:none;" onclick="setSort('act_source')">🎯 所屬活動 <span class="sort-icon" id="sort-act_source">▼</span></th>
-                <th onclick="setSort('phone')">📱 兌換號碼 <span class="sort-icon" id="sort-phone">▼</span></th>
-                <th onclick="setSort('name')">👤 顧客姓名 <span class="sort-icon" id="sort-name">▼</span></th>
-                <th onclick="setSort('social_id')">🔗 社群帳號 <span class="sort-icon" id="sort-social_id">▼</span></th>
+                <th onclick="setSort('phone')">📱 顧客資訊 <span class="sort-icon" id="sort-phone">▼</span></th>
                 <th onclick="setSort('gift')">🎁 兌換品項 <span class="sort-icon" id="sort-gift">▼</span></th>
                 <th onclick="setSort('status')">⚡ 狀態 <span class="sort-icon" id="sort-status">▼</span></th>
-                <th onclick="setSort('store')">📌 核銷門市 <span class="sort-icon" id="sort-store">▼</span></th>
-                <th onclick="setSort('redeemTime')">🕒 核銷時間 <span class="sort-icon" id="sort-redeemTime">▼</span></th>
-                <th onclick="setSort('redeemBy')">👤 核銷人員 <span class="sort-icon" id="sort-redeemBy">▼</span></th>
-                <th onclick="setSort('expireDate')">⏳ 使用期限 <span class="sort-icon" id="sort-expireDate">▼</span></th>
-                <th onclick="setSort('timestamp')">📅 領券時間 <span class="sort-icon" id="sort-timestamp">▼</span></th>
-                <!-- 🔥 保留操作欄位，讓總覽也可看見 -->
+                <th onclick="setSort('store')">📌 核銷紀錄 <span class="sort-icon" id="sort-store">▼</span></th>
+                <th onclick="setSort('timestamp')">⏳ 時間資訊 <span class="sort-icon" id="sort-timestamp">▼</span></th>
                 <th id="col-action">⚙️ 管理操作</th>
               </tr>
             </thead>
@@ -638,7 +633,6 @@
           <ul class="item-list" id="ui-gift-list"></ul>
         </div>
 
-        <!-- 🔥 取消左側的橘色邊框，與上方卡片統一風格 -->
         <div class="config-card">
           <h2>📦 活動贈品庫存分配</h2>
           <p class="desc">分配各門市的贈品庫存數量。</p>
@@ -752,8 +746,9 @@
   </main>
 
   <script type="module">
+    // 🔥 加上 where 用以查詢資料庫刪除庫存
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getFirestore, collection, getDocs, onSnapshot, doc, getDoc, setDoc, updateDoc, deleteDoc, query, limit } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getFirestore, collection, getDocs, onSnapshot, doc, getDoc, setDoc, updateDoc, deleteDoc, query, limit, where } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
     import { getAuth, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
     const firebaseConfig = {
@@ -786,13 +781,12 @@
     let globalEventOrder = [];
     let editingActName = null; 
     
-    // 視覺與點數商品變數
     let globalHomeBanner = "";
     let globalHomeNews = "";
     let globalPointRate = 100;
     let globalRewardsList = [];
-    let globalGiftList = []; // 限量贈品清單
-    let editingGiftIdx = null; // 🔥 新增：紀錄正在編輯的贈品索引
+    let globalGiftList = [];
+    let editingGiftIdx = null;
     
     let isMemberSystemActive = true;
 
@@ -846,7 +840,7 @@
         if(document.getElementById('batch-act')) document.getElementById('batch-act').innerHTML = cleanHtml;
       }
 
-      if (viewId === 'config-gift') { fetchInventoryStats(); } // 🔥 名稱更新連動
+      if (viewId === 'config-gift') { fetchInventoryStats(); }
     };
 
     function populateAdminDropdown() {
@@ -870,7 +864,6 @@
     }
 
     function renderConfigUI() {
-      // 門市
       document.getElementById('ui-store-list').innerHTML = globalStoreList.map((store, idx) => `
         <li class="item-li">
           <div class="item-info"><strong>🏪 ${store}</strong></div>
@@ -878,7 +871,6 @@
         </li>
       `).join('');
 
-      // 活動
       document.getElementById('ui-event-list').innerHTML = globalEventOrder.map(actName => {
         const pwd = globalEventConfig[actName];
         const giftInfo = globalPosConfig[actName];
@@ -913,7 +905,6 @@
         `;
       }).join('');
 
-      // 點數商品
       document.getElementById('ui-reward-list').innerHTML = globalRewardsList.map((item, idx) => `
         <li class="item-li">
           <div class="item-info">
@@ -931,7 +922,6 @@
         </li>
       `).join('');
 
-      // 🔥 更新：活動贈品（加入編輯、上下移動、刪除）
       document.getElementById('ui-gift-list').innerHTML = globalGiftList.map((gift, idx) => `
         <li class="item-li">
           <div class="item-info">
@@ -949,7 +939,6 @@
         </li>
       `).join('');
 
-      // 更新總開關狀態UI
       const toggleBtn = document.getElementById('sys-member-toggle');
       const toggleText = document.getElementById('sys-member-status-text');
       if(isMemberSystemActive) {
@@ -963,14 +952,12 @@
       }
     }
 
-    // 總開關邏輯
     window.toggleMemberSystem = function() {
       isMemberSystemActive = !isMemberSystemActive;
       renderConfigUI();
       triggerSaveHint();
     };
 
-    // 🔥 新增：活動贈品的編輯與移動邏輯
     window.editGiftItem = function(idx) {
         editingGiftIdx = idx;
         document.getElementById('new-gift-name').value = globalGiftList[idx];
@@ -994,10 +981,10 @@
       if(!val) return;
 
       if (editingGiftIdx !== null) {
-          globalGiftList[editingGiftIdx] = val; // 儲存編輯
+          globalGiftList[editingGiftIdx] = val; 
           cancelEditGift();
       } else {
-          if(!globalGiftList.includes(val)) globalGiftList.push(val); // 新增
+          if(!globalGiftList.includes(val)) globalGiftList.push(val); 
           document.getElementById('new-gift-name').value = '';
       }
 
@@ -1006,12 +993,28 @@
       triggerSaveHint();
     };
 
-    window.deleteGiftItem = function(idx) {
-      if(confirm("確定要刪除這個活動贈品嗎？")) {
+    // 🔥 修改：連帶刪除資料庫中的庫存紀錄
+    window.deleteGiftItem = async function(idx) {
+      const giftName = globalGiftList[idx];
+      if(confirm(`確定要刪除「${giftName}」嗎？\n⚠️ 注意：這將連帶刪除「所有門市對應的庫存紀錄」，此操作立即生效！`)) {
         globalGiftList.splice(idx, 1);
         renderConfigUI();
         populateAdminDropdown();
         triggerSaveHint();
+        
+        try {
+            // 到 inventory 中尋找 act == 該贈品名稱 的文件並刪除
+            const q = query(collection(db, "inventory"), where("act", "==", giftName));
+            const querySnapshot = await getDocs(q);
+            querySnapshot.forEach((docSnap) => {
+                deleteDoc(doc(db, "inventory", docSnap.id));
+            });
+            fetchInventoryStats(); // 重新整理下方監控表格
+            alert(`已成功清除「${giftName}」的庫存紀錄！\n記得點擊最下方【儲存至雲端】來更新總表設定喔！`);
+        } catch(e) {
+            console.error("清除庫存連動失敗", e);
+            alert("庫存紀錄清除失敗，請檢查網路連線。");
+        }
       }
     };
 
@@ -1508,16 +1511,14 @@
       const act = actSelect.value;
       const tbody = document.getElementById('table-body');
       const colAct = document.getElementById('col-act');
-      const colAction = document.getElementById('col-action');
       const btnBatch = document.getElementById('btn-batch');
       const btnExpire = document.getElementById('btn-expire');
       
       if (unsubscribeSnapshot) unsubscribeSnapshot();
-      tbody.innerHTML = '<tr><td colspan="12" style="text-align:center; padding: 40px; color: #8A93A5;">📡 與資料庫即時連線中...</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding: 40px; color: #8A93A5;">📡 與資料庫即時連線中...</td></tr>';
       
       if (act === 'ALL_OVERVIEW') {
           colAct.style.display = 'table-cell';
-          colAction.style.display = 'table-cell'; // 🔥 讓總覽也顯示操作選項
           btnBatch.disabled = true;
           btnExpire.disabled = true;
           document.getElementById('check-all').disabled = true;
@@ -1537,11 +1538,10 @@
               await Promise.all(fetchPromises);
               updateDashboardStats();
           } catch(e) {
-              tbody.innerHTML = '<tr><td colspan="13" style="text-align:center; padding: 40px; color: red;">載入總覽失敗，請重試。</td></tr>';
+              tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding: 40px; color: red;">載入總覽失敗，請重試。</td></tr>';
           }
       } else {
           colAct.style.display = 'none';
-          colAction.style.display = 'table-cell';
           btnBatch.disabled = false;
           btnExpire.disabled = false;
           document.getElementById('check-all').disabled = false;
@@ -1554,7 +1554,7 @@
             });
             updateDashboardStats();
           }, (error) => {
-            tbody.innerHTML = '<tr><td colspan="12" style="text-align:center; padding: 40px; color: red;">連線中斷，請確認網路連線。</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding: 40px; color: red;">連線中斷，請確認網路連線。</td></tr>';
           });
       }
     };
@@ -1750,9 +1750,10 @@
       document.getElementById('result-count').innerText = `顯示 ${filteredData.length} 筆結果`;
 
       if (filteredData.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="13" style="text-align:center; padding: 40px; color: #F07654; font-weight: bold;">找不到資料 🥲</td></tr>`; return;
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding: 40px; color: #F07654; font-weight: bold;">找不到資料 🥲</td></tr>`; return;
       }
 
+      // 🔥 精簡化的表格渲染：欄位整併
       tbody.innerHTML = filteredData.map(d => {
         const defaultGift = globalPosConfig[d.act_source]?.gift || '預設活動贈品';
         const defaultExpire = globalPosConfig[d.act_source]?.expireDate || "無特別限制";
@@ -1767,7 +1768,7 @@
         let checkboxHTML = (!d.status || d.status === '未兌換') ? `<input type="checkbox" class="row-check" value="${d.id}" ${isOverview ? 'disabled' : ''}>` : '';
         let actColHTML = isOverview ? `<td><span class="act-tag">${d.act_source}</span></td>` : '';
 
-        // 🔥 確保總覽模式下也有操作選單
+        // 操作選單 (總覽模式也開放)
         let actionBtnHTML = `
           <details class="kebab-dropdown">
             <summary>⋮</summary>
@@ -1783,20 +1784,33 @@
           </details>
         `;
 
+        // 🔥 資料區塊合併設計
+        let customerInfo = `
+            <div style="font-weight:bold; font-size:14px; color:var(--text-main);">${d.name || '未知'}</div>
+            <div style="font-family:monospace; font-size:13px; color:var(--text-sub);">${d.phone || '-'}</div>
+            <div style="font-size:12px; color:#F07654;">${d.social_id || '未提供'}</div>
+        `;
+
+        let redeemInfo = (d.status === '已兌換') ? `
+            <div style="font-weight:bold; color:var(--sidebar-bg); font-size:13px;">${d.store || '-'}</div>
+            <div style="font-size:12px; color:var(--text-sub); margin-top:2px;">${d.redeemTime || '-'}</div>
+            <div style="font-size:11px; color:#B7BFCC;">人員: ${d.redeemBy || '-'}</div>
+        ` : `<div style="color:var(--gray); font-size:12px;">-</div>`;
+
+        let timeInfo = `
+            <div style="font-size:13px; font-weight:bold; color:var(--text-main);"><span style="font-size:10px;color:var(--text-sub);">期限: </span>${displayExpire}</div>
+            <div style="font-size:11px; color:var(--text-sub); margin-top:4px;"><span style="font-size:10px;">領券: </span>${d.timestamp || '-'}</div>
+        `;
+
         return `
           <tr>
             <td>${checkboxHTML}</td>
             ${actColHTML}
-            <td style="font-family:monospace; font-size:15px; font-weight:bold; color:var(--text-main);">${d.phone || ''}</td>
-            <td style="font-weight:bold;">${d.name || ''}</td>
-            <td style="color:#F07654;">${d.social_id || '未提供'}</td>
-            <td style="font-weight:bold; color:#3FBF8F;">${displayGift}</td>
+            <td>${customerInfo}</td>
+            <td style="font-weight:bold; color:#3FBF8F; max-width:180px; word-wrap:break-word;">${displayGift}</td>
             <td>${statusBadge}</td>
-            <td style="font-weight:bold; color:var(--sidebar-bg);">${d.store || '-'}</td>
-            <td class="time-text">${d.redeemTime || '-'}</td>
-            <td style="font-weight:bold; color:var(--text-sub);">${d.redeemBy || '-'}</td>
-            <td style="font-weight:bold; color:var(--text-main);">${displayExpire}</td>
-            <td class="time-text">${d.timestamp || '-'}</td>
+            <td>${redeemInfo}</td>
+            <td>${timeInfo}</td>
             <td>${actionBtnHTML}</td>
           </tr>
         `;
