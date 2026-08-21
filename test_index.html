@@ -174,16 +174,27 @@ body.mode-counter-active .act-btn.on .radio { border-color: var(--accent-counter
 
 .searchbar { display: flex; flex-direction: column; gap: 12px; width: 100%; }
 .search-actions { display: flex; gap: 10px; width: 100%; }
-#phone { 
-  width: 100%; min-height: 56px; border-radius: 14px; border: 1px solid var(--input); 
-  background: oklch(0.17 0.024 259/.6); color: var(--foreground); 
-  padding: 0 16px; font-size: 18px; font-weight: 600; letter-spacing: 0.08em; 
-  outline: none; transition: all 0.2s; 
+.input-group { 
+  display: flex; flex: 1; border-radius: 14px; border: 1px solid var(--input); 
+  background: oklch(0.17 0.024 259/.6); overflow: hidden; transition: all 0.2s;
+  min-height: 56px;
 }
-#phone:focus { border-color: var(--accent-digital); box-shadow: 0 0 0 4px rgba(0,198,255,0.25); }
+.input-group:focus-within { border-color: var(--accent-digital); box-shadow: 0 0 0 4px rgba(0,198,255,0.25); }
+body.mode-physical-active .input-group:focus-within { border-color: var(--accent-physical); box-shadow: 0 0 0 4px rgba(255,107,53,0.25); }
+body.mode-member-active .input-group:focus-within { border-color: var(--accent-member); box-shadow: 0 0 0 4px rgba(242,169,0,0.25); }
+
+#btn-scan { 
+  background: rgba(255,255,255,0.05); border: none; color: var(--muted-foreground); 
+  padding: 0 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; 
+  border-right: 1px solid var(--input); transition: 0.2s; 
+}
+#btn-scan:hover { background: rgba(255,255,255,0.1); color: #fff; }
+#phone { 
+  flex: 1; width: 100%; background: transparent; border: none; 
+  color: var(--foreground); padding: 0 16px; font-size: 18px; font-weight: 600; 
+  letter-spacing: 0.08em; outline: none; 
+}
 #phone::placeholder{font-size:15px;font-weight:400;letter-spacing:normal;color:var(--muted-foreground)}
-body.mode-physical-active #phone:focus { border-color: var(--accent-physical); box-shadow: 0 0 0 4px rgba(255,107,53,0.25); }
-body.mode-member-active #phone:focus { border-color: var(--accent-member); box-shadow: 0 0 0 4px rgba(242,169,0,0.25); }
 
 .primary-btn{min-height:56px;padding:0 24px;font-size:16px;font-weight:700;border:none;border-radius:14px;
   background-image:var(--gradient-digital);color:#fff;box-shadow:0 14px 30px -16px rgba(0,198,255,0.9);transition:all .2s;
@@ -446,14 +457,13 @@ body.mode-member-active .undo { color:var(--accent-member); border-color: rgba(2
         <div id="scan-block">
           <span class="label" id="scan-label">● 掃描 / 查詢會員</span>
           <div class="searchbar">
-            <input id="phone" type="tel" placeholder="輸入手機號碼" autocomplete="off" />
-            <div class="search-actions">
-              <button id="btn-scan" class="primary-btn" onclick="startScan()" style="flex: 1; background: rgba(255,255,255,0.08); color: var(--foreground); border: 1px solid rgba(255,255,255,0.2); box-shadow: none;">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:8px;"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
-                相機掃描
+            <div class="input-group">
+              <button id="btn-scan" onclick="startScan()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
               </button>
-              <button class="primary-btn" id="btn-check" onclick="check()" style="flex: 1;">查詢</button>
+              <input id="phone" type="tel" placeholder="輸入手機號碼" autocomplete="off" />
             </div>
+            <button class="primary-btn" id="btn-check" onclick="check()">查詢</button>
           </div>
         </div>
       </section>
@@ -566,7 +576,7 @@ body.mode-member-active .undo { color:var(--accent-member); border-color: rgba(2
 
   let evMap = {};
   let giftMap = {};
-  let storeGiftMap = {}; // 🔥 新增：儲存各門市「確實有庫存」的活動贈品名單
+  let storeGiftMap = {}; 
 
   const $ = (id) => document.getElementById(id);
   let store = "", act = "", shownPhone = "", shownAct = "", record = null;
@@ -710,7 +720,6 @@ body.mode-member-active .undo { color:var(--accent-member); border-color: rgba(2
   };
   window.alert = function(msg) { showToast(msg, 'error'); };
 
-  // 🔥 優化：動態切換掃描區塊的文字
   window.setMode = function(m) {
     currentMode = m;
     $('mode-member').classList.toggle('active', m === 'member');
@@ -759,7 +768,7 @@ body.mode-member-active .undo { color:var(--accent-member); border-color: rgba(2
       $('placeholder-title').innerText = "實體券快速核銷";
       $('placeholder-desc').innerText = "掃描實體券 QR Code 或直接輸入流水號進行核銷。";
       $('label-phone').innerText = "🔢 實體流水號";
-      $('scan-label').innerText = "● 查詢單號"; // 🔥 修改：實體券時標題改為查詢單號
+      $('scan-label').innerText = "● 查詢單號"; 
       $('info-social').style.display = 'none';
       $('info-expire').style.display = 'none';
 
@@ -813,22 +822,18 @@ body.mode-member-active .undo { color:var(--accent-member); border-color: rgba(2
       giftMap = {};
       for (const a in POS_CONFIG) { giftMap[a] = POS_CONFIG[a].gift; }
 
-      // 🔥 新增：即時監聽庫存表，建立「門市 -> 有庫存的活動贈品」對應關係
       onSnapshot(collection(db, "inventory"), (snap) => {
         storeGiftMap = {};
         snap.forEach(docSnap => {
           let d = docSnap.data();
           if (!storeGiftMap[d.store]) storeGiftMap[d.store] = [];
-          // 確保該贈品還存在於全域的 GIFT_LIST 中（防呆），且還沒被加進去過
           if (GIFT_LIST.includes(d.act) && !storeGiftMap[d.store].includes(d.act)) {
               storeGiftMap[d.store].push(d.act);
           }
         });
         
-        // 如果當下正好在「活動贈品」模式，而且有選門市，就自動刷新畫面上的選項
         if (currentMode === 'counter' && store) {
            renderActs();
-           loadCounter();
         }
       });
 
@@ -877,7 +882,6 @@ body.mode-member-active .undo { color:var(--accent-member); border-color: rgba(2
     if (currentMode === 'physical') {
       currentList = (evMap[store] || []).filter(a => a.includes('【實體】') || a.includes('實體券'));
     } else if (currentMode === 'counter') {
-      // 🔥 修改：這裡改吃我們即時過濾出來的專屬門市贈品清單
       currentList = storeGiftMap[store] || [];
     }
 
@@ -889,6 +893,7 @@ body.mode-member-active .undo { color:var(--accent-member); border-color: rgba(2
 
     if (!currentList.includes(act)) {
        act = currentList[0];
+       if (currentMode === 'counter') loadCounter(); // 🔥 確保預設選中時也去抓資料
     }
 
     const list = document.createElement("div");
@@ -1091,7 +1096,6 @@ body.mode-member-active .undo { color:var(--accent-member); border-color: rgba(2
     const isExpired = record.status === "已過期" || autoExpired;
     const banner = $("banner");
     
-    // 🔥 優化卡片上方 Banner，清楚顯示已核銷的時間地點
     if (isClaimed) {
       banner.className = "banner bad rise";
       banner.innerHTML = `❌ 券已失效 / 已領取<small style="margin-top:8px;">📍 於 ${record.store || "未知門市"} 兌換</small><small>🕒 ${record.redeemTime || "未知時間"}</small>`;
@@ -1260,7 +1264,6 @@ body.mode-member-active .undo { color:var(--accent-member); border-color: rgba(2
     } finally { setBusy(false); }
   }
 
-  // 🔥 優化：電子券清單也會清楚顯示在哪裡兌換與兌換時間
   function renderUserCoupons() {
      let html = '';
      const acts = Object.keys(userCouponsData);
