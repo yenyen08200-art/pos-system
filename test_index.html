@@ -360,6 +360,11 @@ body.mode-member-active .undo { color:var(--accent-member); border-color: rgba(2
   background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
   border-radius: 16px; height: 64px; font-size: 24px; font-weight: 700; color: #fff;
   cursor: pointer; transition: 0.1s; display: flex; align-items: center; justify-content: center; font-family: "Space Grotesk", sans-serif;
+  
+  /* 🔥 新增：防止雙擊放大、禁止選取文字 */
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
 }
 .keypad-btn:active { transform: scale(0.92); background: rgba(255,255,255,0.15); }
 .keypad-btn.btn-clear { background: rgba(255,71,87,0.1); color: #ff4757; border-color: rgba(255,71,87,0.3); }
@@ -395,18 +400,18 @@ body.mode-member-active .undo { color:var(--accent-member); border-color: rgba(2
     <div class="pin-display-box" id="pin-display"></div>
     
     <div class="keypad-grid">
-      <button class="keypad-btn" onclick="addPin('7')">7</button>
-      <button class="keypad-btn" onclick="addPin('8')">8</button>
-      <button class="keypad-btn" onclick="addPin('9')">9</button>
-      <button class="keypad-btn" onclick="addPin('4')">4</button>
-      <button class="keypad-btn" onclick="addPin('5')">5</button>
-      <button class="keypad-btn" onclick="addPin('6')">6</button>
-      <button class="keypad-btn" onclick="addPin('1')">1</button>
-      <button class="keypad-btn" onclick="addPin('2')">2</button>
-      <button class="keypad-btn" onclick="addPin('3')">3</button>
-      <button class="keypad-btn btn-clear" onclick="clearPin()">✖</button>
-      <button class="keypad-btn" onclick="addPin('0')">0</button>
-      <button class="keypad-btn btn-submit" onclick="submitPin()">✔</button>
+      <button class="keypad-btn" ontouchstart="" onclick="addPin('7')">7</button>
+      <button class="keypad-btn" ontouchstart="" onclick="addPin('8')">8</button>
+      <button class="keypad-btn" ontouchstart="" onclick="addPin('9')">9</button>
+      <button class="keypad-btn" ontouchstart="" onclick="addPin('4')">4</button>
+      <button class="keypad-btn" ontouchstart="" onclick="addPin('5')">5</button>
+      <button class="keypad-btn" ontouchstart="" onclick="addPin('6')">6</button>
+      <button class="keypad-btn" ontouchstart="" onclick="addPin('1')">1</button>
+      <button class="keypad-btn" ontouchstart="" onclick="addPin('2')">2</button>
+      <button class="keypad-btn" ontouchstart="" onclick="addPin('3')">3</button>
+      <button class="keypad-btn btn-clear" ontouchstart="" onclick="clearPin()">✖</button>
+      <button class="keypad-btn" ontouchstart="" onclick="addPin('0')">0</button>
+      <button class="keypad-btn btn-submit" ontouchstart="" onclick="submitPin()">✔</button>
     </div>
   </div>
 </div>
@@ -453,7 +458,11 @@ body.mode-member-active .undo { color:var(--accent-member); border-color: rgba(2
         <div id="scan-block">
           <span class="label" id="scan-label">掃描會員</span>
           <div class="searchbar">
-            <input id="phone" type="tel" placeholder="輸入手機號碼" autocomplete="off" />
+            <!-- 🔥 補回這顆相機按鈕，程式就不會報錯卡死了 -->
+            <button id="btn-scan" class="icon-btn" onclick="startScan()">📷</button>
+            <div class="search-input-wrapper" style="flex:1;">
+              <input id="phone" type="tel" placeholder="輸入手機號碼" autocomplete="off" />
+            </div>
             <button class="primary-btn" id="btn-check" onclick="check()">查詢</button>
           </div>
         </div>
@@ -585,6 +594,7 @@ body.mode-member-active .undo { color:var(--accent-member); border-color: rgba(2
   let loginErrorTimer = null; // 用來防止多次點擊導致錯誤文字閃爍的問題
   
   window.addPin = function(num) {
+    if (navigator.vibrate) navigator.vibrate(20); // 🔥 新增：Android 手機按鍵微震動
     if(currentPin.length < 10) currentPin += num;
     $('pin-display').innerText = '*'.repeat(currentPin.length);
     $('pin-display').classList.remove('error');
@@ -593,6 +603,7 @@ body.mode-member-active .undo { color:var(--accent-member); border-color: rgba(2
   }
   
   window.clearPin = function() {
+    if (navigator.vibrate) navigator.vibrate(20); // 🔥 新增震動
     currentPin = '';
     $('pin-display').innerText = '';
     $('pin-display').classList.remove('error');
@@ -601,6 +612,7 @@ body.mode-member-active .undo { color:var(--accent-member); border-color: rgba(2
   }
 
   window.submitPin = function() {
+    if (navigator.vibrate) navigator.vibrate(20); // 🔥 新增震動
     if(currentPin.length === 0) return;
     
     const selectedStore = $('login-store-select').value;
