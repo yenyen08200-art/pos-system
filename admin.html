@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -756,6 +757,27 @@
               <input type="text" id="new-act-stores" placeholder="預設 ALL" value="ALL">
             </div>
           </div>
+
+          <!-- 🔥 新增：活動自動上下架排程 -->
+          <div style="background:#F7F9FB; border:1px dashed #E6EAF0; border-radius:14px; padding:16px 18px; margin-bottom:20px;">
+            <div style="font-weight:800; font-size:15px; margin-bottom:6px;">🗓️ 自動上下架排程 (選填)</div>
+            <p class="desc" style="margin-bottom:14px;">
+              填了時間之後，這個活動的上架／下架就交給雲端排程接管（每小時整點檢查一次），前台也會自己判斷時間。
+              <b>兩格都留空 = 完全用手動開關控制。</b>
+            </p>
+            <div class="form-group" style="margin-bottom:0; align-items:flex-end;">
+              <div class="field-block">
+                <label>⬆️ 自動上架時間</label>
+                <input type="datetime-local" id="new-act-start">
+              </div>
+              <div class="field-block">
+                <label>⬇️ 自動下架時間</label>
+                <input type="datetime-local" id="new-act-end">
+              </div>
+              <button class="btn-cancel" style="padding:12px 18px; margin-bottom:1px;" onclick="clearActSchedule()">🧹 清除排程</button>
+            </div>
+          </div>
+
           <button id="btn-add-act" class="btn-primary" style="width:100%" onclick="addOrUpdateEvent()">➕ 快速建立活動</button>
           <button id="btn-cancel-edit" class="btn-cancel" style="width:100%; display:none; margin-top:10px;" onclick="cancelEditEvent()">❌ 取消編輯</button>
           
@@ -926,6 +948,27 @@
       if (globalEventOrder.length > 0) window.fetchData(); 
     }
 
+    /* 🔥 排程共用工具（與 Cloud Functions 的判斷邏輯一致）
+       支援 "2026-09-01T10:00"（datetime-local）與 "2026/09/01"、"2026-09-01"
+       一律當作台灣時間解讀，回傳 epoch 毫秒；沒填或解析失敗回傳 null */
+    function parseScheduleTime(str, endOfDayIfNoTime) {
+      if (!str || typeof str !== 'string') return null;
+      const m = str.trim().match(/(\d{4})[/-](\d{1,2})[/-](\d{1,2})(?:[T\s](\d{1,2}):(\d{2}))?/);
+      if (!m) return null;
+      const h  = m[4] !== undefined ? Number(m[4]) : (endOfDayIfNoTime ? 23 : 0);
+      const mi = m[5] !== undefined ? Number(m[5]) : (endOfDayIfNoTime ? 59 : 0);
+      return Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3]), h, mi, 0) - 8 * 3600 * 1000;
+    }
+
+    function fmtScheduleText(str) {
+      return String(str).replace('T', ' ').replace(/-/g, '/');
+    }
+
+    window.clearActSchedule = function() {
+      document.getElementById('new-act-start').value = '';
+      document.getElementById('new-act-end').value = '';
+    };
+
     function renderConfigUI() {
       document.getElementById('ui-store-list').innerHTML = globalStoreList.map((store, idx) => `
         <li class="item-li">
@@ -939,20 +982,37 @@
         const giftInfo = globalPosConfig[actName];
         const giftStr = giftInfo ? giftInfo.gift : "無設定";
         const expireStr = giftInfo && giftInfo.expireDate ? giftInfo.expireDate : "無特別限制";
-        const isActive = giftInfo && giftInfo.active !== false; 
-        
+        const isActive = giftInfo && giftInfo.active !== false;
+
         let storesStr = giftInfo ? giftInfo.stores : "ALL";
         if(Array.isArray(storesStr)) storesStr = storesStr.join(', ');
-        
-        const statusBadge = isActive 
-            ? '<span style="color:var(--green);font-size:12px;">[🟢 顯示中]</span>' 
-            : '<span style="color:var(--gray);font-size:12px;">[⚫ 已下架]</span>';
-            
+
+        // 🔥 排程狀態：有填時間就由排程接管，徽章顯示實際狀態
+        const startMs = parseScheduleTime(giftInfo && giftInfo.startAt, false);
+        const endMs   = parseScheduleTime(giftInfo && giftInfo.endAt, true);
+        const hasSchedule = startMs !== null || endMs !== null;
+        const now = Date.now();
+
+        let statusBadge;
+        if (hasSchedule && startMs !== null && now < startMs) {
+            statusBadge = '<span style="color:#F0A500;font-size:12px;">[⏳ 排程待上架]</span>';
+        } else if (hasSchedule && endMs !== null && now > endMs) {
+            statusBadge = '<span style="color:var(--gray);font-size:12px;">[🏁 已到期下架]</span>';
+        } else if (isActive) {
+            statusBadge = '<span style="color:var(--green);font-size:12px;">[🟢 顯示中]</span>';
+        } else {
+            statusBadge = '<span style="color:var(--gray);font-size:12px;">[⚫ 已下架]</span>';
+        }
+
+        const scheduleStr = hasSchedule
+          ? `<span style="display:block;margin-top:4px;color:#F0764E;font-weight:600;">🗓️ 排程：${giftInfo.startAt ? fmtScheduleText(giftInfo.startAt) : '立即'} ～ ${giftInfo.endAt ? fmtScheduleText(giftInfo.endAt) : '無限期'}</span>`
+          : '';
+
         return `
         <li class="item-li">
           <div class="item-info">
             <strong>🎯 ${actName} ${statusBadge}</strong>
-            <span>密語: <code>${pwd}</code> | 贈品: ${giftStr} | 期限: ${expireStr} | 限定門市: ${storesStr}</span>
+            <span>密語: <code>${pwd}</code> | 贈品: ${giftStr} | 期限: ${expireStr} | 限定門市: ${storesStr}${scheduleStr}</span>
           </div>
           <details class="kebab-dropdown">
             <summary>⋮</summary>
@@ -1191,6 +1251,8 @@
       document.getElementById('new-act-gift').value = cfg.gift === "依實體券面標示發放" ? "" : (cfg.gift || "");
       document.getElementById('new-act-expire').value = cfg.expireDate === "無特別限制" ? "" : (cfg.expireDate || "");
       document.getElementById('new-act-stores').value = Array.isArray(cfg.stores) ? cfg.stores.join(', ') : (cfg.stores || "ALL");
+      document.getElementById('new-act-start').value = cfg.startAt || "";
+      document.getElementById('new-act-end').value = cfg.endAt || "";
 
       const btn = document.getElementById('btn-add-act');
       btn.innerText = "💾 儲存修改內容";
@@ -1206,8 +1268,10 @@
       
       document.getElementById('new-act-pwd').value = '';
       document.getElementById('new-act-gift').value = '';
-      document.getElementById('new-act-expire').value = ''; 
+      document.getElementById('new-act-expire').value = '';
       document.getElementById('new-act-stores').value = 'ALL';
+      document.getElementById('new-act-start').value = '';
+      document.getElementById('new-act-end').value = '';
 
       const btn = document.getElementById('btn-add-act');
       btn.innerText = "➕ 快速建立活動";
@@ -1219,26 +1283,43 @@
       const name = document.getElementById('new-act-name').value.trim();
       let pwd = document.getElementById('new-act-pwd').value.trim();
       let gift = document.getElementById('new-act-gift').value.trim();
-      const expire = document.getElementById('new-act-expire').value.trim(); 
+      const expire = document.getElementById('new-act-expire').value.trim();
       let stores = document.getElementById('new-act-stores').value.trim();
-      
+      const startAt = document.getElementById('new-act-start').value.trim();
+      const endAt = document.getElementById('new-act-end').value.trim();
+
       if(!name || !stores) return alert("⚠️ 請至少填寫「活動名稱」與「限定門市」！");
       if(stores !== "ALL") stores = stores.split(',').map(s => s.trim());
 
-      const isActive = globalPosConfig[name] ? globalPosConfig[name].active !== false : true;
+      // 🔥 排程檢查
+      const sMs = parseScheduleTime(startAt, false);
+      const eMs = parseScheduleTime(endAt, true);
+      if (sMs !== null && eMs !== null && eMs <= sMs) {
+        return alert("⚠️ 下架時間必須晚於上架時間！");
+      }
+
+      let isActive = globalPosConfig[name] ? globalPosConfig[name].active !== false : true;
+
+      // 有排程的話，active 直接依現在時間算好，不用等雲端排程跑下一輪
+      if (sMs !== null || eMs !== null) {
+        const now = Date.now();
+        isActive = (sMs === null || now >= sMs) && (eMs === null || now <= eMs);
+      }
 
       if (!globalEventOrder.includes(name)) {
           globalEventOrder.push(name);
       }
 
       globalEventConfig[name] = pwd || "無 (實體券或後台專用)";
-      globalPosConfig[name] = { 
-        gift: gift || "依實體券面標示發放", 
-        stores: stores, 
+      globalPosConfig[name] = {
+        gift: gift || "依實體券面標示發放",
+        stores: stores,
         expireDate: expire || "無特別限制",
-        active: isActive 
-      }; 
-      
+        startAt: startAt,
+        endAt: endAt,
+        active: isActive
+      };
+
       cancelEditEvent(); 
       renderConfigUI();
       triggerSaveHint();
@@ -1255,11 +1336,17 @@
 
     window.toggleEventStatus = function(actName) {
       if(!globalPosConfig[actName]) return;
-      if (globalPosConfig[actName].active === false) {
-          globalPosConfig[actName].active = true;
-      } else {
-          globalPosConfig[actName].active = false;
+      const cfg = globalPosConfig[actName];
+
+      // 🔥 若這個活動有排程，手動切換會在下一個整點被排程蓋回去 → 先問要不要清掉排程
+      const hasSchedule = parseScheduleTime(cfg.startAt, false) !== null || parseScheduleTime(cfg.endAt, true) !== null;
+      if (hasSchedule) {
+        if(!confirm(`「${actName}」目前由自動排程控制上下架。\n\n手動切換的話，下一個整點會被排程改回去。\n\n按【確定】= 清除排程並改為手動控制\n按【取消】= 保持排程不變`)) return;
+        cfg.startAt = "";
+        cfg.endAt = "";
       }
+
+      cfg.active = cfg.active === false;
       renderConfigUI(); triggerSaveHint();
     };
 
