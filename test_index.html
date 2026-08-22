@@ -545,6 +545,7 @@ body.mode-physical-active .undo { color:var(--accent-physical); border-color: rg
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
   import { getFirestore, doc, getDoc, setDoc, updateDoc, query, collection, where, limit, getDocs, onSnapshot, increment } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  import { getAuth, signInAnonymously, onAuthStateChanged as onPosAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyBINQuYtYZA8RLfwm51AfGLTYj1TX_UcFo",
@@ -557,6 +558,18 @@ body.mode-physical-active .undo { color:var(--accent-physical); border-color: rg
   };
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
+  const posAuth = getAuth(app);
+
+  // 🔥 POS 端沒有真正的員工帳號系統，PIN 碼只是操作介面的門檻，
+  //    不是身份驗證。這裡用「匿名登入」讓每台 POS 機都有一個合法的
+  //    Firebase Auth 連線，Firestore Rules 才能分辨「來自我們自己 app
+  //    的請求」跟「隨便一支腳本打 API」，核銷/扣庫存等寫入才寫得進去。
+  let posAuthReady = false;
+  onPosAuthStateChanged(posAuth, (user) => { posAuthReady = !!user; });
+  signInAnonymously(posAuth).catch((e) => {
+    console.error("POS 匿名登入失敗：", e);
+    showToast("系統連線異常，請重新整理頁面再試一次", "error");
+  });
 
   let STORE_LIST = [];
   let POS_CONFIG = {};
@@ -609,13 +622,18 @@ body.mode-physical-active .undo { color:var(--accent-physical); border-color: rg
 
   window.submitPin = function() {
     if (navigator.vibrate) navigator.vibrate(20);
-    
+
+    if(!posAuthReady) {
+       showLoginError('⏳ 系統連線中，請稍等 1 秒再試一次');
+       return;
+    }
+
     const empNameInput = $('login-emp-name').value.trim();
     if(!empNameInput) {
        showLoginError('❌ 請輸入您的稱呼！');
        return;
     }
-    
+
     if(currentPin.length === 0) return;
     
     const selectedStore = $('login-store-select').value;
