@@ -289,7 +289,7 @@
       <!-- 1. 電子兌換卷儀表板 -->
       <div class="sidebar-item has-sub active" onclick="toggleSubMenu('dashboard-sub', this)">
         <div style="display: flex; align-items: center; gap: 10px;">📊 電子兌換卷儀表板</div>
-        <i class="fa-solid fa-chevron-up" style="font-size: 12px; transition: 0.3s; transform: rotate(180deg);"></i>
+        <i class="fa-solid fa-chevron-down" style="font-size: 12px; transition: 0.3s; transform: rotate(180deg);"></i>
       </div>
       <div class="sub-menu" id="dashboard-sub" style="display: flex;">
         <div class="sidebar-item active" onclick="switchView('dashboard', this)">📊 數據總覽</div>
@@ -435,10 +435,8 @@
                 <th>贈品名稱</th>
                 <th>剩餘庫存</th>
                 <th>已發送出去</th>
-                <th style="width: 100px;">操作</th>
               </tr>
             </thead>
-            <!-- 🔥 注意這裡改成 class，讓這兩邊的表格能同時被更新 -->
             <tbody class="inv-stats-tbody"></tbody>
           </table>
         </div>
@@ -692,7 +690,6 @@
                 <th>贈品名稱</th>
                 <th>剩餘庫存</th>
                 <th>已發送出去</th>
-                <th style="width: 100px;">操作</th>
               </tr>
             </thead>
             <tbody class="inv-stats-tbody"></tbody>
@@ -765,7 +762,6 @@
           <ul class="item-list" id="ui-event-list" style="margin-top: 20px;"></ul>
         </div>
         
-        <!-- 🔥 搬移至此：實體券批次建檔器 -->
         <div class="config-card">
           <h2>🎫 實體券批次建檔器</h2>
           <p class="desc">自動產生連續的流水號並寫入資料庫。門市 POS 將阻擋「未在此建檔過」的偽造實體券。</p>
@@ -846,7 +842,6 @@
     let globalEventOrder = [];
     let editingActName = null; 
     
-    // 視覺與點數商品變數
     let globalHomeBanner = "";
     let globalHomeNews = "";
     let globalPointRate = 100;
@@ -1327,11 +1322,6 @@
               <td>${d.act}</td>
               <td style="font-weight:bold; color:var(--accent);">${d.count}</td>
               <td>${d.usedCount || 0}</td>
-              <td style="width: 80px;">
-                <button class="btn-table-del" onclick="deleteInventoryRecord('${docId}')">
-                  <i class="fa-solid fa-trash-can"></i> 刪除
-                </button>
-              </td>
             </tr>
            `;
         });
