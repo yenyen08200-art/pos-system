@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -565,9 +564,11 @@ body.mode-physical-active .undo { color:var(--accent-physical); border-color: rg
   //    Firebase Auth 連線，Firestore Rules 才能分辨「來自我們自己 app
   //    的請求」跟「隨便一支腳本打 API」，核銷/扣庫存等寫入才寫得進去。
   let posAuthReady = false;
+  let posAuthError = null; // 匿名登入失敗時記下真正的錯誤代碼，直接顯示在登入畫面上
   onPosAuthStateChanged(posAuth, (user) => { posAuthReady = !!user; });
   signInAnonymously(posAuth).catch((e) => {
     console.error("POS 匿名登入失敗：", e);
+    posAuthError = e;
     showToast("系統連線異常，請重新整理頁面再試一次", "error");
   });
 
@@ -624,7 +625,12 @@ body.mode-physical-active .undo { color:var(--accent-physical); border-color: rg
     if (navigator.vibrate) navigator.vibrate(20);
 
     if(!posAuthReady) {
-       showLoginError('⏳ 系統連線中，請稍等 1 秒再試一次');
+       if (posAuthError) {
+         // 直接把 Firebase 回傳的錯誤代碼秀出來，不用開 F12 也能對照原因
+         showLoginError('❌ 連線失敗 (' + (posAuthError.code || posAuthError.message || '未知錯誤') + ')');
+       } else {
+         showLoginError('⏳ 系統連線中，請稍等 1 秒再試一次');
+       }
        return;
     }
 
@@ -819,13 +825,22 @@ body.mode-physical-active .undo { color:var(--accent-physical); border-color: rg
 
   function isEventOnShelf(cfg) {
     if (!cfg) return false;
-    if (cfg.active === false) return false;
     const now = Date.now();
     const s = parseScheduleTime(cfg.startAt, false);
     const e = parseScheduleTime(cfg.endAt, true);
-    if (s !== null && now < s) return false;
-    if (e !== null && now > e) return false;
-    return true;
+    const hasSchedule = s !== null || e !== null;
+
+    // 🔥 有排程 → 一律以「時間」為準，不看 active。
+    //    因為 active 是雲端排程每小時整點才同步的結果，如果這裡跟它做 AND，
+    //    在「時間已到、但還沒到下一個整點」的空窗期，活動會該上架卻上不了。
+    if (hasSchedule) {
+      if (s !== null && now < s) return false;
+      if (e !== null && now > e) return false;
+      return true;
+    }
+
+    // 沒排程 → 完全由後台的手動開關決定
+    return cfg.active !== false;
   }
 
   async function initPOS() {
