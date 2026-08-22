@@ -46,7 +46,7 @@
     .btn-google:hover { background: #F7F9FB !important; }
 
     /* ================= 🧭 側邊欄 ================= */
-    .sidebar { width: 260px; flex: 0 0 260px; background: var(--sidebar-bg); color: #fff; padding: 28px 20px; display: flex; flex-direction: column; height: 100vh; position: sticky; top: 0; }
+    .sidebar { width: 260px; flex: 0 0 260px; background: var(--sidebar-bg); color: #fff; padding: 28px 20px; display: flex; flex-direction: column; height: 100vh; position: sticky; top: 0; overflow-y: auto; }
     .sidebar-brand h2 { margin: 0 0 4px; font-size: 20px; letter-spacing: .5px; }
     .sidebar-brand p { margin: 0; font-size: 12px; color: #8E96A8; }
     .sidebar-menu { margin-top: 38px; display: flex; flex-direction: column; gap: 8px; }
@@ -285,20 +285,39 @@
     </div>
     
     <nav class="sidebar-menu" style="display:flex;">
-      <div class="sidebar-item active" onclick="switchView('dashboard', this)">📊 電子兌換卷儀表板</div>
-      <!-- 🔥 新增：贈品庫存與明細 主選單 -->
-      <div class="sidebar-item" onclick="switchView('inventory-ui', this)">📦 贈品庫存與明細</div>
-      <div class="sidebar-item" onclick="switchView('issue-ui', this)">🎟️ 手動補單管理</div>
+      
+      <!-- 1. 電子兌換卷儀表板 -->
+      <div class="sidebar-item has-sub active" onclick="toggleSubMenu('dashboard-sub', this)">
+        <div style="display: flex; align-items: center; gap: 10px;">📊 電子兌換卷儀表板</div>
+        <i class="fa-solid fa-chevron-up" style="font-size: 12px; transition: 0.3s; transform: rotate(180deg);"></i>
+      </div>
+      <div class="sub-menu" id="dashboard-sub" style="display: flex;">
+        <div class="sidebar-item active" onclick="switchView('dashboard', this)">📊 數據總覽</div>
+        <div class="sidebar-item" onclick="switchView('issue-ui', this)">🎟️ 手動補單管理</div>
+      </div>
+
+      <!-- 2. 贈品庫存儀表板 -->
+      <div class="sidebar-item has-sub" onclick="toggleSubMenu('inventory-sub', this)">
+        <div style="display: flex; align-items: center; gap: 10px;">📦 贈品庫存儀表板</div>
+        <i class="fa-solid fa-chevron-down" style="font-size: 12px; transition: 0.3s;"></i>
+      </div>
+      <div class="sub-menu" id="inventory-sub">
+        <div class="sidebar-item" onclick="switchView('inventory-ui', this)">📦 庫存與明細監控</div>
+        <div class="sidebar-item" onclick="switchView('config-gift', this)">🎁 活動贈品管理</div>
+      </div>
+      
+      <!-- 3. 社群抽獎 -->
       <div class="sidebar-item" onclick="switchView('lottery-ui', this)">🎉 社群抽獎發券中心</div>
+
+      <!-- 4. 薪資單 -->
       <div class="sidebar-item" onclick="switchView('payroll-ui', this)">💸 薪資單群發系統</div>
       
-      <!-- 系統設定中心 (子選單版) -->
+      <!-- 5. 系統設定中心 -->
       <div class="sidebar-item has-sub" onclick="toggleSubMenu('config-sub', this)">
         <div style="display: flex; align-items: center; gap: 10px;">⚙️ 系統設定中心</div>
         <i class="fa-solid fa-chevron-down" style="font-size: 12px; transition: 0.3s;"></i>
       </div>
       <div class="sub-menu" id="config-sub">
-        <div class="sidebar-item" onclick="switchView('config-gift', this)">🎁 活動贈品管理</div>
         <div class="sidebar-item" onclick="switchView('config-member', this)">👑 會員系統(未完善)</div>
         <div class="sidebar-item" onclick="switchView('config-store', this)">🏪 門市清單管理</div>
         <div class="sidebar-item" onclick="switchView('config-event', this)">🎯 行銷活動管理</div>
@@ -419,7 +438,8 @@
                 <th style="width: 100px;">操作</th>
               </tr>
             </thead>
-            <tbody id="inv-stats-tbody"></tbody>
+            <!-- 🔥 注意這裡改成 class，讓這兩邊的表格能同時被更新 -->
+            <tbody class="inv-stats-tbody"></tbody>
           </table>
         </div>
         
@@ -434,6 +454,7 @@
                   <th style="background: #FAFBFC;">門市</th>
                   <th style="background: #FAFBFC;">贈品名稱</th>
                   <th style="background: #FAFBFC;">操作人員</th>
+                  <th style="background: #FAFBFC; width: 80px;">操作</th>
                 </tr>
               </thead>
               <tbody id="gift-logs-tbody"></tbody>
@@ -661,6 +682,23 @@
           <button class="btn-primary" onclick="setInventory()">更新門市庫存</button>
         </div>
 
+        <!-- 庫存監控表格 -->
+        <div class="config-card">
+          <h2>📊 活動贈品庫存即時監控</h2>
+          <table class="stats-table">
+            <thead>
+              <tr>
+                <th>門市</th>
+                <th>贈品名稱</th>
+                <th>剩餘庫存</th>
+                <th>已發送出去</th>
+                <th style="width: 100px;">操作</th>
+              </tr>
+            </thead>
+            <tbody class="inv-stats-tbody"></tbody>
+          </table>
+        </div>
+
         <div class="config-card save-cloud-container">
           <h2>💾 同步至資料庫</h2>
           <p class="desc">在上方完成所有設定後，點擊下方按鈕，所有設定將立刻寫入 Firebase，全台門市瞬間生效！</p>
@@ -727,6 +765,7 @@
           <ul class="item-list" id="ui-event-list" style="margin-top: 20px;"></ul>
         </div>
         
+        <!-- 🔥 搬移至此：實體券批次建檔器 -->
         <div class="config-card">
           <h2>🎫 實體券批次建檔器</h2>
           <p class="desc">自動產生連續的流水號並寫入資料庫。門市 POS 將阻擋「未在此建檔過」的偽造實體券。</p>
@@ -774,7 +813,7 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getFirestore, collection, getDocs, onSnapshot, doc, getDoc, setDoc, updateDoc, deleteDoc, query, limit, where } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getFirestore, collection, getDocs, onSnapshot, doc, getDoc, setDoc, updateDoc, deleteDoc, query, limit, where, increment } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
     import { getAuth, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
     const firebaseConfig = {
@@ -807,6 +846,7 @@
     let globalEventOrder = [];
     let editingActName = null; 
     
+    // 視覺與點數商品變數
     let globalHomeBanner = "";
     let globalHomeNews = "";
     let globalPointRate = 100;
@@ -841,7 +881,7 @@
 
     window.toggleSubMenu = function(menuId, el) {
       const menu = document.getElementById(menuId);
-      const icon = el.querySelector('.fa-chevron-down');
+      const icon = el.querySelector('i');
       if(menu.style.display === 'flex') {
         menu.style.display = 'none';
         if(icon) icon.style.transform = 'rotate(0deg)';
@@ -1295,15 +1335,18 @@
             </tr>
            `;
         });
-        const tbody = document.getElementById('inv-stats-tbody');
-        if(tbody) tbody.innerHTML = html;
+        document.querySelectorAll('.inv-stats-tbody').forEach(el => el.innerHTML = html);
       });
 
       // 贈品發放明細即時追蹤
       if (unsubGiftLogs) unsubGiftLogs();
       unsubGiftLogs = onSnapshot(query(collection(db, "gift_logs"), limit(100)), (snap) => {
         let logs = [];
-        snap.forEach(docSnap => { logs.push(docSnap.data()); });
+        snap.forEach(docSnap => { 
+            let data = docSnap.data();
+            data.id = docSnap.id;
+            logs.push(data); 
+        });
         
         // 依照 timestamp 排序 (最新在前)
         logs.sort((a,b) => b.timestamp - a.timestamp);
@@ -1316,11 +1359,16 @@
               <td style="font-weight:bold;">${d.store}</td>
               <td style="font-weight:bold; color:#3FBF8F;">${d.act}</td>
               <td style="font-weight:bold;">${d.empName}</td>
+              <td style="width: 80px;">
+                <button class="btn-table-del" onclick="deleteGiftLogRecord('${d.id}', '${d.store}', '${d.act}')">
+                  <i class="fa-solid fa-rotate-left"></i> 退回
+                </button>
+              </td>
             </tr>
            `;
         });
         const tbody = document.getElementById('gift-logs-tbody');
-        if(tbody) tbody.innerHTML = html || '<tr><td colspan="4" style="text-align:center;">尚無發放紀錄</td></tr>';
+        if(tbody) tbody.innerHTML = html || '<tr><td colspan="5" style="text-align:center;">尚無發放紀錄</td></tr>';
       });
     }
 
@@ -1363,7 +1411,7 @@
       const act = document.getElementById('manual-act').value;
       const phone = document.getElementById('manual-phone').value.trim();
       const name = document.getElementById('manual-name').value.trim();
-      const social = document.getElementById('manual-social').value.trim() || '後台手手補單';
+      const social = document.getElementById('manual-social').value.trim() || '後台手動補單';
       const gift = document.getElementById('manual-gift').value.trim();
       const expire = document.getElementById('manual-expire').value.trim(); 
 
@@ -2035,11 +2083,21 @@
       }
     }
 
-    window.deleteInventoryRecord = async function(docId) {
-        if(confirm("確定要刪除這筆庫存分配紀錄嗎？此操作會直接從資料庫移除喔！")) {
+    // 🔥 新增：獨立刪除單筆發放紀錄並退回庫存
+    window.deleteGiftLogRecord = async function(docId, store, act) {
+        if(confirm(`確定要刪除這筆發放明細並退回庫存嗎？\n(將會把 ${store} 的 ${act} 庫存 +1)`)) {
             try {
-                await deleteDoc(doc(db, "inventory", docId));
-                alert("✅ 庫存紀錄已刪除！");
+                await deleteDoc(doc(db, "gift_logs", docId));
+                // 同步將該門市的贈品庫存加回去 (使用 increment)
+                const invRef = doc(db, "inventory", `${store}_${act}`);
+                const invSnap = await getDoc(invRef);
+                if (invSnap.exists()) {
+                    await updateDoc(invRef, {
+                        count: increment(1),
+                        usedCount: increment(-1)
+                    });
+                }
+                alert("✅ 發放紀錄已刪除，且庫存已自動退回！");
             } catch(e) {
                 console.error(e);
                 alert("刪除失敗，請檢查權限或網路");
