@@ -401,13 +401,22 @@
 
   function isEventOnShelf(cfg) {
     if (!cfg) return false;
-    if (cfg.active === false) return false;
     const now = Date.now();
     const s = parseScheduleTime(cfg.startAt, false);
     const e = parseScheduleTime(cfg.endAt, true);
-    if (s !== null && now < s) return false;
-    if (e !== null && now > e) return false;
-    return true;
+    const hasSchedule = s !== null || e !== null;
+
+    // 🔥 有排程 → 一律以「時間」為準，不看 active。
+    //    因為 active 是雲端排程每小時整點才同步的結果，如果這裡跟它做 AND，
+    //    在「時間已到、但還沒到下一個整點」的空窗期，活動會該上架卻上不了。
+    if (hasSchedule) {
+      if (s !== null && now < s) return false;
+      if (e !== null && now > e) return false;
+      return true;
+    }
+
+    // 沒排程 → 完全由後台的手動開關決定
+    return cfg.active !== false;
   }
 
   window.checkSaved = checkSaved;
