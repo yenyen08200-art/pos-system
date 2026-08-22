@@ -11,7 +11,6 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
   <style>
-    /* STREAMING_CHUNK:Initializing CSS variables and base styles... */
     :root {
       --bg: #F4F6F8;
       --sidebar-bg: #1A1C24;
@@ -33,7 +32,6 @@
       background: var(--bg); color: var(--text-main); margin: 0; min-height: 100vh; display: flex;
     }
 
-    /* STREAMING_CHUNK:Styling login screen components... */
     /* ================= 🔒 登入畫面 ================= */
     #login-screen { position: fixed; inset: 0; background: var(--bg); display: flex; justify-content: center; align-items: center; z-index: 1000; }
     .login-card { background: var(--card-bg); padding: 40px; border-radius: 24px; box-shadow: var(--shadow); text-align: center; width: 340px; }
@@ -47,7 +45,6 @@
     .btn-google { background: #fff !important; color: var(--text-main) !important; border: 1px solid #E6EAF0 !important; }
     .btn-google:hover { background: #F7F9FB !important; }
 
-    /* STREAMING_CHUNK:Styling sidebar navigation components... */
     /* ================= 🧭 側邊欄 ================= */
     .sidebar { width: 260px; flex: 0 0 260px; background: var(--sidebar-bg); color: #fff; padding: 28px 20px; display: flex; flex-direction: column; height: 100vh; position: sticky; top: 0; }
     .sidebar-brand h2 { margin: 0 0 4px; font-size: 20px; letter-spacing: .5px; }
@@ -69,7 +66,6 @@
     .btn-logout:hover { background: var(--accent); border-color: var(--accent); }
     .mobile-logout { display: none; }
 
-    /* STREAMING_CHUNK:Styling main app layout and header... */
     /* ================= Layouts ================= */
     .view-section { display: none; }
     .view-section.active { display: block; animation: fadeIn 0.3s; }
@@ -83,7 +79,6 @@
     .live-badge { background: var(--accent); color: #fff; font-size: 10px; font-weight: 800; padding: 5px 10px; border-radius: 999px; animation: pulse 1.5s infinite; }
     @keyframes pulse { 0%, 100% { opacity: 1 } 50% { opacity: .45 } }
 
-    /* STREAMING_CHUNK:Styling toolbar and filtering inputs... */
     /* ================= Toolbar UI ================= */
     .toolbar-card { background: var(--card-bg); border-radius: 16px; padding: 16px 24px; box-shadow: var(--shadow); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 24px; border: 1px solid #E6EAF0; }
     .toolbar-group { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
@@ -99,7 +94,6 @@
     .date-filter-box button { border: none; background: transparent; padding: 0 16px; color: var(--text-sub); font-weight: 600; cursor: pointer; border-left: 1px solid #E6EAF0; transition: .2s; }
     .date-filter-box button:hover { color: var(--accent); background: #fdfdfd; }
 
-    /* STREAMING_CHUNK:Styling dashboard statistical cards... */
     /* ================= Dashboard UI ================= */
     .dashboard { display: grid; grid-template-columns: 1.2fr 1fr 1fr 1fr 1fr; gap: 16px; margin-bottom: 24px; }
     .stat-card { background: var(--card-bg); padding: 22px 20px; border-radius: var(--radius); box-shadow: var(--shadow); }
@@ -118,7 +112,6 @@
     .chart-box h3 { margin: 0 0 18px; font-size: 15px; font-weight: 800; }
     .chart-canvas { height: 240px; }
     
-    /* STREAMING_CHUNK:Styling data tables... */
     /* ================= 表格 UI (精簡版) ================= */
     .table-toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; gap: 12px; flex-wrap: wrap; }
     .table-toolbar #result-count { color: var(--text-sub); font-size: 13px; font-weight: 600; }
@@ -142,7 +135,6 @@
     .status-expired { color: #8A93A5; font-weight: 800; background: rgba(138, 147, 165, .12); padding: 5px 12px; border-radius: 999px; font-size: 12px; }
     .act-tag { background: #E6EAF0; color: var(--text-main); font-size: 11px; padding: 4px 8px; border-radius: 6px; font-weight: 700; display: inline-block; white-space: nowrap; }
 
-    /* STREAMING_CHUNK:Styling action menus and config cards... */
     /* ================= Kebab Menu ================= */
     .kebab-dropdown { position: relative; flex-shrink: 0; }
     .kebab-dropdown summary { list-style: none; background: #fff; border: 1px solid #E6EAF0; font-size: 20px; font-weight: bold; color: var(--text-sub); cursor: pointer; width: 44px; height: 44px; border-radius: 12px; transition: .2s; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,0.02); }
@@ -180,7 +172,6 @@
     .btn-cancel { background: #F4F6F8; color: var(--text-main); border: none; padding: 12px 24px; border-radius: 12px; font-weight: 700; cursor: pointer; transition: .2s; }
     .btn-cancel:hover { background: #E6EAF0; }
     
-    /* STREAMING_CHUNK:Styling list items and modals... */
     .item-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
     .item-li { display: flex; justify-content: space-between; align-items: center; padding: 16px; background: #F7F9FB; border-radius: 12px; border: 1px solid #E6EAF0; }
     .item-info strong { font-size: 16px; color: var(--text-main); display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
@@ -208,7 +199,6 @@
     .p-wait { background: #E6EAF0; color: #8A93A5; }
     .p-done { background: rgba(63, 191, 143, .15); color: var(--green); }
 
-    /* STREAMING_CHUNK:Styling switches and responsive layout... */
     /* 雲端儲存統一容器 */
     .save-cloud-container { border: 2px solid var(--accent); background: rgba(240, 118, 84, 0.02); }
 
@@ -260,7 +250,6 @@
 </head>
 <body>
 
-  <!-- STREAMING_CHUNK:Rendering modal and login screen... -->
   <!-- 獨立 QR Code 彈出視窗 -->
   <div class="modal-overlay" id="qr-modal">
     <div class="modal-card">
@@ -285,7 +274,6 @@
     </div>
   </div>
 
-  <!-- STREAMING_CHUNK:Rendering sidebar... -->
   <!-- 側邊選單 -->
   <aside class="sidebar" id="sidebar-nav" style="display:none;">
     <div class="sidebar-brand">
@@ -308,7 +296,6 @@
         <i class="fa-solid fa-chevron-down" style="font-size: 12px; transition: 0.3s;"></i>
       </div>
       <div class="sub-menu" id="config-sub">
-        <!-- 名稱修改與選單分流 -->
         <div class="sidebar-item" onclick="switchView('config-gift', this)">🎁 活動贈品管理</div>
         <div class="sidebar-item" onclick="switchView('config-member', this)">👑 會員系統(未完善)</div>
         <div class="sidebar-item" onclick="switchView('config-store', this)">🏪 門市清單管理</div>
@@ -321,7 +308,6 @@
     </div>
   </aside>
 
-  <!-- STREAMING_CHUNK:Rendering main application views... -->
   <!-- 主內容區 -->
   <main id="main-app">
     <div class="container">
@@ -334,7 +320,6 @@
           </div>
         </div>
 
-        <!-- STREAMING_CHUNK:Rendering dashboard toolbars and stats... -->
         <div class="toolbar-card">
           <div class="toolbar-group">
             <select id="act-select" class="toolbar-item" onchange="fetchData()"></select>
@@ -352,7 +337,6 @@
         </div>
 
         <div class="dashboard">
-          <!-- 修改卡片排列順序 -->
           <div class="stat-card c-total">
             <h3>總發行張數 (依所選條件)</h3>
             <div class="num" id="total-count">0</div>
@@ -375,7 +359,6 @@
           </div>
         </div>
 
-        <!-- STREAMING_CHUNK:Rendering charts layout... -->
         <div class="charts-wrapper">
           <div class="chart-box">
             <h3>🏆 各門市核銷分佈</h3>
@@ -390,23 +373,20 @@
             <div class="chart-canvas"><canvas id="timeChart"></canvas></div>
           </div>
           
-          <!-- 🔥 新增：活動贈品每日發放趨勢圖 -->
-          <div class="chart-box" style="flex: 100%;">
-            <h3>🎁 實體活動贈品發放趨勢 (每日)</h3>
+          <!-- 🔥 新增的第四個圖表：門市贈品發放量 (總計) -->
+          <div class="chart-box">
+            <h3>🎁 各門市活動贈品發放量 (總計)</h3>
             <div class="chart-canvas"><canvas id="giftChart"></canvas></div>
           </div>
         </div>
 
-        <!-- STREAMING_CHUNK:Rendering data table... -->
         <div class="table-toolbar">
           <span id="result-count">顯示 0 筆結果</span>
-          <!-- 🔥 已經補好 keyup / input 的 debounce 觸發器 -->
           <input id="search-box" class="search-box" type="text" placeholder="🔍 搜尋號碼或姓名..." oninput="debounceRenderTable()">
         </div>
 
         <div class="table-container">
           <table id="data-table">
-            <!-- 精簡化後的表格表頭 (8 個欄位) -->
             <thead>
               <tr>
                 <th style="width: 40px;"><input type="checkbox" id="check-all" onclick="document.querySelectorAll('.row-check').forEach(cb => cb.checked = this.checked)"></th>
@@ -424,7 +404,6 @@
         </div>
       </div>
 
-      <!-- STREAMING_CHUNK:Rendering issue tickets view... -->
       <!-- ================= 視圖 2：手動補單管理 ================= -->
       <div id="view-issue-ui" class="view-section">
         <div class="header">
@@ -471,7 +450,6 @@
         </div>
       </div>
 
-      <!-- STREAMING_CHUNK:Rendering lottery and payroll views... -->
       <!-- ================= 視圖：社群抽獎發券中心 ================= -->
       <div id="view-lottery-ui" class="view-section">
         <div class="header">
@@ -546,7 +524,6 @@
         </div>
       </div>
 
-      <!-- STREAMING_CHUNK:Rendering config views for members and gifts... -->
       <!-- ================= 🔥 子選單視圖：會員系統(未完善) ================= -->
       <div id="view-config-member" class="view-section">
         <div class="header">
@@ -657,7 +634,6 @@
                 <th>贈品名稱</th>
                 <th>剩餘庫存</th>
                 <th>已發送出去</th>
-                <!-- 表格操作欄位 -->
                 <th style="width: 100px;">操作</th>
               </tr>
             </thead>
@@ -672,7 +648,6 @@
         </div>
       </div>
 
-      <!-- STREAMING_CHUNK:Rendering config views for stores and events... -->
       <!-- ================= 🔥 子選單視圖：門市清單管理 ================= -->
       <div id="view-config-store" class="view-section">
         <div class="header">
@@ -732,7 +707,6 @@
           <ul class="item-list" id="ui-event-list" style="margin-top: 20px;"></ul>
         </div>
         
-        <!-- 🔥 搬移至此：實體券批次建檔器 -->
         <div class="config-card">
           <h2>🎫 實體券批次建檔器</h2>
           <p class="desc">自動產生連續的流水號並寫入資料庫。門市 POS 將阻擋「未在此建檔過」的偽造實體券。</p>
@@ -778,7 +752,6 @@
     </div>
   </main>
 
-  <!-- STREAMING_CHUNK:Initializing JS and Firebase imports... -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getFirestore, collection, getDocs, onSnapshot, doc, getDoc, setDoc, updateDoc, deleteDoc, query, limit, where } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
@@ -805,7 +778,7 @@
     let storeChartInstance = null;
     let statusChartInstance = null;
     let timeChartInstance = null; 
-    let giftChartInstance = null; // 🔥 新增：活動贈品圖表實例
+    let giftChartInstance = null; // 🔥 新增贈品圖表實例
     let unsubscribeSnapshot = null; 
     const adminEmails = ["yenyen08200@gmail.com", "admin@gmail.com"];
     
@@ -815,7 +788,6 @@
     let globalEventOrder = [];
     let editingActName = null; 
     
-    // 視覺與點數商品變數
     let globalHomeBanner = "";
     let globalHomeNews = "";
     let globalPointRate = 100;
@@ -856,7 +828,6 @@
       }
     };
 
-    // STREAMING_CHUNK:Handling view switching and dropdown population...
     window.switchView = function(viewId, element) {
       document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
       document.getElementById('view-' + viewId).classList.add('active');
@@ -868,7 +839,6 @@
       }
       element.classList.add('active');
       
-      // 更新：切換到行銷活動管理時，也要確保下拉選單更新
       if (viewId === 'lottery-ui' || viewId === 'issue-ui' || viewId === 'config-event') {
         const actSelectHtml = document.getElementById('act-select').innerHTML;
         let cleanHtml = actSelectHtml.replace(/<option value="ALL_OVERVIEW">🌐 總覽 \(所有活動\)<\/option>/g, '');
@@ -878,9 +848,6 @@
       }
 
       if (viewId === 'config-gift') { fetchInventoryStats(); } 
-      
-      // 🔥 切換回首頁時，順便更新贈品發放圖表
-      if (viewId === 'dashboard') { fetchGiftTransactions(); }
     };
 
     function populateAdminDropdown() {
@@ -992,7 +959,6 @@
       }
     }
 
-    // STREAMING_CHUNK:Implementing config actions and database saves...
     window.toggleMemberSystem = function() {
       isMemberSystemActive = !isMemberSystemActive;
       renderConfigUI();
@@ -1034,7 +1000,6 @@
       triggerSaveHint();
     };
 
-    // 確保完全清除 Firebase 上的庫存連動
     window.deleteGiftItem = async function(idx) {
       const giftName = globalGiftList[idx];
       if(confirm(`確定要刪除「${giftName}」嗎？\n⚠️ 注意：這將連帶刪除「所有門市對應的庫存紀錄」，此操作立即生效！`)) {
@@ -1323,7 +1288,6 @@
       }
     }
 
-    // STREAMING_CHUNK:Implementing admin logic for batch operations and tickets...
     window.submitManualTicket = async function() {
       const act = document.getElementById('manual-act').value;
       const phone = document.getElementById('manual-phone').value.trim();
@@ -1548,7 +1512,6 @@
       updateDashboardStats();
     };
 
-    // 🔥 新增：搜尋框防抖功能
     let searchTimeout = null;
     window.debounceRenderTable = function() {
       if(searchTimeout) clearTimeout(searchTimeout);
@@ -1557,7 +1520,6 @@
       }, 300);
     };
 
-    // STREAMING_CHUNK:Fetching data and rendering stats and charts...
     window.fetchData = async function() {
       const actSelect = document.getElementById('act-select');
       if (!actSelect || !actSelect.value) return;
@@ -1655,77 +1617,41 @@
       document.getElementById('unredeemed-count').innerText = unredeemedCount;
       document.getElementById('expired-count').innerText = expiredCount; 
       
+      // 🔥 新增：擷取各門市贈品總發出數，並繪製成獨立圖表
+      let storeGiftMap = {};
+      getDocs(collection(db, "inventory")).then(snap => {
+        snap.forEach(docSnap => {
+           let d = docSnap.data();
+           let used = d.usedCount || 0;
+           if (!storeGiftMap[d.store]) storeGiftMap[d.store] = 0;
+           storeGiftMap[d.store] += used;
+        });
+        
+        const canvas = document.getElementById('giftChart');
+        if(!canvas) return;
+        const ctx = canvas.getContext('2d');
+        if (giftChartInstance) giftChartInstance.destroy();
+
+        const labels = Object.keys(storeGiftMap);
+        const data = Object.values(storeGiftMap);
+
+        giftChartInstance = new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: labels.length > 0 ? labels : ['尚無資料'],
+            datasets: [{
+              label: '活動贈品發放數量',
+              data: data.length > 0 ? data : [0],
+              backgroundColor: '#3FBF8F', 
+              borderRadius: 8
+            }]
+          },
+          options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+        });
+      });
+
       drawCharts(storeStats, redeemedCount, unredeemedCount, expiredCount, hourStats); 
       renderTable(); 
-    };
-
-    // 🔥 新增：抓取並渲染活動贈品每日使用圖表
-    window.fetchGiftTransactions = async function() {
-      try {
-        const snap = await getDocs(collection(db, "gift_transactions"));
-        const records = [];
-        snap.forEach(doc => records.push(doc.data()));
-
-        if(giftChartInstance) giftChartInstance.destroy();
-
-        // 取得所有唯一日期並排序
-        const dates = [...new Set(records.map(r => r.dateStr))].sort();
-        // 取得所有唯一贈品
-        const gifts = [...new Set(records.map(r => r.gift))];
-
-        // 若無資料，顯示空圖表
-        if(dates.length === 0) {
-            const ctx = document.getElementById('giftChart').getContext('2d');
-            giftChartInstance = new Chart(ctx, {
-                type: 'line',
-                data: { labels: ['尚無資料'], datasets: [{ label: '發放數量', data: [0] }] },
-                options: { responsive: true, maintainAspectRatio: false }
-            });
-            return;
-        }
-
-        // 預設顏色陣列，供多條線使用
-        const colors = ['#F07654', '#3FBF8F', '#4A90E2', '#F79070', '#8E44AD', '#F39C12'];
-
-        // 整理 Chart.js 資料結構
-        const datasets = gifts.map((gift, index) => {
-            const color = colors[index % colors.length];
-            return {
-                label: gift,
-                data: dates.map(date => {
-                    return records.filter(r => r.dateStr === date && r.gift === gift).length;
-                }),
-                borderColor: color,
-                backgroundColor: color,
-                borderWidth: 2,
-                tension: 0.3, // 曲線平滑度
-                fill: false
-            };
-        });
-
-        const ctx = document.getElementById('giftChart').getContext('2d');
-        giftChartInstance = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: dates,
-                datasets: datasets
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { position: 'bottom' },
-                    tooltip: { mode: 'index', intersect: false }
-                },
-                scales: {
-                    y: { beginAtZero: true, ticks: { stepSize: 1 } }
-                },
-                interaction: { mode: 'nearest', axis: 'x', intersect: false }
-            }
-        });
-      } catch(e) {
-        console.error("無法載入贈品歷史數據", e);
-      }
     };
 
     window.batchRedeem = async function() {
@@ -1878,7 +1804,6 @@
         tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding: 40px; color: #F07654; font-weight: bold;">找不到資料 🥲</td></tr>`; return;
       }
 
-      // 🔥 精簡化的表格渲染：欄位整併
       tbody.innerHTML = filteredData.map(d => {
         const defaultGift = globalPosConfig[d.act_source]?.gift || '預設活動贈品';
         const defaultExpire = globalPosConfig[d.act_source]?.expireDate || "無特別限制";
@@ -1893,7 +1818,6 @@
         let checkboxHTML = (!d.status || d.status === '未兌換') ? `<input type="checkbox" class="row-check" value="${d.id}" ${isOverview ? 'disabled' : ''}>` : '';
         let actColHTML = isOverview ? `<td><span class="act-tag">${d.act_source}</span></td>` : '';
 
-        // 操作選單 (總覽模式也開放)
         let actionBtnHTML = `
           <details class="kebab-dropdown">
             <summary>⋮</summary>
@@ -1909,7 +1833,6 @@
           </details>
         `;
 
-        // 🔥 資料區塊合併設計
         let customerInfo = `
             <div style="font-weight:bold; font-size:14px; color:var(--text-main);">${d.name || '未知'}</div>
             <div style="font-family:monospace; font-size:13px; color:var(--text-sub);">${d.phone || '-'}</div>
@@ -2014,7 +1937,6 @@
       });
     }
 
-    // STREAMING_CHUNK:Finalizing auth state and app initialization...
     // ================= 登入驗證 =================
     window.login = function() {
       const email = document.getElementById('email').value;
@@ -2045,7 +1967,6 @@
         document.getElementById('sidebar-nav').style.display = 'flex'; 
         document.getElementById('main-app').style.display = 'block';
         fetchSystemConfig();
-        fetchGiftTransactions(); // 🔥 登入成功時，順便載入贈品歷史數據
       } else {
         if(user) { alert("❌ 權限不足"); signOut(auth); }
         document.getElementById('sidebar-nav').style.display = 'none';
@@ -2161,4 +2082,3 @@
   </script>
 </body>
 </html>
-```eof
