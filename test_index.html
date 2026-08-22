@@ -254,9 +254,11 @@ body.mode-physical-active .redeem { background-image: var(--gradient-physical); 
 .redeem.is-claimed { background: var(--muted) !important; box-shadow: none !important; color: var(--muted-foreground) !important; cursor: not-allowed !important; pointer-events: none !important; opacity: 1 !important; transform: none !important; }
 .redeem.is-expired { background: var(--destructive) !important; box-shadow: 0 10px 20px -10px rgba(255,0,0,0.5) !important; color: #fff !important; cursor: not-allowed !important; pointer-events: none !important; opacity: 1 !important; transform: none !important; }
 
+/* 撤銷按鈕樣式 */
 .undo{min-height:64px;width:100%;border-radius:18px;font-size:20px;font-weight:700;color:var(--accent-digital);
   border:1px solid rgba(0,198,255,0.5);background:rgba(0,198,255,0.15);transition:background .2s}
 body.mode-physical-active .undo { color:var(--accent-physical); border-color: rgba(255,107,53,0.5); background:rgba(255,107,53,0.15); }
+body.mode-counter-active .undo { color:var(--accent-counter); border-color: rgba(63,191,143,0.5); background:rgba(63,191,143,0.15); }
 .undo:hover{background:rgba(0,198,255,0.25)}
 
 .next{min-height:64px;width:100%;border-radius:18px;font-size:18px;font-weight:600;color:var(--foreground);
@@ -366,7 +368,6 @@ body.mode-physical-active .undo { color:var(--accent-physical); border-color: rg
     <div class="login-logo">⚡</div>
     <div class="login-title" id="login-status-text">核銷系統登入</div>
     
-    <!-- 🔥 這裡加入了請輸入稱呼的欄位 -->
     <div style="margin-bottom: 12px;">
       <input type="text" id="login-emp-name" placeholder="請輸入您的稱呼 (例: 小編)" style="width: 100%; padding: 14px 16px; border-radius: 12px; background: rgba(0,0,0,0.3); color: #fff; border: 1px solid rgba(255,255,255,0.2); font-size: 16px; outline: none; font-weight: bold; text-align: center; transition: 0.2s;">
     </div>
@@ -408,7 +409,6 @@ body.mode-physical-active .undo { color:var(--accent-physical); border-color: rg
       </div>
       <div class="status" style="background: rgba(255,255,255,0.05); padding: 8px 16px; border-radius: 12px; font-size: 14px;">
         門市：<span id="duty" style="font-weight:bold; color:#00C6FF;">尚未選擇</span> 
-        <!-- 🔥 顯示登入人員的名稱 -->
         <span style="color:var(--muted-foreground); margin: 0 8px;">|</span>
         人員：<span id="duty-emp" style="font-weight:bold; color:#fff;">未登入</span>
         <button onclick="showLoginScreen()" style="background:transparent; border:1px solid rgba(255,255,255,0.2); color:#fff; padding:4px 8px; border-radius:6px; font-size:12px; margin-left:10px; cursor:pointer;">交班登出</button>
@@ -433,7 +433,6 @@ body.mode-physical-active .undo { color:var(--accent-physical); border-color: rg
 
         <div id="scan-block">
           <span class="label" id="scan-label">● 掃描 / 查詢會員</span>
-          <!-- 🔥 搜尋與相機排版已調整為 1:2.5 -->
           <div class="searchbar">
             <div class="input-group">
               <input id="phone" type="tel" placeholder="輸入手機號碼" autocomplete="off" />
@@ -510,6 +509,10 @@ body.mode-physical-active .undo { color:var(--accent-physical); border-color: rg
           <div style="font-weight:700; font-size:18px; color:var(--muted-foreground); letter-spacing: 0.1em;">門市專屬配額剩餘</div>
           <div class="giant-count" id="c-count">--</div>
           <button id="btn-tally" class="giant-btn" onclick="deductTally()">🎁 發出 1 件</button>
+          
+          <!-- 🔥 新增的贈品撤銷按鈕 -->
+          <button class="undo hidden" id="btn-undo-tally" style="margin-top: 16px;" onclick="undoTally()">⚡ 撤銷 (5s)</button>
+          
           <p style="margin-top:24px; font-size:14px; color:var(--muted-foreground);">店員直接點擊扣除，雲端即時同步，防呆鎖死。</p>
         </div>
 
@@ -534,7 +537,7 @@ body.mode-physical-active .undo { color:var(--accent-physical); border-color: rg
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-  import { getFirestore, doc, getDoc, setDoc, updateDoc, query, collection, where, limit, getDocs, onSnapshot, increment } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  import { getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, query, collection, where, limit, getDocs, onSnapshot, increment } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyBINQuYtYZA8RLfwm51AfGLTYj1TX_UcFo",
@@ -572,6 +575,10 @@ body.mode-physical-active .undo { color:var(--accent-physical); border-color: rg
   
   let unsubCounter = null; 
   let currentCount = 0;
+  
+  // 🔥 新增：用於記錄贈品撤銷的變數
+  let lastTallyLogId = null;
+  let tallyUndoTimer = null;
 
   let currentPin = '';
   let loginErrorTimer = null; 
@@ -597,7 +604,6 @@ body.mode-physical-active .undo { color:var(--accent-physical); border-color: rg
   window.submitPin = function() {
     if (navigator.vibrate) navigator.vibrate(20);
     
-    // 🔥 加入了稱呼的判斷
     const empNameInput = $('login-emp-name').value.trim();
     if(!empNameInput) {
        showLoginError('❌ 請輸入您的稱呼！');
@@ -620,7 +626,6 @@ body.mode-physical-active .undo { color:var(--accent-physical); border-color: rg
       return;
     }
     
-    // 儲存密碼與稱呼
     localStorage.setItem("p_employee", currentPin);
     localStorage.setItem("p_employee_name", empNameInput);
     $("employee-name").value = empNameInput;
@@ -720,6 +725,10 @@ body.mode-physical-active .undo { color:var(--accent-physical); border-color: rg
   window.alert = function(msg) { showToast(msg, 'error'); };
 
   window.setMode = function(m) {
+    // 🔥 切換模式時隱藏撤銷按鈕並清除計時器
+    if (tallyUndoTimer) clearInterval(tallyUndoTimer);
+    if ($("btn-undo-tally")) $("btn-undo-tally").classList.add("hidden");
+    
     currentMode = m;
     $('mode-member').classList.toggle('active', m === 'member');
     $('mode-physical').classList.toggle('active', m === 'physical');
@@ -875,6 +884,10 @@ body.mode-physical-active .undo { color:var(--accent-physical); border-color: rg
   }
 
   function renderActs(){
+    // 🔥 切換活動時隱藏撤銷按鈕並清除計時器
+    if (tallyUndoTimer) clearInterval(tallyUndoTimer);
+    if ($("btn-undo-tally")) $("btn-undo-tally").classList.add("hidden");
+
     const box = $("acts"); box.innerHTML = "";
     if (!store){ box.innerHTML = '<p class="empty">請先選擇門市</p>'; return; }
     
@@ -916,6 +929,10 @@ body.mode-physical-active .undo { color:var(--accent-physical); border-color: rg
   }
 
   function selectStore(s){
+    // 🔥 切換門市時隱藏撤銷按鈕並清除計時器
+    if (tallyUndoTimer) clearInterval(tallyUndoTimer);
+    if ($("btn-undo-tally")) $("btn-undo-tally").classList.add("hidden");
+
     store = s; localStorage.setItem("p_store", s);
     act = (evMap[s] || [])[0] || ""; record = null;
     $("duty").innerText = store || "尚未選擇";
@@ -951,10 +968,13 @@ body.mode-physical-active .undo { color:var(--accent-physical); border-color: rg
 
     $('btn-tally').disabled = true;
     try {
+      // 🔥 產生這筆發放日誌的唯一 ID
+      const logId = new Date().getTime().toString();
+      lastTallyLogId = logId;
+
       await updateDoc(doc(db, "inventory", `${store}_${act}`), { count: increment(-1), usedCount: increment(1) });
       
-      // 🔥 新增：寫入發放日誌
-      await setDoc(doc(db, "gift_logs", new Date().getTime().toString()), {
+      await setDoc(doc(db, "gift_logs", logId), {
         act: act,
         store: store,
         empName: empName,
@@ -971,6 +991,23 @@ body.mode-physical-active .undo { color:var(--accent-physical); border-color: rg
       }
       showToast("✅ 已成功發放 1 件！", "success");
       
+      // 🔥 顯示並啟動 5 秒撤銷按鈕
+      const btnUndoTally = $("btn-undo-tally");
+      btnUndoTally.classList.remove("hidden");
+      let left = 5;
+      btnUndoTally.innerText = `⚡ 撤銷 (${left}s)`;
+      
+      if (tallyUndoTimer) clearInterval(tallyUndoTimer);
+      tallyUndoTimer = setInterval(() => {
+        left -= 1;
+        if (left <= 0) {
+          clearInterval(tallyUndoTimer);
+          btnUndoTally.classList.add("hidden");
+        } else {
+          btnUndoTally.innerText = `⚡ 撤銷 (${left}s)`;
+        }
+      }, 1000);
+
       setTimeout(() => { 
         if(currentCount > 0) $('btn-tally').disabled = false; 
       }, 1000);
@@ -979,6 +1016,33 @@ body.mode-physical-active .undo { color:var(--accent-physical); border-color: rg
       console.error(e);
       showToast("扣除失敗，請檢查網路連線", "error"); 
       $('btn-tally').disabled = false;
+    }
+  };
+
+  // 🔥 新增：撤銷贈品發放的功能
+  window.undoTally = async function() {
+    if (tallyUndoTimer) clearInterval(tallyUndoTimer);
+    $("btn-undo-tally").classList.add("hidden");
+
+    if (!lastTallyLogId) return;
+
+    $('btn-tally').disabled = true;
+    $('btn-tally').innerText = "撤銷中...";
+
+    try {
+      // 刪除剛剛寫入的日誌
+      await deleteDoc(doc(db, "gift_logs", lastTallyLogId));
+      // 將庫存加回去
+      await updateDoc(doc(db, "inventory", `${store}_${act}`), { count: increment(1), usedCount: increment(-1) });
+      
+      showToast("✅ 已成功撤銷發放！庫存已復原。", "success");
+    } catch(e) {
+      console.error(e);
+      showToast("撤銷失敗，請檢查網路！", "error");
+    } finally {
+      lastTallyLogId = null;
+      $('btn-tally').disabled = currentCount <= 0;
+      $('btn-tally').innerText = currentCount <= 0 ? "贈品庫存已空" : "🎁 發出 1 件";
     }
   };
 
