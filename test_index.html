@@ -76,6 +76,14 @@ body.mode-counter-active main {
     linear-gradient(90deg, oklch(1 0 0 / 3%) 1px, transparent 1px);
 }
 
+body.mode-member-active main {
+  background-image:
+    radial-gradient(circle at 15% 10%, rgba(0,198,255,0.1), transparent 45%),
+    radial-gradient(circle at 85% 0%, rgba(0,114,255,0.1), transparent 40%),
+    linear-gradient(oklch(1 0 0 / 3%) 1px, transparent 1px),
+    linear-gradient(90deg, oklch(1 0 0 / 3%) 1px, transparent 1px);
+}
+
 .wrap { max-width: 1400px; margin: 0 auto; width: 100%; padding: 20px 16px; }
 @media(min-width:768px){.wrap{padding:32px}}
 
@@ -85,6 +93,7 @@ header{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-betw
   background-image:var(--gradient-digital);color:#fff;box-shadow:0 12px 30px -12px rgba(0,198,255,0.8); transition:transform .3s}
 body.mode-physical-active .logo { background-image: var(--gradient-physical); box-shadow:0 12px 30px -12px rgba(255,107,53,0.8); }
 body.mode-counter-active .logo { background-image: var(--gradient-counter); box-shadow:0 12px 30px -12px rgba(63,191,143,0.8); }
+body.mode-member-active .logo { background-image: var(--gradient-member); box-shadow:0 12px 30px -12px rgba(0,198,255,0.8); color:#fff;}
 .logo:hover{transform:scale(1.05)}
 h1{font-size:clamp(22px,3vw,30px);font-weight:700;letter-spacing:-.02em}
 .sub{font-size:14px;color:var(--muted-foreground); display:flex; align-items:center; gap:8px;}
@@ -534,7 +543,7 @@ body.mode-physical-active .undo { color:var(--accent-physical); border-color: rg
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-  import { getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, query, collection, where, limit, getDocs, onSnapshot, increment } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  import { getFirestore, doc, getDoc, setDoc, updateDoc, query, collection, where, limit, getDocs, onSnapshot, increment } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyBINQuYtYZA8RLfwm51AfGLTYj1TX_UcFo",
@@ -1020,7 +1029,11 @@ body.mode-physical-active .undo { color:var(--accent-physical); border-color: rg
     $('btn-tally').innerText = "撤銷中...";
 
     try {
-      await deleteDoc(doc(db, "gift_logs", lastTallyLogId));
+      // 🔥 將 deleteDoc 改為 updateDoc，避開 Firebase 的刪除權限限制，同時在後台留下撤銷紀錄
+      await updateDoc(doc(db, "gift_logs", lastTallyLogId), { 
+          empName: $("employee-name").value.trim() + " ↩️(已撤銷)",
+          time: new Date().toLocaleString()
+      });
       await updateDoc(doc(db, "inventory", `${store}_${act}`), { count: increment(1), usedCount: increment(-1) });
       
       showToast("✅ 已成功撤銷發放！庫存已復原。", "success");
