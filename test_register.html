@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -385,6 +386,28 @@
   const customGift = urlParams.get('gift') || "";
   if (window.location.search) { window.history.replaceState({}, document.title, window.location.pathname); }
 
+  /* 🔥 前端雙重判斷：就算雲端排程掛掉，前台也會自己依上下架時間過濾活動
+     支援 "2026-09-01T10:00" / "2026/09/01"，一律當台灣時間解讀 */
+  function parseScheduleTime(str, endOfDayIfNoTime) {
+    if (!str || typeof str !== 'string') return null;
+    const m = str.trim().match(/(\d{4})[/-](\d{1,2})[/-](\d{1,2})(?:[T\s](\d{1,2}):(\d{2}))?/);
+    if (!m) return null;
+    const h  = m[4] !== undefined ? Number(m[4]) : (endOfDayIfNoTime ? 23 : 0);
+    const mi = m[5] !== undefined ? Number(m[5]) : (endOfDayIfNoTime ? 59 : 0);
+    return Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3]), h, mi, 0) - 8 * 3600 * 1000;
+  }
+
+  function isEventOnShelf(cfg) {
+    if (!cfg) return false;
+    if (cfg.active === false) return false;
+    const now = Date.now();
+    const s = parseScheduleTime(cfg.startAt, false);
+    const e = parseScheduleTime(cfg.endAt, true);
+    if (s !== null && now < s) return false;
+    if (e !== null && now > e) return false;
+    return true;
+  }
+
   window.checkSaved = checkSaved;
   window.switchAct = switchAct;
   window.register = register;
@@ -409,7 +432,7 @@
         actSelect.innerHTML = "";
         
         EVENT_ORDER.forEach(actName => {
-          if (POS_CONFIG[actName] && POS_CONFIG[actName].active === false) return;
+          if (POS_CONFIG[actName] && !isEventOnShelf(POS_CONFIG[actName])) return; // 🔥 含手動下架 + 排程時間判斷
           if (actName.includes('【實體】') || actName.includes('實體券')) return;
 
           const opt = document.createElement('option');
@@ -417,6 +440,13 @@
           opt.text = actName;
           actSelect.appendChild(opt);
         });
+
+        // 🔥 排程時間內沒有任何活動時，給顧客明確訊息而不是空白下拉選單
+        if (actSelect.options.length === 0) {
+          actSelect.innerHTML = '<option value="">😴 目前沒有進行中的活動</option>';
+          $('btn-submit').disabled = true;
+          $('btn-submit').innerText = "目前無可領取的活動";
+        }
 
         checkSaved(true);
       } else {
