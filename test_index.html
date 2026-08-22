@@ -148,7 +148,6 @@ body.mode-counter-active .act-btn.on .radio { border-color: var(--accent-counter
 
 .empty{border:1px dashed var(--border);border-radius:14px;padding:24px;text-align:center;font-size:14px;color:var(--muted-foreground)}
 
-/* 🔥 調整搜尋框排列 */
 .searchbar { display: flex; flex-direction: column; gap: 12px; width: 100%; }
 .search-actions { display: flex; gap: 10px; width: 100%; }
 
@@ -410,8 +409,8 @@ body.mode-physical-active .undo { color:var(--accent-physical); border-color: rg
           <span class="label" id="scan-label">● 掃描 / 查詢會員</span>
           <div class="searchbar">
             <input id="phone" type="tel" placeholder="輸入手機號碼" autocomplete="off" />
-            <!-- 🔥 修改：掃描與查詢並排，比例 1:2.5 -->
             <div class="search-actions">
+              <!-- 🔥 修改：掃描按鈕改為 1 份比例，查詢按鈕為 2.5 份比例 -->
               <button id="btn-scan" class="primary-btn" onclick="startScan()" style="flex: 1;">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px;"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
                 掃描
@@ -1205,9 +1204,15 @@ body.mode-physical-active .undo { color:var(--accent-physical); border-color: rg
         return;
       } 
       else if (currentMode === 'member') {
+        let hasData = false; 
         if (isMemberSystemActive) {
             const memSnap = await getDoc(doc(db, "members", ph));
-            memberRecord = memSnap.exists() ? memSnap.data() : { points: 0, name: "非註冊會員" };
+            if(memSnap.exists()) {
+                hasData = true;
+                memberRecord = memSnap.data();
+            } else {
+                memberRecord = { points: 0, name: "非註冊會員" };
+            }
             $('m-pts').innerText = memberRecord.points || 0;
             $('m-name').innerText = memberRecord.name || "非註冊顧客";
             $('m-phone').innerText = ph;
@@ -1221,10 +1226,18 @@ body.mode-physical-active .undo { color:var(--accent-physical); border-color: rg
         await Promise.all(digitalActs.map(async (a) => {
             const cSnap = await getDoc(doc(db, a, ph));
             if(cSnap.exists()) {
+                hasData = true; 
                 let data = cSnap.data(); data.act_source = a;
                 userCouponsData[a] = data;
             }
         }));
+
+        if (!hasData) {
+            showToast(isMemberSystemActive ? "查無此人的會員或優惠券紀錄！" : "查無此號碼的優惠券紀錄！", "error");
+            $("phone").value = "";
+            $("placeholder").classList.remove("hidden");
+            return;
+        }
 
         playAlert("scan");
         renderUserCoupons();
