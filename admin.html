@@ -997,19 +997,35 @@
         const hasSchedule = startMs !== null || endMs !== null;
         const now = Date.now();
 
+        // 🔥 徽章顯示「前台實際看到的狀態」：有排程就以時間為準，
+        //    不要顯示資料庫裡那個要等整點才同步的 active，否則會誤導。
+        let effectiveOn;
         let statusBadge;
-        if (hasSchedule && startMs !== null && now < startMs) {
-            statusBadge = '<span style="color:#F0A500;font-size:12px;">[⏳ 排程待上架]</span>';
-        } else if (hasSchedule && endMs !== null && now > endMs) {
-            statusBadge = '<span style="color:var(--gray);font-size:12px;">[🏁 已到期下架]</span>';
-        } else if (isActive) {
-            statusBadge = '<span style="color:var(--green);font-size:12px;">[🟢 顯示中]</span>';
+        if (hasSchedule) {
+            if (startMs !== null && now < startMs) {
+                effectiveOn = false;
+                statusBadge = '<span style="color:#F0A500;font-size:12px;">[⏳ 排程待上架]</span>';
+            } else if (endMs !== null && now > endMs) {
+                effectiveOn = false;
+                statusBadge = '<span style="color:var(--gray);font-size:12px;">[🏁 已到期下架]</span>';
+            } else {
+                effectiveOn = true;
+                statusBadge = '<span style="color:var(--green);font-size:12px;">[🟢 顯示中]</span>';
+            }
         } else {
-            statusBadge = '<span style="color:var(--gray);font-size:12px;">[⚫ 已下架]</span>';
+            effectiveOn = isActive;
+            statusBadge = isActive
+                ? '<span style="color:var(--green);font-size:12px;">[🟢 顯示中]</span>'
+                : '<span style="color:var(--gray);font-size:12px;">[⚫ 已下架]</span>';
         }
 
+        // 資料庫裡的 active 還沒跟上時間判斷（等下個整點雲端排程同步），給個提示
+        const syncHint = (hasSchedule && effectiveOn !== isActive)
+          ? `<span style="display:block;margin-top:2px;color:var(--text-sub);font-size:11px;">⏱️ 前台已${effectiveOn ? '生效' : '停止'}，雲端 active 欄位將於下個整點同步</span>`
+          : '';
+
         const scheduleStr = hasSchedule
-          ? `<span style="display:block;margin-top:4px;color:#F0764E;font-weight:600;">🗓️ 排程：${giftInfo.startAt ? fmtScheduleText(giftInfo.startAt) : '立即'} ～ ${giftInfo.endAt ? fmtScheduleText(giftInfo.endAt) : '無限期'}</span>`
+          ? `<span style="display:block;margin-top:4px;color:#F0764E;font-weight:600;">🗓️ 排程：${giftInfo.startAt ? fmtScheduleText(giftInfo.startAt) : '立即'} ～ ${giftInfo.endAt ? fmtScheduleText(giftInfo.endAt) : '無限期'}</span>${syncHint}`
           : '';
 
         return `
