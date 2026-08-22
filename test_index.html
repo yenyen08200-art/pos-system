@@ -254,11 +254,9 @@ body.mode-physical-active .redeem { background-image: var(--gradient-physical); 
 .redeem.is-claimed { background: var(--muted) !important; box-shadow: none !important; color: var(--muted-foreground) !important; cursor: not-allowed !important; pointer-events: none !important; opacity: 1 !important; transform: none !important; }
 .redeem.is-expired { background: var(--destructive) !important; box-shadow: 0 10px 20px -10px rgba(255,0,0,0.5) !important; color: #fff !important; cursor: not-allowed !important; pointer-events: none !important; opacity: 1 !important; transform: none !important; }
 
-/* 撤銷按鈕樣式 */
 .undo{min-height:64px;width:100%;border-radius:18px;font-size:20px;font-weight:700;color:var(--accent-digital);
   border:1px solid rgba(0,198,255,0.5);background:rgba(0,198,255,0.15);transition:background .2s}
 body.mode-physical-active .undo { color:var(--accent-physical); border-color: rgba(255,107,53,0.5); background:rgba(255,107,53,0.15); }
-body.mode-counter-active .undo { color:var(--accent-counter); border-color: rgba(63,191,143,0.5); background:rgba(63,191,143,0.15); }
 .undo:hover{background:rgba(0,198,255,0.25)}
 
 .next{min-height:64px;width:100%;border-radius:18px;font-size:18px;font-weight:600;color:var(--foreground);
@@ -510,7 +508,6 @@ body.mode-counter-active .undo { color:var(--accent-counter); border-color: rgba
           <div class="giant-count" id="c-count">--</div>
           <button id="btn-tally" class="giant-btn" onclick="deductTally()">🎁 發出 1 件</button>
           
-          <!-- 🔥 新增的贈品撤銷按鈕 -->
           <button class="undo hidden" id="btn-undo-tally" style="margin-top: 16px;" onclick="undoTally()">⚡ 撤銷 (5s)</button>
           
           <p style="margin-top:24px; font-size:14px; color:var(--muted-foreground);">店員直接點擊扣除，雲端即時同步，防呆鎖死。</p>
@@ -576,7 +573,6 @@ body.mode-counter-active .undo { color:var(--accent-counter); border-color: rgba
   let unsubCounter = null; 
   let currentCount = 0;
   
-  // 🔥 新增：用於記錄贈品撤銷的變數
   let lastTallyLogId = null;
   let tallyUndoTimer = null;
 
@@ -725,7 +721,6 @@ body.mode-counter-active .undo { color:var(--accent-counter); border-color: rgba
   window.alert = function(msg) { showToast(msg, 'error'); };
 
   window.setMode = function(m) {
-    // 🔥 切換模式時隱藏撤銷按鈕並清除計時器
     if (tallyUndoTimer) clearInterval(tallyUndoTimer);
     if ($("btn-undo-tally")) $("btn-undo-tally").classList.add("hidden");
     
@@ -884,7 +879,6 @@ body.mode-counter-active .undo { color:var(--accent-counter); border-color: rgba
   }
 
   function renderActs(){
-    // 🔥 切換活動時隱藏撤銷按鈕並清除計時器
     if (tallyUndoTimer) clearInterval(tallyUndoTimer);
     if ($("btn-undo-tally")) $("btn-undo-tally").classList.add("hidden");
 
@@ -929,7 +923,6 @@ body.mode-counter-active .undo { color:var(--accent-counter); border-color: rgba
   }
 
   function selectStore(s){
-    // 🔥 切換門市時隱藏撤銷按鈕並清除計時器
     if (tallyUndoTimer) clearInterval(tallyUndoTimer);
     if ($("btn-undo-tally")) $("btn-undo-tally").classList.add("hidden");
 
@@ -968,7 +961,6 @@ body.mode-counter-active .undo { color:var(--accent-counter); border-color: rgba
 
     $('btn-tally').disabled = true;
     try {
-      // 🔥 產生這筆發放日誌的唯一 ID
       const logId = new Date().getTime().toString();
       lastTallyLogId = logId;
 
@@ -991,7 +983,6 @@ body.mode-counter-active .undo { color:var(--accent-counter); border-color: rgba
       }
       showToast("✅ 已成功發放 1 件！", "success");
       
-      // 🔥 顯示並啟動 5 秒撤銷按鈕
       const btnUndoTally = $("btn-undo-tally");
       btnUndoTally.classList.remove("hidden");
       let left = 5;
@@ -1019,7 +1010,6 @@ body.mode-counter-active .undo { color:var(--accent-counter); border-color: rgba
     }
   };
 
-  // 🔥 新增：撤銷贈品發放的功能
   window.undoTally = async function() {
     if (tallyUndoTimer) clearInterval(tallyUndoTimer);
     $("btn-undo-tally").classList.add("hidden");
@@ -1030,9 +1020,7 @@ body.mode-counter-active .undo { color:var(--accent-counter); border-color: rgba
     $('btn-tally').innerText = "撤銷中...";
 
     try {
-      // 刪除剛剛寫入的日誌
       await deleteDoc(doc(db, "gift_logs", lastTallyLogId));
-      // 將庫存加回去
       await updateDoc(doc(db, "inventory", `${store}_${act}`), { count: increment(1), usedCount: increment(-1) });
       
       showToast("✅ 已成功撤銷發放！庫存已復原。", "success");
