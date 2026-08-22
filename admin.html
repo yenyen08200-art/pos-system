@@ -833,6 +833,7 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getFirestore, collection, getDocs, onSnapshot, doc, getDoc, setDoc, updateDoc, deleteDoc, query, limit, where, increment } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
     import { getAuth, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyBINQuYtYZA8RLfwm51AfGLTYj1TX_UcFo",
@@ -846,9 +847,10 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
-    const auth = getAuth(app); 
-    const googleProvider = new GoogleAuthProvider(); 
-    
+    const auth = getAuth(app);
+    const googleProvider = new GoogleAuthProvider();
+    const functions = getFunctions(app, "asia-east1"); // 要跟 Cloud Functions 的 region 一致
+
     let allData = []; 
     let sortCol = 'timestamp'; 
     let sortAsc = false; 
@@ -856,6 +858,9 @@
     let statusChartInstance = null;
     let timeChartInstance = null; 
     let unsubscribeSnapshot = null; 
+    // 🔥 這份清單只用來讓畫面「秒判斷」要不要顯示驗證中的提示，不是真正的權限依據。
+    //    真正算數的是 Cloud Function grantAdminIfAllowed 核發的 Custom Claims，
+    //    兩份清單內容要一致，改的話兩邊都要改（functions/index.js 裡的 ADMIN_EMAILS）。
     const adminEmails = ["yenyen08200@gmail.com", "admin@gmail.com"];
     
     let globalPosConfig = {};
@@ -2124,16 +2129,47 @@
       signOut(auth);
     };
 
-    onAuthStateChanged(auth, (user) => {
+    onAuthStateChanged(auth, async (user) => {
       if (user && adminEmails.includes(user.email)) {
+        // 🔥 前端清單只是先擋一下畫面，真正的權限要跟雲端核發 Custom Claims
+        document.getElementById('login-btn').innerText = "驗證管理員權限中...";
+        document.getElementById('google-btn').innerText = "驗證管理員權限中...";
+
+        try {
+          const grantAdmin = httpsCallable(functions, 'grantAdminIfAllowed');
+          const result = await grantAdmin();
+
+          if (!result.data || !result.data.granted) {
+            alert("❌ 權限不足（伺服器端驗證失敗），請聯絡系統管理員。");
+            await signOut(auth);
+            return;
+          }
+
+          // 強制刷新 ID Token，把剛核發的 Custom Claims 抓回本地端
+          await user.getIdToken(true);
+          const tokenResult = await user.getIdTokenResult();
+          if (tokenResult.claims.admin !== true) {
+            alert("❌ 權限核發失敗，請重新登入一次。");
+            await signOut(auth);
+            return;
+          }
+        } catch (e) {
+          console.error("核發管理員權限失敗：", e);
+          alert("❌ 無法連線至雲端驗證權限，請確認網路連線後重試。");
+          await signOut(auth);
+          return;
+        }
+
         document.getElementById('login-screen').style.display = 'none';
-        document.getElementById('sidebar-nav').style.display = 'flex'; 
+        document.getElementById('sidebar-nav').style.display = 'flex';
         document.getElementById('main-app').style.display = 'block';
         fetchSystemConfig();
         // 🔥 登入成功時，啟動全域的即時監控
         startRealtimeMonitors();
       } else {
         if(user) { alert("❌ 權限不足"); signOut(auth); }
+        document.getElementById('login-btn').innerText = "安全登入";
+        document.getElementById('google-btn').innerText = "🌐 使用 Google 帳號登入";
         document.getElementById('sidebar-nav').style.display = 'none';
         document.getElementById('main-app').style.display = 'none';
         document.getElementById('login-screen').style.display = 'flex';
