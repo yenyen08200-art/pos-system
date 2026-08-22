@@ -36,8 +36,8 @@
   --gradient-physical: linear-gradient(135deg, #FF6B35, #F04323);
   --accent-counter: #3FBF8F;
   --gradient-counter: linear-gradient(135deg, #3FBF8F, #2A8C66);
-  --accent-member: #00C6FF;
-  --gradient-member: linear-gradient(135deg, #00C6FF, #0072FF);
+  --accent-member: #F2A900;
+  --gradient-member: linear-gradient(135deg, #F2A900, #FFC72C);
   --radius:1.25rem;
 }
 *{box-sizing:border-box;margin:0;padding:0;border-color:var(--border)}
@@ -76,6 +76,14 @@ body.mode-counter-active main {
     linear-gradient(90deg, oklch(1 0 0 / 3%) 1px, transparent 1px);
 }
 
+body.mode-member-active main {
+  background-image:
+    radial-gradient(circle at 15% 10%, rgba(242,169,0,0.12), transparent 45%),
+    radial-gradient(circle at 85% 0%, rgba(255,199,44,0.12), transparent 40%),
+    linear-gradient(oklch(1 0 0 / 3%) 1px, transparent 1px),
+    linear-gradient(90deg, oklch(1 0 0 / 3%) 1px, transparent 1px);
+}
+
 .wrap { max-width: 1400px; margin: 0 auto; width: 100%; padding: 20px 16px; }
 @media(min-width:768px){.wrap{padding:32px}}
 
@@ -85,6 +93,7 @@ header{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-betw
   background-image:var(--gradient-digital);color:#fff;box-shadow:0 12px 30px -12px rgba(0,198,255,0.8); transition:transform .3s}
 body.mode-physical-active .logo { background-image: var(--gradient-physical); box-shadow:0 12px 30px -12px rgba(255,107,53,0.8); }
 body.mode-counter-active .logo { background-image: var(--gradient-counter); box-shadow:0 12px 30px -12px rgba(63,191,143,0.8); }
+body.mode-member-active .logo { background-image: var(--gradient-member); box-shadow:0 12px 30px -12px rgba(242,169,0,0.8); color:#1E293B;}
 .logo:hover{transform:scale(1.05)}
 h1{font-size:clamp(22px,3vw,30px);font-weight:700;letter-spacing:-.02em}
 .sub{font-size:14px;color:var(--muted-foreground); display:flex; align-items:center; gap:8px;}
@@ -110,7 +119,31 @@ section.panel{padding:20px}
 .block+.block{margin-top:24px}
 .label{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.2em;color:var(--muted-foreground);margin-bottom:12px;display:block;}
 
+.custom-dropdown { position: relative; width: 100%; }
+.custom-dropdown summary {
+  list-style: none; width: 100%; min-height: 64px; border-radius: 14px; border: 1px solid var(--border);
+  background: var(--secondary); color: var(--foreground); font-size: 18px; font-weight: 700;
+  display: flex; align-items: center; justify-content: space-between; padding: 0 20px; cursor: pointer;
+  outline: none; transition: all 0.2s;
+}
+.custom-dropdown summary:hover { background: var(--muted); }
+.custom-dropdown summary::-webkit-details-marker { display: none; }
+.custom-dropdown summary::after { content: "▼"; font-size: 14px; color: var(--muted-foreground); }
+.custom-dropdown[open] summary::after { content: "▲"; }
+.custom-dropdown[open] summary { border-color: var(--primary); box-shadow: 0 0 0 2px oklch(0.78 0.17 68/.2); }
+.dropdown-content {
+  margin-top: 12px; padding: 16px; border-radius: 14px; border: 1px solid var(--border);
+  background: var(--card); box-shadow: 0 10px 40px -10px rgba(0,0,0,0.6); z-index: 50; position: absolute; width: 100%;
+}
+
+.stores{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px; width: 100%;}
+@media(min-width:640px){.stores{grid-template-columns:repeat(3,minmax(0,1fr))}}
 button{font-family:inherit;cursor:pointer;}
+.store-btn{width:100%;min-height:56px;border-radius:12px;border:1px solid var(--border);background:var(--secondary);color:var(--secondary-foreground);
+  font-size:16px;font-weight:600;transition:all .2s; padding: 0 8px;}
+.store-btn:hover{background:var(--muted);border-color:var(--accent-digital)}
+.store-btn:active{transform:scale(.97)}
+.store-btn.on{background-image:var(--gradient-digital);color:#fff;border-color:var(--accent-digital);box-shadow:0 12px 26px -14px rgba(0,198,255,0.9)}
 
 .mode-switch { display: flex; gap: 8px; padding: 6px; background: var(--secondary); border-radius: 16px; flex-wrap: wrap;}
 .mode-btn { flex: 1; padding: 14px 12px; border-radius: 12px; border: none; background: transparent; color: var(--muted-foreground); font-weight: 700; font-size: 15px; transition: 0.2s; min-width: 100px;}
@@ -141,15 +174,27 @@ body.mode-counter-active .act-btn.on .radio { border-color: var(--accent-counter
 
 .searchbar { display: flex; flex-direction: column; gap: 12px; width: 100%; }
 .search-actions { display: flex; gap: 10px; width: 100%; }
-#phone { 
-  width: 100%; min-height: 56px; border-radius: 14px; border: 1px solid var(--input); 
-  background: oklch(0.17 0.024 259/.6); color: var(--foreground); 
-  padding: 0 16px; font-size: 18px; font-weight: 600; letter-spacing: 0.08em; 
-  outline: none; transition: all 0.2s; 
+.input-group { 
+  display: flex; flex: 1; border-radius: 14px; border: 1px solid var(--input); 
+  background: oklch(0.17 0.024 259/.6); overflow: hidden; transition: all 0.2s;
+  min-height: 56px;
 }
-#phone:focus { border-color: var(--accent-digital); box-shadow: 0 0 0 4px rgba(0,198,255,0.25); }
+.input-group:focus-within { border-color: var(--accent-digital); box-shadow: 0 0 0 4px rgba(0,198,255,0.25); }
+body.mode-physical-active .input-group:focus-within { border-color: var(--accent-physical); box-shadow: 0 0 0 4px rgba(255,107,53,0.25); }
+body.mode-member-active .input-group:focus-within { border-color: var(--accent-member); box-shadow: 0 0 0 4px rgba(242,169,0,0.25); }
+
+#btn-scan { 
+  background: rgba(255,255,255,0.05); border: none; color: var(--muted-foreground); 
+  padding: 0 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; 
+  border-right: 1px solid var(--input); transition: 0.2s; 
+}
+#btn-scan:hover { background: rgba(255,255,255,0.1); color: #fff; }
+#phone { 
+  flex: 1; width: 100%; background: transparent; border: none; 
+  color: var(--foreground); padding: 0 16px; font-size: 18px; font-weight: 600; 
+  letter-spacing: 0.08em; outline: none; 
+}
 #phone::placeholder{font-size:15px;font-weight:400;letter-spacing:normal;color:var(--muted-foreground)}
-body.mode-physical-active #phone:focus { border-color: var(--accent-physical); box-shadow: 0 0 0 4px rgba(255,107,53,0.25); }
 
 .primary-btn{min-height:56px;padding:0 24px;font-size:16px;font-weight:700;border:none;border-radius:14px;
   background-image:var(--gradient-digital);color:#fff;box-shadow:0 14px 30px -16px rgba(0,198,255,0.9);transition:all .2s;
@@ -157,6 +202,7 @@ body.mode-physical-active #phone:focus { border-color: var(--accent-physical); b
 .primary-btn:hover{filter:brightness(1.1)}
 .primary-btn:active{transform:scale(.95)}
 body.mode-physical-active .primary-btn { background-image: var(--gradient-physical); box-shadow: 0 14px 30px -16px rgba(255,107,53,0.9); }
+body.mode-member-active .primary-btn { background-image: var(--gradient-member); box-shadow: 0 14px 30px -16px rgba(242,169,0,0.9); color: #1E293B; }
 button:disabled{opacity:.5;cursor:not-allowed}
 
 #toast-container {
@@ -180,6 +226,10 @@ body.mode-physical-active .reader-wrap::before, body.mode-physical-active .reade
 body.mode-physical-active .reader-wrap .corner-bl, body.mode-physical-active .reader-wrap .corner-br {
   border-color: var(--accent-physical);
 }
+body.mode-member-active .reader-wrap::before, body.mode-member-active .reader-wrap::after, 
+body.mode-member-active .reader-wrap .corner-bl, body.mode-member-active .reader-wrap .corner-br {
+  border-color: var(--accent-member);
+}
 .reader-wrap::before { top: -2px; left: -2px; border-width: 4px 0 0 4px; }
 .reader-wrap::after { top: -2px; right: -2px; border-width: 4px 4px 0 0; }
 .reader-wrap .corner-bl { bottom: -2px; left: -2px; border-width: 0 0 4px 4px; }
@@ -187,6 +237,7 @@ body.mode-physical-active .reader-wrap .corner-bl, body.mode-physical-active .re
 #reader{width:100%; border-radius: 12px; overflow: hidden; box-shadow: 0 0 0 9999px rgba(0,0,0,0.5); }
 .scanline{position:absolute;left:0;right:0;top:0;height:3px;background:var(--accent-digital);pointer-events:none;animation:scan 2.5s ease-in-out infinite alternate; box-shadow: 0 0 15px 2px var(--accent-digital); z-index: 11;}
 body.mode-physical-active .scanline { background: var(--accent-physical); box-shadow: 0 0 15px 2px var(--accent-physical); }
+body.mode-member-active .scanline { background: var(--accent-member); box-shadow: 0 0 15px 2px var(--accent-member); }
 @keyframes scan{0%{top:0%}100%{top:100%}}
 .close-cam{ margin-top: 40px; width: 100%; max-width: 450px; min-height: 64px; border-radius: 999px; font-size: 16px; font-weight: 700; color: #fff; border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); transition: .2s; cursor: pointer; }
 .close-cam:active{transform:scale(.95)}
@@ -196,6 +247,7 @@ body.mode-physical-active .scanline { background: var(--accent-physical); box-sh
 #placeholder-emoji { display: flex; justify-content: center; align-items: center; margin-bottom: 10px; }
 .ticket-icon { width: 76px; height: 76px; color: var(--accent-digital); filter: drop-shadow(0 0 20px rgba(0,198,255,0.4)); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
 body.mode-physical-active .ticket-icon { color: var(--accent-physical); filter: drop-shadow(0 0 20px rgba(255,107,53,0.4)); }
+body.mode-member-active .ticket-icon { color: var(--accent-member); filter: drop-shadow(0 0 20px rgba(242,169,0,0.4)); }
 
 .placeholder p{color:var(--muted-foreground)}
 .placeholder .p1{font-size:18px;font-weight:600}
@@ -219,6 +271,7 @@ body.mode-physical-active .ticket-icon { color: var(--accent-physical); filter: 
   background-image:var(--gradient-digital);color:#fff;box-shadow:0 26px 50px -22px rgba(0,198,255,0.8);transition:all .2s;
   display: flex; align-items: center; justify-content: center; gap: 12px; cursor: pointer;}
 body.mode-physical-active .redeem { background-image: var(--gradient-physical); box-shadow: 0 26px 50px -22px rgba(255,107,53,1); }
+body.mode-member-active .redeem { background-image: var(--gradient-member); box-shadow: 0 26px 50px -22px rgba(242,169,0,1); color: #1E293B;}
 .redeem:hover:not(:disabled){transform:translateY(-2px);filter:brightness(1.1)}
 .redeem:active:not(:disabled){transform:scale(.98)}
 
@@ -228,6 +281,7 @@ body.mode-physical-active .redeem { background-image: var(--gradient-physical); 
 .undo{min-height:64px;width:100%;border-radius:18px;font-size:20px;font-weight:700;color:var(--accent-digital);
   border:1px solid rgba(0,198,255,0.5);background:rgba(0,198,255,0.15);transition:background .2s}
 body.mode-physical-active .undo { color:var(--accent-physical); border-color: rgba(255,107,53,0.5); background:rgba(255,107,53,0.15); }
+body.mode-member-active .undo { color:var(--accent-member); border-color: rgba(242,169,0,0.5); background:rgba(242,169,0,0.15); }
 .undo:hover{background:rgba(0,198,255,0.25)}
 
 .next{min-height:64px;width:100%;border-radius:18px;font-size:18px;font-weight:600;color:var(--foreground);
@@ -292,7 +346,7 @@ body.mode-physical-active .undo { color:var(--accent-physical); border-color: rg
 #login-store-select {
   width: 100%; padding: 14px 16px; border-radius: 12px; background: rgba(0,0,0,0.3); color: #fff; 
   border: 1px solid rgba(255,255,255,0.2); font-size: 16px; outline: none; font-weight: bold; 
-  cursor: pointer; margin-bottom: 20px; transition: 0.2s;
+  appearance: none; text-align: center; cursor: pointer; margin-bottom: 20px; transition: 0.2s;
 }
 #login-store-select:focus { border-color: var(--accent-digital); background: rgba(0,0,0,0.5); }
 #login-store-select option { background: var(--secondary); color: var(--foreground); }
@@ -398,13 +452,13 @@ body.mode-physical-active .undo { color:var(--accent-physical); border-color: rg
         <div id="scan-block">
           <span class="label" id="scan-label">● 掃描 / 查詢會員</span>
           <div class="searchbar">
-            <input id="phone" type="tel" placeholder="輸入手機號碼" autocomplete="off" />
-            <div class="search-actions">
-              <button id="btn-scan" class="primary-btn" onclick="startScan()" style="flex: 0 0 70px; padding: 0;">
+            <div class="input-group">
+              <button id="btn-scan" onclick="startScan()">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
               </button>
-              <button class="primary-btn" id="btn-check" onclick="check()" style="flex: 1;">查詢</button>
+              <input id="phone" type="tel" placeholder="輸入手機號碼" autocomplete="off" />
             </div>
+            <button class="primary-btn" id="btn-check" onclick="check()">查詢</button>
           </div>
         </div>
       </section>
@@ -686,7 +740,7 @@ body.mode-physical-active .undo { color:var(--accent-physical); border-color: rg
       $('counter-area').classList.add('hidden');
 
       $('phone').type = 'tel';
-      $('phone').placeholder = isMemberSystemActive ? '輸入手機號碼' : '輸入手機號碼';
+      $('phone').placeholder = '輸入手機號碼';
       $('phone').maxLength = 10; 
       $('btn-check').innerText = '查詢';
       $('placeholder-title').innerText = isMemberSystemActive ? "等待掃描會員 / 憑證" : "等待掃描電子券";
@@ -698,7 +752,10 @@ body.mode-physical-active .undo { color:var(--accent-physical); border-color: rg
       nextCust(); 
     } else if (m === 'physical') {
       $('scan-block').classList.remove('hidden');
-      $('act-block').classList.remove('hidden');
+      
+      // 🔥 隱藏實體券的活動選擇清單，保持畫面簡潔
+      $('act-block').classList.add('hidden');
+      
       $('counter-area').classList.add('hidden');
 
       $('phone').type = 'text';
@@ -712,7 +769,6 @@ body.mode-physical-active .undo { color:var(--accent-physical); border-color: rg
       $('info-social').style.display = 'none';
       $('info-expire').style.display = 'none';
 
-      renderActs();
       nextCust();
     }
   };
@@ -803,19 +859,32 @@ body.mode-physical-active .undo { color:var(--accent-physical); border-color: rg
     else { $("btn-check").innerText = currentMode === 'physical' ? '核銷' : '查詢'; }
   }
 
+  function renderStores(){
+    const box = $("stores"); box.innerHTML = "";
+    STORE_LIST.forEach((s) => {
+      const b = document.createElement("button");
+      b.className = "store-btn" + (store === s ? " on" : "");
+      b.innerText = s;
+      b.onclick = () => selectStore(s);
+      box.appendChild(b);
+    });
+    $("duty").innerText = store || "尚未選擇";
+    $("store-summary").innerText = store ? `已選擇：${store}` : "請選擇門市...";
+  }
+
   function renderActs(){
     const box = $("acts"); box.innerHTML = "";
     if (!store){ box.innerHTML = '<p class="empty">請先選擇門市</p>'; return; }
     
     let currentList = [];
-    if (currentMode === 'physical') {
-      currentList = (evMap[store] || []).filter(a => a.includes('【實體】') || a.includes('實體券'));
-    } else if (currentMode === 'counter') {
+    if (currentMode === 'counter') {
       currentList = storeGiftMap[store] || [];
+    } else {
+      return; 
     }
 
     if(currentList.length === 0) { 
-      box.innerHTML = `<p class="empty">此門市目前無開放的${currentMode === 'physical' ? '實體' : '活動贈品'}項目</p>`; 
+      box.innerHTML = `<p class="empty">此門市目前無開放的活動贈品項目</p>`; 
       act = ""; 
       return; 
     }
@@ -1135,33 +1204,33 @@ body.mode-physical-active .undo { color:var(--accent-physical); border-color: rg
 
     try {
       if (currentMode === 'physical') {
-        const ac = act;
-        const snap = await getDoc(doc(db, ac, ph));
-        if (snap.exists()){
-          playAlert("scan"); shownPhone = ph; shownAct = ac; record = snap.data();
-          hideUndo(); renderRight(); return;
-        }
-        
-        const otherActs = (evMap[store] || []).filter(a => a !== ac && (a.includes('【實體】') || a.includes('實體券')));
-        let foundOtherData = null, foundOtherActName = "";
-        for (const otherAct of otherActs){
-          const otherSnap = await getDoc(doc(db, otherAct, ph));
-          if (otherSnap.exists()){
-            const data = otherSnap.data();
-            if (data.status !== "已兌換"){ foundOtherData = data; foundOtherActName = otherAct; break; }
+        // 🔥 自動搜尋：不再依賴手動選取，自動掃描該門市的所有實體券活動
+        const physicalActs = (evMap[store] || []).filter(a => a.includes('【實體】') || a.includes('實體券'));
+        let foundData = null;
+        let foundActName = "";
+
+        for (const pAct of physicalActs){
+          const pSnap = await getDoc(doc(db, pAct, ph));
+          if (pSnap.exists()){
+            foundData = pSnap.data();
+            foundActName = pAct;
+            break; 
           }
         }
-        
-        if (foundOtherData){
-          if (confirm("❌ 找不到 " + ac + " 的紀錄。\n\n💡 但發現客人有未兌換的 " + foundOtherActName + "，是否要自動切換過去？")){
-            act = foundOtherActName; renderActs(); 
-            shownPhone = ph; shownAct = foundOtherActName; record = foundOtherData;
-            hideUndo(); renderRight();
-          } else { $("phone").value = ""; $("placeholder").classList.remove("hidden"); }
+
+        if (foundData){
+          playAlert("scan");
+          shownPhone = ph;
+          shownAct = foundActName;
+          record = foundData;
+          hideUndo();
+          renderRight();
         } else {
           showToast("查無此實體流水號，或該券尚未建檔！", "error");
-          $("phone").value = ""; $("placeholder").classList.remove("hidden");
+          $("phone").value = "";
+          $("placeholder").classList.remove("hidden");
         }
+        return;
       } 
       else if (currentMode === 'member') {
         if (isMemberSystemActive) {
