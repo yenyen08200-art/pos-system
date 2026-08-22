@@ -36,7 +36,7 @@
   --gradient-physical: linear-gradient(135deg, #FF6B35, #F04323);
   --accent-counter: #3FBF8F;
   --gradient-counter: linear-gradient(135deg, #3FBF8F, #2A8C66);
-  --accent-member: #00C6FF; /* 電子券統一保持藍色 */
+  --accent-member: #00C6FF;
   --gradient-member: linear-gradient(135deg, #00C6FF, #0072FF);
   --radius:1.25rem;
 }
@@ -119,31 +119,7 @@ section.panel{padding:20px}
 .block+.block{margin-top:24px}
 .label{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.2em;color:var(--muted-foreground);margin-bottom:12px;display:block;}
 
-.custom-dropdown { position: relative; width: 100%; }
-.custom-dropdown summary {
-  list-style: none; width: 100%; min-height: 64px; border-radius: 14px; border: 1px solid var(--border);
-  background: var(--secondary); color: var(--foreground); font-size: 18px; font-weight: 700;
-  display: flex; align-items: center; justify-content: space-between; padding: 0 20px; cursor: pointer;
-  outline: none; transition: all 0.2s;
-}
-.custom-dropdown summary:hover { background: var(--muted); }
-.custom-dropdown summary::-webkit-details-marker { display: none; }
-.custom-dropdown summary::after { content: "▼"; font-size: 14px; color: var(--muted-foreground); }
-.custom-dropdown[open] summary::after { content: "▲"; }
-.custom-dropdown[open] summary { border-color: var(--primary); box-shadow: 0 0 0 2px oklch(0.78 0.17 68/.2); }
-.dropdown-content {
-  margin-top: 12px; padding: 16px; border-radius: 14px; border: 1px solid var(--border);
-  background: var(--card); box-shadow: 0 10px 40px -10px rgba(0,0,0,0.6); z-index: 50; position: absolute; width: 100%;
-}
-
-.stores{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px; width: 100%;}
-@media(min-width:640px){.stores{grid-template-columns:repeat(3,minmax(0,1fr))}}
 button{font-family:inherit;cursor:pointer;}
-.store-btn{width:100%;min-height:56px;border-radius:12px;border:1px solid var(--border);background:var(--secondary);color:var(--secondary-foreground);
-  font-size:16px;font-weight:600;transition:all .2s; padding: 0 8px;}
-.store-btn:hover{background:var(--muted);border-color:var(--accent-digital)}
-.store-btn:active{transform:scale(.97)}
-.store-btn.on{background-image:var(--gradient-digital);color:#fff;border-color:var(--accent-digital);box-shadow:0 12px 26px -14px rgba(0,198,255,0.9)}
 
 .mode-switch { display: flex; gap: 8px; padding: 6px; background: var(--secondary); border-radius: 16px; flex-wrap: wrap;}
 .mode-btn { flex: 1; padding: 14px 12px; border-radius: 12px; border: none; background: transparent; color: var(--muted-foreground); font-weight: 700; font-size: 15px; transition: 0.2s; min-width: 100px;}
@@ -172,10 +148,9 @@ body.mode-counter-active .act-btn.on .radio { border-color: var(--accent-counter
 
 .empty{border:1px dashed var(--border);border-radius:14px;padding:24px;text-align:center;font-size:14px;color:var(--muted-foreground)}
 
-/* 🔥 全新的搜尋框與並排按鈕排版 */
+/* 🔥 調整搜尋框排列 */
 .searchbar { display: flex; flex-direction: column; gap: 12px; width: 100%; }
 .search-actions { display: flex; gap: 10px; width: 100%; }
-.search-actions button { flex: 1; }
 
 #phone { 
   width: 100%; min-height: 56px; border-radius: 14px; border: 1px solid var(--input); 
@@ -186,16 +161,13 @@ body.mode-counter-active .act-btn.on .radio { border-color: var(--accent-counter
 #phone:focus { border-color: var(--accent-digital); box-shadow: 0 0 0 4px rgba(0,198,255,0.25); }
 #phone::placeholder{font-size:15px;font-weight:400;letter-spacing:normal;color:var(--muted-foreground)}
 body.mode-physical-active #phone:focus { border-color: var(--accent-physical); box-shadow: 0 0 0 4px rgba(255,107,53,0.25); }
-body.mode-member-active #phone:focus { border-color: var(--accent-member); box-shadow: 0 0 0 4px rgba(0,198,255,0.25); }
 
 .primary-btn{min-height:56px;padding:0 24px;font-size:16px;font-weight:700;border:none;border-radius:14px;
   background-image:var(--gradient-digital);color:#fff;box-shadow:0 14px 30px -16px rgba(0,198,255,0.9);transition:all .2s;
-  display: flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer;}
+  display: flex; align-items: center; justify-content: center; gap: 8px;}
 .primary-btn:hover{filter:brightness(1.1)}
 .primary-btn:active{transform:scale(.95)}
 body.mode-physical-active .primary-btn { background-image: var(--gradient-physical); box-shadow: 0 14px 30px -16px rgba(255,107,53,0.9); }
-body.mode-counter-active .primary-btn { background-image: var(--gradient-counter); box-shadow: 0 14px 30px -16px rgba(63,191,143,0.9); color: #fff;}
-body.mode-member-active .primary-btn { background-image: var(--gradient-member); box-shadow: 0 14px 30px -16px rgba(0,198,255,0.9); color: #fff; }
 button:disabled{opacity:.5;cursor:not-allowed}
 
 #toast-container {
@@ -219,10 +191,6 @@ body.mode-physical-active .reader-wrap::before, body.mode-physical-active .reade
 body.mode-physical-active .reader-wrap .corner-bl, body.mode-physical-active .reader-wrap .corner-br {
   border-color: var(--accent-physical);
 }
-body.mode-member-active .reader-wrap::before, body.mode-member-active .reader-wrap::after, 
-body.mode-member-active .reader-wrap .corner-bl, body.mode-member-active .reader-wrap .corner-br {
-  border-color: var(--accent-member);
-}
 .reader-wrap::before { top: -2px; left: -2px; border-width: 4px 0 0 4px; }
 .reader-wrap::after { top: -2px; right: -2px; border-width: 4px 4px 0 0; }
 .reader-wrap .corner-bl { bottom: -2px; left: -2px; border-width: 0 0 4px 4px; }
@@ -230,7 +198,6 @@ body.mode-member-active .reader-wrap .corner-bl, body.mode-member-active .reader
 #reader{width:100%; border-radius: 12px; overflow: hidden; box-shadow: 0 0 0 9999px rgba(0,0,0,0.5); }
 .scanline{position:absolute;left:0;right:0;top:0;height:3px;background:var(--accent-digital);pointer-events:none;animation:scan 2.5s ease-in-out infinite alternate; box-shadow: 0 0 15px 2px var(--accent-digital); z-index: 11;}
 body.mode-physical-active .scanline { background: var(--accent-physical); box-shadow: 0 0 15px 2px var(--accent-physical); }
-body.mode-member-active .scanline { background: var(--accent-member); box-shadow: 0 0 15px 2px var(--accent-member); }
 @keyframes scan{0%{top:0%}100%{top:100%}}
 .close-cam{ margin-top: 40px; width: 100%; max-width: 450px; min-height: 64px; border-radius: 999px; font-size: 16px; font-weight: 700; color: #fff; border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); transition: .2s; cursor: pointer; }
 .close-cam:active{transform:scale(.95)}
@@ -240,7 +207,6 @@ body.mode-member-active .scanline { background: var(--accent-member); box-shadow
 #placeholder-emoji { display: flex; justify-content: center; align-items: center; margin-bottom: 10px; }
 .ticket-icon { width: 76px; height: 76px; color: var(--accent-digital); filter: drop-shadow(0 0 20px rgba(0,198,255,0.4)); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
 body.mode-physical-active .ticket-icon { color: var(--accent-physical); filter: drop-shadow(0 0 20px rgba(255,107,53,0.4)); }
-body.mode-member-active .ticket-icon { color: var(--accent-member); filter: drop-shadow(0 0 20px rgba(0,198,255,0.4)); }
 
 .placeholder p{color:var(--muted-foreground)}
 .placeholder .p1{font-size:18px;font-weight:600}
@@ -264,7 +230,6 @@ body.mode-member-active .ticket-icon { color: var(--accent-member); filter: drop
   background-image:var(--gradient-digital);color:#fff;box-shadow:0 26px 50px -22px rgba(0,198,255,0.8);transition:all .2s;
   display: flex; align-items: center; justify-content: center; gap: 12px; cursor: pointer;}
 body.mode-physical-active .redeem { background-image: var(--gradient-physical); box-shadow: 0 26px 50px -22px rgba(255,107,53,1); }
-body.mode-member-active .redeem { background-image: var(--gradient-member); box-shadow: 0 26px 50px -22px rgba(0,198,255,1); color: #fff;}
 .redeem:hover:not(:disabled){transform:translateY(-2px);filter:brightness(1.1)}
 .redeem:active:not(:disabled){transform:scale(.98)}
 
@@ -274,7 +239,6 @@ body.mode-member-active .redeem { background-image: var(--gradient-member); box-
 .undo{min-height:64px;width:100%;border-radius:18px;font-size:20px;font-weight:700;color:var(--accent-digital);
   border:1px solid rgba(0,198,255,0.5);background:rgba(0,198,255,0.15);transition:background .2s}
 body.mode-physical-active .undo { color:var(--accent-physical); border-color: rgba(255,107,53,0.5); background:rgba(255,107,53,0.15); }
-body.mode-member-active .undo { color:var(--accent-member); border-color: rgba(0,198,255,0.5); background:rgba(0,198,255,0.15); }
 .undo:hover{background:rgba(0,198,255,0.25)}
 
 .next{min-height:64px;width:100%;border-radius:18px;font-size:18px;font-weight:600;color:var(--foreground);
@@ -444,15 +408,15 @@ body.mode-member-active .undo { color:var(--accent-member); border-color: rgba(0
 
         <div id="scan-block">
           <span class="label" id="scan-label">● 掃描 / 查詢會員</span>
-          <!-- 🔥 最新的並排搜尋框：相機在左側，並根據模式自動變色 -->
           <div class="searchbar">
             <input id="phone" type="tel" placeholder="輸入手機號碼" autocomplete="off" />
+            <!-- 🔥 修改：掃描與查詢並排，比例 1:2.5 -->
             <div class="search-actions">
-              <button id="btn-scan" class="primary-btn" onclick="startScan()">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
+              <button id="btn-scan" class="primary-btn" onclick="startScan()" style="flex: 1;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px;"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
                 掃描
               </button>
-              <button class="primary-btn" id="btn-check" onclick="check()">查詢</button>
+              <button class="primary-btn" id="btn-check" onclick="check()" style="flex: 2.5;">查詢</button>
             </div>
           </div>
         </div>
@@ -508,7 +472,6 @@ body.mode-member-active .undo { color:var(--accent-member); border-color: rgba(0
           <div class="actions">
             <button class="redeem" id="btn-redeem" onclick="redeem()">✔ 確認核銷優惠</button>
             <button class="undo hidden" id="btn-undo" onclick="undo()">⚡ 撤銷 (5s)</button>
-            <!-- 返回列表與服務下一位並排 -->
             <div style="display: flex; gap: 10px;">
               <button class="next" id="btn-back" onclick="backToList()" style="flex: 1;">⬅️ 返回列表</button>
               <button class="next" id="btn-next" onclick="nextCust()" style="flex: 1;">🧹 服務下一位</button>
