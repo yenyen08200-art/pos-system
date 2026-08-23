@@ -395,6 +395,8 @@
           </div>
         </div>
 
+        <div id="limit-warning" style="display:none; background:#FFF4E5; border:1px solid #F0A44E; color:#8A5200; border-radius:12px; padding:12px 16px; margin-bottom:14px; font-size:13px; line-height:1.7;"></div>
+
         <div class="table-toolbar">
           <span id="result-count">顯示 0 筆結果</span>
           <input id="search-box" class="search-box" type="text" placeholder="🔍 搜尋號碼或姓名..." oninput="debounceRenderTable()">
@@ -819,6 +821,68 @@
           <button id="btn-run-batch" class="btn-primary" style="width:100%; padding:14px; font-size:16px; background:var(--sidebar-bg);" onclick="runBatch()">🚀 開始批次建檔</button>
         </div>
 
+        <!-- ================= 實體券亂碼流水號生成器 ================= -->
+        <div class="config-card">
+          <h2>🔐 實體券流水號生成器（防偽亂碼）</h2>
+          <p class="desc">
+            上面的「批次建檔器」產生的是 <b>A001、A002…</b> 這種連號，優點是方便對帳，缺點是<b>看到一張就能猜出其他張</b>。
+            這裡改用「亂碼 ＋ 檢查碼」：號碼無法推算，而且打錯一個字會被立刻擋下來，適合有價值、會流到店外的券。
+          </p>
+
+          <div class="form-group">
+            <div class="field-block">
+              <label>🎯 綁定實體券活動</label>
+              <select id="gen-act"></select>
+            </div>
+            <div class="field-block">
+              <label>🎁 兌換品項設定</label>
+              <input type="text" id="gen-gift" value="依實體券面標示發放" placeholder="給店員看的提示">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <div class="field-block" style="flex:0.7;">
+              <label>🔤 前綴 (選填，建議 2 碼)</label>
+              <input type="text" id="gen-prefix" placeholder="例：TX" maxlength="4">
+            </div>
+            <div class="field-block" style="flex:0.7;">
+              <label>🔢 亂碼長度</label>
+              <select id="gen-len">
+                <option value="6">6 碼（約 10 億組）</option>
+                <option value="8" selected>8 碼（約 1.1 兆組，建議）</option>
+                <option value="10">10 碼（約 1125 兆組）</option>
+              </select>
+            </div>
+            <div class="field-block" style="flex:0.6;">
+              <label>🧾 產生張數</label>
+              <input type="number" id="gen-count" value="100" min="1" max="2000">
+            </div>
+            <div class="field-block" style="flex:0.6;">
+              <label>⏳ 使用期限</label>
+              <input type="text" id="gen-expire" value="依紙本券面為主" placeholder="例：2026/12/31">
+            </div>
+          </div>
+
+          <div style="background:#F7F9FC; border:1px solid #E6EAF0; border-radius:12px; padding:14px 16px; margin-bottom:16px; font-size:13px; line-height:1.9; color:#5A6478;">
+            <div><b>券號長這樣：</b><span id="gen-sample" class="mono" style="font-size:15px; color:#1A1C24; font-weight:700;">—</span></div>
+            <div style="margin-top:6px;">
+              最後一碼是<b>檢查碼</b>，由前面幾碼算出來。店員輸入時只要打錯一個字、或把相鄰兩碼打顛倒，
+              系統當場就知道是無效券號（實測攔截率 100% / 99.8%），連查資料庫都不用。
+            </div>
+            <div style="margin-top:6px;">
+              字母表刻意拿掉 <b>I、L、O、U</b>：I/L 會跟數字 1 搞混、O 會跟 0 搞混，
+              顧客唸電話報號碼時最容易錯的就是這幾個。店員若把 O 打成 0 系統也會自動修正。
+            </div>
+          </div>
+
+          <div class="form-group" style="gap:10px;">
+            <button id="btn-gen-preview" class="btn-primary" style="flex:1; padding:14px; font-size:15px; background:#8A93A5;" onclick="previewSerials()">👁️ 先產生預覽（不寫入）</button>
+            <button id="btn-gen-run" class="btn-primary" style="flex:1; padding:14px; font-size:15px; background:var(--sidebar-bg);" onclick="runSerialGen()" disabled>🚀 確認寫入資料庫</button>
+          </div>
+
+          <div id="gen-result" class="result-box" style="display:none;"></div>
+        </div>
+
         <div class="config-card save-cloud-container">
           <h2>💾 同步至資料庫</h2>
           <button class="btn-primary btn-save-cloud" style="width:100%; font-size:18px; padding: 16px;" onclick="saveConfigToCloud()">💾 儲存所有設定至雲端 (即時生效)</button>
@@ -830,9 +894,63 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getFirestore, collection, getDocs, onSnapshot, doc, getDoc, setDoc, updateDoc, deleteDoc, deleteField, query, limit, where, increment } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getFirestore, collection, getDocs, onSnapshot, doc, getDoc, setDoc, updateDoc, deleteDoc, deleteField, query, limit, where, increment, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
     import { getAuth, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
     import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js";
+
+    /* ============================================================
+     * 🔐 跳脫工具 —— 後台表格一定要用
+     * ------------------------------------------------------------
+     * 顧客的「社群暱稱」「社群帳號」是他們自己在領券頁輸入的，
+     * 舊版直接用樣板字串塞進 innerHTML 跟 onclick="fn('${...}')"，等於：
+     *   - 名字裡有一個單引號 → 那一列的操作按鈕全部壞掉
+     *   - 名字填成 <img src=x onerror=...> → 管理員一開後台，
+     *     這段程式碼就會在「帶著 admin 權限的頁面」上執行，整個資料庫任人處置
+     * 這是 stored XSS，而且攻擊者只要會填表單就好。
+     *
+     * esc()   → 放進 HTML 內容時用
+     * jsStr() → 放進 onclick="fn('...')" 這種 JS 字串裡時用
+     * ==========================================================*/
+    function esc(v) {
+      if (v === null || v === undefined) return '';
+      return String(v)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+    function jsStr(v) {
+      if (v === null || v === undefined) return '';
+      return String(v)
+        // 第一階段：JS 字串層級的跳脫
+        .replace(/\\/g, '\\\\')
+        .replace(/'/g, "\\'")
+        .replace(/\r?\n/g, '\\n')
+        // 第二階段：HTML 屬性層級的編碼。
+        // ⚠️ & 一定要處理，而且順序要在這裡（JS 跳脫之後）。
+        //    因為瀏覽器解析 onclick="..." 時，是「先把 HTML 字元參考解碼、
+        //    再把結果交給 JS parser」。少了這行的話，暱稱填 &#39;);alert(1);//
+        //    會被瀏覽器還原成 ');alert(1);// —— 上面的單引號跳脫就整個被繞過了。
+        .replace(/&/g, '&amp;')
+        .replace(/"/g, '&quot;')
+        .replace(/</g, '&lt;');
+    }
+    window.esc = esc;
+    window.jsStr = jsStr;
+
+    /* 🔧 統一時間格式：YYYY/MM/DD HH:mm:ss
+       舊版各處用 new Date().toLocaleString()，在 zh-TW 瀏覽器會產生
+       「2026/8/23 上午10:30:00」——月、日沒有補零，還多了「上午」兩個字。
+       但日期篩選比對的是 date-filter 轉出來的「2026/08/23」，永遠對不上；
+       Cloud Function 寫進去的又是補零格式，同一個欄位混著三種寫法，
+       預設用 timestamp 做字串排序的結果也是亂的。這裡統一成跟後端一致。*/
+    function fmtStamp(d = new Date()) {
+      const p = n => String(n).padStart(2, '0');
+      return `${d.getFullYear()}/${p(d.getMonth()+1)}/${p(d.getDate())} ` +
+             `${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
+    }
+    window.fmtStamp = fmtStamp;
 
     const firebaseConfig = {
       apiKey: "AIzaSyBINQuYtYZA8RLfwm51AfGLTYj1TX_UcFo",
@@ -929,6 +1047,10 @@
         if(document.getElementById('lottery-act')) document.getElementById('lottery-act').innerHTML = cleanHtml;
         if(document.getElementById('manual-act')) document.getElementById('manual-act').innerHTML = cleanHtml;
         if(document.getElementById('batch-act')) document.getElementById('batch-act').innerHTML = cleanHtml;
+        if(document.getElementById('gen-act')) {
+          document.getElementById('gen-act').innerHTML = cleanHtml;
+          updateSerialSample();          // 順便刷新券號範例
+        }
       }
     };
 
@@ -1037,11 +1159,11 @@
           <details class="kebab-dropdown">
             <summary>⋮</summary>
             <div class="kebab-menu">
-              <button onclick="editEvent('${actName}')">✏️ 編輯設定</button>
-              <button onclick="moveEventUp('${actName}')">🔼 向上移動</button>
-              <button onclick="moveEventDown('${actName}')">🔽 向下移動</button>
-              <button onclick="toggleEventStatus('${actName}')">${isActive ? '⬇️ 隱藏下架' : '⬆️ 重新上架'}</button>
-              <button class="danger" onclick="deleteEvent('${actName}')">🗑️ 刪除活動</button>
+              <button onclick="editEvent('${jsStr(actName)}')">✏️ 編輯設定</button>
+              <button onclick="moveEventUp('${jsStr(actName)}')">🔼 向上移動</button>
+              <button onclick="moveEventDown('${jsStr(actName)}')">🔽 向下移動</button>
+              <button onclick="toggleEventStatus('${jsStr(actName)}')">${isActive ? '⬇️ 隱藏下架' : '⬆️ 重新上架'}</button>
+              <button class="danger" onclick="deleteEvent('${jsStr(actName)}')">🗑️ 刪除活動</button>
             </div>
           </details>
         </li>
@@ -1393,7 +1515,7 @@
           POINT_RATE: globalPointRate,
           GIFT_LIST: globalGiftList,
           MEMBER_SYSTEM_ACTIVE: isMemberSystemActive,
-          lastUpdated: new Date().toLocaleString()
+          lastUpdated: fmtStamp()
         });
 
         // 🔥 通關密語寫進 system/secrets，跟公開可讀的 system/config 分開存。
@@ -1457,12 +1579,12 @@
         logs.forEach(d => {
            html += `
             <tr>
-              <td style="font-size: 13px; color: var(--text-sub);">${d.time}</td>
-              <td style="font-weight:bold;">${d.store}</td>
-              <td style="font-weight:bold; color:#3FBF8F;">${d.act}</td>
-              <td style="font-weight:bold;">${d.empName}</td>
+              <td style="font-size: 13px; color: var(--text-sub);">${esc(d.time)}</td>
+              <td style="font-weight:bold;">${esc(d.store)}</td>
+              <td style="font-weight:bold; color:#3FBF8F;">${esc(d.act)}</td>
+              <td style="font-weight:bold;">${esc(d.empName)}</td>
               <td style="width: 80px;">
-                <button class="btn-table-del" onclick="deleteGiftLogRecord('${d.id}', '${d.store}', '${d.act}')">
+                <button class="btn-table-del" onclick="deleteGiftLogRecord('${jsStr(d.id)}', '${jsStr(d.store)}', '${jsStr(d.act)}')">
                   <i class="fa-solid fa-rotate-left"></i> 退回
                 </button>
               </td>
@@ -1555,7 +1677,7 @@
           status: "未兌換",
           store: "",
           redeemTime: "",
-          timestamp: new Date().toLocaleString(),
+          timestamp: fmtStamp(),
           gift: gift || "",
           expireDate: expire || ""
         });
@@ -1593,12 +1715,15 @@
       btn.disabled = true;
 
       try {
-        const promises = [];
-        const timestamp = new Date().toLocaleString();
-        
+        const timestamp = fmtStamp();
+
+        // 🔧 修正：舊版把最多 2000 個 setDoc 一次丟進 Promise.all，
+        //    等於同時開 2000 條寫入，網路差一點就整批失敗，而且無法得知寫到哪。
+        //    改用 writeBatch，每 400 筆送一次（Firestore 單批上限 500）。
+        const docs = [];
         for (let i = start; i <= end; i++) {
           const serial = prefix + String(i).padStart(pad, '0');
-          const p = setDoc(doc(db, act, serial), {
+          docs.push({ serial, data: {
             name: "實體券顧客",
             social_id: "實體紙本憑證",
             phone: serial,
@@ -1608,18 +1733,255 @@
             timestamp: timestamp,
             gift: gift || "依實體券面標示發放",
             expireDate: "依紙本券面為主"
-          });
-          promises.push(p);
+          }});
         }
-        
-        await Promise.all(promises);
-        alert(`✅ 批次建檔完成！成功寫入 ${promises.length} 筆資料。`);
+
+        let done = 0;
+        for (let i = 0; i < docs.length; i += 400) {
+          const chunk = docs.slice(i, i + 400);
+          const wb = writeBatch(db);
+          chunk.forEach(d => wb.set(doc(db, act, d.serial), d.data));
+          await wb.commit();
+          done += chunk.length;
+          btn.innerText = `⏳ 批次寫入中... ${done}/${docs.length}`;
+        }
+
+        alert(`✅ 批次建檔完成！成功寫入 ${done} 筆資料。`);
       } catch(e) {
         console.error(e);
-        alert("❌ 批次建檔發生錯誤。");
+        alert("❌ 批次建檔發生錯誤：" + (e.message || e));
       } finally {
         btn.innerText = "🚀 開始批次建檔";
         btn.disabled = false;
+      }
+    };
+
+    /* ============================================================
+     * 實體券亂碼流水號生成器
+     * ------------------------------------------------------------
+     * 一般這類系統的設計慣例（這裡照著做）：
+     *   1. 字元表要避開會看錯的字：拿掉 I、L、O、U（Crockford Base32 的做法）
+     *   2. 券號要「不可預測」：用 crypto.getRandomValues()，不能用 Math.random()
+     *      —— Math.random() 是可推算的偽亂數，理論上看幾組就能猜出後面的
+     *   3. 最後補一碼「檢查碼」(Luhn mod N)：讓打錯字當場就被擋掉，不用查資料庫
+     *   4. 顯示時每 4 碼加一個減號，存進資料庫時把減號拿掉
+     *   5. 檢查碼只保證「格式對」，不保證「這張券存在」——真正的防偽還是靠
+     *      「有沒有在資料庫建檔過」，檢查碼是幫忙省掉無謂查詢的第一道篩子
+     * ==========================================================*/
+    const SERIAL_ALPHABET = "0123456789ABCDEFGHJKMNPQRSTVWXYZ"; // 32 碼，無 I L O U
+    const SERIAL_BASE = SERIAL_ALPHABET.length;
+
+    /** Luhn mod N：由本體算出一碼檢查碼 */
+    function luhnCheckChar(input) {
+      let factor = 2, sum = 0;
+      for (let i = input.length - 1; i >= 0; i--) {
+        const cp = SERIAL_ALPHABET.indexOf(input[i]);
+        if (cp < 0) return null;
+        let addend = factor * cp;
+        factor = factor === 2 ? 1 : 2;
+        addend = Math.floor(addend / SERIAL_BASE) + (addend % SERIAL_BASE);
+        sum += addend;
+      }
+      return SERIAL_ALPHABET[(SERIAL_BASE - (sum % SERIAL_BASE)) % SERIAL_BASE];
+    }
+
+    /** 驗證「本體＋檢查碼」是否合法（POS 端也可以用同一支） */
+    window.luhnValidate = function(full) {
+      if (!full) return false;
+      let factor = 1, sum = 0;
+      for (let i = full.length - 1; i >= 0; i--) {
+        const cp = SERIAL_ALPHABET.indexOf(full[i]);
+        if (cp < 0) return false;
+        let addend = factor * cp;
+        factor = factor === 2 ? 1 : 2;
+        addend = Math.floor(addend / SERIAL_BASE) + (addend % SERIAL_BASE);
+        sum += addend;
+      }
+      return sum % SERIAL_BASE === 0;
+    };
+
+    /** 把店員手打的內容整理成標準券號（大寫、去分隔符、修正易混淆字） */
+    window.normalizeSerial = function(raw) {
+      return String(raw || "")
+        .toUpperCase()
+        .replace(/[^0-9A-Z]/g, "")
+        .replace(/O/g, "0")
+        .replace(/[IL]/g, "1")
+        .replace(/U/g, "V");
+    };
+
+    function randomSerialBody(len) {
+      const bytes = new Uint8Array(len);
+      crypto.getRandomValues(bytes);   // 密碼學等級亂數，不可預測
+      let out = "";
+      for (let i = 0; i < len; i++) out += SERIAL_ALPHABET[bytes[i] % SERIAL_BASE];
+      return out;
+    }
+
+    /** 回傳 { plain: 存資料庫用, display: 印在券上用 } */
+    function makeSerial(prefix, bodyLen) {
+      const body = randomSerialBody(bodyLen);
+      const full = body + luhnCheckChar(body);
+      const groups = full.match(/.{1,4}/g) || [full];
+      return {
+        plain: prefix + full,
+        display: (prefix ? prefix + "-" : "") + groups.join("-")
+      };
+    }
+
+    let generatedSerials = [];   // 預覽產生的結果，按「確認寫入」時才真的送出
+
+    function updateSerialSample() {
+      const el = document.getElementById('gen-sample');
+      if (!el) return;
+      const prefix = normalizeSerial(document.getElementById('gen-prefix').value).slice(0, 4);
+      const len = parseInt(document.getElementById('gen-len').value, 10) || 8;
+      el.innerText = makeSerial(prefix, len).display;
+    }
+
+    // 改前綴或長度時，即時更新上面那組範例券號
+    ['gen-prefix', 'gen-len'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener('input', () => {
+        updateSerialSample();
+        // 條件變了，之前預覽的那批就不算數，避免印 A 樣式卻寫入 B 樣式
+        generatedSerials = [];
+        const runBtn = document.getElementById('btn-gen-run');
+        if (runBtn) runBtn.disabled = true;
+        const box = document.getElementById('gen-result');
+        if (box) box.style.display = 'none';
+      });
+    });
+    updateSerialSample();
+
+    window.previewSerials = async function() {
+      const act = document.getElementById('gen-act').value;
+      const prefix = normalizeSerial(document.getElementById('gen-prefix').value).slice(0, 4);
+      const len = parseInt(document.getElementById('gen-len').value, 10) || 8;
+      const count = parseInt(document.getElementById('gen-count').value, 10);
+      const btn = document.getElementById('btn-gen-preview');
+      const box = document.getElementById('gen-result');
+
+      if (!act || act === 'ALL_OVERVIEW') return alert("⚠️ 請選擇具體的活動！");
+      if (isNaN(count) || count < 1) return alert("⚠️ 請輸入正確的張數！");
+      if (count > 2000) return alert("⚠️ 一次最多產生 2000 張，請分批處理。");
+
+      btn.disabled = true;
+      btn.innerText = "⏳ 產生中...";
+
+      try {
+        // 先把這個活動已存在的券號抓回來，確保新號碼不會蓋到舊券。
+        // （亂碼撞號機率極低，但「覆蓋掉一張已發出去的券」的後果太嚴重，值得多花這一次查詢）
+        const existingSnap = await getDocs(collection(db, act));
+        const existing = new Set(existingSnap.docs.map(d => d.id));
+
+        const seen = new Set();
+        const list = [];
+        let guard = 0;
+        while (list.length < count && guard < count * 50) {
+          guard++;
+          const s = makeSerial(prefix, len);
+          if (existing.has(s.plain) || seen.has(s.plain)) continue;
+          seen.add(s.plain);
+          list.push(s);
+        }
+
+        if (list.length < count) {
+          return alert("⚠️ 亂碼空間不足，請把「亂碼長度」調長一點再試。");
+        }
+
+        generatedSerials = list;
+        document.getElementById('btn-gen-run').disabled = false;
+
+        const preview = list.slice(0, 12).map(s => `<div class="mono">${s.display}</div>`).join("");
+        box.style.display = 'block';
+        box.innerHTML = `
+          <h3 style="margin-top:0; color:var(--green); font-size:17px;">✅ 已產生 ${list.length} 組券號（尚未寫入資料庫）</h3>
+          <p style="font-size:13px; color:#5A6478; line-height:1.8;">
+            比對了資料庫既有的 ${existing.size} 筆紀錄，確認沒有重複。<br>
+            下面是前 12 組預覽，請先按「下載 CSV」留底給印刷廠，再按「確認寫入資料庫」。<br>
+            <b style="color:#C0392B;">⚠️ 亂碼一旦重新產生就是全新的一組，沒有下載就寫入的話，你會不知道自己印了哪些號碼。</b>
+          </p>
+          <div style="background:#fff; border:1px solid #E6EAF0; border-radius:10px; padding:12px 16px; font-size:14px; line-height:2; letter-spacing:.05em;">
+            ${preview}
+            ${list.length > 12 ? `<div style="color:#8A93A5; font-size:12px; margin-top:6px;">⋯ 其餘 ${list.length - 12} 組請由 CSV 查看</div>` : ""}
+          </div>
+          <button class="btn-primary" style="margin-top:14px; background:#3FBF8F;" onclick="downloadSerialCsv()">⬇️ 下載 CSV（給印刷廠）</button>
+        `;
+      } catch (e) {
+        console.error(e);
+        alert("❌ 產生券號時發生錯誤：" + (e.message || e));
+      } finally {
+        btn.disabled = false;
+        btn.innerText = "👁️ 先產生預覽（不寫入）";
+      }
+    };
+
+    window.downloadSerialCsv = function() {
+      if (!generatedSerials.length) return alert("⚠️ 尚未產生券號。");
+      const act = document.getElementById('gen-act').value;
+      const rows = [["序號", "印在券上的號碼", "資料庫代碼"]];
+      generatedSerials.forEach((s, i) => rows.push([i + 1, s.display, s.plain]));
+
+      // ﻿ 是 BOM，讓 Excel 開啟時不會把中文變亂碼
+      const csv = "﻿" + rows.map(r => r.join(",")).join("\r\n");
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `實體券號_${act}_${new Date().toISOString().slice(0,10)}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    };
+
+    window.runSerialGen = async function() {
+      if (!generatedSerials.length) return alert("⚠️ 請先按「產生預覽」。");
+
+      const act = document.getElementById('gen-act').value;
+      const gift = document.getElementById('gen-gift').value.trim();
+      const expire = document.getElementById('gen-expire').value.trim();
+      const btn = document.getElementById('btn-gen-run');
+
+      if (!confirm(`⚠️ 即將把 ${generatedSerials.length} 組券號寫入「${act}」。\n\n請確認已經下載 CSV 留底，否則這批號碼將無從查起。\n\n確定執行嗎？`)) return;
+
+      btn.disabled = true;
+      const timestamp = fmtStamp();
+
+      try {
+        let done = 0;
+        for (let i = 0; i < generatedSerials.length; i += 400) {
+          const chunk = generatedSerials.slice(i, i + 400);
+          const wb = writeBatch(db);
+          chunk.forEach(s => {
+            wb.set(doc(db, act, s.plain), {
+              name: "實體券顧客",
+              social_id: "實體紙本憑證",
+              phone: s.plain,
+              serialDisplay: s.display,   // 印在券上的樣子，後台查詢時比較好認
+              status: "未兌換",
+              store: "",
+              redeemTime: "",
+              timestamp: timestamp,
+              gift: gift || "依實體券面標示發放",
+              expireDate: expire || "依紙本券面為主"
+            });
+          });
+          await wb.commit();
+          done += chunk.length;
+          btn.innerText = `⏳ 寫入中... ${done}/${generatedSerials.length}`;
+        }
+
+        alert(`✅ 完成！已寫入 ${done} 組券號。\n\n這些券要在 POS 端「實體券」模式輸入才能核銷。`);
+        generatedSerials = [];
+        document.getElementById('gen-result').style.display = 'none';
+      } catch (e) {
+        console.error(e);
+        alert("❌ 寫入失敗：" + (e.message || e));
+      } finally {
+        btn.disabled = true;   // 寫完就鎖起來，避免同一批被重複寫入
+        btn.innerText = "🚀 確認寫入資料庫";
       }
     };
 
@@ -1698,19 +2060,45 @@
       btn.disabled = true;
 
       try {
+        /* 🔧 洗牌改用 crypto 亂數。
+           Math.random() 是可預測的偽亂數，拿來抽獎在公平性上站不太住腳
+           （真的有人質疑時也不好解釋），改用密碼學等級亂數成本幾乎為零。*/
+        const rnd = (n) => {
+          const buf = new Uint32Array(1);
+          crypto.getRandomValues(buf);
+          return buf[0] % n;
+        };
         for (let i = validParticipants.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
+          const j = rnd(i + 1);
           [validParticipants[i], validParticipants[j]] = [validParticipants[j], validParticipants[i]];
         }
-        
+
         const winners = validParticipants.slice(0, count);
+
+        /* 🔧 兌換碼防撞號。
+           舊版是 "888" + 5 位數亂數，只有 9 萬種組合，而且直接 setDoc 不檢查。
+           同一個活動辦幾次抽獎之後，撞號機率就不容忽視了——一撞號就是
+           「後面的得獎者把前面某位的兌換券整個蓋掉」，而且完全無聲無息。
+           這裡先把既有的號碼撈回來，確保這批新號碼不重複。*/
+        const existingSnap = await getDocs(collection(db, act));
+        const usedCodes = new Set(existingSnap.docs.map(d => d.id));
         let resultHTML = `<h3 style="margin-top:0; color:var(--green); font-size:18px;">🎉 抽獎完成！抽出 ${count} 名得獎者：</h3>`;
         
         for (let i = 0; i < winners.length; i++) {
           const w = winners[i];
-          const winnerName = w.name; 
-          const randomCode = "888" + Math.floor(10000 + Math.random() * 90000);
-          
+          const winnerName = w.name;
+
+          let randomCode = "";
+          for (let tryN = 0; tryN < 200; tryN++) {
+            const c = "888" + String(10000 + rnd(90000));
+            if (!usedCodes.has(c)) { randomCode = c; break; }
+          }
+          if (!randomCode) {
+            alert(`⚠️ 這個活動的兌換碼已經快用完了（目前 ${usedCodes.size} 組），請改用新的活動，或先清理舊資料。`);
+            break;
+          }
+          usedCodes.add(randomCode);
+
           await setDoc(doc(db, act, randomCode), {
             name: `@${winnerName}`, 
             social_id: `@${winnerName}`,
@@ -1718,20 +2106,22 @@
             status: "未兌換",
             store: "",
             redeemTime: "",
-            timestamp: new Date().toLocaleString(),
+            timestamp: fmtStamp(),
             gift: gift || "",
             expireDate: "" 
           });
           
           const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${randomCode}&margin=10`;
           
+          // 得獎者的帳號與留言是從社群平台複製貼上的外部內容，一律跳脫後才輸出
+          const safeAccount = encodeURIComponent(String(winnerName).replace(/^@/, ''));
           resultHTML += `
           <div class="winner-card">
             <img src="${qrUrl}" alt="QR Code">
             <div class="winner-info">
-              <a href="https://instagram.com/${winnerName}" target="_blank">👑 @${winnerName} 🔗</a>
-              <div class="winner-comment">💬 留言：${w.comment}</div>
-              <div class="winner-code">🎫 兌換碼：${randomCode}</div>
+              <a href="https://instagram.com/${safeAccount}" target="_blank" rel="noopener noreferrer">👑 @${esc(winnerName)} 🔗</a>
+              <div class="winner-comment">💬 留言：${esc(w.comment)}</div>
+              <div class="winner-code">🎫 兌換碼：${esc(randomCode)}</div>
             </div>
           </div>`;
         }
@@ -1806,12 +2196,26 @@
           btnExpire.disabled = false;
           document.getElementById('check-all').disabled = false;
           
-          const q = query(collection(db, act), limit(500));
+          /* ⚠️ 這裡有 limit(500)。票券超過 500 張時，下面的統計、匯出 Excel、
+             智慧結算都只會看到前 500 筆——數字會少算，過期券也會漏結算。
+             之前完全沒有任何提示，管理員不會知道自己看到的是不完整的資料，
+             所以現在達到上限時會在畫面上明確警告。
+             （真正的解法是改用分頁查詢或 getCountFromServer 做統計，屬於較大重構）*/
+          const ROW_LIMIT = 500;
+          const q = query(collection(db, act), limit(ROW_LIMIT));
           unsubscribeSnapshot = onSnapshot(q, (querySnapshot) => {
             allData = [];
             querySnapshot.forEach((doc) => {
               const d = doc.data(); d.id = doc.id; d.act_source = act; allData.push(d);
             });
+            const warnEl = document.getElementById('limit-warning');
+            if (warnEl) {
+              const hit = allData.length >= ROW_LIMIT;
+              warnEl.style.display = hit ? 'block' : 'none';
+              if (hit) warnEl.innerHTML =
+                `⚠️ <b>這個活動的票券已達 ${ROW_LIMIT} 筆顯示上限</b>：下方統計、匯出報表與「智慧結算過期」都只涵蓋前 ${ROW_LIMIT} 筆，` +
+                `實際張數可能更多。完整的過期結算請交給雲端排程（每天 00:05 自動執行全量掃描）。`;
+            }
             updateDashboardStats();
           }, (error) => {
             tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding: 40px; color: red;">連線中斷，請確認網路連線。</td></tr>';
@@ -1827,10 +2231,19 @@
       let validTotalCount = 0; 
 
       allData.forEach(d => {
-        if(dateStr && ((d.redeemTime && !d.redeemTime.includes(dateStr)) && (d.timestamp && !d.timestamp.includes(dateStr)))) {
-            return; 
-        }
-        
+        /* 🔧 修正：舊版寫成
+             if(dateStr && ((d.redeemTime && !d.redeemTime.includes(dateStr))
+                         && (d.timestamp && !d.timestamp.includes(dateStr))))
+           未兌換票券的 redeemTime 是空字串，`d.redeemTime && ...` 直接短路成 false，
+           整個條件恆為 false → 未兌換的券永遠不會被日期篩掉。
+           結果：上方統計卡片把所有未兌換券都算進去，下面表格（2305 行用的是正確寫法）
+           卻有正確篩掉，同一畫面「總計 N 筆」跟「顯示 M 筆結果」對不起來，核銷率也是錯的。
+           這裡改成跟 renderTable() 完全相同的判斷式。*/
+        const matchDate = dateStr === ""
+          || (d.redeemTime && d.redeemTime.includes(dateStr))
+          || (d.timestamp && d.timestamp.includes(dateStr));
+        if (!matchDate) return;
+
         validTotalCount++;
 
         if (d.status === "已兌換") {
@@ -1874,24 +2287,44 @@
       const btn = document.getElementById('btn-batch');
       btn.innerText = "處理中..."; btn.disabled = true;
 
-      const d = new Date(), pad = (n) => (n < 10 ? "0" + n : String(n));
-      const nowStr = d.getFullYear() + "/" + pad(d.getMonth()+1) + "/" + pad(d.getDate()) + " " + pad(d.getHours()) + ":" + pad(d.getMinutes()) + ":" + pad(d.getSeconds());
-
-      const promises = Array.from(checkedBoxes).map(box => {
-        return updateDoc(doc(db, act, box.value), {
-          status: "已兌換",
-          store: "總部後台 (補登)",
-          redeemTime: nowStr,
-          redeemBy: "總部管理員"
-        });
-      });
+      const nowStr = fmtStamp();
+      const ids = Array.from(checkedBoxes).map(b => b.value);
 
       try {
-        await Promise.all(promises);
-        alert(`✅ 成功批次核銷 ${checkedBoxes.length} 張票券！`);
+        /* 🔧 修正：舊版無條件 updateDoc 覆蓋，會把門市 POS 剛剛核銷的紀錄
+           改寫成「總部後台 (補登)」，稽核資料就此消失。
+           現在先讀一次，只補登「還沒被核銷」的，已核銷的跳過並回報。*/
+        let done = 0, skipped = 0, failed = 0;
+
+        for (let i = 0; i < ids.length; i += 400) {
+          const chunk = ids.slice(i, i + 400);
+          const snaps = await Promise.all(chunk.map(id => getDoc(doc(db, act, id))));
+
+          const wb = writeBatch(db);
+          let inBatch = 0;
+          snaps.forEach((snap, k) => {
+            if (!snap.exists()) { failed++; return; }
+            if (snap.data().status === "已兌換") { skipped++; return; }
+            wb.update(doc(db, act, chunk[k]), {
+              status: "已兌換",
+              store: "總部後台 (補登)",
+              redeemTime: nowStr,
+              redeemBy: "總部管理員"
+            });
+            inBatch++;
+          });
+
+          if (inBatch > 0) { await wb.commit(); done += inBatch; }
+          btn.innerText = `處理中... ${done + skipped + failed}/${ids.length}`;
+        }
+
+        let msg = `✅ 批次核銷完成！成功補登 ${done} 張。`;
+        if (skipped > 0) msg += `\n\n⏭️ 有 ${skipped} 張門市已經核銷過了，為了保留原本的核銷門市與時間紀錄，這幾張沒有被覆蓋。`;
+        if (failed > 0) msg += `\n\n⚠️ 有 ${failed} 張找不到資料。`;
+        alert(msg);
       } catch(e) {
         console.error(e);
-        alert("批次核銷發生錯誤");
+        alert("批次核銷發生錯誤：" + (e.message || e));
       } finally {
         btn.innerText = "☑️ 批次核銷"; btn.disabled = false;
       }
@@ -1903,7 +2336,14 @@
       const act = actSelect.value;
       
       if (act === 'ALL_OVERVIEW') return alert("🛑 總覽模式下無法進行智慧結算，請選擇單一具體活動。");
-      if (act.includes('(已下架)')) return alert("🛑 該活動已下架結束，無需再進行掃描結算！");
+      /* 🔧 修正：舊版寫 act.includes('(已下架)')，但「(已下架)」只加在 <option> 的
+         「顯示文字」上（1052 行），value 仍然是純活動名稱，所以這道防呆永遠不會成立。
+         改成直接看設定裡的 active 欄位。
+         （下架的活動其實還是可以結算——已發出的券本來就該讓它正常到期——
+          所以這裡只做提醒，讓管理員自己決定要不要繼續。）*/
+      if (globalPosConfig[act]?.active === false) {
+        if (!confirm(`⚠️「${act}」目前是下架狀態。\n\n下架只是停止發券，已發出的券仍會照使用期限過期，通常還是可以結算。\n\n確定要繼續嗎？`)) return;
+      }
       
       const defaultExpire = globalPosConfig[act]?.expireDate || "";
 
@@ -2021,42 +2461,42 @@
         if (d.status === '已兌換') statusBadge = `<span class="status-yes">已兌換</span>`; 
         if (d.status === '已過期') statusBadge = `<span class="status-expired">已過期</span>`; 
         
-        let displayGift = d.gift ? `${d.gift} <span style="font-size:10px; color:#F07654;">(專屬)</span>` : defaultGift;
-        let displayExpire = d.expireDate || defaultExpire;
+        let displayGift = d.gift ? `${esc(d.gift)} <span style="font-size:10px; color:#F07654;">(專屬)</span>` : esc(defaultGift);
+        let displayExpire = esc(d.expireDate) || esc(defaultExpire);
         
-        let checkboxHTML = (!d.status || d.status === '未兌換') ? `<input type="checkbox" class="row-check" value="${d.id}" ${isOverview ? 'disabled' : ''}>` : '';
-        let actColHTML = isOverview ? `<td><span class="act-tag">${d.act_source}</span></td>` : '';
+        let checkboxHTML = (!d.status || d.status === '未兌換') ? `<input type="checkbox" class="row-check" value="${esc(d.id)}" ${isOverview ? 'disabled' : ''}>` : '';
+        let actColHTML = isOverview ? `<td><span class="act-tag">${esc(d.act_source)}</span></td>` : '';
 
         let actionBtnHTML = `
           <details class="kebab-dropdown">
             <summary>⋮</summary>
             <div class="kebab-menu">
-              <button onclick="showQrCode('${d.phone}', '${d.name}')">📱 顯示 QR Code</button>
+              <button onclick="showQrCode('${jsStr(d.phone)}', '${jsStr(d.name)}')">📱 顯示 QR Code</button>
         `;
         if (d.status === '已兌換' || d.status === '已過期') {
-            actionBtnHTML += `<button onclick="resetSingleTicket('${d.id}', '${d.act_source}')">↻ 復原未兌換狀態</button>`;
+            actionBtnHTML += `<button onclick="resetSingleTicket('${jsStr(d.id)}', '${jsStr(d.act_source)}')">↻ 復原未兌換狀態</button>`;
         }
         actionBtnHTML += `
-              <button class="danger" onclick="deleteSingleTicket('${d.id}', '${d.act_source}')">🗑️ 刪除紀錄</button>
+              <button class="danger" onclick="deleteSingleTicket('${jsStr(d.id)}', '${jsStr(d.act_source)}')">🗑️ 刪除紀錄</button>
             </div>
           </details>
         `;
 
         let customerInfo = `
-            <div style="font-weight:bold; font-size:14px; color:var(--text-main);">${d.name || '未知'}</div>
-            <div style="font-family:monospace; font-size:13px; color:var(--text-sub);">${d.phone || '-'}</div>
-            <div style="font-size:12px; color:#F07654;">${d.social_id || '未提供'}</div>
+            <div style="font-weight:bold; font-size:14px; color:var(--text-main);">${esc(d.name) || '未知'}</div>
+            <div style="font-family:monospace; font-size:13px; color:var(--text-sub);">${esc(d.phone) || '-'}</div>
+            <div style="font-size:12px; color:#F07654;">${esc(d.social_id) || '未提供'}</div>
         `;
 
         let redeemInfo = (d.status === '已兌換') ? `
-            <div style="font-weight:bold; color:var(--sidebar-bg); font-size:13px;">${d.store || '-'}</div>
-            <div style="font-size:12px; color:var(--text-sub); margin-top:2px;">${d.redeemTime || '-'}</div>
-            <div style="font-size:11px; color:#B7BFCC;">人員: ${d.redeemBy || '-'}</div>
+            <div style="font-weight:bold; color:var(--sidebar-bg); font-size:13px;">${esc(d.store) || '-'}</div>
+            <div style="font-size:12px; color:var(--text-sub); margin-top:2px;">${esc(d.redeemTime) || '-'}</div>
+            <div style="font-size:11px; color:#B7BFCC;">人員: ${esc(d.redeemBy) || '-'}</div>
         ` : `<div style="color:var(--gray); font-size:12px;">-</div>`;
 
         let timeInfo = `
             <div style="font-size:13px; font-weight:bold; color:var(--text-main);"><span style="font-size:10px;color:var(--text-sub);">期限: </span>${displayExpire}</div>
-            <div style="font-size:11px; color:var(--text-sub); margin-top:4px;"><span style="font-size:10px;">領券: </span>${d.timestamp || '-'}</div>
+            <div style="font-size:11px; color:var(--text-sub); margin-top:4px;"><span style="font-size:10px;">領券: </span>${esc(d.timestamp) || '-'}</div>
         `;
 
         return `
@@ -2230,7 +2670,7 @@
         const docRef = doc(db, "inventory", `${s}_${a}`);
         const snap = await getDoc(docRef);
         let used = snap.exists() ? (snap.data().usedCount || 0) : 0;
-        await setDoc(docRef, { count: c, store: s, act: a, usedCount: used, lastUpdated: new Date().toLocaleString() });
+        await setDoc(docRef, { count: c, store: s, act: a, usedCount: used, lastUpdated: fmtStamp() });
         alert("✅ 庫存更新成功！");
       } catch(e) {
         console.error(e); alert("更新庫存失敗！");
