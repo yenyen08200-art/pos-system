@@ -17,6 +17,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+  <!-- LIFF SDK：用 LINE 帳號當身分，取代簡訊 OTP -->
+  <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   <style>
     :root{
       --sage-deep:#5c6a5c; --sage:#8b9a86; --sage-light:#b9c3b1;
@@ -134,13 +136,49 @@
     }
     input::placeholder{color:rgba(90,96,88,.6);font-weight:400}
 
-    .btn-otp {
-      width: auto; padding: 0 16px; margin: 0; border-radius: 14px; font-size: 13px; font-weight: 700; letter-spacing: 0.05em;
-      background: rgba(185,145,90,.15); color: var(--brass-deep); border: 1px solid rgba(185,145,90,.5);
-      cursor: pointer; transition: 0.2s; white-space: nowrap;
+    /* LINE 身分列：讓顧客看得到「系統認得我是誰」，減少填單時的不安全感 */
+    .line-identity {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 14px; margin-bottom: 18px; border-radius: 16px;
+      background: linear-gradient(160deg, rgba(6,199,85,.12), rgba(255,255,255,.25));
+      border: 1px solid rgba(6,199,85,.35);
+      position: relative; z-index: 2;
     }
-    .btn-otp:hover:not(:disabled) { background: rgba(185,145,90,.25); }
-    .btn-otp:disabled { opacity: 0.6; cursor: not-allowed; }
+    .line-identity img {
+      width: 40px; height: 40px; border-radius: 50%; object-fit: cover; flex-shrink: 0;
+      background: rgba(0,0,0,.06);
+    }
+    .line-identity .li-text { min-width: 0; flex: 1; }
+    .line-identity .li-label {
+      font-size: 11px; font-weight: 700; letter-spacing: .1em;
+      color: #068a3d; text-transform: uppercase;
+    }
+    .line-identity .li-name {
+      font-size: 15px; font-weight: 700; color: var(--brass-deep);
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+
+    /* 開場的身分驗證遮罩 */
+    #liff-gate {
+      position: fixed; inset: 0; z-index: 9999;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 16px; padding: 32px; text-align: center;
+      background: rgba(250, 247, 240, .96); backdrop-filter: blur(8px);
+    }
+    #liff-gate.hidden { display: none; }
+    #liff-gate .gate-title { font-size: 17px; font-weight: 700; color: var(--brass-deep); }
+    #liff-gate .gate-desc { font-size: 13px; color: rgba(90,96,88,.85); line-height: 1.7; max-width: 320px; }
+    .gate-spinner {
+      width: 38px; height: 38px; border-radius: 50%;
+      border: 3px solid rgba(185,145,90,.25); border-top-color: var(--brass-deep);
+      animation: gate-spin .9s linear infinite;
+    }
+    @keyframes gate-spin { to { transform: rotate(360deg); } }
+    #liff-gate .gate-retry {
+      margin-top: 4px; padding: 12px 24px; border-radius: 14px; cursor: pointer;
+      font-size: 14px; font-weight: 700; border: 1px solid rgba(185,145,90,.5);
+      background: rgba(185,145,90,.15); color: var(--brass-deep);
+    }
 
     .secret{
       margin:26px 0 20px;padding:22px 18px;border-radius:22px;text-align:center;
@@ -274,6 +312,14 @@
     </header>
 
     <section class="glass card" id="form-section">
+      <div class="line-identity" id="line-identity" style="display:none">
+        <img id="li-avatar" alt="" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==">
+        <div class="li-text">
+          <div class="li-label">LINE 帳號已驗證</div>
+          <div class="li-name" id="li-name">—</div>
+        </div>
+      </div>
+
       <div class="field">
         <label for="activity">兌換活動項目</label>
         <select id="activity" onchange="checkSaved()">
@@ -290,21 +336,13 @@
       </div>
       
       <div class="field">
-        <label for="phone">手機號碼 (限 09 開頭)</label>
-        <div style="display: flex; gap: 8px;">
-          <input id="phone" type="tel" inputmode="numeric" placeholder="例：0912345678" style="flex: 1;" oninput="
-            let v = this.value.replace(/\D/g,''); 
-            if(v.length > 0 && v[0] !== '0') v = ''; 
-            if(v.length > 1 && v[1] !== '9') v = '0';
-            this.value = v.slice(0,10);
-          ">
-          <button type="button" id="btn-send-otp" class="btn-otp" onclick="sendOTP()">取得驗證碼</button>
-        </div>
-      </div>
-      
-      <div class="field" id="otp-field" style="display: none;">
-        <label for="otp_code">簡訊驗證碼</label>
-        <input id="otp_code" type="tel" inputmode="numeric" placeholder="請輸入 6 位數驗證碼" maxlength="6" oninput="this.value=this.value.replace(/\D/g,'')">
+        <label for="phone">手機號碼 (限 09 開頭，門市核銷查詢用)</label>
+        <input id="phone" type="tel" inputmode="numeric" placeholder="例：0912345678" oninput="
+          let v = this.value.replace(/\D/g,'');
+          if(v.length > 0 && v[0] !== '0') v = '';
+          if(v.length > 1 && v[1] !== '9') v = '0';
+          this.value = v.slice(0,10);
+        ">
       </div>
 
       <div class="secret">
@@ -340,21 +378,25 @@
       </div>
       
       <button class="switch-btn" onclick="switchAct()">🔄 切換 / 領取其他活動</button>
-      <button class="family-btn" onclick="refillForFamily()">➕ 幫親友代領 (重新填單)</button>
-      
+
       <!-- 🔥 隱藏開關：引導前往會員中心 -->
       <a href="member.html" class="submit-btn" id="btn-goto-member" style="display: flex; align-items: center; justify-content: center; margin-top: 20px;">👑 前往我的會員中心</a>
     </section>
 
-    <div id="recaptcha-container"></div>
+    <div id="liff-gate">
+      <div class="gate-spinner" id="gate-spinner"></div>
+      <div class="gate-title" id="gate-title">正在驗證 LINE 身分…</div>
+      <div class="gate-desc" id="gate-desc">第一次使用會跳出 LINE 授權畫面，同意後就會自動回到這裡。</div>
+      <button class="gate-retry" id="gate-retry" style="display:none" onclick="location.reload()">🔄 重新載入</button>
+    </div>
 
     <p class="footnote">Texas Chick · Since 1987</p>
   </main>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-  import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-  import { getAuth, RecaptchaVerifier, signInWithPhoneNumber } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { getFirestore, doc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  import { getAuth, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
   import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js";
 
   const firebaseConfig = {
@@ -374,15 +416,34 @@
   const auth = getAuth(app);
   auth.languageCode = 'zh-TW';
 
+  /* ============================================================
+   * LIFF 設定 —— 這一行一定要填，不然整頁不會動
+   * ------------------------------------------------------------
+   * 去哪拿：LINE Developers Console → 你的 Provider
+   *        → 建立（或選擇）一個「LINE Login」channel
+   *        → LIFF 分頁 → Add
+   *            Endpoint URL：這一頁的完整網址
+   *              例 https://yenyen08200-art.github.io/你的repo/test_register.html
+   *            Size：Full
+   *            Scope：勾 profile、openid（openid 一定要勾，不然拿不到 ID Token）
+   *        → 建立完會給你一組 LIFF ID，格式像 1234567890-abcdEFGh
+   *
+   * ⚠️ LIFF ID 前面那串數字就是 Channel ID，要跟 functions/index.js 裡的
+   *    LINE_LOGIN_CHANNEL_ID 填成同一組，否則後端會驗不過。
+   * ============================================================*/
+  const LIFF_ID = "2011218116-PrF1MXQ3";
+
   const $ = id => document.getElementById(id);
   let unsubscribe = null;
   // 🔥 通關密語不再存在前端變數裡了——正確答案只存在雲端的 system/secrets，
-  //    這裡改成呼叫 Cloud Function verifySecretCode 驗證，開發者工具挖不到答案。
-  let POS_CONFIG = {}; 
+  //    驗證與發券整段都在 Cloud Function claimTicket 裡做，開發者工具挖不到答案。
+  let POS_CONFIG = {};
   let isMemberSystemActive = true; // 🔥 新增：全域開關變數
-  
-  let confirmationResult = null;
-  let recaptchaVerifier = null;
+
+  /* LINE 身分狀態 */
+  let lineProfile = null;   // { lineUserId, displayName, pictureUrl }
+  let myClaims = {};        // { 活動名稱: { phone, claimedAt } } —— 這個 LINE 帳號已領過的活動
+  let ticketCache = {};     // { 活動名稱: 票券資料 } —— 領完/查回來的券，切換活動時直接重畫
 
   const urlParams = new URLSearchParams(window.location.search);
   const customGift = urlParams.get('gift') || "";
@@ -422,8 +483,81 @@
   window.checkSaved = checkSaved;
   window.switchAct = switchAct;
   window.register = register;
-  window.refillForFamily = refillForFamily;
-  window.sendOTP = sendOTP;
+
+  /* ============================================================
+   * 開場流程：先確認「你是誰」，再讓你看到表單
+   *
+   *   liff.init()
+   *     → 沒登入就 liff.login()（在 LINE 裡是無感的，外部瀏覽器會跳 LINE 登入頁）
+   *     → liff.getIDToken() 拿到一段有 LINE 簽章的憑證
+   *     → 送給 Cloud Function lineSignIn 驗證
+   *         回傳：Firebase custom token + 這個帳號已領過哪些活動
+   *     → signInWithCustomToken() 登入 Firebase Auth（uid = LINE userId）
+   *
+   * 為什麼要多繞一圈 Firebase Auth？
+   *   因為票券的即時狀態是用 onSnapshot 監聽的，要有 Firebase 的登入身分才讀得到；
+   *   而且之後會員系統要做權限判斷時，request.auth.uid 就直接是 LINE 帳號，很好用。
+   * ============================================================*/
+  function gateFail(title, desc) {
+    $('gate-spinner').style.display = 'none';
+    $('gate-title').innerText = title;
+    $('gate-desc').innerHTML = desc;
+    $('gate-retry').style.display = 'block';
+  }
+
+  async function bootstrap() {
+    if (!LIFF_ID) {
+      return gateFail("⚠️ 系統尚未設定完成",
+        "開發者請先在 <b>test_register.html</b> 填入 LIFF_ID，<br>並在 <b>functions/index.js</b> 填入 LINE_LOGIN_CHANNEL_ID。");
+    }
+
+    try {
+      await liff.init({ liffId: LIFF_ID });
+    } catch (e) {
+      console.error("LIFF 初始化失敗:", e);
+      return gateFail("😢 無法啟動 LINE 驗證", "請確認網址是否正確，或稍後再試一次。");
+    }
+
+    if (!liff.isLoggedIn()) {
+      // 這行會把頁面導去 LINE 授權，同意後自動回到本頁，然後 bootstrap 會再跑一次
+      liff.login({ redirectUri: window.location.href });
+      return;
+    }
+
+    const idToken = liff.getIDToken();
+    if (!idToken) {
+      return gateFail("😢 取不到 LINE 憑證",
+        "請確認這個 LIFF 應用程式的 Scope 有勾選 <b>openid</b>，然後重新開啟頁面。");
+    }
+
+    try {
+      const signIn = httpsCallable(functions, 'lineSignIn');
+      const res = await signIn({ idToken });
+      const d = res.data;
+
+      await signInWithCustomToken(auth, d.firebaseToken);
+
+      lineProfile = { lineUserId: d.lineUserId, displayName: d.displayName, pictureUrl: d.pictureUrl };
+      myClaims = {};
+      (d.claimed || []).forEach(c => { myClaims[c.act] = { phone: c.phone, claimedAt: c.claimedAt }; });
+
+      // 顯示身分列
+      $('li-name').innerText = d.displayName || "LINE 使用者";
+      if (d.pictureUrl) $('li-avatar').src = d.pictureUrl;
+      $('line-identity').style.display = 'flex';
+
+      // 暱稱欄位先幫他帶入 LINE 名稱，少打一點字
+      if (!$('name').value && d.displayName) $('name').value = d.displayName;
+
+    } catch (e) {
+      console.error("LINE 身分驗證失敗:", e);
+      const msg = (e && e.message) ? e.message : "請稍後再試。";
+      return gateFail("😢 身分驗證失敗", msg);
+    }
+
+    $('liff-gate').classList.add('hidden');
+    await initSystem();
+  }
 
   async function initSystem() {
     try {
@@ -469,191 +603,137 @@
     }
   }
 
-  initSystem();
+  bootstrap();
 
-  function checkSaved(isInit=false) {
-    const act = $('activity').value;
-    if(!act) return;
-    
-    $('otp-field').style.display = 'none';
-    $('otp_code').value = '';
-    confirmationResult = null;
-    
-    const phone = localStorage.getItem(`p_${act}_phone`);
-    if(phone) {
-      if(!isInit) alert(`💡 系統偵測到您已領取過「${act}」！已為您載入憑證。`);
-      renderTicket(act, localStorage.getItem(`p_${act}_name`), localStorage.getItem(`p_${act}_social`), phone);
-    } else {
-      if(unsubscribe) unsubscribe();
-      $('ticket-card').style.display = 'none';
-      $('form-section').style.display = 'block';
+  /** 從雲端把「這個活動我領過的那張券」抓回來顯示 */
+  async function showClaimedTicket(act, notify) {
+    const claim = myClaims[act];
+    if (!claim) return false;
+
+    if (ticketCache[act]) {
+      if (notify) alert(`💡 您已經領取過「${act}」，已為您載入原本的憑證。`);
+      renderTicket(act, ticketCache[act]);
+      return true;
     }
+
+    try {
+      const snap = await getDoc(doc(db, act, claim.phone));
+      if (snap.exists()) {
+        ticketCache[act] = { ...snap.data(), phone: claim.phone };
+        if (notify) alert(`💡 您已經領取過「${act}」，已為您載入原本的憑證。`);
+        renderTicket(act, ticketCache[act]);
+        return true;
+      }
+    } catch (e) {
+      console.error("讀取既有票券失敗:", e);
+    }
+    return false;
+  }
+
+  async function checkSaved(isInit = false) {
+    const act = $('activity').value;
+    if (!act) return;
+
+    if (myClaims[act]) {
+      const ok = await showClaimedTicket(act, !isInit);
+      if (ok) return;
+    }
+
+    if (unsubscribe) { unsubscribe(); unsubscribe = null; }
+    $('ticket-card').style.display = 'none';
+    $('form-section').style.display = 'block';
   }
 
   function switchAct() {
-    if(unsubscribe) unsubscribe();
-    const sel = $('activity'), current = sel.value;
-    const next = Array.from(sel.options).find(o => !localStorage.getItem(`p_${o.value}_phone`))?.value;
-    if(next) { sel.value = next; $('ticket-card').style.display = 'none'; $('form-section').style.display = 'block'; }
-    else { sel.value = Array.from(sel.options).find(o => o.value !== current).value; checkSaved(true); }
-  }
+    if (unsubscribe) { unsubscribe(); unsubscribe = null; }
+    const sel = $('activity');
+    const current = sel.value;
 
-  function refillForFamily() {
-    const act = $('activity').value;
-    if(confirm("確定要幫親友代領嗎？\n\n⚠️ 系統將回到空白表單。\n⚠️ 請務必輸入【親友的真實電話】並重新獲取驗證碼！")) {
-      localStorage.removeItem(`p_${act}_phone`);
-      $('phone').value = '';
-      $('btn-send-otp').disabled = false;
-      $('btn-send-otp').innerText = "取得驗證碼";
-      checkSaved(true);
+    // 優先跳到「還沒領過」的活動
+    const next = Array.from(sel.options).find(o => o.value && !myClaims[o.value])?.value;
+    if (next) {
+      sel.value = next;
+      $('ticket-card').style.display = 'none';
+      $('form-section').style.display = 'block';
+      return;
     }
-  }
 
-  function initRecaptcha() {
-    if (!recaptchaVerifier) {
-      recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-        'size': 'invisible',
-        'callback': (response) => {
-        }
-      });
+    // 全部都領過了 → 就切到下一個活動看那張券
+    const others = Array.from(sel.options).filter(o => o.value && o.value !== current);
+    if (others.length === 0) {
+      return alert("🎉 目前所有活動您都已經領取過囉！");
     }
-  }
-
-  async function sendOTP() {
-    const ph = $('phone').value.replace(/\D/g,'');
-    if(ph.length !== 10 || !ph.startsWith('09')) return alert("⚠️ 手機號碼必須為「09 開頭且滿 10 碼數字」！");
-
-    const btn = $('btn-send-otp');
-    btn.disabled = true;
-    btn.innerText = "發送中...";
-
-    initRecaptcha();
-
-    const phoneNumber = "+886" + ph.substring(1);
-
-    try {
-      confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, recaptchaVerifier);
-      alert("✅ 驗證碼已發送，請查看手機簡訊！");
-      $('otp-field').style.display = 'block';
-
-      let timeLeft = 60;
-      btn.innerText = `重新發送 (${timeLeft}s)`;
-      const timer = setInterval(() => {
-        timeLeft--;
-        if(timeLeft <= 0) {
-          clearInterval(timer);
-          btn.innerText = "取得驗證碼";
-          btn.disabled = false;
-        } else {
-          btn.innerText = `重新發送 (${timeLeft}s)`;
-        }
-      }, 1000);
-
-    } catch (error) {
-      console.error("SMS 發送失敗:", error);
-      alert("❌ 發送失敗，請確認號碼是否正確，或稍後再試。");
-      btn.innerText = "取得驗證碼";
-      btn.disabled = false;
-      if(recaptchaVerifier) {
-        recaptchaVerifier.render().then(widgetId => grecaptcha.reset(widgetId));
-      }
-    }
+    sel.value = others[0].value;
+    checkSaved(true);
   }
 
   async function register() {
-    const act=$('activity').value, name=$('name').value.trim(), soc=$('social_id').value.trim(), ph=$('phone').value.replace(/\D/g,''), cd=$('secret_code').value.trim();
-    const otp = $('otp_code').value.trim();
+    const act = $('activity').value;
+    const name = $('name').value.trim();
+    const soc  = $('social_id').value.trim();
+    const ph   = $('phone').value.replace(/\D/g, '');
+    const cd   = $('secret_code').value.trim();
 
-    if(!act) return alert("⚠️ 系統載入中，請稍候！");
-    if(ph.length !== 10 || !ph.startsWith('09')) return alert("⚠️ 手機號碼必須為「09 開頭且滿 10 碼數字」！");
-    if(!name || !soc || !cd) return alert("⚠️ 請完整填寫資料與通關密語！");
-    if(!confirmationResult) return alert("⚠️ 請先點擊「取得驗證碼」！");
-    if(otp.length !== 6) return alert("⚠️ 請輸入完整的 6 位數簡訊驗證碼！");
-
-    let claimCount = parseInt(localStorage.getItem(`p_count_${act}`) || "0");
-    if(claimCount >= 3) {
-      return alert("🛑 為了維護活動公平性，同一台設備最多只能領取 3 次兌換券喔！請請親友使用自己的手機操作。");
-    }
+    if (!act) return alert("⚠️ 系統載入中，請稍候！");
+    if (!lineProfile) return alert("⚠️ LINE 身分尚未驗證完成，請重新整理頁面。");
+    if (ph.length !== 10 || !ph.startsWith('09')) return alert("⚠️ 手機號碼必須為「09 開頭且滿 10 碼數字」！");
+    if (!name || !soc) return alert("⚠️ 請完整填寫社群暱稱與社群帳號！");
 
     const btn = $('btn-submit');
     btn.disabled = true;
-    btn.innerText = "驗證通關密語中...";
-
-    // 🔥 通關密語驗證改到雲端做：前端只送使用者輸入的內容過去，
-    //    正確答案永遠留在伺服器端，不會出現在瀏覽器裡
-    try {
-      const verifySecret = httpsCallable(functions, 'verifySecretCode');
-      const verifyResult = await verifySecret({ act, code: cd });
-      if (!verifyResult.data || !verifyResult.data.valid) {
-        btn.disabled = false;
-        btn.innerText = "領取專屬兌換卷";
-        return alert("⚠️ 通關密語錯誤！");
-      }
-    } catch (e) {
-      console.error("驗證通關密語失敗：", e);
-      btn.disabled = false;
-      btn.innerText = "領取專屬兌換卷";
-      return alert("❌ 驗證通關密語時發生錯誤，請確認網路連線後再試一次！");
-    }
-
-    btn.innerText = "驗證中...";
+    btn.innerText = "領取中…";
 
     try {
-      await confirmationResult.confirm(otp);
-    } catch (error) {
-      console.error("驗證碼錯誤:", error);
-      btn.disabled = false;
-      btn.innerText = "領取專屬兌換卷";
-      return alert("❌ 簡訊驗證碼錯誤或已過期，請重新輸入！");
-    }
+      /* 🔥 密語驗證、活動上架判斷、防重複領取、寫入資料庫——
+         全部在 Cloud Function claimTicket 裡一次做完。
+         前端只負責把資料送過去、把結果畫出來，改 JS 也繞不過去。 */
+      const claim = httpsCallable(functions, 'claimTicket');
+      const res = await claim({
+        idToken: liff.getIDToken(),
+        act, name, social: soc, phone: ph, code: cd,
+      });
+      const d = res.data || {};
 
-    try {
-      const docRef = doc(db, act, ph);
-      const docSnap = await getDoc(docRef);
-
-      if(!docSnap.exists()) {
-        await setDoc(docRef, {
-          name, social_id: soc, phone: ph, status: "未兌換", store: "", redeemTime: "", timestamp: new Date().toLocaleString(), gift: customGift, expireDate: ""
-        });
-        confetti({particleCount:80, spread:70});
-
-        localStorage.setItem(`p_count_${act}`, claimCount + 1);
-        localStorage.setItem(`p_${act}_phone`, ph);
-        localStorage.setItem(`p_${act}_name`, name);
-        localStorage.setItem(`p_${act}_social`, soc);
-        renderTicket(act, name, soc, ph);
-
+      if (d.ok) {
+        confetti({ particleCount: 80, spread: 70 });
+        myClaims[act] = { phone: ph, claimedAt: d.ticket.timestamp || "" };
+        ticketCache[act] = d.ticket;
+        renderTicket(act, d.ticket);
+      } else if (d.reason === "already-claimed") {
+        alert("💡 " + (d.message || "您已經領過這個活動了。"));
+        if (d.ticket) {
+          myClaims[act] = { phone: d.ticket.phone, claimedAt: d.ticket.timestamp || "" };
+          ticketCache[act] = d.ticket;
+          renderTicket(act, d.ticket);
+        }
       } else {
-        const data = docSnap.data();
-        alert("💡 哎呀！這個電話號碼已經有領取紀錄囉！為您重新載入原本的憑證。");
-
-        localStorage.setItem(`p_${act}_phone`, ph);
-        localStorage.setItem(`p_${act}_name`, data.name);
-        localStorage.setItem(`p_${act}_social`, data.social_id);
-        renderTicket(act, data.name, data.social_id, ph);
+        alert("⚠️ " + (d.message || "領取失敗，請稍後再試。"));
       }
     } catch (e) {
-      console.error(e);
-      alert("資料儲存發生錯誤，請稍後再試！");
+      console.error("領券失敗:", e);
+      // Cloud Function 丟出的 HttpsError，訊息會在 e.message 裡（例如「通關密語錯誤。」）
+      alert("⚠️ " + (e && e.message ? e.message : "領取失敗，請稍後再試。"));
     } finally {
       btn.disabled = false;
       btn.innerText = "領取專屬兌換卷";
     }
   }
 
-  function renderTicket(act, name, soc, ph) {
+  /** t = 票券資料物件（後端回傳的，或從 Firestore 讀回來的） */
+  function renderTicket(act, t) {
     $('form-section').style.display = 'none';
     $('ticket-card').style.display = 'block';
-    
+
     // 🔥 依據開關設定，決定是否顯示會員中心按鈕
     $('btn-goto-member').style.display = isMemberSystemActive ? 'flex' : 'none';
-    
-    $('r-act').innerText = act; 
-    $('r-name').innerText = name; 
-    $('r-social').innerText = soc; 
+
+    const ph = t.phone;
+    $('r-act').innerText = act;
+    $('r-name').innerText = t.name || "";
+    $('r-social').innerText = t.social_id || "";
     $('r-phone').innerText = ph;
-    $('r-gift').innerText = customGift || (POS_CONFIG[act] ? POS_CONFIG[act].gift : "專屬活動贈品");
-    $('r-expire').innerText = (POS_CONFIG[act] && POS_CONFIG[act].expireDate) ? POS_CONFIG[act].expireDate : "無特別限制";
+    $('r-gift').innerText = t.gift || customGift || (POS_CONFIG[act] ? POS_CONFIG[act].gift : "") || "專屬活動贈品";
+    $('r-expire').innerText = t.expireDate || (POS_CONFIG[act] && POS_CONFIG[act].expireDate) || "無特別限制";
 
     new QRious({
       element: $('qr'),
@@ -662,7 +742,9 @@
       foreground: '#5c6a5c'
     });
 
-    if(unsubscribe) unsubscribe();
+    setUI(t.status === "已兌換");
+
+    if (unsubscribe) { unsubscribe(); unsubscribe = null; }
     unsubscribe = onSnapshot(doc(db, act, ph), (docSnap) => {
       if (docSnap.exists()) {
         const data = docSnap.data();
