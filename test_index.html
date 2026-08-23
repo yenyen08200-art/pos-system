@@ -195,6 +195,23 @@ body.mode-physical-active .input-group:focus-within { border-color: var(--accent
 .primary-btn:hover{filter:brightness(1.1)}
 .primary-btn:active{transform:scale(.95)}
 body.mode-physical-active .primary-btn { background-image: var(--gradient-physical); box-shadow: 0 14px 30px -16px rgba(255,107,53,0.9); }
+
+/* 只有圖示的按鈕（掃描）：固定成正方形，圖示放大到 30px。
+   之前用 flex:1 / flex:2.5 分配寬度，手機窄螢幕時「掃描」兩個字會把圖示擠掉，
+   改成固定寬度就不會再受螢幕寬度影響。*/
+.search-actions #btn-check { flex: 1; min-width: 0; }
+.icon-btn {
+  flex: 0 0 68px;
+  width: 68px;
+  padding: 0;
+  gap: 0;
+}
+.icon-btn svg { width: 30px; height: 30px; }
+
+@media (max-width: 380px) {
+  .icon-btn { flex-basis: 60px; width: 60px; }
+  .icon-btn svg { width: 27px; height: 27px; }
+}
 button:disabled{opacity:.5;cursor:not-allowed}
 
 #toast-container {
@@ -208,9 +225,27 @@ button:disabled{opacity:.5;cursor:not-allowed}
 #toast-container.success { background: rgba(63,191,143,0.15); color: var(--green); border-color: rgba(63,191,143,0.3); }
 .toast-icon { font-size: 20px; }
 
-#scan-area{ position: fixed; inset: 0; z-index: 9999; background: rgba(10, 12, 16, 0.95); display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 24px; }
+/* 手機版修正：
+   舊版是 padding:24px + 置中 + 關閉鈕 margin-top:40px/高 64px，
+   在螢幕比較矮的手機（尤其 Safari 還會佔掉上下工具列）上，
+   相機畫面 + 間距 + 按鈕的總高度會超過可視範圍，
+   而 position:fixed 又不能捲動 → 「✖ 關閉」被擠出畫面，關不掉相機。
+   這裡改成：可捲動 + 用 dvh 算真實可視高度 + 相機寬度同時受螢幕高度限制。*/
+#scan-area{
+  position: fixed; inset: 0; z-index: 9999;
+  background: rgba(10, 12, 16, 0.95);
+  display: flex; flex-direction: column;
+  justify-content: center; align-items: center;
+  gap: 20px;
+  overflow-y: auto;
+  padding: 16px calc(16px + env(safe-area-inset-right))
+           calc(20px + env(safe-area-inset-bottom)) calc(16px + env(safe-area-inset-left));
+}
 #scan-area.hidden{display:none !important}
-.reader-wrap{ width: 100%; max-width: 450px; position: relative; }
+/* 62dvh 這個上限是關鍵：相機是直式的，寬度限制住高度才不會爆版 */
+.reader-wrap{ width: 100%; max-width: min(450px, 88vw, 62dvh); position: relative; flex: 0 0 auto; }
+/* html5-qrcode 會對 video 塞 inline 樣式，這裡強制讓它照容器寬度等比縮放 */
+#reader video{ display:block; width:100% !important; height:auto !important; }
 .reader-wrap::before, .reader-wrap::after, .reader-wrap .corner-bl, .reader-wrap .corner-br {
   content: ''; position: absolute; width: 40px; height: 40px; border-color: var(--accent-digital); border-style: solid; z-index: 10; pointer-events: none;
 }
@@ -226,7 +261,7 @@ body.mode-physical-active .reader-wrap .corner-bl, body.mode-physical-active .re
 .scanline{position:absolute;left:0;right:0;top:0;height:3px;background:var(--accent-digital);pointer-events:none;animation:scan 2.5s ease-in-out infinite alternate; box-shadow: 0 0 15px 2px var(--accent-digital); z-index: 11;}
 body.mode-physical-active .scanline { background: var(--accent-physical); box-shadow: 0 0 15px 2px var(--accent-physical); }
 @keyframes scan{0%{top:0%}100%{top:100%}}
-.close-cam{ margin-top: 40px; width: 100%; max-width: 450px; min-height: 64px; border-radius: 999px; font-size: 16px; font-weight: 700; color: #fff; border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); transition: .2s; cursor: pointer; }
+.close-cam{ flex: 0 0 auto; width: 100%; max-width: min(450px, 88vw); min-height: 58px; border-radius: 999px; font-size: 16px; font-weight: 700; color: #fff; border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); transition: .2s; cursor: pointer; }
 .close-cam:active{transform:scale(.95)}
 
 .right{display:flex;flex-direction:column}
@@ -445,11 +480,11 @@ body.mode-physical-active .undo { color:var(--accent-physical); border-color: rg
               <input id="phone" type="tel" placeholder="輸入手機號碼" autocomplete="off" />
             </div>
             <div class="search-actions">
-              <button id="btn-scan" class="primary-btn" onclick="startScan()" style="flex: 1;">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px;"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
-                掃描
+              <!-- 只留相機圖示：手機上文字＋圖示會擠在一起，拿掉字之後圖示才放得大、也比較好按 -->
+              <button id="btn-scan" class="primary-btn icon-btn" onclick="startScan()" aria-label="掃描 QR Code" title="掃描 QR Code">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3.4"/></svg>
               </button>
-              <button class="primary-btn" id="btn-check" onclick="check()" style="flex: 2.5;">查詢</button>
+              <button class="primary-btn" id="btn-check" onclick="check()">查詢</button>
             </div>
           </div>
         </div>
@@ -543,7 +578,7 @@ body.mode-physical-active .undo { color:var(--accent-physical); border-color: rg
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-  import { getFirestore, doc, getDoc, setDoc, updateDoc, query, collection, where, limit, getDocs, onSnapshot, increment } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  import { getFirestore, doc, getDoc, setDoc, updateDoc, query, collection, where, limit, getDocs, onSnapshot, increment, runTransaction } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
   import { getAuth, signInAnonymously, onAuthStateChanged as onPosAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
   const firebaseConfig = {
@@ -579,6 +614,16 @@ body.mode-physical-active .undo { color:var(--accent-physical); border-color: rg
   let REWARDS_LIST = [];
   let GIFT_LIST = [];
   let POINT_RATE = 100;
+
+  /* 🔧 統一時間格式：YYYY/MM/DD HH:mm:ss
+     舊版各處用 new Date().toLocaleString()，在 zh-TW 會產生「2026/8/23 上午10:30:00」
+     （月、日沒有補零、還有「上午」兩個字），後台的日期篩選比對的卻是「2026/08/23」，
+     永遠對不上；字串排序也會亂掉。這裡改成跟 Cloud Functions 完全一致的格式。*/
+  function fmtStamp(d = new Date()) {
+    const p = n => String(n).padStart(2, '0');
+    return `${d.getFullYear()}/${p(d.getMonth()+1)}/${p(d.getDate())} ` +
+           `${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
+  }
   let isMemberSystemActive = true;
 
   let evMap = {};
@@ -730,9 +775,14 @@ body.mode-physical-active .undo { color:var(--accent-physical); border-color: rg
     $('pwa-prompt').style.display = 'flex';
   }
 
-  setInterval(() => {
+  // 🔧 舊版每 3 秒去抓 #ping-tracker，但 DOM 裡根本沒有這個 id（只有 CSS 的 .ping-monitor），
+  //    等於每 3 秒固定丟一次 TypeError 到 console，而且永遠不會停。
+  //    這裡加上存在性判斷；找不到元素就直接把計時器關掉。
+  const pingTimer = setInterval(() => {
+      const el = document.querySelector('#ping-tracker span:last-child');
+      if (!el) { clearInterval(pingTimer); return; }
       const ping = Math.floor(Math.random() * (45 - 12 + 1) + 12);
-      document.querySelector('#ping-tracker span:last-child').innerText = `API OK ${ping}ms`;
+      el.innerText = `API OK ${ping}ms`;
   }, 3000);
 
   window.showToast = function(msg, type = 'error') {
@@ -1026,17 +1076,33 @@ body.mode-physical-active .undo { color:var(--accent-physical); border-color: rg
     $('btn-tally').disabled = true;
     try {
       const logId = new Date().getTime().toString();
-      lastTallyLogId = logId;
 
-      await updateDoc(doc(db, "inventory", `${store}_${act}`), { count: increment(-1), usedCount: increment(1) });
-      
-      await setDoc(doc(db, "gift_logs", logId), {
-        act: act,
-        store: store,
-        empName: empName,
-        time: new Date().toLocaleString(),
-        timestamp: Date.now()
+      /* 🔧 修正：舊版是「先 increment(-1) 扣庫存，再另外寫一筆 gift_logs」兩段獨立寫入。
+         兩個問題：
+           1) increment 沒有「不得小於 0」的約束——兩台裝置畫面都顯示剩 1 件時各按一次，
+              庫存會變成 -1，等於實體贈品多發了一件。
+           2) 庫存扣掉了但 gift_logs 寫入失敗時，會跳「扣除失敗」讓店員再按一次，
+              結果庫存被扣兩次、發放明細卻只有一筆，帳實對不起來。
+         改用 transaction：讀庫存 → 確認 > 0 → 扣 1 → 寫 log，四件事同生共死。*/
+      await runTransaction(db, async (tx) => {
+        const invRef = doc(db, "inventory", `${store}_${act}`);
+        const invSnap = await tx.get(invRef);
+        if (!invSnap.exists()) throw new Error("NO_QUOTA");
+
+        const left = Number(invSnap.data().count) || 0;
+        if (left <= 0) throw new Error("OUT_OF_STOCK");
+
+        tx.update(invRef, { count: increment(-1), usedCount: increment(1) });
+        tx.set(doc(db, "gift_logs", logId), {
+          act: act,
+          store: store,
+          empName: empName,
+          time: fmtStamp(),
+          timestamp: Date.now()
+        });
       });
+
+      lastTallyLogId = logId;
 
       const overlay = $("success-overlay");
       overlay.classList.remove("flash");
@@ -1067,9 +1133,15 @@ body.mode-physical-active .undo { color:var(--accent-physical); border-color: rg
         if(currentCount > 0) $('btn-tally').disabled = false; 
       }, 1000);
       
-    } catch(e) { 
+    } catch(e) {
       console.error(e);
-      showToast("扣除失敗，請檢查網路連線", "error"); 
+      if (e.message === "OUT_OF_STOCK") {
+        showToast("庫存已經發完了（可能是其他裝置剛剛發出）", "error");
+      } else if (e.message === "NO_QUOTA") {
+        showToast("這個門市尚未設定配額，請通知總部", "error");
+      } else {
+        showToast("扣除失敗，請檢查網路連線", "error");
+      }
       $('btn-tally').disabled = false;
     }
   };
@@ -1079,22 +1151,38 @@ body.mode-physical-active .undo { color:var(--accent-physical); border-color: rg
     $("btn-undo-tally").classList.add("hidden");
 
     if (!lastTallyLogId) return;
+    const logId = lastTallyLogId;
+    lastTallyLogId = null;      // 先清掉，避免連點兩次撤銷兩次庫存
 
     $('btn-tally').disabled = true;
     $('btn-tally').innerText = "撤銷中...";
 
     try {
-      // 🔥 將 deleteDoc 改為 updateDoc，避開 Firebase 的刪除權限限制，同時在後台留下撤銷紀錄
-      await updateDoc(doc(db, "gift_logs", lastTallyLogId), { 
-          empName: $("employee-name").value.trim() + " ↩️(已撤銷)",
-          time: new Date().toLocaleString()
+      /* 🔧 修正：舊版是「先標記 log 已撤銷，再加回庫存」兩段獨立寫入，
+         第二段失敗的話，明細寫著已撤銷但庫存沒回來。改成 transaction 一起做。
+         另外在交易裡確認這筆 log 還沒被撤銷過，防止重複加回庫存。*/
+      await runTransaction(db, async (tx) => {
+        const logRef = doc(db, "gift_logs", logId);
+        const invRef = doc(db, "inventory", `${store}_${act}`);
+        const logSnap = await tx.get(logRef);
+
+        if (!logSnap.exists()) throw new Error("LOG_GONE");
+        if (String(logSnap.data().empName || "").includes("已撤銷")) throw new Error("ALREADY_UNDONE");
+
+        // 🔥 用 updateDoc 而非 deleteDoc：避開刪除權限限制，也在後台留下撤銷紀錄
+        tx.update(logRef, {
+          empName: ($("employee-name").value.trim() || '001') + " ↩️(已撤銷)",
+          time: fmtStamp()
+        });
+        tx.update(invRef, { count: increment(1), usedCount: increment(-1) });
       });
-      await updateDoc(doc(db, "inventory", `${store}_${act}`), { count: increment(1), usedCount: increment(-1) });
-      
+
       showToast("✅ 已成功撤銷發放！庫存已復原。", "success");
     } catch(e) {
       console.error(e);
-      showToast("撤銷失敗，請檢查網路！", "error");
+      if (e.message === "ALREADY_UNDONE") showToast("這筆已經撤銷過了。", "error");
+      else if (e.message === "LOG_GONE") showToast("找不到這筆發放紀錄。", "error");
+      else showToast("撤銷失敗，請檢查網路！", "error");
     } finally {
       lastTallyLogId = null;
       $('btn-tally').disabled = currentCount <= 0;
@@ -1136,10 +1224,12 @@ body.mode-physical-active .undo { color:var(--accent-physical); border-color: rg
         points_earned: getPts,
         store: store,
         empName: empName,
-        time: new Date().toLocaleString()
+        time: fmtStamp()
       });
 
-      memberRecord.points += getPts;
+      // 🔧 舊資料若沒有 points 欄位，undefined + 數字 = NaN，畫面會顯示 NaN
+      //    而且之後所有「點數足夠嗎」的比較都會變 false，兌換清單全部卡在「點數不足」
+      memberRecord.points = (Number(memberRecord.points) || 0) + getPts;
       $('m-pts').innerText = memberRecord.points;
       $('consume-amount').value = '';
       $('pts-preview').innerText = '';
@@ -1157,30 +1247,44 @@ body.mode-physical-active .undo { color:var(--accent-physical); border-color: rg
 
   window.redeemPoints = async function(giftName, reqPts) {
     if(!memberRecord) return;
-    if(memberRecord.points < reqPts) return;
+    reqPts = Number(reqPts) || 0;
+    if((Number(memberRecord.points) || 0) < reqPts) return;
+    if(memberRecord.name === "非註冊會員") {
+      return showToast("這位顧客還不是會員，請先完成註冊。", "error");
+    }
 
     const empName = $("employee-name").value.trim() || '001';
 
     if(!confirm(`確定要扣除 ${reqPts} 點兌換「${giftName}」嗎？`)) return;
 
     try {
-      await updateDoc(doc(db, "members", shownPhone), {
-        points: increment(-reqPts)
-      });
-      
-      await setDoc(doc(db, "point_transactions", new Date().getTime().toString()), {
-        phone: shownPhone,
-        type: "redeem",
-        gift: giftName,
-        points_spent: reqPts,
-        store: store,
-        empName: empName,
-        time: new Date().toLocaleString()
+      /* 🔧 舊版是「先 increment(-reqPts)，再寫交易紀錄」兩段獨立寫入，
+         而且只用本地快照擋點數，同時在兩台機器操作會把點數扣成負的。
+         改成 transaction：在交易裡重讀點數確認夠扣，再一次寫入扣點與紀錄。*/
+      await runTransaction(db, async (tx) => {
+        const memRef = doc(db, "members", shownPhone);
+        const snap = await tx.get(memRef);
+        if (!snap.exists()) throw new Error("NO_MEMBER");
+
+        const cur = Number(snap.data().points) || 0;
+        if (cur < reqPts) throw new Error("NOT_ENOUGH::" + cur);
+
+        tx.update(memRef, { points: increment(-reqPts) });
+        tx.set(doc(db, "point_transactions", Date.now().toString()), {
+          phone: shownPhone,
+          type: "redeem",
+          gift: giftName,
+          points_spent: reqPts,
+          store: store,
+          empName: empName,
+          time: fmtStamp()
+        });
       });
 
-      memberRecord.points -= reqPts;
+      memberRecord.points = (Number(memberRecord.points) || 0) - reqPts;
       $('m-pts').innerText = memberRecord.points;
-      
+      renderRewardsList();
+
       showToast(`✅ 兌換成功！已扣除 ${reqPts} 點`, "success");
       
       const overlay = $("success-overlay");
@@ -1189,9 +1293,17 @@ body.mode-physical-active .undo { color:var(--accent-physical); border-color: rg
       overlay.classList.add("flash");
       if (window.confetti) confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 }, colors: ['#FFD700', '#FFA500'] });
 
-      renderRewardsList(); 
+      renderRewardsList();
     } catch(e) {
-      showToast("扣點失敗，請檢查網路！", "error");
+      console.error("扣點失敗:", e);
+      if (String(e.message).startsWith("NOT_ENOUGH::")) {
+        showToast(`點數不足（目前只有 ${e.message.split("::")[1]} 點），畫面已更新。`, "error");
+        check(shownPhone);
+      } else if (e.message === "NO_MEMBER") {
+        showToast("查無此會員資料，無法扣點。", "error");
+      } else {
+        showToast("扣點失敗，請檢查網路！", "error");
+      }
     }
   }
 
@@ -1215,8 +1327,12 @@ body.mode-physical-active .undo { color:var(--accent-physical); border-color: rg
         let match; let lastDate = null;
         while ((match = regex.exec(expireStr)) !== null) { lastDate = new Date(match[1], parseInt(match[2])-1, match[3]); }
         if (lastDate && lastDate < today) {
-            autoExpired = true; record.status = "已過期"; 
-            updateDoc(doc(db, shownAct, shownPhone), { status: "已過期", redeemTime: "逾期未換 (前台自動攔截)" });
+            autoExpired = true; record.status = "已過期";
+            // 這是「順手標記」的背景寫入，不擋畫面。但一定要接 catch：
+            // 舊版沒有的話，門市網路一斷就會產生 unhandled rejection，
+            // 而且畫面已經先顯示成「已過期」，跟資料庫不一致也沒人知道。
+            updateDoc(doc(db, shownAct, shownPhone), { status: "已過期", redeemTime: "逾期未換 (前台自動攔截)" })
+              .catch(e => console.warn("自動標記過期寫入失敗（畫面已顯示為過期，雲端排程半夜會再補標一次）:", e));
         }
     }
 
@@ -1313,25 +1429,55 @@ body.mode-physical-active .undo { color:var(--accent-physical); border-color: rg
     }
   }
 
+  // 防止連點兩下「掃描」時重複 start（html5-qrcode 會直接丟錯，相機就卡住不動了）
+  let scanBusy = false;
+
   async function startScan(){
+    if (scanBusy || (scanner && scanner.isScanning)) return;
+    scanBusy = true;
+
     $("scan-area").classList.remove("hidden");
     if (!scanner) scanner = new Html5Qrcode("reader");
-    scanner.start(
-      { facingMode: "environment" },
-      { fps: 15, qrbox: 250 },
-      (txt) => {
-        let result = txt;
-        if (currentMode === 'physical') result = txt.replace(/[^a-zA-Z0-9]/g, "").toUpperCase().slice(0,20); 
-        else result = txt.replace(/[^\d]/g, "").slice(0,10); 
-        
-        $("phone").value = result;
-        stopScan(); check(result);
-      },
-      () => {}
-    ).catch(() => showToast("無相機權限或裝置不支援相機！", "error"));
+
+    try {
+      await scanner.start(
+        { facingMode: "environment" },
+        {
+          fps: 15,
+          // 舊版寫死 qrbox:250，在窄螢幕上會大於相機畫面寬度而報錯。
+          // 改成依實際畫面尺寸取 70%，並限制在 160~320 之間。
+          qrbox: (vw, vh) => {
+            const m = Math.max(160, Math.min(320, Math.floor(Math.min(vw, vh) * 0.7)));
+            return { width: m, height: m };
+          },
+          aspectRatio: 1.0,
+        },
+        (txt) => {
+          let result = txt;
+          if (currentMode === 'physical') result = txt.replace(/[^a-zA-Z0-9]/g, "").toUpperCase().slice(0,20);
+          else result = txt.replace(/[^\d]/g, "").slice(0,10);
+
+          $("phone").value = result;
+          stopScan().then(() => check(result));
+        },
+        () => {}
+      );
+    } catch (e) {
+      console.error("啟動相機失敗:", e);
+      $("scan-area").classList.add("hidden");
+      showToast("無相機權限或裝置不支援相機！", "error");
+    } finally {
+      scanBusy = false;
+    }
   }
-  function stopScan(){
-    if (scanner && scanner.isScanning) scanner.stop();
+
+  // 一定要 await stop()，否則相機還沒真的關掉就又被 start，會噴錯而且鏡頭燈不會熄
+  async function stopScan(){
+    try {
+      if (scanner && scanner.isScanning) await scanner.stop();
+    } catch (e) {
+      console.warn("關閉相機時發生問題:", e);
+    }
     $("scan-area").classList.add("hidden");
   }
 
@@ -1423,6 +1569,15 @@ body.mode-physical-active .undo { color:var(--accent-physical); border-color: rg
         renderUserCoupons();
         $("member-area").classList.remove("hidden");
       }
+    } catch (e) {
+      /* 🔧 舊版只有 finally 沒有 catch。上面 1409-1411 已經把 placeholder、detail、
+         member-area 全部藏起來了，所以只要任何一個 getDoc 失敗（門市 Wi-Fi 不穩、
+         權限錯誤），右半邊就會變成一整片空白、而且完全沒有錯誤提示，
+         店員只會覺得「機器壞了」。這裡補上還原畫面 + 明確提示。*/
+      console.error("查詢失敗:", e);
+      playAlert("error");
+      showToast("查詢失敗，請確認網路連線後再試一次。", "error");
+      $("placeholder").classList.remove("hidden");
     } finally { setBusy(false); }
   }
 
@@ -1474,9 +1629,14 @@ body.mode-physical-active .undo { color:var(--accent-physical); border-color: rg
        html = '<div style="color:var(--muted-foreground); font-size:14px; text-align:center; padding:10px;">尚未設定點數商品</div>';
     } else {
        REWARDS_LIST.forEach(item => {
-         const canRedeem = (memberRecord && memberRecord.points >= item.points);
+         const myPts = Number(memberRecord && memberRecord.points) || 0;
+         const canRedeem = (memberRecord && myPts >= item.points);
          const classStr = canRedeem ? "member-list-item" : "member-list-item disabled";
-         const clickEvt = canRedeem ? `onclick="redeemReward('${item.name}', ${item.points})"` : "";
+         // 🔧 修正：舊版呼叫的是 redeemReward()，但全專案只有 redeemPoints()，
+         //    店員按「點擊兌換」只會得到 ReferenceError，畫面毫無反應 —— 這個功能其實一直是壞的。
+         //    另外商品名稱要跳脫單引號，否則名稱含 ' 會把 onclick 字串拆斷。
+         const safeName = String(item.name).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+         const clickEvt = canRedeem ? `onclick="redeemPoints('${safeName}', ${Number(item.points) || 0})"` : "";
 
          html += `
            <div class="${classStr}" ${clickEvt}>
@@ -1511,15 +1671,46 @@ body.mode-physical-active .undo { color:var(--accent-physical); border-color: rg
     if (!confirm("確定核銷優惠券？憑證將失效！")) return;
     
     const ph = shownPhone, st = store, ac = shownAct;
-    const d = new Date(), pad = (n) => (n < 10 ? "0" + n : String(n));
-    const nowStr = d.getFullYear() + "/" + pad(d.getMonth()+1) + "/" + pad(d.getDate()) + " " + pad(d.getHours()) + ":" + pad(d.getMinutes()) + ":" + pad(d.getSeconds());
-    
+    const nowStr = fmtStamp();
+
     setBusy(true);
     try {
-      await updateDoc(doc(db, ac, ph), { status: "已兌換", store: st, redeemTime: nowStr, redeemBy: empName });
+      /* 🔧 修正：舊版直接 updateDoc，只憑「查詢當下抓回來的本地快照」判斷是否已核銷。
+         A 店員 10:00 查詢、10:03 才按核銷，這中間 B 店員已經核銷完的話，
+         A 這次寫入會直接蓋掉 B 的紀錄，兩邊都顯示成功 → 餐點發了兩份。
+         改用 transaction，在交易裡重新讀一次狀態，已被核銷就中止。*/
+      await runTransaction(db, async (tx) => {
+        const ref = doc(db, ac, ph);
+        const snap = await tx.get(ref);
+        if (!snap.exists()) throw new Error("NOT_FOUND");
+
+        const cur = snap.data();
+        if (cur.status === "已兌換") {
+          const who = cur.store ? `${cur.store} ` : "";
+          throw new Error(`ALREADY::${who}${cur.redeemTime || ""}`);
+        }
+        if (cur.status === "已過期") throw new Error("EXPIRED");
+
+        tx.update(ref, { status: "已兌換", store: st, redeemTime: nowStr, redeemBy: empName });
+      });
+
       record = Object.assign({}, record || {}, { status: "已兌換", store: st, redeemTime: nowStr, redeemBy: empName });
+    } catch (e) {
+      console.error("核銷失敗:", e);
+      playAlert("error");
+      if (String(e.message).startsWith("ALREADY::")) {
+        showToast("⚠️ 這張券剛剛已經被核銷了！" + e.message.slice(9), "error");
+        check(ph);                       // 重新查一次，把畫面更新成最新狀態
+      } else if (e.message === "EXPIRED") {
+        showToast("此憑證已過期，無法核銷。", "error");
+      } else if (e.message === "NOT_FOUND") {
+        showToast("查無此憑證，可能已被刪除。", "error");
+      } else {
+        showToast("核銷失敗，請確認網路連線後再試一次。", "error");
+      }
+      return;
     } finally { setBusy(false); }
-    
+
     renderRight();
     showToast("✅ 核銷成功！", "success");
 
@@ -1544,11 +1735,21 @@ body.mode-physical-active .undo { color:var(--accent-physical); border-color: rg
 
   window.undo = async function() {
     if (uTimer) clearInterval(uTimer);
-    const ph = shownPhone, ac = shownAct; setBusy(true);
-    try { await updateDoc(doc(db, ac, ph), { status: "未兌換", store: "", redeemTime: "", redeemBy: "" }); } finally { setBusy(false); }
+    const ph = shownPhone, ac = shownAct;
+    setBusy(true);
+    try {
+      await updateDoc(doc(db, ac, ph), { status: "未兌換", store: "", redeemTime: "", redeemBy: "" });
+    } catch (e) {
+      // 🔧 舊版只有 finally 沒有 catch，撤銷失敗時例外會直接往外拋，
+      //    店員只看到按鈕消失、以為撤銷成功了，實際上資料庫沒動。
+      console.error("撤銷失敗:", e);
+      showToast("撤銷失敗，請確認網路連線後再試一次。", "error");
+      return;
+    } finally { setBusy(false); }
+
     $("btn-undo").classList.add("hidden");
-    showToast("已撤銷復原", "success"); 
-    check(ph); 
+    showToast("已撤銷復原", "success");
+    check(ph);
   }
 
   window.nextCust = function() {
