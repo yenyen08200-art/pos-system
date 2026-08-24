@@ -1178,6 +1178,7 @@
               <button onclick="moveEventUp('${jsStr(actName)}')">🔼 向上移動</button>
               <button onclick="moveEventDown('${jsStr(actName)}')">🔽 向下移動</button>
               <button onclick="toggleEventStatus('${jsStr(actName)}')">${isActive ? '⬇️ 隱藏下架' : '⬆️ 重新上架'}</button>
+              ${quotaNum > 0 ? `<button onclick="resetQuotaFor('${jsStr(actName)}')">🎟️ 重置名額</button>` : ''}
               <button class="danger" onclick="deleteEvent('${jsStr(actName)}')">🗑️ 刪除活動</button>
             </div>
           </details>
@@ -1511,6 +1512,37 @@
 
       cfg.active = cfg.active === false;
       renderConfigUI(); triggerSaveHint();
+    };
+
+    /* 🎟️ 重置活動名額
+       名額計數是累加的，同一個活動要「再開一輪」就得把它歸零。
+       計數文件放在 claims 底下、Firestore Rules 對前端全關，
+       所以這裡沒辦法直接寫，一定要透過 Cloud Function 用 Admin SDK 動。 */
+    window.resetQuotaFor = async function(actName) {
+      const cfg = globalPosConfig[actName] || {};
+      const limit = Math.floor(Number(cfg.quota) || 0);
+      if (limit <= 0) return alert("⚠️ 這個活動沒有設定名額上限，不需要重置。");
+
+      try {
+        const getUsage = httpsCallable(functions, 'getQuotaUsage');
+        const res = await getUsage({ act: actName });
+        const used = Number(res.data && res.data.used) || 0;
+
+        const ok = confirm(
+          `「${actName}」目前已領 ${used} / ${limit} 份。\n\n` +
+          `確定要把計數歸零、重新開放領取嗎？\n\n` +
+          `⚠️ 已經領過的顧客仍然不能再領一次（防重複領取的鎖不會被清掉），\n` +
+          `這個動作只是讓「還沒領過的人」可以繼續領。`
+        );
+        if (!ok) return;
+
+        const reset = httpsCallable(functions, 'resetActQuota');
+        const r = await reset({ act: actName });
+        alert(`✅ 「${actName}」名額已重置（原本已領 ${Number(r.data && r.data.previousUsed) || 0} 份）。`);
+      } catch (e) {
+        console.error("重置名額失敗:", e);
+        alert("⚠️ " + (e && e.message ? e.message : "重置失敗，請稍後再試。"));
+      }
     };
 
     window.saveConfigToCloud = async function() {
