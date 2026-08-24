@@ -644,6 +644,18 @@ body.mode-physical-active .undo { color:var(--accent-physical); border-color: rg
   
   let lastTallyLogId = null;
   let tallyUndoTimer = null;
+  /* 記住這筆待撤銷的發放屬於「哪個門市 / 哪個活動」。
+     庫存的 onSnapshot 一變動就會重畫活動列表，靠這兩個值才分得出
+     「只是庫存數字更新」還是「使用者真的切走了」。 */
+  let lastTallyStore = null;
+  let lastTallyAct = null;
+
+  /** 收掉贈品發放的 5 秒撤銷鈕（切換模式 / 門市 / 活動、撤銷完成時用） */
+  function hideTallyUndo() {
+    if (tallyUndoTimer) clearInterval(tallyUndoTimer);
+    tallyUndoTimer = null;
+    if ($("btn-undo-tally")) $("btn-undo-tally").classList.add("hidden");
+  }
 
   let currentPin = '';
   let loginErrorTimer = null; 
@@ -805,8 +817,7 @@ body.mode-physical-active .undo { color:var(--accent-physical); border-color: rg
   window.alert = function(msg) { showToast(msg, 'error'); };
 
   window.setMode = function(m) {
-    if (tallyUndoTimer) clearInterval(tallyUndoTimer);
-    if ($("btn-undo-tally")) $("btn-undo-tally").classList.add("hidden");
+    hideTallyUndo();
     
     currentMode = m;
     $('mode-member').classList.toggle('active', m === 'member');
@@ -993,8 +1004,14 @@ body.mode-physical-active .undo { color:var(--accent-physical); border-color: rg
   }
 
   function renderActs(){
-    if (tallyUndoTimer) clearInterval(tallyUndoTimer);
-    if ($("btn-undo-tally")) $("btn-undo-tally").classList.add("hidden");
+    /* 修正「贈品發出後撤銷鈕瞬間消失」：
+       庫存的 onSnapshot 只要一變動就會呼叫 renderActs()，
+       而「發出 1 件」本身就會改動庫存 —— 舊版在這裡無條件隱藏撤銷鈕，
+       等於按鈕才剛出現就被自己觸發的 snapshot 蓋掉。
+       現在只有「沒有待撤銷的發放」或「已經切到別的門市 / 活動」才收掉。 */
+    if (!lastTallyLogId || lastTallyStore !== store || lastTallyAct !== act) {
+      hideTallyUndo();
+    }
 
     const box = $("acts"); box.innerHTML = "";
     if (!store){ box.innerHTML = '<p class="empty">請先選擇門市</p>'; return; }
@@ -1014,6 +1031,8 @@ body.mode-physical-active .undo { color:var(--accent-physical); border-color: rg
 
     if (!currentList.includes(act)) {
        act = currentList[0];
+       // 活動被自動換掉 = 等同切走，待撤銷的那筆已不屬於現在這個活動
+       if (lastTallyLogId && (lastTallyStore !== store || lastTallyAct !== act)) hideTallyUndo();
        if (currentMode === 'counter') loadCounter(); 
     }
 
@@ -1037,8 +1056,7 @@ body.mode-physical-active .undo { color:var(--accent-physical); border-color: rg
   }
 
   function selectStore(s){
-    if (tallyUndoTimer) clearInterval(tallyUndoTimer);
-    if ($("btn-undo-tally")) $("btn-undo-tally").classList.add("hidden");
+    hideTallyUndo();
 
     store = s; localStorage.setItem("p_store", s);
     act = (evMap[s] || [])[0] || ""; record = null;
@@ -1103,6 +1121,8 @@ body.mode-physical-active .undo { color:var(--accent-physical); border-color: rg
       });
 
       lastTallyLogId = logId;
+      lastTallyStore = store;   // 記住發在哪個門市 / 活動，撤銷時才還得回正確的格子
+      lastTallyAct = act;
 
       const overlay = $("success-overlay");
       overlay.classList.remove("flash");
@@ -1147,11 +1167,14 @@ body.mode-physical-active .undo { color:var(--accent-physical); border-color: rg
   };
 
   window.undoTally = async function() {
-    if (tallyUndoTimer) clearInterval(tallyUndoTimer);
-    $("btn-undo-tally").classList.add("hidden");
+    hideTallyUndo();
 
     if (!lastTallyLogId) return;
     const logId = lastTallyLogId;
+    /* 用「發放當下」記起來的門市 / 活動，而不是現在畫面上的，
+       否則使用者若在 5 秒內切換活動，庫存會被加回到錯的那一格。 */
+    const undoStore = lastTallyStore || store;
+    const undoAct = lastTallyAct || act;
     lastTallyLogId = null;      // 先清掉，避免連點兩次撤銷兩次庫存
 
     $('btn-tally').disabled = true;
@@ -1163,7 +1186,7 @@ body.mode-physical-active .undo { color:var(--accent-physical); border-color: rg
          另外在交易裡確認這筆 log 還沒被撤銷過，防止重複加回庫存。*/
       await runTransaction(db, async (tx) => {
         const logRef = doc(db, "gift_logs", logId);
-        const invRef = doc(db, "inventory", `${store}_${act}`);
+        const invRef = doc(db, "inventory", `${undoStore}_${undoAct}`);
         const logSnap = await tx.get(logRef);
 
         if (!logSnap.exists()) throw new Error("LOG_GONE");
@@ -1185,6 +1208,8 @@ body.mode-physical-active .undo { color:var(--accent-physical); border-color: rg
       else showToast("撤銷失敗，請檢查網路！", "error");
     } finally {
       lastTallyLogId = null;
+      lastTallyStore = null;
+      lastTallyAct = null;
       $('btn-tally').disabled = currentCount <= 0;
       $('btn-tally').innerText = currentCount <= 0 ? "贈品庫存已空" : "🎁 發出 1 件";
     }

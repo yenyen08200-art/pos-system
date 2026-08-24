@@ -757,7 +757,16 @@
               <label>限定門市</label>
               <input type="text" id="new-act-stores" placeholder="預設 ALL" value="ALL">
             </div>
+            <div class="field-block">
+              <label>🎟️ 名額上限 (選填)</label>
+              <input type="text" id="new-act-quota" placeholder="留空或 0 = 不限名額" inputmode="numeric">
+            </div>
           </div>
+          <p class="desc" style="margin-top:-8px; margin-bottom:20px;">
+            <b>名額上限</b>：抽獎類活動（例：一號餐抽 10 個）務必填寫。額滿後雲端會直接擋下領取，
+            就算通關密語外流也不會超發。贈品類活動可留空，改用門市配額控管。
+            <b style="color:#F0764E;">注意：調高名額可立即生效；若要「重新開放」同一個活動，需請工程師清掉計數。</b>
+          </p>
 
           <!-- 🔥 新增：活動自動上下架排程 -->
           <div style="background:#F7F9FB; border:1px dashed #E6EAF0; border-radius:14px; padding:16px 18px; margin-bottom:20px;">
@@ -1146,6 +1155,12 @@
           ? `<span style="display:block;margin-top:2px;color:var(--text-sub);font-size:11px;">⏱️ 前台已${effectiveOn ? '生效' : '停止'}，雲端 active 欄位將於下個整點同步</span>`
           : '';
 
+        // 名額上限（0 或未設定 = 不限）
+        const quotaNum = giftInfo ? Math.floor(Number(giftInfo.quota) || 0) : 0;
+        const quotaStr = quotaNum > 0
+          ? `<span style="display:block;margin-top:4px;color:#7A5AF8;font-weight:700;">🎟️ 名額上限：${quotaNum} 份（額滿後雲端自動擋下）</span>`
+          : '';
+
         const scheduleStr = hasSchedule
           ? `<span style="display:block;margin-top:4px;color:#F0764E;font-weight:600;">🗓️ 排程：${giftInfo.startAt ? fmtScheduleText(giftInfo.startAt) : '立即'} ～ ${giftInfo.endAt ? fmtScheduleText(giftInfo.endAt) : '無限期'}</span>${syncHint}`
           : '';
@@ -1154,7 +1169,7 @@
         <li class="item-li">
           <div class="item-info">
             <strong>🎯 ${actName} ${statusBadge}</strong>
-            <span>密語: <code>${pwd}</code> | 贈品: ${giftStr} | 期限: ${expireStr} | 限定門市: ${storesStr}${scheduleStr}</span>
+            <span>密語: <code>${pwd}</code> | 贈品: ${giftStr} | 期限: ${expireStr} | 限定門市: ${storesStr}${quotaStr}${scheduleStr}</span>
           </div>
           <details class="kebab-dropdown">
             <summary>⋮</summary>
@@ -1393,6 +1408,7 @@
       document.getElementById('new-act-gift').value = cfg.gift === "依實體券面標示發放" ? "" : (cfg.gift || "");
       document.getElementById('new-act-expire').value = cfg.expireDate === "無特別限制" ? "" : (cfg.expireDate || "");
       document.getElementById('new-act-stores').value = Array.isArray(cfg.stores) ? cfg.stores.join(', ') : (cfg.stores || "ALL");
+      document.getElementById('new-act-quota').value = Math.floor(Number(cfg.quota) || 0) > 0 ? Math.floor(Number(cfg.quota)) : "";
       document.getElementById('new-act-start').value = cfg.startAt || "";
       document.getElementById('new-act-end').value = cfg.endAt || "";
 
@@ -1412,6 +1428,7 @@
       document.getElementById('new-act-gift').value = '';
       document.getElementById('new-act-expire').value = '';
       document.getElementById('new-act-stores').value = 'ALL';
+      document.getElementById('new-act-quota').value = '';
       document.getElementById('new-act-start').value = '';
       document.getElementById('new-act-end').value = '';
 
@@ -1429,8 +1446,11 @@
       let stores = document.getElementById('new-act-stores').value.trim();
       const startAt = document.getElementById('new-act-start').value.trim();
       const endAt = document.getElementById('new-act-end').value.trim();
+      const quotaRaw = document.getElementById('new-act-quota').value.trim();
 
       if(!name || !stores) return alert("⚠️ 請至少填寫「活動名稱」與「限定門市」！");
+      if(quotaRaw && !/^[0-9]+$/.test(quotaRaw)) return alert("⚠️ 名額上限請填 0 或正整數（留空 = 不限名額）！");
+      const quota = Math.max(0, Math.floor(Number(quotaRaw) || 0));
       if(stores !== "ALL") stores = stores.split(',').map(s => s.trim());
 
       // 🔥 排程檢查
@@ -1459,6 +1479,7 @@
         expireDate: expire || "無特別限制",
         startAt: startAt,
         endAt: endAt,
+        quota: quota,        // 0 = 不限名額；> 0 時由 Cloud Function claimTicket 在雲端擋
         active: isActive
       };
 
