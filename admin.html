@@ -2207,7 +2207,20 @@
         const comments = (res.data && res.data.comments) || [];
 
         if (comments.length === 0) {
-          return metaStatusMsg('⚠️ 這篇貼文目前抓不到任何留言。', 'var(--red)');
+          /* 抓到 0 則時，後端會順便問 Meta「官方認為這篇有幾則留言」，
+             用這個數字分辨是「找錯貼文」還是「權限被擋」——兩者解法完全不同。 */
+          const official = res.data && res.data.officialCount;
+          if (typeof official === 'number' && official > 0) {
+            return metaStatusMsg(
+              `⚠️ 這篇貼文<b>官方顯示有 ${official} 則留言，但 API 一則都沒回傳</b>。<br>` +
+              '這代表貼文找對了，是 Meta 把留言內容擋住了 —— 最常見的原因是這個 App 還在' +
+              '<b>開發模式 (Development Mode)</b>，或 <code>instagram_business_manage_comments</code> ' +
+              '這類權限尚未通過審核。需要把 App 切換到上線模式並送審才抓得到一般粉絲的留言。',
+              'var(--red)');
+          }
+          return metaStatusMsg(
+            '⚠️ 這篇貼文抓不到任何留言，Meta 回報的留言數也是 0 —— 請確認是不是挑錯貼文了。',
+            'var(--red)');
         }
 
         /* 填成「帳號 <tab> 留言」，正好是下面 runLottery 解析器吃的格式，
