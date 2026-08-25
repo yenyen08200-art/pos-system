@@ -592,6 +592,10 @@
               <label>🏆 預計抽出人數</label>
               <input type="number" id="lottery-count" value="10" min="1">
             </div>
+            <div class="field-block" style="flex:0.5;">
+              <label>🪑 備取人數 (選填)</label>
+              <input type="number" id="lottery-backup-count" value="0" min="0" placeholder="正取不符資格時遞補用">
+            </div>
           </div>
           <div class="form-group">
             <div class="field-block">
@@ -2253,12 +2257,63 @@
       }
     };
 
+    /** 密碼學等級亂數，抽獎的洗牌與兌換碼產生都靠這個 */
+    function cryptoRandInt(n) {
+      const buf = new Uint32Array(1);
+      crypto.getRandomValues(buf);
+      return buf[0] % n;
+    }
+
+    /** 建立一張兌換券，回傳兌換碼。usedCodes 用來閃開已存在的碼，呼叫端自己準備好。 */
+    async function issueLotteryTicket(act, gift, winnerName, comment, usedCodes) {
+      let randomCode = "";
+      for (let tryN = 0; tryN < 200; tryN++) {
+        const c = "888" + String(10000 + cryptoRandInt(90000));
+        if (!usedCodes.has(c)) { randomCode = c; break; }
+      }
+      if (!randomCode) throw new Error("CODE_EXHAUSTED");
+      usedCodes.add(randomCode);
+
+      await setDoc(doc(db, act, randomCode), {
+        name: `@${winnerName}`,
+        social_id: `@${winnerName}`,
+        phone: randomCode,
+        status: "未兌換",
+        store: "",
+        redeemTime: "",
+        timestamp: fmtStamp(),
+        gift: gift || "",
+        expireDate: ""
+      });
+      return randomCode;
+    }
+
+    /** 得獎者卡片（QR Code + 帳號 + 留言 + 兌換碼），正取跟備取遞補後共用同一張卡片樣式 */
+    function winnerCardHTML(winnerName, comment, randomCode) {
+      const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${randomCode}&margin=10`;
+      // 得獎者的帳號與留言是從社群平台複製貼上的外部內容，一律跳脫後才輸出
+      const safeAccount = encodeURIComponent(String(winnerName).replace(/^@/, ''));
+      return `
+      <div class="winner-card">
+        <img src="${qrUrl}" alt="QR Code">
+        <div class="winner-info">
+          <a href="https://instagram.com/${safeAccount}" target="_blank" rel="noopener noreferrer">👑 @${esc(winnerName)} 🔗</a>
+          <div class="winner-comment">💬 留言：${esc(comment)}</div>
+          <div class="winner-code">🎫 兌換碼：${esc(randomCode)}</div>
+        </div>
+      </div>`;
+    }
+
     window.runLottery = async function() {
       const act = document.getElementById('lottery-act').value;
       const rawText = document.getElementById('lottery-raw-list').value.trim();
       const keyword = document.getElementById('lottery-keyword').value.trim();
       const requiredTags = parseInt(document.getElementById('lottery-tags').value, 10) || 0;
       const count = parseInt(document.getElementById('lottery-count').value, 10);
+      /* 🪑 備取：因為 API 抓不到「誰按讚」「誰追蹤」（Meta 沒開放這種查詢），
+         留言/標記只能驗證一部分資格，追蹤/按讚還是得人工看一眼。
+         所以正取先建券，備取只列名單、不建券，人工確認正取沒問題後才需要遞補。 */
+      const backupCount = parseInt(document.getElementById('lottery-backup-count').value, 10) || 0;
       const gift = document.getElementById('lottery-gift').value.trim();
       const btn = document.getElementById('btn-run-lottery');
       const resultBox = document.getElementById('lottery-result');
@@ -2269,22 +2324,22 @@
 
       let candidateList = [];
       const lines = rawText.split('\n');
-      
+
       lines.forEach(line => {
         let l = line.trim();
         if (!l) return;
         if (l.includes('"user_name"') || l.includes('user_name')) return;
-        
+
         let username = "";
         let comment = "";
 
         if (l.includes('","') || l.startsWith('"')) {
             const parts = l.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || [];
             const cleanParts = parts.map(p => p.replace(/^"|"$/g, '').trim());
-            
+
             if (cleanParts.length >= 5) {
-                username = cleanParts[3]; 
-                comment = cleanParts[4];  
+                username = cleanParts[3];
+                comment = cleanParts[4];
             } else if (cleanParts.length >= 2) {
                 username = cleanParts[0];
                 comment = cleanParts[1];
@@ -2328,20 +2383,16 @@
       btn.disabled = true;
 
       try {
-        /* 🔧 洗牌改用 crypto 亂數。
-           Math.random() 是可預測的偽亂數，拿來抽獎在公平性上站不太住腳
-           （真的有人質疑時也不好解釋），改用密碼學等級亂數成本幾乎為零。*/
-        const rnd = (n) => {
-          const buf = new Uint32Array(1);
-          crypto.getRandomValues(buf);
-          return buf[0] % n;
-        };
         for (let i = validParticipants.length - 1; i > 0; i--) {
-          const j = rnd(i + 1);
+          const j = cryptoRandInt(i + 1);
           [validParticipants[i], validParticipants[j]] = [validParticipants[j], validParticipants[i]];
         }
 
-        const winners = validParticipants.slice(0, count);
+        // 正取 + 備取一次抽好；備取人數若超過剩餘可抽人數，就儘量抽、不足額也沒關係
+        const totalDraw = Math.min(count + backupCount, validParticipants.length);
+        const drawn = validParticipants.slice(0, totalDraw);
+        const winners = drawn.slice(0, count);
+        const backups = drawn.slice(count);
 
         /* 🔧 兌換碼防撞號。
            舊版是 "888" + 5 位數亂數，只有 9 萬種組合，而且直接 setDoc 不檢查。
@@ -2350,52 +2401,47 @@
            這裡先把既有的號碼撈回來，確保這批新號碼不重複。*/
         const existingSnap = await getDocs(collection(db, act));
         const usedCodes = new Set(existingSnap.docs.map(d => d.id));
-        let resultHTML = `<h3 style="margin-top:0; color:var(--green); font-size:18px;">🎉 抽獎完成！抽出 ${count} 名得獎者：</h3>`;
-        
+        let resultHTML = `<h3 style="margin-top:0; color:var(--green); font-size:18px;">🎉 抽獎完成！抽出 ${winners.length} 名得獎者：</h3>`;
+
         for (let i = 0; i < winners.length; i++) {
           const w = winners[i];
-          const winnerName = w.name;
-
-          let randomCode = "";
-          for (let tryN = 0; tryN < 200; tryN++) {
-            const c = "888" + String(10000 + rnd(90000));
-            if (!usedCodes.has(c)) { randomCode = c; break; }
+          let randomCode;
+          try {
+            randomCode = await issueLotteryTicket(act, gift, w.name, w.comment, usedCodes);
+          } catch (e) {
+            if (e.message === "CODE_EXHAUSTED") {
+              alert(`⚠️ 這個活動的兌換碼已經快用完了（目前 ${usedCodes.size} 組），請改用新的活動，或先清理舊資料。`);
+              break;
+            }
+            throw e;
           }
-          if (!randomCode) {
-            alert(`⚠️ 這個活動的兌換碼已經快用完了（目前 ${usedCodes.size} 組），請改用新的活動，或先清理舊資料。`);
-            break;
-          }
-          usedCodes.add(randomCode);
-
-          await setDoc(doc(db, act, randomCode), {
-            name: `@${winnerName}`, 
-            social_id: `@${winnerName}`,
-            phone: randomCode, 
-            status: "未兌換",
-            store: "",
-            redeemTime: "",
-            timestamp: fmtStamp(),
-            gift: gift || "",
-            expireDate: "" 
-          });
-          
-          const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${randomCode}&margin=10`;
-          
-          // 得獎者的帳號與留言是從社群平台複製貼上的外部內容，一律跳脫後才輸出
-          const safeAccount = encodeURIComponent(String(winnerName).replace(/^@/, ''));
-          resultHTML += `
-          <div class="winner-card">
-            <img src="${qrUrl}" alt="QR Code">
-            <div class="winner-info">
-              <a href="https://instagram.com/${safeAccount}" target="_blank" rel="noopener noreferrer">👑 @${esc(winnerName)} 🔗</a>
-              <div class="winner-comment">💬 留言：${esc(w.comment)}</div>
-              <div class="winner-code">🎫 兌換碼：${esc(randomCode)}</div>
-            </div>
-          </div>`;
+          resultHTML += winnerCardHTML(w.name, w.comment, randomCode);
         }
-        
+
         resultHTML += `<div style="font-size:13px; color:var(--text-main); margin-top:20px; font-weight:bold; line-height:1.6;">💡 貼心提示：<br>1. 您可以點擊藍色帳號連結，直接前往得獎者的 IG 首頁發送私訊。<br>2. 對著上方的 QR Code 點擊「滑鼠右鍵 ➜ 複製圖片」，即可直接貼到私訊傳給得獎者！</div>`;
-        
+
+        // 🪑 備取名單：只顯示帳號＋留言，不建立兌換券，靠 promoteBackup() 手動遞補
+        if (backups.length > 0) {
+          window._lotteryContext = { act, gift };
+          window._lotteryBackups = backups.map(b => ({ name: b.name, comment: b.comment, promoted: false }));
+
+          resultHTML += `<h3 style="margin-top:24px; color:#7A5AF8; font-size:16px;">🪑 備取名單（${backups.length} 人，尚未建立兌換券）</h3>`;
+          resultHTML += `<p class="desc">請自行到得獎者的社群帳號確認有沒有追蹤／按讚（Meta 沒開放這兩項查詢，系統驗不了）。正取若有人不符資格，從下面依序按「遞補」，才會真的建立兌換券。</p>`;
+          backups.forEach((b, idx) => {
+            resultHTML += `
+            <div class="winner-card" id="backup-card-${idx}" style="opacity:0.85;">
+              <div class="winner-info" style="width:100%;">
+                <a href="https://instagram.com/${encodeURIComponent(String(b.name).replace(/^@/, ''))}" target="_blank" rel="noopener noreferrer">🪑 @${esc(b.name)} 🔗</a>
+                <div class="winner-comment">💬 留言：${esc(b.comment)}</div>
+                <button class="btn-cancel" style="margin-top:8px;" onclick="promoteBackup(${idx})">⬆️ 遞補為正取（建立兌換券）</button>
+              </div>
+            </div>`;
+          });
+        } else {
+          window._lotteryContext = null;
+          window._lotteryBackups = null;
+        }
+
         resultBox.innerHTML = resultHTML;
         resultBox.style.display = 'block';
         btn.innerText = "✅ 抽獎與建檔完畢";
@@ -2404,6 +2450,32 @@
         alert("❌ 抽獎或寫入資料庫失敗，請檢查網路連線。");
         btn.innerText = "🚀 開始過濾並抽出得獎者";
         btn.disabled = false;
+      }
+    };
+
+    /** 把某位備取遞補成正取：現場重新建立兌換券，成功後直接把卡片換成正式得獎者樣式 */
+    window.promoteBackup = async function(idx) {
+      const ctx = window._lotteryContext;
+      const b = window._lotteryBackups && window._lotteryBackups[idx];
+      if (!ctx || !b) return alert("⚠️ 找不到這筆備取資料，請重新抽獎後再試。");
+      if (b.promoted) return alert("這位已經遞補過了。");
+
+      const card = document.getElementById(`backup-card-${idx}`);
+      const btn = card ? card.querySelector('button') : null;
+      if (btn) { btn.disabled = true; btn.innerText = "⏳ 建立兌換券中..."; }
+
+      try {
+        // 重新查一次已用兌換碼：跟抽獎當下可能已經隔了一段時間，中間有其他人領券也要閃開
+        const existingSnap = await getDocs(collection(db, ctx.act));
+        const usedCodes = new Set(existingSnap.docs.map(d => d.id));
+        const randomCode = await issueLotteryTicket(ctx.act, ctx.gift, b.name, b.comment, usedCodes);
+
+        b.promoted = true;
+        if (card) card.outerHTML = winnerCardHTML(b.name, b.comment, randomCode);
+      } catch (e) {
+        console.error(e);
+        if (btn) { btn.disabled = false; btn.innerText = "⬆️ 遞補為正取（建立兌換券）"; }
+        alert(e && e.message === "CODE_EXHAUSTED" ? "⚠️ 這個活動的兌換碼已經快用完了。" : "❌ 建立失敗，請檢查網路連線。");
       }
     };
 
