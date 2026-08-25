@@ -2228,6 +2228,24 @@
         document.getElementById('lottery-raw-list').value =
           comments.map(c => `${c.username}\t${c.text}`).join('\n');
 
+        /* 拿不到留言者身分的留言，抽出來也不知道要通知誰，等於白抽。
+           全部都是未知就直接擋，部分未知就提醒風險。 */
+        const unknown = (res.data && res.data.unknownCount) || 0;
+        if (unknown >= comments.length) {
+          return metaStatusMsg(
+            `⚠️ 抓到 <b>${comments.length}</b> 則留言，但<b>全部都拿不到留言者帳號</b>（顯示為「未知帳號」）。<br>` +
+            'Meta 在 App 未過審的情況下，會給你留言內容卻抽掉留言者身分。' +
+            '這批資料<b>不能拿來抽獎</b> —— 抽出來也不知道要通知誰。<br>' +
+            '請先完成 App 審查，或改用其他平台的貼文。',
+            'var(--red)');
+        }
+        if (unknown > 0) {
+          return metaStatusMsg(
+            `⚠️ 已抓回 <b>${comments.length}</b> 則留言，但其中 <b>${unknown}</b> 則拿不到留言者帳號。<br>` +
+            '這些「未知帳號」就算被抽中也無法通知，建議先完成 App 審查再抽，或手動把那幾行刪掉。',
+            'var(--red)');
+        }
+
         metaStatusMsg(`✅ 已抓回 <b>${comments.length}</b> 則留言並填入下方名單，接著設定條件就可以抽獎了！`, 'var(--green)');
       } catch (e) {
         console.error('抓取留言失敗:', e);
