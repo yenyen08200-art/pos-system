@@ -515,6 +515,60 @@
           <h1>🎉 社群留言抽獎中心</h1>
         </div>
         
+        <!-- 🤖 全自動模式：直接從 Meta 抓留言，不用再手動複製貼上 -->
+        <div class="config-card">
+          <h2>🤖 全自動抓取留言</h2>
+          <p class="desc">
+            選好平台後按「載入最近貼文」，挑出這次的抽獎貼文，再按「抓取留言」，
+            雲端就會把整串留言撈回來自動填進下面的名單框。留言很多時可能要等十幾秒，請耐心稍候。
+          </p>
+          <div class="form-group">
+            <div class="field-block">
+              <label>平台</label>
+              <select id="meta-platform" onchange="onMetaPlatformChange()">
+                <option value="instagram">📷 Instagram</option>
+                <option value="facebook">👍 Facebook 粉專</option>
+                <option value="threads">🧵 Threads</option>
+              </select>
+            </div>
+            <div class="field-block" style="flex:2;">
+              <label>抽獎貼文</label>
+              <select id="meta-post"><option value="">請先按「載入最近貼文」</option></select>
+            </div>
+          </div>
+          <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <button class="btn-cancel" style="flex:1; min-width:180px;" onclick="loadSocialPosts()">📋 載入最近貼文</button>
+            <button class="btn-primary" style="flex:2; min-width:200px;" onclick="fetchSocialComments()">⬇️ 抓取這篇貼文的留言</button>
+          </div>
+          <div id="meta-fetch-status" class="desc" style="margin-top:12px; min-height:20px;"></div>
+
+          <details style="margin-top:18px; border-top:1px dashed #E6EAF0; padding-top:14px;">
+            <summary style="cursor:pointer; font-weight:800; font-size:15px;">🔑 Meta 社群連線設定（第一次使用 / 權杖失效時才需要打開）</summary>
+            <div id="meta-status" class="desc" style="margin:14px 0; line-height:1.9;">讀取連線狀態中…</div>
+            <div class="form-group">
+              <div class="field-block">
+                <label>平台</label>
+                <select id="meta-token-platform">
+                  <option value="instagram">📷 Instagram</option>
+                  <option value="facebook">👍 Facebook 粉專</option>
+                  <option value="threads">🧵 Threads</option>
+                </select>
+              </div>
+              <div class="field-block" style="flex:2;">
+                <label>存取權杖 (Access Token)</label>
+                <input type="password" id="meta-token-value" placeholder="貼上 Meta 開發者後台產生的權杖" autocomplete="off">
+              </div>
+            </div>
+            <button class="btn-cancel" style="width:100%;" onclick="saveMetaToken()">💾 驗證並儲存權杖</button>
+            <p class="desc" style="margin-top:10px;">
+              <b>權杖只會存在雲端資料庫，不會寫進這個網頁，也不會被推上 GitHub。</b>
+              存檔前系統會先拿去問 Meta 是不是有效的，無效不會存進去。
+              Instagram 與 Threads 的權杖只有 60 天效期，雲端排程會在每月 1 號與 15 號自動幫你換新的；
+              Facebook 粉專權杖是永久的，設定一次就好。
+            </p>
+          </details>
+        </div>
+
         <div class="config-card">
           <h2>🎯 第一步：貼上留言名單</h2>
           <p class="desc">直接從外掛 CSV、記事本或 Excel 複製整坨資料貼在下方。系統會自動辨識帳號與留言，並過濾掉無關網址與標頭！</p>
@@ -1050,6 +1104,9 @@
       }
       element.classList.add('active');
       
+      // 進抽獎頁時順便刷新 Meta 連線狀態
+      if (viewId === 'lottery-ui') refreshMetaStatus();
+
       if (viewId === 'lottery-ui' || viewId === 'issue-ui' || viewId === 'config-event') {
         const actSelectHtml = document.getElementById('act-select').innerHTML;
         let cleanHtml = actSelectHtml.replace(/<option value="ALL_OVERVIEW">🌐 總覽 \(所有活動\)<\/option>/g, '');
@@ -2035,6 +2092,133 @@
       } finally {
         btn.disabled = true;   // 寫完就鎖起來，避免同一批被重複寫入
         btn.innerText = "🚀 確認寫入資料庫";
+      }
+    };
+
+    /* ============================================================
+     * 🤖 Meta 全自動抓留言
+     *
+     * 這一段只負責「把留言拿回來填進名單框」，抽獎邏輯完全沿用下面的 runLottery，
+     * 所以手動貼上的老流程還是照常可用（Meta 掛掉時可以直接退回手動）。
+     *
+     * 權杖不在這個檔案裡，全部存在雲端；這裡只透過 Cloud Function 間接使用。
+     * ============================================================*/
+    const META_LABEL_TW = { instagram: 'Instagram', facebook: 'Facebook 粉專', threads: 'Threads' };
+
+    function metaStatusMsg(msg, color) {
+      const box = document.getElementById('meta-fetch-status');
+      if (!box) return;
+      box.innerHTML = msg;
+      box.style.color = color || 'var(--text-sub)';
+    }
+
+    /** 換平台時把舊的貼文清單清掉，避免拿 A 平台的貼文 ID 去 B 平台抓 */
+    window.onMetaPlatformChange = function() {
+      const sel = document.getElementById('meta-post');
+      sel.innerHTML = '<option value="">請先按「載入最近貼文」</option>';
+      metaStatusMsg('');
+    };
+
+    /** 讀取三個平台目前有沒有連上、是哪個帳號（不會拿到權杖本身） */
+    window.refreshMetaStatus = async function() {
+      const box = document.getElementById('meta-status');
+      if (!box) return;
+      try {
+        const fn = httpsCallable(functions, 'getMetaStatus');
+        const res = await fn({});
+        const st = (res.data && res.data.status) || {};
+        box.innerHTML = Object.keys(META_LABEL_TW).map(p => {
+          const s = st[p] || {};
+          if (!s.connected) {
+            return `❌ <b>${META_LABEL_TW[p]}</b>：尚未連線`;
+          }
+          const acc = s.accountName ? `（${esc(s.accountName)}）` : '';
+          const when = s.refreshedAt || s.updatedAt || '';
+          const tail = s.needsRefresh
+            ? `　<span style="color:var(--text-sub);">最後更新 ${esc(when)}，每月 1 / 15 號自動續期</span>`
+            : `　<span style="color:var(--text-sub);">永久有效</span>`;
+          return `✅ <b>${META_LABEL_TW[p]}</b>：已連線${acc}${tail}`;
+        }).join('<br>');
+      } catch (e) {
+        console.error('讀取 Meta 連線狀態失敗:', e);
+        box.innerHTML = '<span style="color:var(--red);">⚠️ 無法讀取連線狀態：' + esc(e && e.message ? e.message : '未知錯誤') + '</span>';
+      }
+    };
+
+    /** 貼上新權杖。後端會先拿去問 Meta 有沒有效，才寫進資料庫 */
+    window.saveMetaToken = async function() {
+      const platform = document.getElementById('meta-token-platform').value;
+      const input = document.getElementById('meta-token-value');
+      const token = input.value.trim();
+      if (!token) return alert('⚠️ 請先貼上權杖！');
+
+      try {
+        const fn = httpsCallable(functions, 'setMetaToken');
+        const res = await fn({ platform, token });
+        input.value = '';   // 存完立刻清掉，不要留在畫面上
+        alert(`✅ ${META_LABEL_TW[platform]} 連線成功！\n帳號：${(res.data && res.data.accountName) || '(未取得名稱)'}`);
+        refreshMetaStatus();
+      } catch (e) {
+        console.error('儲存 Meta 權杖失敗:', e);
+        alert('❌ ' + (e && e.message ? e.message : '儲存失敗，請稍後再試。'));
+      }
+    };
+
+    /** 載入最近 25 篇貼文供挑選，省得自己去找貼文 ID */
+    window.loadSocialPosts = async function() {
+      const platform = document.getElementById('meta-platform').value;
+      const sel = document.getElementById('meta-post');
+      metaStatusMsg('⏳ 正在載入貼文清單…');
+      sel.innerHTML = '<option value="">載入中…</option>';
+
+      try {
+        const fn = httpsCallable(functions, 'listSocialPosts');
+        const res = await fn({ platform });
+        const posts = (res.data && res.data.posts) || [];
+
+        if (posts.length === 0) {
+          sel.innerHTML = '<option value="">這個帳號沒有抓到任何貼文</option>';
+          return metaStatusMsg('⚠️ 沒有抓到貼文，請確認權杖對應的是正確的帳號。', 'var(--red)');
+        }
+
+        sel.innerHTML = posts.map(p => {
+          const d = p.time ? String(p.time).slice(0, 10) : '';
+          const snippet = String(p.text || '(無文字內容)').replace(/\s+/g, ' ').slice(0, 40);
+          return `<option value="${esc(p.id)}">${esc(d)}｜${esc(snippet)}</option>`;
+        }).join('');
+        metaStatusMsg(`✅ 載入 ${posts.length} 篇貼文，請在上方挑出這次的抽獎貼文。`, 'var(--green)');
+      } catch (e) {
+        console.error('載入貼文失敗:', e);
+        sel.innerHTML = '<option value="">載入失敗</option>';
+        metaStatusMsg('❌ ' + esc(e && e.message ? e.message : '載入失敗'), 'var(--red)');
+      }
+    };
+
+    /** 抓留言，填進下面的名單框，後續流程完全不變 */
+    window.fetchSocialComments = async function() {
+      const platform = document.getElementById('meta-platform').value;
+      const postId = document.getElementById('meta-post').value;
+      if (!postId) return alert('⚠️ 請先載入貼文並挑選一篇！');
+
+      metaStatusMsg('⏳ 正在抓取留言，留言多的話可能要十幾秒…');
+      try {
+        const fn = httpsCallable(functions, 'fetchSocialComments');
+        const res = await fn({ platform, postId });
+        const comments = (res.data && res.data.comments) || [];
+
+        if (comments.length === 0) {
+          return metaStatusMsg('⚠️ 這篇貼文目前抓不到任何留言。', 'var(--red)');
+        }
+
+        /* 填成「帳號 <tab> 留言」，正好是下面 runLottery 解析器吃的格式，
+           所以抓回來之後的過濾、抽獎、發券流程一行都不用改。 */
+        document.getElementById('lottery-raw-list').value =
+          comments.map(c => `${c.username}\t${c.text}`).join('\n');
+
+        metaStatusMsg(`✅ 已抓回 <b>${comments.length}</b> 則留言並填入下方名單，接著設定條件就可以抽獎了！`, 'var(--green)');
+      } catch (e) {
+        console.error('抓取留言失敗:', e);
+        metaStatusMsg('❌ ' + esc(e && e.message ? e.message : '抓取失敗'), 'var(--red)');
       }
     };
 
