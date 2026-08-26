@@ -391,6 +391,84 @@ body.mode-physical-active .undo { color:var(--accent-physical); border-color: rg
 .keypad-btn.btn-clear:active { background: rgba(255,71,87,0.3); }
 .keypad-btn.btn-submit { background: var(--gradient-digital); color: #fff; border: none; box-shadow: 0 8px 20px -5px rgba(0,198,255,0.6); }
 .keypad-btn.btn-submit:active { box-shadow: 0 4px 10px -5px rgba(0,198,255,0.6); }
+
+/* ================= 🎬 POS 登入畫面動效 ================= */
+/* 呼吸：待機時 logo 輕微起伏，讓店員一眼看得出系統是活的 */
+.login-logo { animation: pos-logo-breathe 3.4s ease-in-out infinite; }
+@keyframes pos-logo-breathe {
+  0%, 100% { transform: scale(1);    box-shadow: 0 10px 25px -5px rgba(0,198,255,.55); }
+  50%      { transform: scale(1.07); box-shadow: 0 16px 38px -5px rgba(0,198,255,.95); }
+}
+#pos-login-screen::before {
+  content: ""; position: absolute; width: 560px; height: 560px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(0,198,255,.12), transparent 70%);
+  animation: pos-halo 6s ease-in-out infinite; pointer-events: none;
+}
+@keyframes pos-halo {
+  0%, 100% { transform: scale(.9);  opacity: .5; }
+  50%      { transform: scale(1.12); opacity: .95; }
+}
+.login-panel { position: relative; animation: pos-panel-in .75s cubic-bezier(.2,.8,.2,1) both; }
+@keyframes pos-panel-in { from { opacity: 0; transform: translateY(28px) scale(.95); } to { opacity: 1; transform: none; } }
+/* 面板內元素依序浮現，比整塊一起跳出來有層次 */
+.login-panel > * { animation: pos-item-in .55s cubic-bezier(.2,.8,.2,1) both; }
+.login-panel > *:nth-child(1) { animation-delay: .12s; }
+.login-panel > *:nth-child(2) { animation-delay: .18s; }
+.login-panel > *:nth-child(3) { animation-delay: .24s; }
+.login-panel > *:nth-child(4) { animation-delay: .30s; }
+.login-panel > *:nth-child(5) { animation-delay: .36s; }
+.login-panel > *:nth-child(6) { animation-delay: .42s; }
+@keyframes pos-item-in { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+
+/* 登入成功：面板放大淡出，同時 logo 彈一下，收得乾脆有回饋感 */
+#pos-login-screen.success .login-panel { animation: pos-panel-out .55s cubic-bezier(.4,0,.2,1) both; }
+#pos-login-screen.success .login-logo  { animation: pos-logo-pop .55s cubic-bezier(.2,.8,.2,1) both; }
+#pos-login-screen.success { animation: pos-screen-out .55s .1s ease both; }
+@keyframes pos-panel-out { to { opacity: 0; transform: scale(1.1); filter: blur(6px); } }
+@keyframes pos-logo-pop { 0% { transform: scale(1); } 45% { transform: scale(1.35); } 100% { transform: scale(1.15); } }
+@keyframes pos-screen-out { to { opacity: 0; } }
+/* 成功瞬間標題轉綠，比只靠 toast 更直覺 */
+#pos-login-screen.success .login-title { color: var(--accent-physical, #3FBF8F) !important; }
+
+/* ================= 🔽 自訂下拉選單 ================= */
+.cs { position: relative; width: 100%; }
+/* 原生 select 留著（仍是唯一的真實狀態），只是視覺上藏起來 */
+.cs-native { position: absolute; left: 0; top: 0; width: 100%; height: 100%; opacity: 0; pointer-events: none; }
+.cs-trigger {
+  width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  padding: 14px 16px; border-radius: 12px; background: rgba(0,0,0,.3); color: #fff;
+  border: 1px solid rgba(255,255,255,.2); font-size: 16px; font-weight: bold;
+  font-family: inherit; cursor: pointer; outline: none; transition: .2s;
+}
+.cs.open .cs-trigger { border-color: var(--accent-digital); background: rgba(0,0,0,.5); }
+.cs-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cs-caret { font-size: 12px; opacity: .6; flex: 0 0 auto; transition: transform .28s cubic-bezier(.2,.8,.2,1); }
+.cs.open .cs-caret { transform: rotate(180deg); }
+
+.cs-panel {
+  position: absolute; left: 0; right: 0; top: calc(100% + 8px); z-index: 100001;
+  background: #1b1f2a; border: 1px solid rgba(255,255,255,.14); border-radius: 14px;
+  box-shadow: 0 22px 50px rgba(0,0,0,.6); padding: 6px;
+  max-height: 260px; overflow-y: auto;
+  opacity: 0; transform: translateY(-10px) scale(.97); transform-origin: top center;
+  pointer-events: none; transition: opacity .2s ease, transform .28s cubic-bezier(.2,.8,.2,1);
+}
+.cs.open .cs-panel { opacity: 1; transform: none; pointer-events: auto; }
+.cs-opt {
+  padding: 13px 14px; border-radius: 10px; font-size: 15px; font-weight: 600; color: #E8ECF4;
+  cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  opacity: 0; transform: translateY(-6px);
+  transition: background .15s, color .15s, opacity .26s ease, transform .26s cubic-bezier(.2,.8,.2,1);
+}
+.cs.open .cs-opt { opacity: 1; transform: none; }
+.cs-opt:hover { background: rgba(255,255,255,.08); }
+.cs-opt.selected { background: rgba(0,198,255,.16); color: var(--accent-digital); }
+
+/* 動效會讓部分使用者不適，系統設定要求減少動態時全部關掉 */
+@media (prefers-reduced-motion: reduce) {
+  .login-logo, #pos-login-screen::before, .login-panel, .login-panel > * { animation: none !important; }
+  .cs-panel, .cs-opt, .cs-caret { transition: none !important; }
+}
 </style>
 </head>
 <body>
@@ -720,9 +798,17 @@ body.mode-physical-active .undo { color:var(--accent-physical); border-color: rg
 
     selectStore(selectedStore);
     
-    $('pos-login-screen').style.display = 'none';
+    /* 登入成功：先播 0.55 秒的收場動畫再把畫面收掉。
+       主畫面同步解除模糊，動畫播完才真正 display:none，
+       所以店員不會覺得卡頓，但看得到「通過」的回饋。 */
+    const ls = $('pos-login-screen');
+    ls.classList.add('success');
     $('main-app').style.filter = 'none';
     $('main-app').style.pointerEvents = 'auto';
+    setTimeout(() => {
+      ls.style.display = 'none';
+      ls.classList.remove('success');
+    }, 620);
     
     showToast(`✅ 登入成功！`, 'success');
   }
@@ -747,6 +833,7 @@ body.mode-physical-active .undo { color:var(--accent-physical); border-color: rg
     $('login-emp-name').value = '';
     $("duty-emp").innerText = '未登入';
     clearPin();
+    $('pos-login-screen').classList.remove('success');   // 清掉上一輪的收場動畫，否則畫面會是透明的
     $('pos-login-screen').style.display = 'flex';
     $('main-app').style.filter = 'blur(10px)';
     $('main-app').style.pointerEvents = 'none';
@@ -759,6 +846,7 @@ body.mode-physical-active .undo { color:var(--accent-physical); border-color: rg
     if(savedEmpPin && savedEmpName) {
       $("employee-name").value = savedEmpName;
       $("duty-emp").innerText = savedEmpName;
+      $('pos-login-screen').classList.remove('success');
       $('pos-login-screen').style.display = 'none';
       $('main-app').style.filter = 'none';
       $('main-app').style.pointerEvents = 'auto';
@@ -1805,5 +1893,123 @@ body.mode-physical-active .undo { color:var(--accent-physical); border-color: rg
   $("btn-stop").onclick = stopScan;
   $("btn-check").onclick = () => check();
 </script>
+<!-- ============================================================
+     自訂下拉選單：把原生 <select> 包一層，做出可以動畫的展開效果
+     ------------------------------------------------------------
+     為什麼不直接拿掉 <select> 自己刻一個？
+       原生 select 彈出來的清單是「瀏覽器自己畫」的，網頁 CSS 完全碰不到，
+       所以想要滑順展開只能自己做一份。但整組換掉風險很高——現有程式碼
+       到處都在讀寫 select.value、直接塞 innerHTML 換選項、綁 onchange。
+
+     所以這裡採「包一層」而不是「換掉」：
+       · 原生 select 留在 DOM 裡（只是視覺上藏起來），仍然是唯一的真實狀態
+       · 所有 .value 讀寫、innerHTML 換選項、onchange 全部照舊運作
+       · 額外攔截 value 的 setter 跟選項變動，讓外觀跟著同步
+     這樣就算動畫層有問題，底下的資料流也不會受影響。
+     ============================================================ -->
+<script>
+(function () {
+  var OPEN = 'open';
+  var opened = null;
+  var nativeValue = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value');
+
+  function sync(cs, sel) {
+    var lab = cs.querySelector('.cs-label');
+    var o = sel.options[sel.selectedIndex];
+    if (lab) lab.textContent = o ? o.textContent : '';
+  }
+
+  function build(cs, sel) {
+    var panel = cs.querySelector('.cs-panel');
+    panel.innerHTML = '';
+    Array.prototype.forEach.call(sel.options, function (opt, i) {
+      var d = document.createElement('div');
+      d.className = 'cs-opt' + (opt.value === sel.value ? ' selected' : '');
+      d.textContent = opt.textContent;
+      // 依序滑出；超過 12 項就不再累加，免得長清單要等很久才展開完
+      d.style.transitionDelay = Math.min(i, 12) * 22 + 'ms';
+      d.addEventListener('click', function (e) {
+        e.stopPropagation();
+        if (sel.value !== opt.value) {
+          sel.value = opt.value;
+          sel.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+        sync(cs, sel);
+        close(cs);
+      });
+      panel.appendChild(d);
+    });
+  }
+
+  function open(cs, sel) {
+    if (opened && opened !== cs) close(opened);
+    build(cs, sel);          // 每次展開都重建，確保選項永遠是最新的
+    sync(cs, sel);
+    cs.classList.add(OPEN);
+    opened = cs;
+  }
+
+  function close(cs) {
+    // 收合時把 delay 清掉，否則會反過來一項一項慢慢消失，看起來拖泥帶水
+    cs.querySelectorAll('.cs-opt').forEach(function (d) { d.style.transitionDelay = '0ms'; });
+    cs.classList.remove(OPEN);
+    if (opened === cs) opened = null;
+  }
+
+  function enhance(sel) {
+    if (!sel || sel.getAttribute('data-cs') === '1') return;
+    sel.setAttribute('data-cs', '1');
+
+    var cls = sel.className;                       // 原本的 class 給觸發鈕沿用，外觀才不會跑掉
+    var cs = document.createElement('div');
+    cs.className = 'cs';
+    sel.parentNode.insertBefore(cs, sel);
+    cs.appendChild(sel);
+    sel.classList.add('cs-native');
+
+    var trigger = document.createElement('button');
+    trigger.type = 'button';
+    trigger.className = 'cs-trigger ' + cls;
+    trigger.innerHTML = '<span class="cs-label"></span><span class="cs-caret">▾</span>';
+    cs.appendChild(trigger);
+
+    var panel = document.createElement('div');
+    panel.className = 'cs-panel';
+    cs.appendChild(panel);
+
+    trigger.addEventListener('click', function (e) {
+      e.stopPropagation();
+      if (sel.disabled) return;
+      if (cs.classList.contains(OPEN)) { close(cs); } else { open(cs, sel); }
+    });
+
+    /* 程式碼用 sel.value = 'x' 直接指定時，原生不會發 change 事件，
+       這裡攔下 setter 補一次同步，否則畫面上的文字會停在舊的值。 */
+    Object.defineProperty(sel, 'value', {
+      configurable: true,
+      get: function () { return nativeValue.get.call(this); },
+      set: function (v) { nativeValue.set.call(this, v); sync(cs, sel); }
+    });
+
+    // 選項被整批換掉（innerHTML = ...）時，顯示的文字也要跟著更新
+    new MutationObserver(function () { sync(cs, sel); }).observe(sel, { childList: true });
+
+    sel.addEventListener('change', function () { sync(cs, sel); });
+    sync(cs, sel);
+  }
+
+  function enhanceAll() {
+    document.querySelectorAll('select:not([data-cs])').forEach(enhance);
+  }
+  window.enhanceAllSelects = enhanceAll;   // 之後動態長出來的 select 可以手動再呼叫一次
+
+  document.addEventListener('click', function () { if (opened) close(opened); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && opened) close(opened); });
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', enhanceAll);
+  else enhanceAll();
+})();
+</script>
+
 </body>
 </html>

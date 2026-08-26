@@ -246,6 +246,105 @@
       .search-box { width: 100%; }
       .kebab-menu { right: auto; left: 0; }
     }
+
+    /* ================= 🎬 登入畫面動效 ================= */
+    .login-logo {
+      width: 68px; height: 68px; margin: 0 auto 16px; border-radius: 22px;
+      display: flex; align-items: center; justify-content: center; font-size: 32px;
+      background: linear-gradient(135deg, var(--accent), #ffb199);
+      box-shadow: 0 12px 28px -8px rgba(240,118,78,.6);
+      animation: logo-breathe 3.4s ease-in-out infinite;
+    }
+    /* 呼吸：很輕微的縮放＋光暈起伏，讓待機畫面不會死板，但也不至於搶注意力 */
+    @keyframes logo-breathe {
+      0%, 100% { transform: scale(1);    box-shadow: 0 12px 28px -8px rgba(240,118,78,.55); }
+      50%      { transform: scale(1.06); box-shadow: 0 18px 40px -8px rgba(240,118,78,.85); }
+    }
+    #login-screen::before {
+      content: ""; position: absolute; width: 520px; height: 520px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(240,118,78,.16), transparent 70%);
+      animation: halo-breathe 6s ease-in-out infinite; pointer-events: none;
+    }
+    @keyframes halo-breathe {
+      0%, 100% { transform: scale(.9);  opacity: .55; }
+      50%      { transform: scale(1.1); opacity: .95; }
+    }
+    .login-card { position: relative; animation: card-in .7s cubic-bezier(.2,.8,.2,1) both; }
+    @keyframes card-in { from { opacity: 0; transform: translateY(26px) scale(.96); } to { opacity: 1; transform: none; } }
+    /* 卡片內的元素依序浮現，比整塊一起出現有層次 */
+    .login-card > * { animation: item-in .55s cubic-bezier(.2,.8,.2,1) both; }
+    .login-card > *:nth-child(1) { animation-delay: .10s; }
+    .login-card > *:nth-child(2) { animation-delay: .16s; }
+    .login-card > *:nth-child(3) { animation-delay: .22s; }
+    .login-card > *:nth-child(4) { animation-delay: .28s; }
+    .login-card > *:nth-child(5) { animation-delay: .34s; }
+    .login-card > *:nth-child(6) { animation-delay: .40s; }
+    .login-card > *:nth-child(7) { animation-delay: .46s; }
+    .login-card > *:nth-child(8) { animation-delay: .52s; }
+    @keyframes item-in { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+
+    /* 驗證中：外框跑一圈流動的光，讓人知道系統在動，不是當掉 */
+    #login-screen.verifying .login-card { animation: card-in .7s cubic-bezier(.2,.8,.2,1) both, pulse-border 1.1s ease-in-out infinite; }
+    @keyframes pulse-border {
+      0%, 100% { box-shadow: var(--shadow), 0 0 0 0 rgba(240,118,78,.45); }
+      50%      { box-shadow: var(--shadow), 0 0 0 12px rgba(240,118,78,0); }
+    }
+    /* 登入成功：卡片放大淡出，收掉的瞬間有「通過」的感覺 */
+    #login-screen.success .login-card { animation: card-out .55s cubic-bezier(.4,0,.2,1) both; }
+    #login-screen.success .login-logo { animation: logo-pop .55s cubic-bezier(.2,.8,.2,1) both; }
+    @keyframes card-out { to { opacity: 0; transform: scale(1.08); filter: blur(6px); } }
+    @keyframes logo-pop { 0% { transform: scale(1); } 45% { transform: scale(1.3); } 100% { transform: scale(1.1); } }
+    #login-screen.success { animation: screen-out .55s .12s ease both; }
+    @keyframes screen-out { to { opacity: 0; } }
+
+    /* ================= 🔽 自訂下拉選單 ================= */
+    .cs { position: relative; }
+    /* 工具列是 flex，寬度由內容撐開；給個下限免得選項字少時縮成一小條 */
+    .toolbar-group .cs { min-width: 200px; }
+    /* 原生 select 留著（仍是唯一的真實狀態），只是視覺上藏起來 */
+    .cs-native { position: absolute; left: 0; top: 0; width: 100%; height: 100%; opacity: 0; pointer-events: none; }
+    .cs-trigger {
+      width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 10px;
+      text-align: left; cursor: pointer; font-family: inherit;
+    }
+    .cs-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .cs-caret { font-size: 11px; opacity: .5; flex: 0 0 auto; transition: transform .28s cubic-bezier(.2,.8,.2,1); }
+    .cs.open .cs-caret { transform: rotate(180deg); }
+
+    /* 沒有自帶 class 的 select（表單裡那些），觸發鈕要補回原本 .form-group select 的外觀 */
+    .form-group .cs { flex: 1; min-width: 140px; }
+    .form-group .cs-trigger:not(.toolbar-item) {
+      padding: 12px 16px; border: 1px solid #E6EAF0; border-radius: 12px;
+      background: #F7F9FB; font-size: 14px; color: var(--text-main);
+    }
+    .cs.open .cs-trigger:not(.toolbar-item) { border-color: var(--accent); background: #fff; }
+    .cs.open .cs-trigger.toolbar-item { border-color: var(--accent); color: var(--accent); }
+
+    .cs-panel {
+      position: absolute; left: 0; right: 0; top: calc(100% + 8px); z-index: 9998;
+      background: #fff; border: 1px solid #E6EAF0; border-radius: 14px;
+      box-shadow: 0 18px 44px rgba(0,0,0,.16); padding: 6px;
+      max-height: 300px; overflow-y: auto;
+      opacity: 0; transform: translateY(-10px) scale(.97); transform-origin: top center;
+      pointer-events: none; transition: opacity .2s ease, transform .28s cubic-bezier(.2,.8,.2,1);
+    }
+    .cs.open .cs-panel { opacity: 1; transform: none; pointer-events: auto; }
+    .cs-opt {
+      padding: 11px 14px; border-radius: 10px; font-size: 14px; font-weight: 600;
+      color: var(--text-main); cursor: pointer; white-space: nowrap;
+      overflow: hidden; text-overflow: ellipsis;
+      opacity: 0; transform: translateY(-6px);
+      transition: background .15s, color .15s, opacity .26s ease, transform .26s cubic-bezier(.2,.8,.2,1);
+    }
+    .cs.open .cs-opt { opacity: 1; transform: none; }
+    .cs-opt:hover { background: #F3F5F8; }
+    .cs-opt.selected { background: rgba(240,118,78,.1); color: var(--accent); }
+
+    /* 動效會讓部分使用者不適，系統設定要求減少動態時全部關掉 */
+    @media (prefers-reduced-motion: reduce) {
+      .login-logo, #login-screen::before, .login-card, .login-card > * { animation: none !important; }
+      .cs-panel, .cs-opt, .cs-caret { transition: none !important; }
+    }
   </style>
 </head>
 <body>
@@ -264,7 +363,8 @@
   <!-- 登入畫面 -->
   <div id="login-screen">
     <div class="login-card">
-      <h2>🔒 總部戰情室</h2>
+      <div class="login-logo">🔒</div>
+      <h2>總部戰情室</h2>
       <p class="sub">德州小騎士授權登入</p>
       <input id="email" type="email" placeholder="管理員信箱">
       <input id="pwd" type="password" placeholder="密碼">
@@ -321,6 +421,7 @@
         <div class="sidebar-item" onclick="switchView('config-member', this)">👑 會員系統(未完善)</div>
         <div class="sidebar-item" onclick="switchView('config-store', this)">🏪 門市清單管理</div>
         <div class="sidebar-item" onclick="switchView('config-event', this)">🎯 行銷活動管理</div>
+        <div class="sidebar-item" onclick="switchView('config-voucher', this)">🎫 實體券登記與生成</div>
       </div>
     </nav>
     
@@ -764,94 +865,15 @@
       </div>
 
       <!-- ================= 🔥 子選單視圖：門市清單管理 ================= -->
-      <div id="view-config-store" class="view-section">
+      <!-- ================= 視圖：實體券登記與生成 ================= -->
+      <div id="view-config-voucher" class="view-section">
         <div class="header">
-          <h1>🏪 門市清單管理</h1>
+          <h1>🎫 實體券登記與生成</h1>
         </div>
-
-        <div class="config-card">
-          <h2>🏪 新增與移除門市</h2>
-          <p class="desc">新增或刪除門市，全台 POS 系統會自動同步更新。</p>
-          <div class="form-group">
-            <input type="text" id="new-store-name" placeholder="輸入新門市名稱 (例: 巨蛋門市)">
-            <button class="btn-primary" onclick="addStore()">➕ 新增門市</button>
-          </div>
-          <ul class="item-list" id="ui-store-list"></ul>
-        </div>
-
-        <div class="config-card save-cloud-container">
-          <h2>💾 同步至資料庫</h2>
-          <button class="btn-primary btn-save-cloud" style="width:100%; font-size:18px; padding: 16px;" onclick="saveConfigToCloud()">💾 儲存所有設定至雲端 (即時生效)</button>
-        </div>
-      </div>
-
-      <!-- ================= 🔥 子選單視圖：行銷活動管理 ================= -->
-      <div id="view-config-event" class="view-section">
-        <div class="header">
-          <h1>🎯 行銷活動管理</h1>
-        </div>
-
-        <div class="config-card">
-          <h2>🎯 建立與調整活動</h2>
-          <p class="desc">建立抽獎活動或實體券分類。可透過右方點點選單【上下移動】調整排序，POS 端會自動套用！</p>
-          <div class="form-group">
-            <div class="field-block">
-              <label>活動/資料夾名稱 <span id="edit-lock-hint" style="color:red;display:none;">(編輯模式下不可改名)</span></label>
-              <input type="text" id="new-act-name" placeholder="例: 【實體】一號餐兌換券">
-            </div>
-            <div class="field-block">
-              <label>通關密語 (實體券免填)</label>
-              <input type="text" id="new-act-pwd" placeholder="留白則為實體免密碼">
-            </div>
-            <div class="field-block">
-              <label>預設贈品 (實體券免填)</label>
-              <input type="text" id="new-act-gift" placeholder="留白則依實體券面">
-            </div>
-            <div class="field-block">
-              <label>使用期限 (選填)</label>
-              <input type="text" id="new-act-expire" placeholder="例: 2026/12/31">
-            </div>
-            <div class="field-block">
-              <label>限定門市</label>
-              <input type="text" id="new-act-stores" placeholder="預設 ALL" value="ALL">
-            </div>
-            <div class="field-block">
-              <label>🎟️ 名額上限 (選填)</label>
-              <input type="text" id="new-act-quota" placeholder="留空或 0 = 不限名額" inputmode="numeric">
-            </div>
-          </div>
-          <p class="desc" style="margin-top:-8px; margin-bottom:20px;">
-            <b>名額上限</b>：抽獎類活動（例：一號餐抽 10 個）務必填寫。額滿後雲端會直接擋下領取，
-            就算通關密語外流也不會超發。贈品類活動可留空，改用門市配額控管。
-            <b style="color:#F0764E;">注意：調高名額可立即生效；若要「重新開放」同一個活動，需請工程師清掉計數。</b>
-          </p>
-
-          <!-- 🔥 新增：活動自動上下架排程 -->
-          <div style="background:#F7F9FB; border:1px dashed #E6EAF0; border-radius:14px; padding:16px 18px; margin-bottom:20px;">
-            <div style="font-weight:800; font-size:15px; margin-bottom:6px;">🗓️ 自動上下架排程 (選填)</div>
-            <p class="desc" style="margin-bottom:14px;">
-              填了時間之後，這個活動的上架／下架就交給雲端排程接管（每小時整點檢查一次），前台也會自己判斷時間。
-              <b>兩格都留空 = 完全用手動開關控制。</b>
-            </p>
-            <div class="form-group" style="margin-bottom:0; align-items:flex-end;">
-              <div class="field-block">
-                <label>⬆️ 自動上架時間</label>
-                <input type="datetime-local" id="new-act-start">
-              </div>
-              <div class="field-block">
-                <label>⬇️ 自動下架時間</label>
-                <input type="datetime-local" id="new-act-end">
-              </div>
-              <button class="btn-cancel" style="padding:12px 18px; margin-bottom:1px;" onclick="clearActSchedule()">🧹 清除排程</button>
-            </div>
-          </div>
-
-          <button id="btn-add-act" class="btn-primary" style="width:100%" onclick="addOrUpdateEvent()">➕ 快速建立活動</button>
-          <button id="btn-cancel-edit" class="btn-cancel" style="width:100%; display:none; margin-top:10px;" onclick="cancelEditEvent()">❌ 取消編輯</button>
-          
-          <ul class="item-list" id="ui-event-list" style="margin-top: 20px;"></ul>
-        </div>
-        
+        <p class="desc" style="margin:-8px 0 22px;">
+          印刷廠交來新一批紙本券時，在這裡把券號寫進資料庫。<b>沒在這裡建檔過的券，門市 POS 一律不給核銷</b>，
+          所以偽造的券刷不過。連號適合方便對帳，亂碼＋檢查碼適合會流到店外、有價值的券。
+        </p>
         <div class="config-card">
           <h2>🎫 實體券批次建檔器</h2>
           <p class="desc">自動產生連續的流水號並寫入資料庫。門市 POS 將阻擋「未在此建檔過」的偽造實體券。</p>
@@ -949,6 +971,96 @@
 
           <div id="gen-result" class="result-box" style="display:none;"></div>
         </div>
+      </div>
+
+      <div id="view-config-store" class="view-section">
+        <div class="header">
+          <h1>🏪 門市清單管理</h1>
+        </div>
+
+        <div class="config-card">
+          <h2>🏪 新增與移除門市</h2>
+          <p class="desc">新增或刪除門市，全台 POS 系統會自動同步更新。</p>
+          <div class="form-group">
+            <input type="text" id="new-store-name" placeholder="輸入新門市名稱 (例: 巨蛋門市)">
+            <button class="btn-primary" onclick="addStore()">➕ 新增門市</button>
+          </div>
+          <ul class="item-list" id="ui-store-list"></ul>
+        </div>
+
+        <div class="config-card save-cloud-container">
+          <h2>💾 同步至資料庫</h2>
+          <button class="btn-primary btn-save-cloud" style="width:100%; font-size:18px; padding: 16px;" onclick="saveConfigToCloud()">💾 儲存所有設定至雲端 (即時生效)</button>
+        </div>
+      </div>
+
+      <!-- ================= 🔥 子選單視圖：行銷活動管理 ================= -->
+      <div id="view-config-event" class="view-section">
+        <div class="header">
+          <h1>🎯 行銷活動管理</h1>
+        </div>
+
+        <div class="config-card">
+          <h2>🎯 建立與調整活動</h2>
+          <p class="desc">建立抽獎活動或實體券分類。可透過右方點點選單【上下移動】調整排序，POS 端會自動套用！</p>
+          <div class="form-group">
+            <div class="field-block">
+              <label>活動/資料夾名稱 <span id="edit-lock-hint" style="color:red;display:none;">(編輯模式下不可改名)</span></label>
+              <input type="text" id="new-act-name" placeholder="例: 【實體】一號餐兌換券">
+            </div>
+            <div class="field-block">
+              <label>通關密語 (實體券免填)</label>
+              <input type="text" id="new-act-pwd" placeholder="留白則為實體免密碼">
+            </div>
+            <div class="field-block">
+              <label>預設贈品 (實體券免填)</label>
+              <input type="text" id="new-act-gift" placeholder="留白則依實體券面">
+            </div>
+            <div class="field-block">
+              <label>使用期限 (選填)</label>
+              <input type="text" id="new-act-expire" placeholder="例: 2026/12/31">
+            </div>
+            <div class="field-block">
+              <label>限定門市</label>
+              <input type="text" id="new-act-stores" placeholder="預設 ALL" value="ALL">
+            </div>
+            <div class="field-block">
+              <label>🎟️ 名額上限 (選填)</label>
+              <input type="text" id="new-act-quota" placeholder="留空或 0 = 不限名額" inputmode="numeric">
+            </div>
+          </div>
+          <p class="desc" style="margin-top:-8px; margin-bottom:20px;">
+            <b>名額上限</b>：抽獎類活動（例：一號餐抽 10 個）務必填寫。額滿後雲端會直接擋下領取，
+            就算通關密語外流也不會超發。贈品類活動可留空，改用門市配額控管。
+            <b style="color:#F0764E;">注意：調高名額可立即生效；若要「重新開放」同一個活動，需請工程師清掉計數。</b>
+          </p>
+
+          <!-- 🔥 新增：活動自動上下架排程 -->
+          <div style="background:#F7F9FB; border:1px dashed #E6EAF0; border-radius:14px; padding:16px 18px; margin-bottom:20px;">
+            <div style="font-weight:800; font-size:15px; margin-bottom:6px;">🗓️ 自動上下架排程 (選填)</div>
+            <p class="desc" style="margin-bottom:14px;">
+              填了時間之後，這個活動的上架／下架就交給雲端排程接管（每小時整點檢查一次），前台也會自己判斷時間。
+              <b>兩格都留空 = 完全用手動開關控制。</b>
+            </p>
+            <div class="form-group" style="margin-bottom:0; align-items:flex-end;">
+              <div class="field-block">
+                <label>⬆️ 自動上架時間</label>
+                <input type="datetime-local" id="new-act-start">
+              </div>
+              <div class="field-block">
+                <label>⬇️ 自動下架時間</label>
+                <input type="datetime-local" id="new-act-end">
+              </div>
+              <button class="btn-cancel" style="padding:12px 18px; margin-bottom:1px;" onclick="clearActSchedule()">🧹 清除排程</button>
+            </div>
+          </div>
+
+          <button id="btn-add-act" class="btn-primary" style="width:100%" onclick="addOrUpdateEvent()">➕ 快速建立活動</button>
+          <button id="btn-cancel-edit" class="btn-cancel" style="width:100%; display:none; margin-top:10px;" onclick="cancelEditEvent()">❌ 取消編輯</button>
+          
+          <ul class="item-list" id="ui-event-list" style="margin-top: 20px;"></ul>
+        </div>
+        
 
         <div class="config-card save-cloud-container">
           <h2>💾 同步至資料庫</h2>
@@ -1111,7 +1223,8 @@
       // 進抽獎頁時順便刷新 Meta 連線狀態
       if (viewId === 'lottery-ui') refreshMetaStatus();
 
-      if (viewId === 'lottery-ui' || viewId === 'issue-ui' || viewId === 'config-event') {
+      // config-voucher 也要一起刷新：batch-act / gen-act 兩個下拉選單在那一頁
+      if (viewId === 'lottery-ui' || viewId === 'issue-ui' || viewId === 'config-event' || viewId === 'config-voucher') {
         const actSelectHtml = document.getElementById('act-select').innerHTML;
         let cleanHtml = actSelectHtml.replace(/<option value="ALL_OVERVIEW">🌐 總覽 \(所有活動\)<\/option>/g, '');
         if(document.getElementById('lottery-act')) document.getElementById('lottery-act').innerHTML = cleanHtml;
@@ -2955,6 +3068,7 @@
         // 🔥 前端清單只是先擋一下畫面，真正的權限要跟雲端核發 Custom Claims
         document.getElementById('login-btn').innerText = "驗證管理員權限中...";
         document.getElementById('google-btn').innerText = "驗證管理員權限中...";
+        document.getElementById('login-screen').classList.add('verifying');
 
         try {
           const grantAdmin = httpsCallable(functions, 'grantAdminIfAllowed');
@@ -2981,7 +3095,15 @@
           return;
         }
 
-        document.getElementById('login-screen').style.display = 'none';
+        /* 登入成功：先播 0.55 秒的收場動畫再把畫面收掉，
+           後面的資料載入照舊立刻開始，不會因為動畫而延後。 */
+        const ls = document.getElementById('login-screen');
+        ls.classList.remove('verifying');
+        ls.classList.add('success');
+        setTimeout(function () {
+          ls.style.display = 'none';
+          ls.classList.remove('success');
+        }, 620);
         document.getElementById('sidebar-nav').style.display = 'flex';
         document.getElementById('main-app').style.display = 'block';
         fetchSystemConfig();
@@ -2991,6 +3113,7 @@
         if(user) { alert("❌ 權限不足"); signOut(auth); }
         document.getElementById('login-btn').innerText = "安全登入";
         document.getElementById('google-btn').innerText = "🌐 使用 Google 帳號登入";
+        document.getElementById('login-screen').classList.remove('verifying', 'success');
         document.getElementById('sidebar-nav').style.display = 'none';
         document.getElementById('main-app').style.display = 'none';
         document.getElementById('login-screen').style.display = 'flex';
@@ -3086,5 +3209,123 @@
       alert("🎉 薪資單自動發送腳本執行完成！");
     }
   </script>
+<!-- ============================================================
+     自訂下拉選單：把原生 <select> 包一層，做出可以動畫的展開效果
+     ------------------------------------------------------------
+     為什麼不直接拿掉 <select> 自己刻一個？
+       原生 select 彈出來的清單是「瀏覽器自己畫」的，網頁 CSS 完全碰不到，
+       所以想要滑順展開只能自己做一份。但整組換掉風險很高——現有程式碼
+       到處都在讀寫 select.value、直接塞 innerHTML 換選項、綁 onchange。
+
+     所以這裡採「包一層」而不是「換掉」：
+       · 原生 select 留在 DOM 裡（只是視覺上藏起來），仍然是唯一的真實狀態
+       · 所有 .value 讀寫、innerHTML 換選項、onchange 全部照舊運作
+       · 額外攔截 value 的 setter 跟選項變動，讓外觀跟著同步
+     這樣就算動畫層有問題，底下的資料流也不會受影響。
+     ============================================================ -->
+<script>
+(function () {
+  var OPEN = 'open';
+  var opened = null;
+  var nativeValue = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value');
+
+  function sync(cs, sel) {
+    var lab = cs.querySelector('.cs-label');
+    var o = sel.options[sel.selectedIndex];
+    if (lab) lab.textContent = o ? o.textContent : '';
+  }
+
+  function build(cs, sel) {
+    var panel = cs.querySelector('.cs-panel');
+    panel.innerHTML = '';
+    Array.prototype.forEach.call(sel.options, function (opt, i) {
+      var d = document.createElement('div');
+      d.className = 'cs-opt' + (opt.value === sel.value ? ' selected' : '');
+      d.textContent = opt.textContent;
+      // 依序滑出；超過 12 項就不再累加，免得長清單要等很久才展開完
+      d.style.transitionDelay = Math.min(i, 12) * 22 + 'ms';
+      d.addEventListener('click', function (e) {
+        e.stopPropagation();
+        if (sel.value !== opt.value) {
+          sel.value = opt.value;
+          sel.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+        sync(cs, sel);
+        close(cs);
+      });
+      panel.appendChild(d);
+    });
+  }
+
+  function open(cs, sel) {
+    if (opened && opened !== cs) close(opened);
+    build(cs, sel);          // 每次展開都重建，確保選項永遠是最新的
+    sync(cs, sel);
+    cs.classList.add(OPEN);
+    opened = cs;
+  }
+
+  function close(cs) {
+    // 收合時把 delay 清掉，否則會反過來一項一項慢慢消失，看起來拖泥帶水
+    cs.querySelectorAll('.cs-opt').forEach(function (d) { d.style.transitionDelay = '0ms'; });
+    cs.classList.remove(OPEN);
+    if (opened === cs) opened = null;
+  }
+
+  function enhance(sel) {
+    if (!sel || sel.getAttribute('data-cs') === '1') return;
+    sel.setAttribute('data-cs', '1');
+
+    var cls = sel.className;                       // 原本的 class 給觸發鈕沿用，外觀才不會跑掉
+    var cs = document.createElement('div');
+    cs.className = 'cs';
+    sel.parentNode.insertBefore(cs, sel);
+    cs.appendChild(sel);
+    sel.classList.add('cs-native');
+
+    var trigger = document.createElement('button');
+    trigger.type = 'button';
+    trigger.className = 'cs-trigger ' + cls;
+    trigger.innerHTML = '<span class="cs-label"></span><span class="cs-caret">▾</span>';
+    cs.appendChild(trigger);
+
+    var panel = document.createElement('div');
+    panel.className = 'cs-panel';
+    cs.appendChild(panel);
+
+    trigger.addEventListener('click', function (e) {
+      e.stopPropagation();
+      if (sel.disabled) return;
+      if (cs.classList.contains(OPEN)) { close(cs); } else { open(cs, sel); }
+    });
+
+    /* 程式碼用 sel.value = 'x' 直接指定時，原生不會發 change 事件，
+       這裡攔下 setter 補一次同步，否則畫面上的文字會停在舊的值。 */
+    Object.defineProperty(sel, 'value', {
+      configurable: true,
+      get: function () { return nativeValue.get.call(this); },
+      set: function (v) { nativeValue.set.call(this, v); sync(cs, sel); }
+    });
+
+    // 選項被整批換掉（innerHTML = ...）時，顯示的文字也要跟著更新
+    new MutationObserver(function () { sync(cs, sel); }).observe(sel, { childList: true });
+
+    sel.addEventListener('change', function () { sync(cs, sel); });
+    sync(cs, sel);
+  }
+
+  function enhanceAll() {
+    document.querySelectorAll('select:not([data-cs])').forEach(enhance);
+  }
+  window.enhanceAllSelects = enhanceAll;   // 之後動態長出來的 select 可以手動再呼叫一次
+
+  document.addEventListener('click', function () { if (opened) close(opened); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && opened) close(opened); });
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', enhanceAll);
+  else enhanceAll();
+})();
+</script>
+
 </body>
 </html>

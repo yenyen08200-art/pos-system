@@ -294,7 +294,57 @@
       h1{font-size:28px}
       .meta strong{font-size:11px}
     }
-  </style>
+  
+    /* ================= 🔽 自訂下拉選單 ================= */
+    .cs{position:relative;width:100%}
+    /* .field 自己有 z-index:2，會形成堆疊脈絡；不把展開中的那一個提上來，
+       選單會被「下一個欄位」蓋住（後面的同層元素本來就畫在上面）。 */
+    .field:has(.cs.open){z-index:60}
+    /* 原生 select 留著（仍是唯一的真實狀態），只是視覺上藏起來 */
+    .cs-native{position:absolute;left:0;top:0;width:100%;height:100%;opacity:0;pointer-events:none}
+    .cs-trigger{
+      width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;
+      padding:16px 16px;border-radius:16px;
+      border:1px solid rgba(255,255,255,.7);background:rgba(255,255,255,.45);
+      backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+      color:var(--ink);font-size:16px;font-weight:500;font-family:inherit;text-align:left;
+      outline:none;cursor:pointer;transition:all .35s cubic-bezier(.2,.8,.2,1);
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.8);
+    }
+    .cs.open .cs-trigger{
+      background-color:rgba(255,255,255,.7);border-color:rgba(185,145,90,.75);
+      box-shadow:0 0 0 4px rgba(185,145,90,.15),0 0 18px rgba(220,187,132,.35),inset 0 1px 0 rgba(255,255,255,.9);
+      transform:translateY(-1px);
+    }
+    .cs-label{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .cs-caret{font-size:12px;color:var(--brass-deep);flex:0 0 auto;transition:transform .3s cubic-bezier(.2,.8,.2,1)}
+    .cs.open .cs-caret{transform:rotate(180deg)}
+
+    .cs-panel{
+      position:absolute;left:0;right:0;top:calc(100% + 8px);z-index:60;
+      background:rgba(255,255,255,.92);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+      border:1px solid rgba(185,145,90,.28);border-radius:18px;
+      box-shadow:0 20px 46px rgba(90,70,40,.22);padding:7px;
+      max-height:270px;overflow-y:auto;
+      opacity:0;transform:translateY(-10px) scale(.97);transform-origin:top center;
+      pointer-events:none;transition:opacity .22s ease,transform .32s cubic-bezier(.2,.8,.2,1);
+    }
+    .cs.open .cs-panel{opacity:1;transform:none;pointer-events:auto}
+    .cs-opt{
+      padding:14px 14px;border-radius:12px;font-size:15px;font-weight:500;color:var(--ink);
+      cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+      opacity:0;transform:translateY(-6px);
+      transition:background .18s,color .18s,opacity .28s ease,transform .28s cubic-bezier(.2,.8,.2,1);
+    }
+    .cs.open .cs-opt{opacity:1;transform:none}
+    .cs-opt:hover{background:rgba(185,145,90,.1)}
+    .cs-opt.selected{background:linear-gradient(135deg,rgba(220,187,132,.28),rgba(185,145,90,.18));color:var(--brass-deep);font-weight:700}
+
+    /* 動效會讓部分使用者不適，系統設定要求減少動態時全部關掉 */
+    @media (prefers-reduced-motion: reduce){
+      .cs-panel,.cs-opt,.cs-caret,.cs-trigger{transition:none !important}
+    }
+</style>
 </head>
 <body>
   <div class="blue-glow"></div>
@@ -764,5 +814,123 @@
     $('hl-text').style.color = isRedeemed ? "#6f766e" : "#2c302c";
   }
 </script>
+<!-- ============================================================
+     自訂下拉選單：把原生 <select> 包一層，做出可以動畫的展開效果
+     ------------------------------------------------------------
+     為什麼不直接拿掉 <select> 自己刻一個？
+       原生 select 彈出來的清單是「瀏覽器自己畫」的，網頁 CSS 完全碰不到，
+       所以想要滑順展開只能自己做一份。但整組換掉風險很高——現有程式碼
+       到處都在讀寫 select.value、直接塞 innerHTML 換選項、綁 onchange。
+
+     所以這裡採「包一層」而不是「換掉」：
+       · 原生 select 留在 DOM 裡（只是視覺上藏起來），仍然是唯一的真實狀態
+       · 所有 .value 讀寫、innerHTML 換選項、onchange 全部照舊運作
+       · 額外攔截 value 的 setter 跟選項變動，讓外觀跟著同步
+     這樣就算動畫層有問題，底下的資料流也不會受影響。
+     ============================================================ -->
+<script>
+(function () {
+  var OPEN = 'open';
+  var opened = null;
+  var nativeValue = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value');
+
+  function sync(cs, sel) {
+    var lab = cs.querySelector('.cs-label');
+    var o = sel.options[sel.selectedIndex];
+    if (lab) lab.textContent = o ? o.textContent : '';
+  }
+
+  function build(cs, sel) {
+    var panel = cs.querySelector('.cs-panel');
+    panel.innerHTML = '';
+    Array.prototype.forEach.call(sel.options, function (opt, i) {
+      var d = document.createElement('div');
+      d.className = 'cs-opt' + (opt.value === sel.value ? ' selected' : '');
+      d.textContent = opt.textContent;
+      // 依序滑出；超過 12 項就不再累加，免得長清單要等很久才展開完
+      d.style.transitionDelay = Math.min(i, 12) * 22 + 'ms';
+      d.addEventListener('click', function (e) {
+        e.stopPropagation();
+        if (sel.value !== opt.value) {
+          sel.value = opt.value;
+          sel.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+        sync(cs, sel);
+        close(cs);
+      });
+      panel.appendChild(d);
+    });
+  }
+
+  function open(cs, sel) {
+    if (opened && opened !== cs) close(opened);
+    build(cs, sel);          // 每次展開都重建，確保選項永遠是最新的
+    sync(cs, sel);
+    cs.classList.add(OPEN);
+    opened = cs;
+  }
+
+  function close(cs) {
+    // 收合時把 delay 清掉，否則會反過來一項一項慢慢消失，看起來拖泥帶水
+    cs.querySelectorAll('.cs-opt').forEach(function (d) { d.style.transitionDelay = '0ms'; });
+    cs.classList.remove(OPEN);
+    if (opened === cs) opened = null;
+  }
+
+  function enhance(sel) {
+    if (!sel || sel.getAttribute('data-cs') === '1') return;
+    sel.setAttribute('data-cs', '1');
+
+    var cls = sel.className;                       // 原本的 class 給觸發鈕沿用，外觀才不會跑掉
+    var cs = document.createElement('div');
+    cs.className = 'cs';
+    sel.parentNode.insertBefore(cs, sel);
+    cs.appendChild(sel);
+    sel.classList.add('cs-native');
+
+    var trigger = document.createElement('button');
+    trigger.type = 'button';
+    trigger.className = 'cs-trigger ' + cls;
+    trigger.innerHTML = '<span class="cs-label"></span><span class="cs-caret">▾</span>';
+    cs.appendChild(trigger);
+
+    var panel = document.createElement('div');
+    panel.className = 'cs-panel';
+    cs.appendChild(panel);
+
+    trigger.addEventListener('click', function (e) {
+      e.stopPropagation();
+      if (sel.disabled) return;
+      if (cs.classList.contains(OPEN)) { close(cs); } else { open(cs, sel); }
+    });
+
+    /* 程式碼用 sel.value = 'x' 直接指定時，原生不會發 change 事件，
+       這裡攔下 setter 補一次同步，否則畫面上的文字會停在舊的值。 */
+    Object.defineProperty(sel, 'value', {
+      configurable: true,
+      get: function () { return nativeValue.get.call(this); },
+      set: function (v) { nativeValue.set.call(this, v); sync(cs, sel); }
+    });
+
+    // 選項被整批換掉（innerHTML = ...）時，顯示的文字也要跟著更新
+    new MutationObserver(function () { sync(cs, sel); }).observe(sel, { childList: true });
+
+    sel.addEventListener('change', function () { sync(cs, sel); });
+    sync(cs, sel);
+  }
+
+  function enhanceAll() {
+    document.querySelectorAll('select:not([data-cs])').forEach(enhance);
+  }
+  window.enhanceAllSelects = enhanceAll;   // 之後動態長出來的 select 可以手動再呼叫一次
+
+  document.addEventListener('click', function () { if (opened) close(opened); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && opened) close(opened); });
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', enhanceAll);
+  else enhanceAll();
+})();
+</script>
+
 </body>
 </html>
