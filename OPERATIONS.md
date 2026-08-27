@@ -104,7 +104,32 @@ App Check 擋的是「有人直接拿 API 網址寫腳本狂打」。
 
 ---
 
-## 6. 已經設定好、不用再管的
+## 6. 定期要看一眼的：執行環境版本
+
+Cloud Functions 的 Node.js 版本**有生命週期**，Google 會定期淘汰舊版。
+部署時如果看到這種警告，就是該升級了：
+
+```
+Runtime Node.js 20 was deprecated on 2026-04-30 and will be decommissioned...
+```
+
+升級方式：改 `AutoExpireBot/functions/package.json` 的 `engines.node`，然後重新部署。
+
+```json
+"engines": { "node": "22" }
+```
+
+> ⚠️ **不要拖到 decommission（停用）那天**。deprecated 只是警告，還能部署；
+> 一旦 decommissioned，就再也部署不上去了，得先升級才能修任何東西——
+> 那時候如果剛好遇到緊急狀況會很麻煩。
+
+順帶一提，部署時可能還會看到「firebase-functions 版本過舊」的提醒。
+那個**沒有時效壓力**，現有版本仍然正常運作；要升級的話屬於大版本更新，
+建議先用預覽頻道與模擬器測過再上正式站。
+
+---
+
+## 7. 已經設定好、不用再管的
 
 | 項目 | 狀態 |
 |---|---|
