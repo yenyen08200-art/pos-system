@@ -56,8 +56,25 @@
     
     /* 子選單樣式 */
     .sidebar-item.has-sub { justify-content: space-between; }
-    .sub-menu { display: none; flex-direction: column; background: rgba(0,0,0,0.2); border-radius: 12px; margin-top: 2px; overflow: hidden; padding: 6px 0; }
-    .sub-menu .sidebar-item { padding-left: 44px; border-radius: 0; font-size: 13px; font-weight: 500; }
+    .sub-menu {
+      display: flex; flex-direction: column; background: rgba(0,0,0,0.2);
+      border-radius: 12px; margin-top: 2px; overflow: hidden;
+      /* 收合狀態：高度與內距都歸零，才不會留下一條背景色 */
+      max-height: 0; opacity: 0; padding: 0;
+      transition: max-height .34s cubic-bezier(.2,.8,.2,1), opacity .22s ease, padding .34s cubic-bezier(.2,.8,.2,1);
+    }
+    .sub-menu.open { max-height: 320px; opacity: 1; padding: 6px 0; }
+    .sub-menu .sidebar-item {
+      padding-left: 44px; border-radius: 0; font-size: 13px; font-weight: 500;
+      opacity: 0; transform: translateX(-10px);
+      transition: opacity .26s ease, transform .3s cubic-bezier(.2,.8,.2,1), background .2s, color .2s;
+    }
+    /* 展開時子項目依序滑進來，比整塊一起出現有層次 */
+    .sub-menu.open .sidebar-item { opacity: 1; transform: none; }
+    .sub-menu.open .sidebar-item:nth-child(1) { transition-delay: .07s; }
+    .sub-menu.open .sidebar-item:nth-child(2) { transition-delay: .12s; }
+    .sub-menu.open .sidebar-item:nth-child(3) { transition-delay: .17s; }
+    .sub-menu.open .sidebar-item:nth-child(4) { transition-delay: .22s; }
     .sub-menu .sidebar-item:hover { background: rgba(255, 255, 255, 0.08); color: #fff; }
     .sub-menu .sidebar-item.active { background: var(--accent); color: #fff; font-weight: 700; border-radius: 8px; margin: 0 8px; }
 
@@ -391,7 +408,7 @@
         <div style="display: flex; align-items: center; gap: 10px;">📊 電子兌換卷儀表板</div>
         <i class="fa-solid fa-chevron-down" style="font-size: 12px; transition: 0.3s; transform: rotate(180deg);"></i>
       </div>
-      <div class="sub-menu" id="dashboard-sub" style="display: flex;">
+      <div class="sub-menu open" id="dashboard-sub">
         <div class="sidebar-item active" onclick="switchView('dashboard', this)">📊 數據總覽</div>
         <div class="sidebar-item" onclick="switchView('issue-ui', this)">🎟️ 手動補單管理</div>
       </div>
@@ -1200,14 +1217,24 @@
     window.toggleSubMenu = function(menuId, el) {
       const menu = document.getElementById(menuId);
       const icon = el.querySelector('i');
-      if(menu.style.display === 'flex') {
-        menu.style.display = 'none';
-        if(icon) icon.style.transform = 'rotate(0deg)';
-      } else {
-        menu.style.display = 'flex';
-        if(icon) icon.style.transform = 'rotate(180deg)';
-      }
+      const willOpen = !menu.classList.contains('open');
+      menu.classList.toggle('open', willOpen);
+      if(icon) icon.style.transform = willOpen ? 'rotate(180deg)' : 'rotate(0deg)';
     };
+
+    /* 「⋮」選單用的是原生 <details>，各自獨立、彼此不知道對方開著，
+       所以連點兩個會同時展開兩張選單。這裡補上「開新的就收掉舊的」，
+       順便讓點到選單外面、或按下選單裡任何一顆按鈕之後也會自動收合。 */
+    document.addEventListener('click', function (e) {
+      const cur = e.target.closest ? e.target.closest('details.kebab-dropdown') : null;
+      document.querySelectorAll('details.kebab-dropdown[open]').forEach(function (d) {
+        if (d !== cur) d.removeAttribute('open');
+      });
+      // 點到選單裡的功能鈕（顯示 QR、刪除…）後，動作已經觸發，選單就該收起來
+      if (cur && e.target.closest('.kebab-menu')) {
+        setTimeout(function () { cur.removeAttribute('open'); }, 0);
+      }
+    });
 
     window.switchView = function(viewId, element) {
       document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
