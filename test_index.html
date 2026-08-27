@@ -346,6 +346,7 @@ body.mode-physical-active .undo { color:var(--accent-physical); border-color: rg
   background: radial-gradient(circle at 50% 50%, rgba(0,198,255,0.1), var(--background) 80%);
   display: flex; flex-direction: column; justify-content: center; align-items: center;
   backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  overflow: hidden;   /* 背景光暈有 560px，比手機還寬，不裁掉會撐出橫向捲軸 */
 }
 .login-panel {
   background: linear-gradient(160deg, rgba(255,255,255,0.05), rgba(255,255,255,0.01));

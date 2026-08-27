@@ -548,6 +548,20 @@
    *   因為票券的即時狀態是用 onSnapshot 監聽的，要有 Firebase 的登入身分才讀得到；
    *   而且之後會員系統要做權限判斷時，request.auth.uid 就直接是 LINE 帳號，很好用。
    * ============================================================*/
+  /* 把前端錯誤送回雲端，之後在 Firebase Logs 搜 [client] 就查得到。
+     顧客回報「領不到券」時，不用再請他截圖或自己猜原因。
+     刻意不 await、也不理會失敗——回報本身壞掉不該影響顧客的操作。 */
+  function reportError(where, e, act) {
+    try {
+      httpsCallable(functions, "reportClientError")({
+        where: where,
+        code: (e && e.code) || "",
+        message: (e && (e.message || String(e))) || "",
+        act: act || "",
+      }).catch(() => {});
+    } catch (_) { /* 連呼叫都失敗就算了，不要因為回報而中斷流程 */ }
+  }
+
   function gateFail(title, desc) {
     $('gate-spinner').style.display = 'none';
     $('gate-title').innerText = title;
@@ -565,6 +579,7 @@
       await liff.init({ liffId: LIFF_ID });
     } catch (e) {
       console.error("LIFF 初始化失敗:", e);
+      reportError("liff-init", e);
       return gateFail("😢 無法啟動 LINE 驗證", "請確認網址是否正確，或稍後再試一次。");
     }
 
@@ -601,6 +616,7 @@
 
     } catch (e) {
       console.error("LINE 身分驗證失敗:", e);
+      reportError("line-signin", e);
       const msg = (e && e.message) ? e.message : "請稍後再試。";
       return gateFail("😢 身分驗證失敗", msg);
     }
@@ -649,6 +665,7 @@
       }
     } catch (e) {
       console.error("讀取系統設定失敗:", e);
+      reportError("load-config", e);
       alert("系統連線異常，請重新整理頁面！");
     }
   }
@@ -676,6 +693,7 @@
       }
     } catch (e) {
       console.error("讀取既有票券失敗:", e);
+      reportError("load-tickets", e);
     }
     return false;
   }
@@ -761,6 +779,7 @@
       }
     } catch (e) {
       console.error("領券失敗:", e);
+      reportError("claim", e, act);
       // Cloud Function 丟出的 HttpsError，訊息會在 e.message 裡（例如「通關密語錯誤。」）
       alert("⚠️ " + (e && e.message ? e.message : "領取失敗，請稍後再試。"));
     } finally {

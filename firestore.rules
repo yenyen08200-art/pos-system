@@ -1,0 +1,187 @@
+rules_version = '2';
+
+/**
+ * 德州小騎士 - Firestore 安全規則
+ * ------------------------------------------------------------
+ * ⚠️ 這份檔案是「目前線上規則的版控副本」。
+ *    以前規則只存在 Firebase 主控台裡，沒有歷史紀錄、沒有備份，
+ *    也沒辦法跟程式碼一起 review——誰哪天改壞了完全查不出來。
+ *    現在改成以這份檔案為準：修改請改這裡，再用
+ *      firebase deploy --only firestore:rules
+ *    部署上去。
+ *
+ * ⚠️ 重要觀念（前一版寫錯過，這裡講清楚）：
+ *    Firestore 的規則是「所有符合的 match 區塊取聯集」，只要任何一條 allow
+ *    成立就放行——**不是**「越具體的規則優先」。所以底下那條給票券用的
+ *    萬用 match /{ticketCollection}/{ticketId} 會匹配到任何兩段路徑，
+ *    包含 /system/config、/members/xxx。必須用 isReservedCollection()
+ *    明確把已經另外定規則的 collection 排除掉，否則等於整組破功。
+ *
+ * 三種登入身份（用 sign_in_provider 就能在規則裡分辨，這是關鍵）：
+ *   1. 顧客   — LIFF 領券時，後端驗證 LINE ID Token 後發 custom token 登入，
+ *               uid 就是 LINE userId，provider = 'custom'
+ *   2. POS 店員 — test_index.html 開啟時自動做「匿名登入」(signInAnonymously)，
+ *                 provider = 'anonymous'。PIN 碼只是操作介面上的門檻，不是身份驗證
+ *   3. 管理員 — admin.html 用 Email/密碼或 Google 登入，登入成功後會呼叫
+ *               Cloud Function `grantAdminIfAllowed`，通過的話會在他的登入
+ *               憑證(Custom Claims)上蓋一個 admin:true 的章，這份規則才讀得到
+ *
+ * ⚠️ 為什麼要分 provider？
+ *    舊版所有「寫入」都只檢查 isSignedIn()，但顧客本身也是登入狀態，
+ *    等於顧客理論上可以自己把票券改成「已兌換」、自己加點數。
+ *    現在核銷、給點這類「只有店員該做的事」一律要求 isPos() 或 isAdmin()，
+ *    顧客的 custom token 過不了這關。
+ *
+ * Cloud Functions 走 Admin SDK，完全不受這份規則限制（這是正常且必要的）。
+ * 顧客領券已經整段搬到 Cloud Function `claimTicket`，所以前端不再需要
+ * 建立票券的權限——這也是為什麼下面 create 從 isSignedIn() 收緊成 isAdmin()。
+ * ------------------------------------------------------------
+ */
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && request.auth.token.admin == true;
+    }
+
+    // POS 店員 = 匿名登入。顧客走 custom token，不會匹配到這個。
+    function isPos() {
+      return isSignedIn() && request.auth.token.firebase.sign_in_provider == 'anonymous';
+    }
+
+    // 店員或管理員 —— 「只有店裡的人能做」的動作都用這個
+    function isStaff() {
+      return isPos() || isAdmin();
+    }
+
+    // 這些 collection 已經在下面各自有明確規則，
+    // 不可以再被票券那條萬用規則放行一次。
+    function isReservedCollection(name) {
+      return name in ['system', 'members', 'inventory', 'gift_logs',
+                      'point_transactions', 'claims'];
+    }
+
+    // ---------- 系統設定：全站共用，只有管理員能寫 ----------
+    match /system/config {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // 通關密語（EVENT_CONFIG）獨立放這裡，只有管理員能讀能寫。
+    // 顧客端的密語驗證已經整段併進 Cloud Function `claimTicket`，
+    // 正確答案永遠不會傳到瀏覽器。
+    match /system/secrets {
+      allow read, write: if isAdmin();
+    }
+
+    // 每日統計快照（由 autoExpireTickets 用 Admin SDK 寫入）
+    // 前端沒有讀取需求，一律關閉。
+    match /system/daily_stats {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
+    // system 底下其他還沒定義的文件，一律拒絕。
+    // ⚠️ Meta 社群平台的存取權杖（system/meta_tokens）就是靠這條擋住的：
+    //    前端連讀都讀不到，只有 Cloud Functions 的 Admin SDK 碰得到。
+    match /system/{otherDoc} {
+      allow read, write: if false;
+    }
+
+    // ---------- 會員 ----------
+    match /members/{phone} {
+      allow read: if true;
+
+      // 新建會員：只在 member.html 的 OTP 驗證通過後發生，points 一定是 0
+      allow create: if isSignedIn()
+                    && request.resource.data.points == 0;
+
+      // 給點 / 扣點只有 POS 店員與管理員能做。
+      // ⚠️ 舊版這裡是 isSignedIn()，等於顧客自己就能幫自己加點數。
+      // ⚠️ 會員系統目前暫停中。之後要重新啟用 member.html 時請注意：
+      //    如果那頁有「顧客自己按按鈕兌換點數」的功能，會因為這條規則被擋下來。
+      //    正確做法不是把規則放寬回 isSignedIn()，而是把兌換點數改成
+      //    Cloud Function callable（比照 claimTicket），由後端驗證後用 Admin SDK 扣點。
+      allow update: if isAdmin()
+                    || (isPos()
+                        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['points']));
+
+      allow delete: if isAdmin();
+    }
+
+    // ---------- 領券紀錄（防重複領取的鎖 + 活動名額計數）----------
+    // 由 Cloud Function claimTicket 用 Admin SDK 建立，前端完全碰不到。
+    // 如果這裡開放給前端寫，顧客就能自己刪掉紀錄再領一次，整個防作弊就破功了。
+    // 活動名額的計數文件（__quota__ 開頭）也放在這底下，同樣受這條保護。
+    match /claims/{claimId} {
+      allow read, write: if false;
+    }
+
+    // 點數異動紀錄：只增不改，方便之後對帳
+    // 建立者只會是 POS（給點/兌換），顧客不該能自己寫紀錄
+    match /point_transactions/{id} {
+      allow read: if isAdmin();
+      allow create: if isStaff();
+      allow update, delete: if isAdmin();
+    }
+
+    // ---------- 贈品庫存 ----------
+    match /inventory/{id} {
+      allow read: if true;
+
+      // 建立配額（全新門市/贈品組合）只在後台「更新門市庫存」按鈕，一定是管理員
+      allow create: if isAdmin();
+
+      // POS 端「發出 1 件 / 撤銷」只用 increment() 動 count、usedCount 兩個欄位；
+      // 後台的完整校正（改門市/贈品名稱等）才需要 isAdmin()
+      allow update: if isAdmin()
+                    || (isPos()
+                        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['count', 'usedCount']));
+
+      allow delete: if isAdmin();
+    }
+
+    // 贈品發放明細
+    match /gift_logs/{id} {
+      allow read: if true;
+      allow create: if isStaff();      // POS 發出贈品時寫入
+      allow update: if isStaff();      // POS 撤銷時用 updateDoc 標記，不用 delete
+      allow delete: if isAdmin();      // 後台「退回」用的是真的刪除
+    }
+
+    // ---------- 各活動票券 ----------
+    // 每個活動一個 collection，名稱就是活動名稱（後台動態新增），
+    // 所以只能用萬用字元比對；務必排除上面那些已有專屬規則的 collection。
+    match /{ticketCollection}/{ticketId} {
+      allow read: if !isReservedCollection(ticketCollection);
+
+      // 建立票券：
+      //   顧客領券 → 已經全部改走 Cloud Function claimTicket（Admin SDK 寫入，
+      //              不受這份規則限制），所以前端顧客端不再需要 create 權限。
+      //   後台補單 / 批次建檔 / 抽獎發券 → admin.html，需要 isAdmin()。
+      // 一律要求剛建立時狀態是「未兌換」，不能一開始就是已核銷。
+      allow create: if !isReservedCollection(ticketCollection)
+                    && isAdmin()
+                    && request.resource.data.status == '未兌換';
+
+      // 核銷 / 撤銷核銷 —— 只有店員（POS 匿名登入）或管理員能做。
+      // ⚠️ 這裡刻意不是 isSignedIn()：顧客現在也有登入身份(custom token)，
+      //    用 isSignedIn() 的話顧客就能自己把券改成「已兌換」。
+      allow update: if !isReservedCollection(ticketCollection)
+                    && isStaff();
+
+      // 票券原則上不刪除（有問題用「標記過期/已兌換」處理），只有管理員能刪
+      allow delete: if !isReservedCollection(ticketCollection)
+                    && isAdmin();
+    }
+
+    // 註：這裡不再放 match /{document=**} { allow read, write: if false; }。
+    //     因為規則是「聯集」，一條全域的 deny 不會覆蓋上面任何一條 allow，
+    //     寫了只會讓人誤以為有保底效果。真正的保底是：沒有任何 match 命中
+    //     的路徑，Firestore 預設就是拒絕。
+  }
+}
