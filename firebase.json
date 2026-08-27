@@ -3,11 +3,59 @@
     "public": ".",
     "ignore": [
       "firebase.json",
+      "firestore.rules",
       "**/.*",
       "**/node_modules/**"
+    ],
+    "headers": [
+      {
+        "//": "HTML 一律不快取：POS 跟後台改版後要馬上生效，不能讓店員還在用舊版。no-cache 不是不存，是每次都回伺服器確認一下有沒有更新，沒更新就回 304，幾乎不花流量。這也順便解決了每次改完都要 Ctrl+Shift+R 的問題。",
+        "source": "**/*.html",
+        "headers": [
+          { "key": "Cache-Control", "value": "no-cache, must-revalidate" }
+        ]
+      },
+      {
+        "//": "Service Worker 同理，快取住的話會一直用舊的邏輯",
+        "source": "/sw.js",
+        "headers": [
+          { "key": "Cache-Control", "value": "no-cache, must-revalidate" }
+        ]
+      },
+      {
+        "//": "圖片／字型幾乎不會變，存一年。POS 第二次開啟就不用重新下載 LOGO（那兩張加起來 600KB），店裡網路不穩時差很多。真的要換圖時改檔名即可。",
+        "source": "**/*.@(png|jpg|jpeg|gif|svg|webp|ico|woff|woff2|ttf)",
+        "headers": [
+          { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+        ]
+      },
+      {
+        "//": "PWA 設定檔偶爾會改，存一小時就好",
+        "source": "/manifest.json",
+        "headers": [
+          { "key": "Cache-Control", "value": "public, max-age=3600" }
+        ]
+      },
+      {
+        "//": "基本安全標頭：禁止被塞進別人的 iframe（防點擊劫持）、禁止瀏覽器亂猜檔案型別、跳離本站時不外洩完整網址",
+        "source": "**",
+        "headers": [
+          { "key": "X-Frame-Options", "value": "SAMEORIGIN" },
+          { "key": "X-Content-Type-Options", "value": "nosniff" },
+          { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" }
+        ]
+      }
     ]
   },
   "firestore": {
     "rules": "firestore.rules"
+  },
+  "emulators": {
+    "//": "本機模擬器：在自己電腦上跑一份假的 Firestore／Auth／Hosting，測試新功能不會碰到正式資料，也不吃雲端額度。啟動方式：firebase emulators:start",
+    "auth": { "port": 9099 },
+    "firestore": { "port": 8080 },
+    "hosting": { "port": 5000 },
+    "ui": { "enabled": true, "port": 4000 },
+    "singleProjectMode": true
   }
 }

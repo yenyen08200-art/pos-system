@@ -715,6 +715,41 @@ body.mode-physical-active .sc-tick { stroke: #FF6B35; filter: drop-shadow(0 0 10
     measurementId: "G-HZ6334WB3B"
   };
   const app = initializeApp(firebaseConfig);
+
+  /* ============================================================
+     App Check + Performance Monitoring
+     ------------------------------------------------------------
+     App Check：驗證「這個請求真的是從我們的網頁發出的」，擋掉直接拿
+       API 網址寫腳本狂打的情況。密語、名額上限那些是「規則層」的防護，
+       App Check 是「來源層」——兩層是互補的。
+
+     ⚠️ 下面的 RECAPTCHA_SITE_KEY 留空時整段會自動跳過，不會影響任何功能。
+        要啟用請到 Firebase Console → App Check → 註冊這個網站（選
+        reCAPTCHA v3），把拿到的網站金鑰貼進來，再到 Console 開啟強制執行。
+        建議順序：先貼金鑰部署、觀察幾天確認沒有誤擋正常顧客，最後才開強制。
+
+     Performance Monitoring：自動蒐集真實使用者的載入時間。
+       重點是「店員實際用的裝置和網路」，不是我們自己電腦測出來的數字。
+     ============================================================ */
+  const RECAPTCHA_SITE_KEY = "";   // ← 從 Firebase Console → App Check 取得後貼在這裡
+
+  if (RECAPTCHA_SITE_KEY) {
+    import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app-check.js")
+      .then(({ initializeAppCheck, ReCaptchaV3Provider }) => {
+        initializeAppCheck(app, {
+          provider: new ReCaptchaV3Provider(RECAPTCHA_SITE_KEY),
+          isTokenAutoRefreshEnabled: true,
+        });
+        console.log("✅ App Check 已啟用");
+      })
+      .catch((e) => console.warn("App Check 載入失敗（不影響功能）：", e && e.message));
+  }
+
+  // 效能監控純粹是觀測用的，載入失敗就算了，絕對不能影響到主要流程
+  import("https://www.gstatic.com/firebasejs/10.12.2/firebase-performance.js")
+    .then(({ getPerformance }) => { getPerformance(app); })
+    .catch(() => { /* 監控載不起來不是問題，安靜略過 */ });
+
   const db = getFirestore(app);
   const posAuth = getAuth(app);
 
