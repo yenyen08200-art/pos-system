@@ -362,6 +362,19 @@
       .login-logo, #login-screen::before, .login-card, .login-card > * { animation: none !important; }
       .cs-panel, .cs-opt, .cs-caret { transition: none !important; }
     }
+
+    /* ================= 📜 捲動進場 =================
+       用瀏覽器原生的 IntersectionObserver 偵測「元素進入畫面了沒」，
+       不是自己去監聽 scroll 事件——後者每秒會觸發幾十次，很容易拖慢畫面。
+       只播一次：進場後就取消觀察，來回捲動不會一直重播。 */
+    .reveal { opacity: 0; transform: translateY(24px); }
+    .reveal.in {
+      opacity: 1; transform: none;
+      transition: opacity .55s cubic-bezier(.2,.8,.2,1), transform .6s cubic-bezier(.2,.8,.2,1);
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .reveal { opacity: 1 !important; transform: none !important; }
+    }
   </style>
 </head>
 <body>
@@ -1247,6 +1260,9 @@
       }
       element.classList.add('active');
       
+      // 切到新頁面時重新掃描捲動進場的元素（原本 display:none 的沒被觀察過）
+      if (window.rescanReveal) requestAnimationFrame(window.rescanReveal);
+
       // 進抽獎頁時順便刷新 Meta 連線狀態
       if (viewId === 'lottery-ui') refreshMetaStatus();
 
@@ -3351,6 +3367,51 @@
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', enhanceAll);
   else enhanceAll();
+})();
+</script>
+
+
+<!-- ============================================================
+     捲動進場：元素捲進畫面才浮現
+     ------------------------------------------------------------
+     用原生 IntersectionObserver，不自己監聽 scroll 事件——
+     scroll 每秒會觸發幾十次，自己算位置很容易拖慢畫面；
+     IntersectionObserver 由瀏覽器排程，成本低很多。
+
+     切換頁面時要重新掃描：新的那一頁本來是 display:none，
+     元素從沒被觀察過，不重掃的話會一直停在透明狀態。
+     ============================================================ -->
+<script>
+(function () {
+  var SEL = '.stat-card, .chart-box, .config-card, .table-container, .toolbar-card';
+  var io = null;
+
+  if (!('IntersectionObserver' in window)) {
+    // 太舊的瀏覽器沒有這個 API，直接讓內容正常顯示，不要為了動畫犧牲可用性
+    document.querySelectorAll(SEL).forEach(function (el) { el.classList.add('reveal', 'in'); });
+    return;
+  }
+
+  io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (en) {
+      if (!en.isIntersecting) return;
+      en.target.classList.add('in');
+      io.unobserve(en.target);      // 播過就不再觀察，來回捲動不會重播
+    });
+  }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+
+  function scan() {
+    document.querySelectorAll(SEL).forEach(function (el) {
+      if (el.getAttribute('data-reveal') === '1') return;
+      el.setAttribute('data-reveal', '1');
+      el.classList.add('reveal');
+      io.observe(el);
+    });
+  }
+  window.rescanReveal = scan;
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', scan);
+  else scan();
 })();
 </script>
 

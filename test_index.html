@@ -469,6 +469,39 @@ body.mode-physical-active .undo { color:var(--accent-physical); border-color: rg
   .login-logo, #pos-login-screen::before, .login-panel, .login-panel > * { animation: none !important; }
   .cs-panel, .cs-opt, .cs-caret { transition: none !important; }
 }
+
+/* ================= ✔️ 核銷成功：打勾一筆畫出來 =================
+   原理是 SVG 的 stroke-dasharray / stroke-dashoffset：
+   把虛線的「線段長度」設成跟路徑總長一樣，再讓 dashoffset 從全長變到 0，
+   線就會像被筆一路描出來。長度不寫死，交給 JS 用 getTotalLength() 量，
+   之後改路徑形狀也不用回來改數字。 */
+#success-check {
+  position: fixed; inset: 0; z-index: 100000; pointer-events: none;
+  display: flex; align-items: center; justify-content: center; opacity: 0;
+}
+#success-check.play { opacity: 1; }
+#success-check svg { width: 168px; height: 168px; overflow: visible; }
+.sc-ring { fill: none; stroke: rgba(63,191,143,.9); stroke-width: 5; }
+.sc-tick { fill: none; stroke: #3FBF8F; stroke-width: 10; stroke-linecap: round; stroke-linejoin: round;
+           filter: drop-shadow(0 0 10px rgba(63,191,143,.65)); }
+/* 實體券模式是橘色系，打勾跟著換色才不會跟整體風格打架 */
+body.mode-physical-active .sc-ring { stroke: rgba(255,107,53,.9); }
+body.mode-physical-active .sc-tick { stroke: #FF6B35; filter: drop-shadow(0 0 10px rgba(255,107,53,.65)); }
+
+#success-check.play .sc-ring { animation: sc-ring-draw .42s cubic-bezier(.2,.8,.2,1) forwards; }
+#success-check.play .sc-tick { animation: sc-tick-draw .36s .3s cubic-bezier(.2,.8,.2,1) forwards; }
+#success-check.play svg     { animation: sc-pop .95s ease forwards; }
+@keyframes sc-ring-draw { to { stroke-dashoffset: 0; } }
+@keyframes sc-tick-draw { to { stroke-dashoffset: 0; } }
+@keyframes sc-pop {
+  0%   { transform: scale(.82); opacity: 0; }
+  14%  { opacity: 1; }
+  72%  { transform: scale(1);   opacity: 1; }
+  100% { transform: scale(1.1); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #success-check { display: none !important; }
+}
 </style>
 </head>
 <body>
@@ -650,6 +683,14 @@ body.mode-physical-active .undo { color:var(--accent-physical); border-color: rg
   </div>
   
   <div id="success-overlay"></div>
+
+  <!-- 核銷成功時一筆畫出來的打勾（路徑長度由 JS 量測後填入 dash 屬性） -->
+  <div id="success-check" aria-hidden="true">
+    <svg viewBox="0 0 120 120">
+      <circle class="sc-ring" cx="60" cy="60" r="52"></circle>
+      <path class="sc-tick" d="M36 62 L53 79 L86 44"></path>
+    </svg>
+  </div>
 </main>
 
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
@@ -1216,6 +1257,7 @@ body.mode-physical-active .undo { color:var(--accent-physical); border-color: rg
       overlay.classList.remove("flash");
       void overlay.offsetWidth;
       overlay.classList.add("flash");
+      playSuccessCheck();
       if (window.confetti) {
           confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 }, colors: ['#FFD700', '#FFA500', '#FF6B35', '#FFFFFF'], disableForReducedMotion: true });
       }
@@ -1404,6 +1446,7 @@ body.mode-physical-active .undo { color:var(--accent-physical); border-color: rg
       overlay.classList.remove("flash");
       void overlay.offsetWidth;
       overlay.classList.add("flash");
+      playSuccessCheck();
       if (window.confetti) confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 }, colors: ['#FFD700', '#FFA500'] });
 
       renderRewardsList();
@@ -1773,6 +1816,24 @@ body.mode-physical-active .undo { color:var(--accent-physical); border-color: rg
       renderRight(); 
   }
 
+  /* 播一次「一筆畫出打勾」。
+     dash 長度用 getTotalLength() 現場量，不寫死數字——
+     之後若調整打勾的形狀，這裡不用跟著改。 */
+  window.playSuccessCheck = function () {
+    const box = $("success-check");
+    if (!box) return;
+    box.querySelectorAll(".sc-ring, .sc-tick").forEach((p) => {
+      const len = p.getTotalLength();
+      p.style.strokeDasharray = len;
+      p.style.strokeDashoffset = len;
+    });
+    box.classList.remove("play");
+    void box.offsetWidth;              // 強制重排，動畫才會從頭播（連續核銷時很重要）
+    box.classList.add("play");
+    clearTimeout(box._scTimer);
+    box._scTimer = setTimeout(() => box.classList.remove("play"), 1000);
+  };
+
   window.redeem = async function() {
     const empName = $("employee-name").value.trim() || '001';
 
@@ -1831,6 +1892,7 @@ body.mode-physical-active .undo { color:var(--accent-physical); border-color: rg
     overlay.classList.remove("flash");
     void overlay.offsetWidth;
     overlay.classList.add("flash");
+    playSuccessCheck();
 
     if (window.confetti) {
         confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 }, colors: ['#FFD700', '#FFA500', '#FF6B35', '#FFFFFF'], disableForReducedMotion: true });
