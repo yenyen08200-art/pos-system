@@ -432,6 +432,10 @@ body.mode-physical-active .undo { color:var(--accent-physical); border-color: rg
 
 /* ================= 🔽 自訂下拉選單 ================= */
 .cs { position: relative; width: 100%; }
+/* .login-panel 的子元素有進場動畫（動到 transform），會各自形成堆疊脈絡，
+   選單的 z-index 因此被關在自己那一格裡，後面的數字鍵盤就畫到選單上面
+   ——看起來就像選單變透明了。把「展開中的那一格」整格提上來才蓋得住。 */
+.login-panel > *:has(.cs.open) { position: relative; z-index: 50; }
 /* 原生 select 留著（仍是唯一的真實狀態），只是視覺上藏起來 */
 .cs-native { position: absolute; left: 0; top: 0; width: 100%; height: 100%; opacity: 0; pointer-events: none; }
 .cs-trigger {
@@ -719,12 +723,22 @@ body.mode-physical-active .sc-tick { stroke: #FF6B35; filter: drop-shadow(0 0 10
   //    的請求」跟「隨便一支腳本打 API」，核銷/扣庫存等寫入才寫得進去。
   let posAuthReady = false;
   let posAuthError = null; // 匿名登入失敗時記下真正的錯誤代碼，直接顯示在登入畫面上
-  onPosAuthStateChanged(posAuth, (user) => { posAuthReady = !!user; });
-  signInAnonymously(posAuth).catch((e) => {
-    console.error("POS 匿名登入失敗：", e);
-    posAuthError = e;
-    showToast("系統連線異常，請重新整理頁面再試一次", "error");
-  });
+  onPosAuthStateChanged(posAuth, (user) => { if (user) posAuthReady = true; });
+  /* 🔧 不要只靠 onAuthStateChanged：那支只在「狀態變化」時才會被呼叫，
+     萬一它沒被觸發（或觸發得比使用者按登入還慢），posAuthReady 就永遠是 false，
+     畫面只會一直顯示「系統連線中」，看不出到底卡在哪。
+     這裡直接用 signInAnonymously 自己回傳的結果當作準，兩條路任一成功就放行。 */
+  signInAnonymously(posAuth)
+    .then(() => { posAuthReady = true; console.log("✅ POS 匿名登入完成"); })
+    .catch((e) => {
+      console.error("POS 匿名登入失敗：", e);
+      posAuthError = e;
+      // auth/operation-not-allowed = Firebase 主控台沒開「匿名」登入方式，這是新專案最常見的原因
+      const hint = (e && e.code === "auth/operation-not-allowed")
+        ? "Firebase 尚未啟用「匿名登入」，請到 Authentication → Sign-in method 開啟"
+        : "系統連線異常，請重新整理頁面再試一次";
+      showToast(hint, "error");
+    });
 
   let STORE_LIST = [];
   let POS_CONFIG = {};

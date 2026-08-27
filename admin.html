@@ -85,7 +85,8 @@
 
     /* ================= Layouts ================= */
     .view-section { display: none; }
-    .view-section.active { display: block; animation: fadeIn 0.3s; }
+    /* 進場動畫改用下面的 view-in（含水平位移），這裡只保留顯示切換 */
+    .view-section.active { display: block; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
     
     #main-app { flex: 1; padding: 32px 40px; display: none; overflow-y: auto; height: 100vh; }
@@ -374,6 +375,48 @@
     }
     @media (prefers-reduced-motion: reduce) {
       .reveal { opacity: 1 !important; transform: none !important; }
+    }
+
+    /* ================= 💀 骨架屏 =================
+       資料還在路上時先畫出「內容的形狀」在微微流光，比一片空白或
+       「載入中…」更讓人覺得系統在動——等待時間沒變，但體感差很多。 */
+    .sk-row td { padding: 14px 12px !important; border-bottom: 1px solid #F1F3F7; }
+    .sk-bar {
+      height: 13px; border-radius: 7px;
+      background: linear-gradient(90deg, #EEF1F5 25%, #F7F9FB 37%, #EEF1F5 63%);
+      background-size: 400% 100%;
+      animation: sk-shimmer 1.35s ease-in-out infinite;
+    }
+    @keyframes sk-shimmer { 0% { background-position: 100% 50%; } 100% { background-position: 0 50%; } }
+
+    /* ================= 📋 表格列依序滑入 ================= */
+    tbody tr.row-in { animation: row-slide .42s cubic-bezier(.2,.8,.2,1) both; }
+    @keyframes row-slide { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+
+    /* ================= ✨ 卡片光暈跟隨滑鼠 =================
+       只在有滑鼠的裝置啟用；觸控螢幕沒有游標，加了也只是白白多算一輪。 */
+    @media (hover: hover) and (pointer: fine) {
+      .stat-card, .chart-box, .config-card { position: relative; overflow: hidden; }
+      .stat-card::after, .chart-box::after, .config-card::after {
+        content: ""; position: absolute; inset: 0; pointer-events: none; opacity: 0;
+        transition: opacity .35s ease;
+        background: radial-gradient(220px circle at var(--mx, 50%) var(--my, 50%), rgba(255,255,255,.55), transparent 60%);
+      }
+      .stat-card:hover::after, .chart-box:hover::after, .config-card:hover::after { opacity: 1; }
+      /* 深色的總計卡用白光會看不出來，改用暖色調 */
+      .stat-card.c-total::after {
+        background: radial-gradient(220px circle at var(--mx, 50%) var(--my, 50%), rgba(255,255,255,.28), transparent 60%);
+      }
+    }
+
+    /* ================= 🔄 頁面切換轉場 =================
+       後台切頁很頻繁，時間刻意壓在 0.26 秒——再長就會從「有質感」變成「擋路」。 */
+    .view-section.active { display: block; animation: view-in .26s cubic-bezier(.2,.8,.2,1) both; }
+    @keyframes view-in { from { opacity: 0; transform: translateX(14px); } to { opacity: 1; transform: none; } }
+
+    @media (prefers-reduced-motion: reduce) {
+      .sk-bar, tbody tr.row-in, .view-section.active { animation: none !important; }
+      .stat-card::after, .chart-box::after, .config-card::after { display: none !important; }
     }
   </style>
 </head>
@@ -2659,7 +2702,7 @@
       const btnExpire = document.getElementById('btn-expire');
       
       if (unsubscribeSnapshot) unsubscribeSnapshot();
-      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding: 40px; color: #8A93A5;">📡 與資料庫即時連線中...</td></tr>';
+      showSkeleton(tbody);   // 先畫出「內容的形狀」，比一片空白更有在動的感覺
       
       if (act === 'ALL_OVERVIEW') {
           colAct.style.display = 'table-cell';
@@ -2761,12 +2804,12 @@
       const unredeemedCount = validTotalCount - redeemedCount - expiredCount; 
       
       const rate = validTotalCount === 0 ? "0.0" : ((redeemedCount / validTotalCount) * 100).toFixed(1);
-      document.getElementById('rate-count').innerText = rate + "%";
+      countUp(document.getElementById('rate-count'), parseFloat(rate), "%", 1);
 
-      document.getElementById('total-count').innerText = validTotalCount;
-      document.getElementById('redeemed-count').innerText = redeemedCount;
-      document.getElementById('unredeemed-count').innerText = unredeemedCount;
-      document.getElementById('expired-count').innerText = expiredCount; 
+      countUp(document.getElementById('total-count'), validTotalCount);
+      countUp(document.getElementById('redeemed-count'), redeemedCount);
+      countUp(document.getElementById('unredeemed-count'), unredeemedCount);
+      countUp(document.getElementById('expired-count'), expiredCount);
       
       drawCharts(storeStats, redeemedCount, unredeemedCount, expiredCount, hourStats); 
       renderTable(); 
@@ -2949,6 +2992,8 @@
         tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding: 40px; color: #F07654; font-weight: bold;">找不到資料 🥲</td></tr>`; return;
       }
 
+      // 畫完之後讓列依序滑進來，「資料到了」這件事會很明確
+      requestAnimationFrame(() => staggerRows(tbody));
       tbody.innerHTML = filteredData.map(d => {
         const defaultGift = globalPosConfig[d.act_source]?.gift || '預設活動贈品';
         const defaultExpire = globalPosConfig[d.act_source]?.expireDate || "無特別限制";
@@ -3412,6 +3457,97 @@
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', scan);
   else scan();
+})();
+</script>
+
+
+<!-- ============================================================
+     視覺增強：數字跑動、骨架屏、表格列依序滑入、卡片光暈
+     ------------------------------------------------------------
+     全部是「加在既有流程旁邊」的裝飾層，沒有動到任何資料邏輯：
+     就算這段整個被拿掉，後台功能一樣正常。
+     ============================================================ -->
+<script>
+(function () {
+  /* ---------- 1. 數字跑動 ----------
+     數字變動時眼睛會自動被吸引過去，一打開後台就看得出今天的量有沒有變。
+     只在「數值真的變了」時才跑，避免每次重新整理都在那邊滾。 */
+  var countState = {};
+  window.countUp = function (el, target, suffix, decimals) {
+    if (!el) return;
+    suffix = suffix || '';
+    decimals = decimals || 0;
+    var fmt = function (v) { return decimals > 0 ? v.toFixed(decimals) : String(Math.round(v)); };
+    var key = el.id || el.className;
+    var from = countState[key];
+    countState[key] = target;
+
+    // 第一次載入、或使用者要求減少動態時，直接顯示結果不跑動畫
+    if (from === undefined || from === target ||
+        window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      el.textContent = fmt(target) + suffix;
+      return;
+    }
+
+    var start = performance.now();
+    var dur = 620;
+    if (el._raf) cancelAnimationFrame(el._raf);
+    function step(now) {
+      var p = Math.min((now - start) / dur, 1);
+      var eased = 1 - Math.pow(1 - p, 3);           // easeOutCubic：先快後慢，收得自然
+      var v = from + (target - from) * eased;
+      el.textContent = fmt(v) + suffix;
+      if (p < 1) el._raf = requestAnimationFrame(step);
+    }
+    el._raf = requestAnimationFrame(step);
+  };
+
+  /* ---------- 2. 骨架屏 ----------
+     欄數跟著表頭走，換頁面也不會對不齊。 */
+  window.showSkeleton = function (tbody, rows, cols) {
+    if (!tbody) return;
+    rows = rows || 6;
+    if (!cols) {
+      var table = tbody.closest('table');
+      var head = table ? table.querySelector('thead tr') : null;
+      cols = head ? head.children.length : 6;
+    }
+    var html = '';
+    for (var r = 0; r < rows; r++) {
+      html += '<tr class="sk-row">';
+      for (var c = 0; c < cols; c++) {
+        // 寬度隨欄位變化，看起來像真的資料，不會像一排整齊的色塊
+        var w = [70, 90, 55, 80, 65][c % 5];
+        html += '<td><div class="sk-bar" style="width:' + w + '%;animation-delay:' + (r * 90 + c * 40) + 'ms"></div></td>';
+      }
+      html += '</tr>';
+    }
+    tbody.innerHTML = html;
+  };
+
+  /* ---------- 3. 表格列依序滑入 ----------
+     只對前 18 列做，再多下去延遲會長到讓人等，而且畫面外的列本來也看不到。 */
+  window.staggerRows = function (tbody) {
+    if (!tbody || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    var rows = tbody.querySelectorAll('tr');
+    for (var i = 0; i < rows.length && i < 18; i++) {
+      rows[i].classList.add('row-in');
+      rows[i].style.animationDelay = (i * 26) + 'ms';
+    }
+  };
+
+  /* ---------- 4. 卡片光暈跟隨滑鼠 ----------
+     用事件代理綁在 document 上，卡片是動態產生的也不用重綁。
+     只更新 CSS 變數，實際渲染交給 CSS，比用 JS 直接改樣式省。 */
+  if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+    document.addEventListener('mousemove', function (e) {
+      var card = e.target.closest && e.target.closest('.stat-card, .chart-box, .config-card');
+      if (!card) return;
+      var r = card.getBoundingClientRect();
+      card.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+      card.style.setProperty('--my', (e.clientY - r.top) + 'px');
+    }, { passive: true });
+  }
 })();
 </script>
 
