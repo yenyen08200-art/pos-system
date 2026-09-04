@@ -888,6 +888,20 @@
           <h1>🎁 活動贈品管理</h1>
         </div>
 
+        <div class="config-card" style="border: 2px solid var(--green); background: rgba(63, 191, 143, 0.05);">
+          <h2>🎁「活動贈品」按鈕總開關</h2>
+          <p class="desc" style="color: var(--text-main);">
+            此開關控制核銷端 (test_index.html) 要不要顯示「🎁 活動贈品」這個模式按鈕。
+            關閉時，店員畫面只會剩下「電子券」跟「實體券」兩個按鈕，更直覺好按——
+            適合沒有在跑活動贈品發放的門市。
+          </p>
+          <div style="display: flex; align-items: center; gap: 15px;">
+            <span style="font-weight: bold; font-size: 16px;">按鈕狀態：</span>
+            <div class="toggle-switch active" id="sys-gift-counter-toggle" onclick="toggleGiftCounter()"></div>
+            <span id="sys-gift-counter-status-text" style="font-weight: bold; color: var(--green);">已啟用 (ON)</span>
+          </div>
+        </div>
+
         <div class="config-card">
           <h2>🎁 門市活動贈品獨立品項設定</h2>
           <p class="desc">在此設定實體的活動贈品（如馬克杯、公仔、隨餐附贈小物），設定後方可分配各門市庫存。</p>
@@ -1286,7 +1300,8 @@
     let editingGiftIdx = null; 
     
     let isMemberSystemActive = true;
-    
+    let isGiftCounterActive = true;   // 「活動贈品」模式按鈕總開關，預設開（維持現有行為不變）
+
     // 用於管理即時連線
     let unsubInventory = null;
     let unsubGiftLogs = null;
@@ -1531,10 +1546,28 @@
         toggleText.innerText = "已停用 (OFF)";
         toggleText.style.color = "var(--text-sub)";
       }
+
+      const giftToggleBtn = document.getElementById('sys-gift-counter-toggle');
+      const giftToggleText = document.getElementById('sys-gift-counter-status-text');
+      if(isGiftCounterActive) {
+        giftToggleBtn.classList.add('active');
+        giftToggleText.innerText = "已啟用 (ON)";
+        giftToggleText.style.color = "var(--green)";
+      } else {
+        giftToggleBtn.classList.remove('active');
+        giftToggleText.innerText = "已停用 (OFF)";
+        giftToggleText.style.color = "var(--text-sub)";
+      }
     }
 
     window.toggleMemberSystem = function() {
       isMemberSystemActive = !isMemberSystemActive;
+      renderConfigUI();
+      triggerSaveHint();
+    };
+
+    window.toggleGiftCounter = function() {
+      isGiftCounterActive = !isGiftCounterActive;
       renderConfigUI();
       triggerSaveHint();
     };
@@ -1868,6 +1901,7 @@
           POINT_RATE: globalPointRate,
           GIFT_LIST: globalGiftList,
           MEMBER_SYSTEM_ACTIVE: isMemberSystemActive,
+          GIFT_COUNTER_ACTIVE: isGiftCounterActive,
           lastUpdated: fmtStamp()
         });
 
@@ -1988,6 +2022,7 @@
           globalGiftList = data.GIFT_LIST || [];
 
           isMemberSystemActive = data.MEMBER_SYSTEM_ACTIVE !== undefined ? data.MEMBER_SYSTEM_ACTIVE : true;
+          isGiftCounterActive = data.GIFT_COUNTER_ACTIVE !== undefined ? data.GIFT_COUNTER_ACTIVE : true;
 
           document.getElementById('cfg-home-banner').value = globalHomeBanner;
           document.getElementById('cfg-home-news').value = globalHomeNews;

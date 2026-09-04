@@ -88,6 +88,10 @@ body.mode-member-active main {
 @media(min-width:768px){.wrap{padding:32px}}
 
 header{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px;margin-bottom:24px}
+/* 手機版 header 換行後，.status 是那一行唯一的 flex item，
+   justify-content:space-between 對單一項目的效果是靠左貼齊——
+   這裡強制它撐滿整行、置中，門市/人員資訊才不會偏在螢幕左邊。 */
+@media(max-width:640px){ header .status{ width:100%; text-align:center; } }
 .brand{display:flex;align-items:center;gap:16px}
 .logo{width:56px;height:56px;display:flex;align-items:center;justify-content:center;border-radius:18px;font-size:26px;
   background-image:var(--gradient-digital);color:#fff;box-shadow:0 12px 30px -12px rgba(0,198,255,0.8); transition:transform .3s}
@@ -146,7 +150,7 @@ button{font-family:inherit;cursor:pointer;}
 .store-btn.on{background-image:var(--gradient-digital);color:#fff;border-color:var(--accent-digital);box-shadow:0 12px 26px -14px rgba(0,198,255,0.9)}
 
 .mode-switch { display: flex; gap: 8px; padding: 6px; background: var(--secondary); border-radius: 16px; flex-wrap: wrap;}
-.mode-btn { flex: 1; padding: 14px 12px; border-radius: 12px; border: none; background: transparent; color: var(--muted-foreground); font-weight: 700; font-size: 15px; transition: 0.2s; min-width: 100px;}
+.mode-btn { flex: 1; padding: 14px 12px; border-radius: 12px; border: none; background: transparent; color: var(--muted-foreground); font-weight: 700; font-size: 15px; transition: 0.2s; min-width: 100px; white-space: nowrap;}
 #mode-member.active { background: var(--gradient-digital); color: #fff; box-shadow: 0 8px 20px -6px rgba(0,198,255,0.6); border: none; }
 #mode-physical.active { background: var(--gradient-physical); color: #fff; box-shadow: 0 8px 20px -6px rgba(255,107,53,0.6); border: none; }
 #mode-counter.active { background: var(--gradient-counter); color: #fff; box-shadow: 0 8px 20px -6px rgba(63,191,143,0.6); border: none; }
@@ -209,6 +213,9 @@ body.mode-physical-active .primary-btn { background-image: var(--gradient-physic
 .icon-btn svg { width: 30px; height: 30px; }
 
 @media (max-width: 380px) {
+  /* 螢幕太窄時 3 顆模式按鈕會被壓到比文字需要的寬度還小，
+     加了 nowrap 之後改成文字外溢，這裡縮小字級跟內距讓它塞得下 */
+  .mode-btn { font-size: 12.5px; padding: 14px 4px; }
   .icon-btn { flex-basis: 60px; width: 60px; }
   .icon-btn svg { width: 27px; height: 27px; }
 }
@@ -794,6 +801,7 @@ body.mode-physical-active .sc-tick { stroke: #FF6B35; filter: drop-shadow(0 0 10
            `${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
   }
   let isMemberSystemActive = true;
+  let isGiftCounterActive = true;   // admin.html 的「活動贈品」按鈕總開關，預設開（維持現有行為不變）
 
   let evMap = {};
   let giftMap = {};
@@ -959,12 +967,7 @@ body.mode-physical-active .sc-tick { stroke: #FF6B35; filter: drop-shadow(0 0 10
       $('pwa-prompt').style.display = 'none'; 
     }
   };
-  const isIos = () => /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
-  const isInStandaloneMode = () => ('standalone' in window.navigator) && (window.navigator.standalone);
-  if (isIos() && !isInStandaloneMode()) {
-    $('pwa-prompt').innerHTML = `<span style="font-size:14px;">📲 iOS : 請點選下方「分享」➔「加入主畫面」</span><button onclick="document.getElementById('pwa-prompt').style.display='none'" style="background:transparent; border:none; font-size:20px; cursor:pointer;">✖</button>`;
-    $('pwa-prompt').style.display = 'flex';
-  }
+  // 🔧 iOS「加入主畫面」提示太擋路，店員自己知道怎麼裝 App，關掉這段自動彈出
 
   // 🔧 舊版每 3 秒去抓 #ping-tracker，但 DOM 裡根本沒有這個 id（只有 CSS 的 .ping-monitor），
   //    等於每 3 秒固定丟一次 TypeError 到 console，而且永遠不會停。
@@ -1100,6 +1103,7 @@ body.mode-physical-active .sc-tick { stroke: #FF6B35; filter: drop-shadow(0 0 10
         POINT_RATE = data.POINT_RATE || 100;
         
         isMemberSystemActive = data.MEMBER_SYSTEM_ACTIVE !== undefined ? data.MEMBER_SYSTEM_ACTIVE : true;
+        isGiftCounterActive = data.GIFT_COUNTER_ACTIVE !== undefined ? data.GIFT_COUNTER_ACTIVE : true;
 
         const loginStoreSelect = $('login-store-select');
         let optionsHtml = '<option value="">請先選擇值班門市</option>';
@@ -1114,6 +1118,8 @@ body.mode-physical-active .sc-tick { stroke: #FF6B35; filter: drop-shadow(0 0 10
       $('member-points-card').style.display = isMemberSystemActive ? 'block' : 'none';
       $('reward-title').style.display = isMemberSystemActive ? 'block' : 'none';
       $('reward-list').style.display = isMemberSystemActive ? 'grid' : 'none';
+      // admin.html 關掉「活動贈品」開關時，店員畫面只剩電子券／實體券兩個按鈕，更直覺好按
+      $('mode-counter').style.display = isGiftCounterActive ? '' : 'none';
 
       evMap = {};
       STORE_LIST.forEach(s => {
