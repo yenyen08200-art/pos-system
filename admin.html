@@ -259,6 +259,8 @@
     .hamburger-btn.open span:nth-child(3){ top: 16px; transform: rotate(-45deg); }
 
     @media (max-width:768px){
+      /* 只允許上下滾動這一頁，不要有橫向拖動整個畫面的空間 */
+      html, body { overflow-x: hidden; max-width: 100vw; }
       body { flex-direction: column; }
       body.menu-open { overflow: hidden; }
 
@@ -298,16 +300,28 @@
       }
       body.menu-open .sidebar-overlay { opacity: 1; pointer-events: auto; }
 
-      body.is-authed #main-app { padding: 16px; padding-top: 72px; height: auto; }
-      #main-app { height: auto; }
+      /* main-app 改回單純的區塊版面，讓 html/body 當唯一的捲動容器，
+         避免 flex:1 + overflow:auto 在手機上把內容鎖死、滑不下去 */
+      body.is-authed #main-app {
+        padding: 16px; padding-top: 72px; height: auto; min-height: calc(100vh - 56px);
+        flex: none; width: 100%; overflow: visible;
+      }
+      #main-app { height: auto; overflow: visible; }
       .header { flex-direction: column; align-items: flex-start; gap: 16px; }
 
       .toolbar-card { flex-direction: column; align-items: stretch; padding: 16px; }
       .toolbar-group { justify-content: stretch; width: 100%; }
       .toolbar-item { flex: 1; text-align: center; justify-content: center; }
       .toolbar-group .cs { min-width: 0; width: 100%; }   /* 桌機給的 200px 下限在窄螢幕會撐出橫向捲軸 */
-      .date-filter-box { width: 100%; justify-content: space-between; }
-      .date-filter-box input { width: 100%; }
+
+      /* 日期篩選：input 用 flex:1 自己量寬度，不要用 width:100% 把「清除篩選」擠到換行，
+         也不會因為擠太窄讓 iOS 把日期文字跟小日曆圖示都吃掉、顯示空白 */
+      .date-filter-box { width: 100%; }
+      .date-filter-box input[type="date"] { flex: 1 1 auto; width: auto; min-width: 128px; }
+      .date-filter-box button { flex: 0 0 auto; white-space: nowrap; font-size: 13px; padding: 0 12px; }
+
+      /* 這兩顆是電腦後台在用的管理功能，手機現場不需要，收起來版面才不會爆版 */
+      #btn-expire, #btn-export-excel { display: none; }
 
       .dashboard { grid-template-columns: repeat(2, 1fr); gap: 12px; }
       .stat-card { padding: 16px; }
@@ -317,6 +331,30 @@
       .table-toolbar { flex-direction: column; align-items: flex-start; gap: 10px; }
       .search-box { width: 100%; }
       .kebab-menu { right: auto; left: 0; }
+
+      /* ============ 數據總覽表格 → 手機改成一筆一張卡片 ============
+         橫向表格在窄螢幕上要左右滑才看得完，改成直向卡片、
+         每個欄位前面帶標籤文字，只需要上下滑就能看完一筆資料。 */
+      .table-container { overflow: visible; max-height: none; padding: 0; }
+      #data-table, #data-table thead, #data-table tbody { display: block; width: 100%; }
+      #data-table thead { display: none; }
+      #data-table tr {
+        display: flex; flex-direction: column; background: #fff; border: 1px solid #E6EAF0;
+        border-radius: 16px; box-shadow: var(--shadow); margin-bottom: 12px; padding: 6px 14px;
+      }
+      #data-table tr.empty-row { display: block; border: none; box-shadow: none; padding: 0; }
+      #data-table td {
+        display: flex; justify-content: space-between; align-items: flex-start; gap: 14px;
+        padding: 10px 0; border: none; border-bottom: 1px dashed #EEF1F5; text-align: right;
+      }
+      #data-table td:last-child { border-bottom: none; }
+      #data-table td::before {
+        content: attr(data-label); flex: 0 0 auto; text-align: left; font-size: 11.5px;
+        font-weight: 800; color: var(--text-sub); padding-top: 2px;
+      }
+      #data-table td[data-label=""] { order: -1; padding: 6px 0; }
+      #data-table td[data-label=""]:empty { display: none; }
+      #data-table td[data-label=""]::before { content: none; }
     }
 
     /* ================= 🎬 登入畫面動效 ================= */
@@ -487,7 +525,7 @@
 
   <!-- 手機版固定頂部列（漢堡選單開關） -->
   <div class="mobile-topbar" id="mobile-topbar">
-    <div class="mt-brand">🏍️ 德州小騎士後台</div>
+    <div class="mt-brand">🏍️ 德州小騎士後台控制室</div>
     <button class="hamburger-btn" id="hamburger-btn" onclick="toggleMobileMenu()" aria-label="開啟選單">
       <span></span><span></span><span></span>
     </button>
@@ -576,7 +614,7 @@
           <div class="toolbar-group">
             <button class="toolbar-item toolbar-btn-success" id="btn-batch" onclick="batchRedeem()">☑️ 批次核銷</button>
             <button class="toolbar-item" id="btn-expire" onclick="expireTickets()">🧹 智慧結算過期</button>
-            <button class="toolbar-item toolbar-btn-primary" onclick="exportExcel()">📥 匯出 Excel</button>
+            <button class="toolbar-item toolbar-btn-primary" id="btn-export-excel" onclick="exportExcel()">📥 匯出 Excel</button>
           </div>
         </div>
 
@@ -3195,7 +3233,7 @@
       document.getElementById('result-count').innerText = `顯示 ${filteredData.length} 筆結果`;
 
       if (filteredData.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding: 40px; color: #F07654; font-weight: bold;">找不到資料 🥲</td></tr>`; return;
+        tbody.innerHTML = `<tr class="empty-row"><td colspan="8" style="text-align:center; padding: 40px; color: #F07654; font-weight: bold;">找不到資料 🥲</td></tr>`; return;
       }
 
       // 畫完之後讓列依序滑進來，「資料到了」這件事會很明確
@@ -3212,7 +3250,7 @@
         let displayExpire = esc(d.expireDate) || esc(defaultExpire);
         
         let checkboxHTML = (!d.status || d.status === '未兌換') ? `<input type="checkbox" class="row-check" value="${esc(d.id)}" ${isOverview ? 'disabled' : ''}>` : '';
-        let actColHTML = isOverview ? `<td><span class="act-tag">${esc(d.act_source)}</span></td>` : '';
+        let actColHTML = isOverview ? `<td data-label="🎯 所屬活動"><span class="act-tag">${esc(d.act_source)}</span></td>` : '';
 
         let actionBtnHTML = `
           <details class="kebab-dropdown">
@@ -3248,14 +3286,14 @@
 
         return `
           <tr>
-            <td>${checkboxHTML}</td>
+            <td data-label="">${checkboxHTML}</td>
             ${actColHTML}
-            <td>${customerInfo}</td>
-            <td style="font-weight:bold; color:#3FBF8F; max-width:180px; word-wrap:break-word;">${displayGift}</td>
-            <td>${statusBadge}</td>
-            <td>${redeemInfo}</td>
-            <td>${timeInfo}</td>
-            <td>${actionBtnHTML}</td>
+            <td data-label="📱 顧客資訊">${customerInfo}</td>
+            <td data-label="🎁 兌換品項" style="font-weight:bold; color:#3FBF8F; max-width:180px; word-wrap:break-word;">${displayGift}</td>
+            <td data-label="⚡ 狀態">${statusBadge}</td>
+            <td data-label="📌 核銷紀錄">${redeemInfo}</td>
+            <td data-label="⏳ 時間資訊">${timeInfo}</td>
+            <td data-label="">${actionBtnHTML}</td>
           </tr>
         `;
       }).join('');
