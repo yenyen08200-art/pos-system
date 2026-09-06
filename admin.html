@@ -110,6 +110,10 @@
     .toolbar-btn-success:hover:not(:disabled) { filter: brightness(1.05); color: #fff; }
     .date-filter-box { display: flex; align-items: center; border: 1px solid #E6EAF0; border-radius: 10px; overflow: hidden; background: #fff; }
     .date-filter-box input { border: none; padding: 10px 12px; font-weight: 600; outline: none; background: transparent; font-family: inherit; color: var(--text-main); }
+    /* 這個假提示字只是為了補 iOS 手機版空白日期欄位的問題，
+       電腦版原生 input 自己就會顯示「年/月/日」跟日曆圖示，不需要疊字，
+       預設先藏起來，只在手機版的 media query 裡才顯示。 */
+    .date-ph { display: none; }
     .date-filter-box button { border: none; background: transparent; padding: 0 16px; color: var(--text-sub); font-weight: 600; cursor: pointer; border-left: 1px solid #E6EAF0; transition: .2s; }
     .date-filter-box button:hover { color: var(--accent); background: #fdfdfd; }
 
@@ -323,7 +327,7 @@
       /* iOS 的空日期欄位本身完全不會顯示文字或圖示，疊一個假提示字上去，
          選了日期（.has-date）就讓開，不擋到瀏覽器原生顯示出來的日期文字 */
       .date-ph {
-        position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+        display: block; position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
         font-size: 13.5px; font-weight: 600; color: var(--text-sub); pointer-events: none; z-index: 0;
       }
       .date-filter-box.has-date .date-ph { display: none; }
