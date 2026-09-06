@@ -1119,6 +1119,23 @@
             <b style="color:#F0764E;">注意：調高名額可立即生效；若要「重新開放」同一個活動，需請工程師清掉計數。</b>
           </p>
 
+          <!-- 🔥 顧客自助線上領取總開關：跟活動名稱完全脫鉤，不用靠取名字（【實體】前綴）
+               去控制顧客領券頁看不看得到。同一個活動裡，有些人自助線上領、有些人拿後台
+               生成的 QR Code，兩種身分並存也沒關係——這個開關只影響「要不要出現在
+               test_register.html 的選單」，跟門市核銷、票券本身完全無關。 -->
+          <div style="background:#F7F9FB; border:1px dashed #E6EAF0; border-radius:14px; padding:16px 18px; margin-bottom:20px; display:flex; align-items:center; gap:15px;">
+            <div style="flex:1;">
+              <div style="font-weight:800; font-size:15px;">📱 開放顧客自助線上領取</div>
+              <p class="desc" style="margin:4px 0 0;">
+                關閉後，這個活動<b>不會出現在顧客的 LINE 領券頁面</b>（test_register.html）——
+                適合「只透過後台生成 QR Code 發放、不開放自助領取」的活動，或是同一活動
+                <b>混合</b>「一部分自助領、一部分後台發 QR」的情況，關閉自助領取入口就不用
+                另外設通關密語防止陌生人自己跑來領。
+              </p>
+            </div>
+            <div class="toggle-switch active" id="new-act-selfclaim-toggle" onclick="toggleNewActSelfClaim()"></div>
+          </div>
+
           <!-- 🔥 新增：活動自動上下架排程 -->
           <div style="background:#F7F9FB; border:1px dashed #E6EAF0; border-radius:14px; padding:16px 18px; margin-bottom:20px;">
             <div style="font-weight:800; font-size:15px; margin-bottom:6px;">🗓️ 自動上下架排程 (選填)</div>
@@ -1282,7 +1299,14 @@
     let globalEventConfig = {};
     let globalStoreList = [];
     let globalEventOrder = [];
-    let editingActName = null; 
+    let editingActName = null;
+    let newActSelfClaimEnabled = true;   // 建活動表單裡的「開放顧客自助線上領取」開關，預設開
+
+    window.toggleNewActSelfClaim = function() {
+      newActSelfClaimEnabled = !newActSelfClaimEnabled;
+      const el = document.getElementById('new-act-selfclaim-toggle');
+      el.classList.toggle('active', newActSelfClaimEnabled);
+    }; 
     
     let globalHomeBanner = "";
     let globalHomeNews = "";
@@ -1472,11 +1496,17 @@
           ? `<span style="display:block;margin-top:4px;color:#F0764E;font-weight:600;">🗓️ 排程：${giftInfo.startAt ? fmtScheduleText(giftInfo.startAt) : '立即'} ～ ${giftInfo.endAt ? fmtScheduleText(giftInfo.endAt) : '無限期'}</span>${syncHint}`
           : '';
 
+        // 舊活動沒有這個欄位時視為開（維持它們原本的行為），只在「關閉」時特別標示提醒
+        const selfClaimOff = giftInfo && giftInfo.selfClaimEnabled === false;
+        const selfClaimStr = selfClaimOff
+          ? `<span style="display:block;margin-top:4px;color:#8A93A5;font-weight:700;">🔒 已關閉顧客自助線上領取（僅後台發放）</span>`
+          : '';
+
         return `
         <li class="item-li">
           <div class="item-info">
             <strong>🎯 ${actName} ${statusBadge}</strong>
-            <span>密語: <code>${pwd}</code> | 贈品: ${giftStr} | 期限: ${expireStr} | 限定門市: ${storesStr}${quotaStr}${scheduleStr}</span>
+            <span>密語: <code>${pwd}</code> | 贈品: ${giftStr} | 期限: ${expireStr} | 限定門市: ${storesStr}${quotaStr}${scheduleStr}${selfClaimStr}</span>
           </div>
           <details class="kebab-dropdown">
             <summary>⋮</summary>
@@ -1738,6 +1768,10 @@
       document.getElementById('new-act-start').value = cfg.startAt || "";
       document.getElementById('new-act-end').value = cfg.endAt || "";
 
+      // 舊活動沒有這個欄位時預設為開（維持它們原本「會出現在領券頁」的行為不變）
+      newActSelfClaimEnabled = cfg.selfClaimEnabled !== false;
+      document.getElementById('new-act-selfclaim-toggle').classList.toggle('active', newActSelfClaimEnabled);
+
       const btn = document.getElementById('btn-add-act');
       btn.innerText = "💾 儲存修改內容";
       btn.style.background = "#3FBF8F";
@@ -1757,6 +1791,9 @@
       document.getElementById('new-act-quota').value = '';
       document.getElementById('new-act-start').value = '';
       document.getElementById('new-act-end').value = '';
+
+      newActSelfClaimEnabled = true;   // 新建活動預設開放自助領取
+      document.getElementById('new-act-selfclaim-toggle').classList.add('active');
 
       const btn = document.getElementById('btn-add-act');
       btn.innerText = "➕ 快速建立活動";
@@ -1806,6 +1843,7 @@
         startAt: startAt,
         endAt: endAt,
         quota: quota,        // 0 = 不限名額；> 0 時由 Cloud Function claimTicket 在雲端擋
+        selfClaimEnabled: newActSelfClaimEnabled,   // false = 不出現在顧客的 test_register.html 領券頁
         active: isActive
       };
 

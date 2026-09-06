@@ -678,8 +678,16 @@
         actSelect.innerHTML = "";
         
         EVENT_ORDER.forEach(actName => {
-          if (POS_CONFIG[actName] && !isEventOnShelf(POS_CONFIG[actName])) return; // 🔥 含手動下架 + 排程時間判斷
-          if (actName.includes('【實體】') || actName.includes('實體券')) return;
+          const cfg = POS_CONFIG[actName];
+          if (cfg && !isEventOnShelf(cfg)) return; // 🔥 含手動下架 + 排程時間判斷
+
+          // 🔒 「開放顧客自助線上領取」開關關閉時不列出——這是主要判斷方式，
+          //    跟活動名稱脫鉤，管理員不用靠取名字來控制這頁看不看得到。
+          if (cfg && cfg.selfClaimEnabled === false) return;
+          // 沒有這個欄位的舊活動，退回舊的命名慣例判斷（相容既有的【實體】活動）
+          if (!cfg || cfg.selfClaimEnabled === undefined) {
+            if (actName.includes('【實體】') || actName.includes('實體券')) return;
+          }
 
           const opt = document.createElement('option');
           opt.value = actName;

@@ -1558,10 +1558,14 @@ body.mode-physical-active .sc-tick { stroke: #FF6B35; filter: drop-shadow(0 0 10
     $("v-name").innerText = record.name || "—";
     $("v-expire").innerText = expireStr;
     
-    // 🔧 physical 模式併入 member 後，這裡改用「找到的活動名稱」判斷是不是實體／預先生成的券，
-    //    不再看 currentMode——不管店員是怎麼查到這張券的，只要活動有標記【實體】就走這個顯示，
-    //    橘色主題(mode-physical-active)也跟著這張券走，離開這張券的畫面時在 backToList() 裡收掉
-    const isPhysicalTicket = shownAct.includes('【實體】') || shownAct.includes('實體券');
+    /* 🔧 判斷「這是不是後台預先生成、非顧客自助領取的券」，改看這張券自己的資料，
+       不再看活動名稱或 currentMode。原因：同一個活動現在可能同時有兩種券
+       （一部分顧客自助線上領、一部分後台生成 QR 碼發放），用活動名稱判斷
+       只能整個活動一刀切，沒辦法分辨「這一張」到底是哪一種。
+       兩個生成器（批次建檔、流水號生成）寫入時 social_id 固定是這個值，
+       自助領取的顧客則是自己輸入真實的社群帳號，兩者不會混淆。
+       橘色主題(mode-physical-active)也跟著這張券走，離開畫面時在 backToList() 裡收掉。 */
+    const isPhysicalTicket = record.social_id === '實體紙本憑證';
     document.body.classList.toggle('mode-physical-active', isPhysicalTicket);
     if (isPhysicalTicket) {
         $("v-social").innerText = record.social_id || "實體紙本憑證";
