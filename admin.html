@@ -2384,6 +2384,51 @@
     };
 
     let generatedSerials = [];   // 預覽產生的結果，按「確認寫入」時才真的送出
+    let generatedMeta = {};      // 這批券的活動名稱／兌換品項／期限，畫 QR 圖卡用
+
+    /* 純 QR Code 圖片對顧客跟店員來說什麼資訊都沒有：
+       顧客不知道會換到什麼、店員掃不到時也不知道要打哪組序號。
+       改成把「活動名稱、兌換品項、使用期限、序號文字」直接畫進同一張圖，
+       這樣不管是複製這張圖傳 LINE、還是印出來，資訊都在同一張裡不會分開。
+       QR 本體還是抓 api.qrserver.com 產生，這裡用 fetch 拿 blob 再用
+       createImageBitmap 畫到 canvas 上（不會有 canvas 跨網域 taint 的問題）。 */
+    async function buildQrCardBlob(s) {
+      const qrResp = await fetch(serialQrUrl(s.plain));
+      if (!qrResp.ok) throw new Error('QR 圖片下載失敗 HTTP ' + qrResp.status);
+      const qrBitmap = await createImageBitmap(await qrResp.blob());
+
+      const W = 380, qrSize = 260, qrTop = 118;
+      const H = qrTop + qrSize + 96;
+      const canvas = document.createElement('canvas');
+      canvas.width = W; canvas.height = H;
+      const ctx = canvas.getContext('2d');
+
+      ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, W, H);
+      ctx.textAlign = 'center';
+
+      ctx.fillStyle = '#1A1C24';
+      ctx.font = 'bold 20px "Microsoft JhengHei", sans-serif';
+      ctx.fillText('德州小騎士 · ' + generatedMeta.actName, W / 2, 34);
+
+      ctx.font = '15px "Microsoft JhengHei", sans-serif';
+      ctx.fillStyle = '#5A6478';
+      ctx.fillText('兌換品項：' + generatedMeta.gift, W / 2, 62);
+      ctx.fillText('使用期限：' + generatedMeta.expire, W / 2, 84);
+
+      ctx.drawImage(qrBitmap, (W - qrSize) / 2, qrTop, qrSize, qrSize);
+
+      ctx.font = 'bold 20px monospace';
+      ctx.fillStyle = '#1A1C24';
+      ctx.fillText(s.display, W / 2, qrTop + qrSize + 34);
+
+      ctx.font = '13px "Microsoft JhengHei", sans-serif';
+      ctx.fillStyle = '#8A93A5';
+      ctx.fillText('請至門市出示此圖兌換；掃描失敗請跟店員報上方序號', W / 2, qrTop + qrSize + 60);
+
+      return new Promise((resolve, reject) => {
+        canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error('圖卡產生失敗')), 'image/png');
+      });
+    }
 
     function updateSerialSample() {
       const el = document.getElementById('gen-sample');
@@ -2445,6 +2490,15 @@
         }
 
         generatedSerials = list;
+        // QR 圖卡要印上活動名稱／兌換品項／使用期限，這裡先記下這批的資訊，
+        // 供 showAllSerialQr()、downloadSerialQrZip() 畫圖卡用。
+        const rawGift = document.getElementById('gen-gift').value.trim();
+        const rawExpire = document.getElementById('gen-expire').value.trim();
+        generatedMeta = {
+          actName: act,
+          gift: (rawGift && rawGift !== '依實體券面標示發放') ? rawGift : '詳洽門市人員',
+          expire: (rawExpire && rawExpire !== '依紙本券面為主') ? rawExpire : '不限使用期限'
+        };
         document.getElementById('btn-gen-run').disabled = false;
 
         const preview = list.slice(0, 12).map(s => `<div class="mono">${s.display}</div>`).join("");
@@ -2484,17 +2538,37 @@
     /* 展開全部 QR Code——不是為了印紙本，是給「屏科大這種要電子發送給個人」的情境用的。
        印刷廠只需要 CSV 裡的文字號碼，這個按鈕才會需要圖片，所以做成選按才載入，
        不要一產生預覽就自動抓 N 張圖，平白浪費流量。 */
-    window.showAllSerialQr = function() {
+    window.showAllSerialQr = async function() {
       if (!generatedSerials.length) return alert("⚠️ 尚未產生券號。");
       const area = document.getElementById('serial-qr-area');
-      const cards = generatedSerials.map((s) => `
+      const total = generatedSerials.length;
+      area.innerHTML = `<p class="desc" style="margin-top:16px;">⏳ 圖卡繪製中…（0/${total}）</p>`;
+
+      const urls = new Array(total);
+      let done = 0, idx = 0;
+      async function worker() {
+        while (idx < generatedSerials.length) {
+          const i = idx++;
+          try {
+            urls[i] = URL.createObjectURL(await buildQrCardBlob(generatedSerials[i]));
+          } catch (e) {
+            console.error('圖卡繪製失敗：' + generatedSerials[i].plain, e);
+          }
+          done++;
+          area.querySelector('.desc').innerText = `⏳ 圖卡繪製中…（${done}/${total}）`;
+        }
+      }
+      await Promise.all(Array.from({ length: Math.min(6, total) }, worker));
+
+      const cards = generatedSerials.map((s, i) => urls[i] ? `
         <div class="serial-qr-card">
-          <img src="${serialQrUrl(s.plain)}" alt="QR Code" loading="lazy">
+          <img src="${urls[i]}" alt="QR Code 圖卡">
           <div class="mono">${esc(s.display)}</div>
         </div>
-      `).join('');
+      ` : '').join('');
       area.innerHTML = `
         <p class="desc" style="margin-top:16px;">
+          圖卡已經把活動名稱、兌換品項、序號都印在同一張圖上了。
           在圖片上「滑鼠右鍵 ➜ 複製圖片」，就能直接貼到 LINE／訊息傳給對方。
         </p>
         <div class="serial-qr-grid">${cards}</div>
@@ -2519,11 +2593,9 @@
           while (idx < generatedSerials.length) {
             const s = generatedSerials[idx++];
             try {
-              const res = await fetch(serialQrUrl(s.plain));
-              if (!res.ok) throw new Error('HTTP ' + res.status);
-              zip.file(`${s.plain}.png`, await res.blob());
+              zip.file(`${s.plain}.png`, await buildQrCardBlob(s));
             } catch (e) {
-              console.error('QR 圖片下載失敗：' + s.plain, e);
+              console.error('QR 圖卡產生失敗：' + s.plain, e);
               failed++;
             }
             done++;
