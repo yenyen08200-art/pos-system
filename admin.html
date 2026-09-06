@@ -1468,6 +1468,45 @@
       }
     });
 
+    /* 表格容器有自己的 overflow:auto（捲動區塊），選單原本用 position:absolute
+       掛在按鈕下面，只要那一列比較靠下面，選單就會被容器的捲動邊界整個切掉、
+       看起來「卡在按鈕後面」。改成展開時量出按鈕的實際位置，把選單切成
+       position:fixed（相對整個視窗，不會被任何容器的 overflow 裁切），
+       上方空間不夠就往上開，右邊超出視窗就往左靠，收合時清掉這些內聯樣式。 */
+    document.addEventListener('toggle', function (e) {
+      const d = e.target;
+      if (!d.classList || !d.classList.contains('kebab-dropdown')) return;
+      const menu = d.querySelector('.kebab-menu');
+      const summary = d.querySelector('summary');
+      if (!menu || !summary) return;
+
+      if (!d.open) {
+        menu.style.position = '';
+        menu.style.top = '';
+        menu.style.left = '';
+        menu.style.right = '';
+        return;
+      }
+
+      const rect = summary.getBoundingClientRect();
+      const gap = 8;
+      const menuW = menu.offsetWidth || 170;
+      const menuH = menu.offsetHeight || 170;
+      const openUp = (window.innerHeight - rect.bottom) < (menuH + gap) && rect.top > (menuH + gap);
+
+      menu.style.position = 'fixed';
+      menu.style.top = (openUp ? rect.top - menuH - gap : rect.bottom + gap) + 'px';
+      menu.style.right = 'auto';
+      menu.style.left = Math.max(8, Math.min(rect.right - menuW, window.innerWidth - menuW - 8)) + 'px';
+    }, true);   // toggle 事件不會冒泡，這裡用捕獲階段在 document 上統一攔
+
+    // 表格還能捲動時，選單的 fixed 座標會跟著跑掉，捲動時乾脆直接收合
+    document.querySelectorAll('.table-container').forEach(function (box) {
+      box.addEventListener('scroll', function () {
+        document.querySelectorAll('details.kebab-dropdown[open]').forEach(d => d.removeAttribute('open'));
+      });
+    });
+
     window.switchView = function(viewId, element) {
       document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
       document.getElementById('view-' + viewId).classList.add('active');
