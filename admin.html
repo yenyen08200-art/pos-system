@@ -198,6 +198,12 @@
     .result-box { margin-top: 16px; padding: 20px; background: rgba(63, 191, 143, .05); border: 2px solid rgba(63, 191, 143, .2); border-radius: 16px; font-size: 14px; display: none; max-height: 600px; overflow-y: auto; }
     .winner-card { display: flex; gap: 16px; background: #fff; padding: 16px; border-radius: 12px; margin-bottom: 16px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); border: 1px solid #E6EAF0; align-items: center; }
     .winner-card img { width: 100px; height: 100px; border-radius: 8px; border: 1px solid #f0f0f0; }
+    /* 流水號批次生成的 QR Code 網格：要電子發送（LINE／私訊）給對方時用，
+       印刷廠拿的是 CSV 文字檔，這個是給「不印紙、直接傳圖」的情境用的 */
+    .serial-qr-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 14px; margin-top: 14px; }
+    .serial-qr-card { background: #fff; border: 1px solid #E6EAF0; border-radius: 12px; padding: 12px; text-align: center; }
+    .serial-qr-card img { width: 100%; max-width: 160px; border-radius: 8px; }
+    .serial-qr-card .mono { margin-top: 8px; font-size: 12px; word-break: break-all; }
     .winner-info { flex: 1; overflow: hidden; }
     .winner-info a { font-size: 16px; color: var(--accent); font-weight: 700; text-decoration: none; }
     .winner-info a:hover { text-decoration: underline; }
@@ -499,7 +505,7 @@
         <div class="sidebar-item" onclick="switchView('config-member', this)">👑 會員系統(未完善)</div>
         <div class="sidebar-item" onclick="switchView('config-store', this)">🏪 門市清單管理</div>
         <div class="sidebar-item" onclick="switchView('config-event', this)">🎯 行銷活動管理</div>
-        <div class="sidebar-item" onclick="switchView('config-voucher', this)">🎫 實體券登記與生成</div>
+        <div class="sidebar-item" onclick="switchView('config-voucher', this)">🎫 流水號登記與生成</div>
       </div>
     </nav>
     
@@ -957,14 +963,15 @@
       </div>
 
       <!-- ================= 🔥 子選單視圖：門市清單管理 ================= -->
-      <!-- ================= 視圖：實體券登記與生成 ================= -->
+      <!-- ================= 視圖：流水號登記與生成 ================= -->
       <div id="view-config-voucher" class="view-section">
         <div class="header">
-          <h1>🎫 實體券登記與生成</h1>
+          <h1>🎫 流水號登記與生成</h1>
         </div>
         <p class="desc" style="margin:-8px 0 22px;">
-          印刷廠交來新一批紙本券時，在這裡把券號寫進資料庫。<b>沒在這裡建檔過的券，門市 POS 一律不給核銷</b>，
-          所以偽造的券刷不過。連號適合方便對帳，亂碼＋檢查碼適合會流到店外、有價值的券。
+          不管是印刷廠交來的紙本券，還是要電子發送給合作單位（例如抽獎名額），都在這裡把號碼寫進資料庫。
+          <b>沒在這裡建檔過的號碼，門市 POS 一律不給核銷</b>，所以偽造的號碼刷不過。
+          連號適合方便對帳，亂碼＋檢查碼適合會流到店外、有價值的券。
         </p>
         <div class="config-card">
           <h2>🎫 實體券批次建檔器</h2>
@@ -1004,10 +1011,11 @@
 
         <!-- ================= 實體券亂碼流水號生成器 ================= -->
         <div class="config-card">
-          <h2>🔐 實體券流水號生成器（防偽亂碼）</h2>
+          <h2>🔐 流水號生成器（防偽亂碼）</h2>
           <p class="desc">
             上面的「批次建檔器」產生的是 <b>A001、A002…</b> 這種連號，優點是方便對帳，缺點是<b>看到一張就能猜出其他張</b>。
-            這裡改用「亂碼 ＋ 檢查碼」：號碼無法推算，而且打錯一個字會被立刻擋下來，適合有價值、會流到店外的券。
+            這裡改用「亂碼 ＋ 檢查碼」：號碼無法推算，而且打錯一個字會被立刻擋下來，適合有價值、會流到店外的券——
+            紙本用「下載 CSV」交給印刷廠，要電子發送（LINE／私訊）給對方就用「顯示全部 QR Code」。
           </p>
 
           <div class="form-group">
@@ -2294,7 +2302,11 @@
             ${preview}
             ${list.length > 12 ? `<div style="color:#8A93A5; font-size:12px; margin-top:6px;">⋯ 其餘 ${list.length - 12} 組請由 CSV 查看</div>` : ""}
           </div>
-          <button class="btn-primary" style="margin-top:14px; background:#3FBF8F;" onclick="downloadSerialCsv()">⬇️ 下載 CSV（給印刷廠）</button>
+          <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:14px;">
+            <button class="btn-primary" style="background:#3FBF8F;" onclick="downloadSerialCsv()">⬇️ 下載 CSV（給印刷廠）</button>
+            <button class="btn-primary" style="background:#4A90D9;" onclick="showAllSerialQr()">📱 顯示全部 QR Code（電子發送用）</button>
+          </div>
+          <div id="serial-qr-area"></div>
         `;
       } catch (e) {
         console.error(e);
@@ -2305,11 +2317,36 @@
       }
     };
 
+    /** 產生一組券號的 QR Code 圖片網址，跟抽獎、電子券用的是同一個服務，風格統一 */
+    function serialQrUrl(plain) {
+      return `https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=8&data=${encodeURIComponent(plain)}`;
+    }
+
+    /* 展開全部 QR Code——不是為了印紙本，是給「屏科大這種要電子發送給個人」的情境用的。
+       印刷廠只需要 CSV 裡的文字號碼，這個按鈕才會需要圖片，所以做成選按才載入，
+       不要一產生預覽就自動抓 N 張圖，平白浪費流量。 */
+    window.showAllSerialQr = function() {
+      if (!generatedSerials.length) return alert("⚠️ 尚未產生券號。");
+      const area = document.getElementById('serial-qr-area');
+      const cards = generatedSerials.map((s) => `
+        <div class="serial-qr-card">
+          <img src="${serialQrUrl(s.plain)}" alt="QR Code" loading="lazy">
+          <div class="mono">${esc(s.display)}</div>
+        </div>
+      `).join('');
+      area.innerHTML = `
+        <p class="desc" style="margin-top:16px;">
+          在圖片上「滑鼠右鍵 ➜ 複製圖片」，就能直接貼到 LINE／訊息傳給對方。
+        </p>
+        <div class="serial-qr-grid">${cards}</div>
+      `;
+    };
+
     window.downloadSerialCsv = function() {
       if (!generatedSerials.length) return alert("⚠️ 尚未產生券號。");
       const act = document.getElementById('gen-act').value;
-      const rows = [["序號", "印在券上的號碼", "資料庫代碼"]];
-      generatedSerials.forEach((s, i) => rows.push([i + 1, s.display, s.plain]));
+      const rows = [["序號", "印在券上的號碼", "資料庫代碼", "QR Code 圖片網址"]];
+      generatedSerials.forEach((s, i) => rows.push([i + 1, s.display, s.plain, serialQrUrl(s.plain)]));
 
       // ﻿ 是 BOM，讓 Excel 開啟時不會把中文變亂碼
       const csv = "﻿" + rows.map(r => r.join(",")).join("\r\n");

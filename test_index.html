@@ -586,8 +586,7 @@ body.mode-physical-active .sc-tick { stroke: #FF6B35; filter: drop-shadow(0 0 10
 
         <span class="label">系統模式</span>
         <div class="mode-switch">
-          <button id="mode-member" class="mode-btn active" onclick="setMode('member')">👤 會員 / 電子券</button>
-          <button id="mode-physical" class="mode-btn" onclick="setMode('physical')">🎫 實體券</button>
+          <button id="mode-member" class="mode-btn active" onclick="setMode('member')">👤 會員 / 兌換券</button>
           <button id="mode-counter" class="mode-btn" onclick="setMode('counter')">🎁 活動贈品</button>
         </div>
 
@@ -1002,13 +1001,13 @@ body.mode-physical-active .sc-tick { stroke: #FF6B35; filter: drop-shadow(0 0 10
     hideTallyUndo();
     
     currentMode = m;
+    // 🔧 mode-physical 按鈕已經併入 mode-member 拿掉了，這裡不能再操作它，
+    //    不然每次呼叫 setMode() 都會因為 $('mode-physical') 是 null 而整支報錯
     $('mode-member').classList.toggle('active', m === 'member');
-    $('mode-physical').classList.toggle('active', m === 'physical');
-    $('mode-counter').classList.toggle('active', m === 'counter'); 
+    $('mode-counter').classList.toggle('active', m === 'counter');
     $('phone').value = '';
-    
+
     document.body.classList.remove('mode-physical-active', 'mode-counter-active', 'mode-member-active');
-    if(m === 'physical') document.body.classList.add('mode-physical-active');
     if(m === 'counter') document.body.classList.add('mode-counter-active');
     if(m === 'member') document.body.classList.add('mode-member-active');
 
@@ -1022,35 +1021,26 @@ body.mode-physical-active .sc-tick { stroke: #FF6B35; filter: drop-shadow(0 0 10
       renderActs();
     } else if (m === 'member') {
       $('scan-block').classList.remove('hidden');
-      $('act-block').classList.add('hidden'); 
-      $('counter-area').classList.add('hidden');
-
-      $('phone').type = 'tel';
-      $('phone').placeholder = isMemberSystemActive ? '輸入手機號碼' : '輸入手機號碼';
-      $('phone').maxLength = 10; 
-      $('btn-check').innerText = '查詢';
-      $('placeholder-title').innerText = isMemberSystemActive ? "等待掃描會員 / 憑證" : "等待掃描電子券";
-      $('placeholder-desc').innerText = isMemberSystemActive ? "掃描 QR Code 即可帶出會員點數與所有優惠券資訊。" : "掃描 QR Code 即可一鍵帶出所有電子券資訊。";
-      $('scan-label').innerText = isMemberSystemActive ? "● 掃描 / 查詢會員" : "● 掃描 / 查詢電子券";
-      $('info-social').style.display = 'block';
-      $('info-expire').style.display = 'block';
-      
-      nextCust(); 
-    } else if (m === 'physical') {
-      $('scan-block').classList.remove('hidden');
       $('act-block').classList.add('hidden');
       $('counter-area').classList.add('hidden');
 
+      /* 🔧 合併「電子券」「實體券」成同一個模式：
+         以前分兩顆按鈕，是因為輸入格式不同（電子券是純數字手機號碼、
+         實體券是英數混合流水號），但兩邊背後查詢的邏輯其實一樣
+         （拿使用者輸入的字串去對應活動的 collection 裡找同名文件），
+         沒必要讓店員自己判斷「這張是哪一種、要先切哪個模式」。
+         改成 type=text 讓字母數字都能手動輸入，QR 掃描也統一處理。 */
       $('phone').type = 'text';
-      $('phone').placeholder = '輸入實體券流水號';
-      $('phone').maxLength = 20; 
-      $('btn-check').innerText = '核銷';
-      $('placeholder-title').innerText = "實體券快速核銷";
-      $('placeholder-desc').innerText = "掃描實體券 QR Code 或直接輸入流水號進行核銷。";
-      $('label-phone').innerText = "🔢 實體流水號";
-      $('scan-label').innerText = "● 查詢單號"; 
-      $('info-social').style.display = 'none';
-      $('info-expire').style.display = 'none';
+      $('phone').inputMode = 'text';
+      $('phone').placeholder = '輸入手機號碼或流水號';
+      $('phone').maxLength = 20;
+      $('btn-check').innerText = '查詢';
+      $('placeholder-title').innerText = isMemberSystemActive ? "等待掃描會員 / 兌換券" : "等待掃描兌換券";
+      $('placeholder-desc').innerText = "掃描 QR Code，或直接輸入手機號碼／流水號查詢。";
+      $('label-phone').innerText = "📱 手機號碼／流水號";
+      $('scan-label').innerText = isMemberSystemActive ? "● 掃描 / 查詢會員" : "● 掃描 / 查詢兌換券";
+      $('info-social').style.display = 'block';
+      $('info-expire').style.display = 'block';
 
       nextCust();
     }
@@ -1114,7 +1104,7 @@ body.mode-physical-active .sc-tick { stroke: #FF6B35; filter: drop-shadow(0 0 10
         loginStoreSelect.innerHTML = optionsHtml;
       }
 
-      $('mode-member').innerHTML = isMemberSystemActive ? '👤 會員 / 電子券' : '📱 電子券';
+      $('mode-member').innerHTML = isMemberSystemActive ? '👤 會員 / 兌換券' : '🎟️ 兌換券';
       $('member-points-card').style.display = isMemberSystemActive ? 'block' : 'none';
       $('reward-title').style.display = isMemberSystemActive ? 'block' : 'none';
       $('reward-list').style.display = isMemberSystemActive ? 'grid' : 'none';
@@ -1171,8 +1161,8 @@ body.mode-physical-active .sc-tick { stroke: #FF6B35; filter: drop-shadow(0 0 10
   function setBusy(b){
     busy = b;
     $("btn-check").disabled = b;
-    if(b) { $("btn-check").innerText = "處理中…"; } 
-    else { $("btn-check").innerText = currentMode === 'physical' ? '核銷' : '查詢'; }
+    if(b) { $("btn-check").innerText = "處理中…"; }
+    else { $("btn-check").innerText = '查詢'; }   // physical 模式已併入 member，統一都是「查詢」
   }
 
   function renderStores(){
@@ -1568,7 +1558,12 @@ body.mode-physical-active .sc-tick { stroke: #FF6B35; filter: drop-shadow(0 0 10
     $("v-name").innerText = record.name || "—";
     $("v-expire").innerText = expireStr;
     
-    if (currentMode === 'physical') {
+    // 🔧 physical 模式併入 member 後，這裡改用「找到的活動名稱」判斷是不是實體／預先生成的券，
+    //    不再看 currentMode——不管店員是怎麼查到這張券的，只要活動有標記【實體】就走這個顯示，
+    //    橘色主題(mode-physical-active)也跟著這張券走，離開這張券的畫面時在 backToList() 裡收掉
+    const isPhysicalTicket = shownAct.includes('【實體】') || shownAct.includes('實體券');
+    document.body.classList.toggle('mode-physical-active', isPhysicalTicket);
+    if (isPhysicalTicket) {
         $("v-social").innerText = record.social_id || "實體紙本憑證";
         $("v-gift").innerHTML = `<span style="color:var(--primary);font-weight:900;font-size:22px;">${displayGift}</span> <span style="font-size:12px;color:var(--muted-foreground);display:block;margin-top:4px;">⚠️ 貼心防偽提示：請確認系統帶出之品項與紙本標示相符</span>`;
     } else {
@@ -1592,11 +1587,9 @@ body.mode-physical-active .sc-tick { stroke: #FF6B35; filter: drop-shadow(0 0 10
         redeemBtn.innerText = "✔ 確認核銷優惠";
     }
     
-    if (currentMode === 'physical') {
-        $("btn-back").style.display = 'none';
-    } else {
-        $("btn-back").style.display = 'flex';
-    }
+    // 🔧 以前 physical 模式是「直接顯示單一結果」沒有列表可以返回，才隱藏這顆按鈕；
+    //    現在不管什麼類型的券，都是先進列表、選一筆才進到這裡，所以一律顯示「返回列表」
+    $("btn-back").style.display = 'flex';
   }
 
   function hideUndo(){
@@ -1605,9 +1598,10 @@ body.mode-physical-active .sc-tick { stroke: #FF6B35; filter: drop-shadow(0 0 10
   }
   
   window.backToList = function() {
-    record = null; 
+    record = null;
     shownAct = "";
-    hideUndo(); 
+    hideUndo();
+    document.body.classList.remove('mode-physical-active');   // 離開這張券的畫面，橘色主題跟著收掉
     $("detail").classList.add("hidden");
     $("member-area").classList.remove("hidden");
   }
@@ -1665,9 +1659,10 @@ body.mode-physical-active .sc-tick { stroke: #FF6B35; filter: drop-shadow(0 0 10
           aspectRatio: 1.0,
         },
         (txt) => {
-          let result = txt;
-          if (currentMode === 'physical') result = txt.replace(/[^a-zA-Z0-9]/g, "").toUpperCase().slice(0,20);
-          else result = txt.replace(/[^\d]/g, "").slice(0,10);
+          /* 🔧 physical／member 合併後，掃描不再需要看模式決定怎麼清理：
+             手機號碼本來就是純數字、流水號本體是英數混合，兩者都落在
+             [0-9A-Z] 範圍內，統一轉大寫、去掉其他符號，兩種格式都不會被破壞。 */
+          const result = txt.toUpperCase().replace(/[^0-9A-Z]/g, "").slice(0, 20);
 
           $("phone").value = result;
           stopScan().then(() => check(result));
@@ -1693,10 +1688,50 @@ body.mode-physical-active .sc-tick { stroke: #FF6B35; filter: drop-shadow(0 0 10
     $("scan-area").classList.add("hidden");
   }
 
+  /* ============================================================
+     流水號檢查碼快速驗證（跟 admin.html 的生成器同一套 Luhn mod N 演算法）
+     ------------------------------------------------------------
+     只用來「提前提醒」，絕對不能拿來擋查詢：
+       - 舊式連號券（A001 這種，批次建檔器產生的）根本沒有檢查碼，
+         硬要驗證只會誤判成「格式錯誤」，把合法的舊券擋下來。
+       - 會員手機號碼也不是照這套規則生的，同樣不能拿來驗證。
+     所以只在「長度看起來像新格式、而且包含英文字母」時才驗，
+     驗不過也只是跳提示、照樣送出查詢——真正的防偽還是靠資料庫裡有沒有這筆紀錄。
+     ==========================================================*/
+  const SERIAL_ALPHABET = "0123456789ABCDEFGHJKMNPQRSTVWXYZ";
+  const SERIAL_BASE = SERIAL_ALPHABET.length;
+
+  function luhnLooksValid(full) {
+    let factor = 1, sum = 0;
+    for (let i = full.length - 1; i >= 0; i--) {
+      const cp = SERIAL_ALPHABET.indexOf(full[i]);
+      if (cp < 0) return true;   // 出現字元表沒有的字（例如 I/L/O/U），不是我們生成的格式，不驗
+      let addend = factor * cp;
+      factor = factor === 2 ? 1 : 2;
+      addend = Math.floor(addend / SERIAL_BASE) + (addend % SERIAL_BASE);
+      sum += addend;
+    }
+    return sum % SERIAL_BASE === 0;
+  }
+
+  /** 純數字（手機號碼）或太短（舊式連號券常見長度）都不驗，避免誤判 */
+  function maybeWarnBadSerial(input) {
+    if (!input || /^[0-9]+$/.test(input)) return;   // 純數字：可能是手機號碼，不驗
+    if (input.length < 7) return;                    // 太短：可能是舊式連號券，不驗
+    if (!luhnLooksValid(input)) {
+      showToast("⚠️ 這組流水號格式看起來不太對，確認一下有沒有打錯字或看反？（仍會照樣查詢）", "error");
+    }
+  }
+
   async function check(overridePhone){
-    const ph = overridePhone || $("phone").value.trim();
+    // 手動輸入跟 QR 掃描統一正規化（轉大寫、去掉多餘符號）：
+    // Firestore 的文件 ID 是區分大小寫的，店員手打小寫字母會查不到，
+    // 不是「這張券真的不存在」，是「大小寫沒對上」——先在這裡處理掉，不用讓店員自己猜原因。
+    const ph = (overridePhone || $("phone").value.trim()).toUpperCase().replace(/[^0-9A-Z]/g, "").slice(0, 20);
     if (!store) return showToast("請確認已選擇門市。", "error");
     if (!ph) return;
+
+    maybeWarnBadSerial(ph);   // 只提醒，不阻擋，下面照樣查詢
 
     record = null; memberRecord = null; userCouponsData = {};
     $("placeholder").classList.add("hidden");
@@ -1706,81 +1741,51 @@ body.mode-physical-active .sc-tick { stroke: #FF6B35; filter: drop-shadow(0 0 10
     setBusy(true);
 
     try {
-      if (currentMode === 'physical') {
-        // 🔥 核銷查詢不受「下架」影響：活動下架只是停止發券，已發出的券仍要能核銷到期限為止
-        const physicalActs = EVENT_ORDER.filter(a => {
-          if (!(a.includes('【實體】') || a.includes('實體券'))) return false;
-          const cfg = POS_CONFIG[a];
-          if (!cfg) return false;
-          return cfg.stores === "ALL" || (Array.isArray(cfg.stores) && cfg.stores.includes(store));
-        });
-        let foundData = null;
-        let foundActName = "";
-
-        for (const pAct of physicalActs){
-          const pSnap = await getDoc(doc(db, pAct, ph));
-          if (pSnap.exists()){
-            foundData = pSnap.data();
-            foundActName = pAct;
-            break; 
+      /* 🔧 電子券／實體券合併成同一次查詢：以前分兩個模式，是因為輸入格式不同
+         （手機號碼 vs 流水號），但兩邊查的邏輯本來就一樣——拿輸入的字串去
+         每個活動的 collection 裡對文件 ID。現在統一在同一輪 Promise.all 裡
+         查完全部活動（不分實體／電子標籤），有找到幾筆就顯示幾筆。
+         實體券碼是獨一無二的亂碼，正常情況下只會命中一個活動，
+         使用者體驗上跟以前的「直接顯示」差別很小，只是多一次「點進去看」。 */
+      let hasData = false;
+      if (isMemberSystemActive) {
+          const memSnap = await getDoc(doc(db, "members", ph));
+          if(memSnap.exists()) {
+              hasData = true;
+              memberRecord = memSnap.data();
+          } else {
+              memberRecord = { points: 0, name: "非註冊會員" };
           }
-        }
+          $('m-pts').innerText = memberRecord.points || 0;
+          $('m-name').innerText = memberRecord.name || "非註冊顧客";
+          $('m-phone').innerText = ph;
+          $('consume-amount').value = ''; $('pts-preview').innerText = '';
+          renderRewardsList();
+      }
 
-        if (foundData){
-          playAlert("scan");
-          shownPhone = ph;
-          shownAct = foundActName;
-          record = foundData;
-          hideUndo();
-          renderRight();
-        } else {
-          showToast("查無此實體流水號，或該券尚未建檔！", "error");
+      shownPhone = ph;
+
+      // 🔥 不過濾 active：活動下架只是停止發券，已發出的券仍要能核銷到期限為止
+      let allActs = EVENT_ORDER.filter(a => POS_CONFIG[a]);
+      await Promise.all(allActs.map(async (a) => {
+          const cSnap = await getDoc(doc(db, a, ph));
+          if(cSnap.exists()) {
+              hasData = true;
+              let data = cSnap.data(); data.act_source = a;
+              userCouponsData[a] = data;
+          }
+      }));
+
+      if (!hasData) {
+          showToast(isMemberSystemActive ? "查無此人的會員或優惠券紀錄！" : "查無此號碼／流水號的優惠券紀錄！", "error");
           $("phone").value = "";
           $("placeholder").classList.remove("hidden");
-        }
-        return;
-      } 
-      else if (currentMode === 'member') {
-        let hasData = false; 
-        if (isMemberSystemActive) {
-            const memSnap = await getDoc(doc(db, "members", ph));
-            if(memSnap.exists()) {
-                hasData = true;
-                memberRecord = memSnap.data();
-            } else {
-                memberRecord = { points: 0, name: "非註冊會員" };
-            }
-            $('m-pts').innerText = memberRecord.points || 0;
-            $('m-name').innerText = memberRecord.name || "非註冊顧客";
-            $('m-phone').innerText = ph;
-            $('consume-amount').value = ''; $('pts-preview').innerText = '';
-            renderRewardsList();
-        }
-        
-        shownPhone = ph;
-        
-        // 🔥 同上：不過濾 active，避免活動排程自動下架後，顧客手上「還沒到期」的券查不到
-        let digitalActs = EVENT_ORDER.filter(a => !a.includes('【實體】') && !a.includes('實體券') && POS_CONFIG[a]);
-        await Promise.all(digitalActs.map(async (a) => {
-            const cSnap = await getDoc(doc(db, a, ph));
-            if(cSnap.exists()) {
-                hasData = true; 
-                let data = cSnap.data(); data.act_source = a;
-                userCouponsData[a] = data;
-            }
-        }));
-
-        if (!hasData) {
-            showToast(isMemberSystemActive ? "查無此人的會員或優惠券紀錄！" : "查無此號碼的優惠券紀錄！", "error");
-            $("phone").value = "";
-            $("placeholder").classList.remove("hidden");
-            return;
-        }
-
-        playAlert("scan");
-        renderUserCoupons();
-        $("member-area").classList.remove("hidden");
+          return;
       }
+
+      playAlert("scan");
+      renderUserCoupons();
+      $("member-area").classList.remove("hidden");
     } catch (e) {
       /* 🔧 舊版只有 finally 沒有 catch。上面 1409-1411 已經把 placeholder、detail、
          member-area 全部藏起來了，所以只要任何一個 getDoc 失敗（門市 Wi-Fi 不穩、
@@ -1984,7 +1989,8 @@ body.mode-physical-active .sc-tick { stroke: #FF6B35; filter: drop-shadow(0 0 10
   }
 
   window.nextCust = function() {
-    $("phone").value = ""; record = null; memberRecord = null; userCouponsData = {}; hideUndo(); 
+    $("phone").value = ""; record = null; memberRecord = null; userCouponsData = {}; hideUndo();
+    document.body.classList.remove('mode-physical-active');   // 服務下一位，橘色主題跟著收掉
     $("member-area").classList.add("hidden");
     $("detail").classList.add("hidden");
     if(currentMode !== 'counter') $("placeholder").classList.remove("hidden");
