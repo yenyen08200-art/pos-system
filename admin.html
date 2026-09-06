@@ -1479,7 +1479,23 @@
        position:fixed 都還是曾經被裁切或整個消失過——與其一直猜是哪個祖先造成的
        （overflow、動畫用到的 transform…），乾脆展開時直接把 .kebab-menu 這個節點
        整個「搬」到 <body> 最下面，變成跟任何表格、卡片、動畫元素都無關的獨立節點，
-       用視窗座標定位，徹底排除掉任何祖先造成的裁切或定位干擾。收合時再搬回原位。 */
+       用視窗座標定位，徹底排除掉任何祖先造成的裁切或定位干擾。收合時再搬回原位。
+
+       position:fixed 是釘在「視窗」上，不會跟著任何容器的捲動走：電腦版真正在
+       捲動的是 #main-app 自己的 overflow-y:auto，手機版是整個 window，選單開著時
+       不管哪一種捲動，都會讓選單「留在原地、跟按鈕分開」。與其把選單關掉，
+       這裡選擇更直覺的做法——捲動時即時重算按鈕的最新座標，讓選單跟著按鈕一起
+       移動，就像正常貼著按鈕的下拉選單一樣。 */
+    function positionKebabMenu(summary, menu) {
+      const rect = summary.getBoundingClientRect();
+      const gap = 8;
+      const menuW = menu.offsetWidth || 170;
+      const menuH = menu.offsetHeight || 170;
+      const openUp = (window.innerHeight - rect.bottom) < (menuH + gap) && rect.top > (menuH + gap);
+      menu.style.top = (openUp ? rect.top - menuH - gap : rect.bottom + gap) + 'px';
+      menu.style.left = Math.max(8, Math.min(rect.right - menuW, window.innerWidth - menuW - 8)) + 'px';
+    }
+
     document.addEventListener('toggle', function (e) {
       const d = e.target;
       if (!d.classList || !d.classList.contains('kebab-dropdown')) return;
@@ -1502,35 +1518,30 @@
       const menu = d.querySelector('.kebab-menu');
       if (!menu) return;
 
-      const rect = summary.getBoundingClientRect();
-      const gap = 8;
-      const menuW = menu.offsetWidth || 170;
-      const menuH = menu.offsetHeight || 170;
-      const openUp = (window.innerHeight - rect.bottom) < (menuH + gap) && rect.top > (menuH + gap);
-
       document.body.appendChild(menu);   // 搬離表格／卡片，脫離所有可能造成裁切的祖先
       d._portalMenu = menu;
-
       menu.style.position = 'fixed';
-      menu.style.top = (openUp ? rect.top - menuH - gap : rect.bottom + gap) + 'px';
       menu.style.right = 'auto';
-      menu.style.left = Math.max(8, Math.min(rect.right - menuW, window.innerWidth - menuW - 8)) + 'px';
+      positionKebabMenu(summary, menu);
     }, true);   // toggle 事件不會冒泡，這裡用捕獲階段在 document 上統一攔
 
-    /* position:fixed 是釘在「視窗」上，不會跟著任何容器的捲動而移動。
-       電腦版真正在捲動的是 #main-app（它自己 overflow-y:auto），手機版
-       捲的是整個文件（window）——選單開著的時候，不管哪一種捲動，
-       選單都會停在原地、跟按鈕整個「脫鉤」。比照大部分下拉選單的慣例：
-       捲動時直接收合選單，而不是即時跟著重新定位（比較穩、不會抖動）。
-       這裡刻意不掛在 .table-container 上——之前掛在那裡出過 bug：
-       選單一展開，瀏覽器把剛展開的內容自動捲進可視範圍，會誤觸發它自己
-       把自己關掉。#main-app／window 的捲動不會有這個副作用。 */
+    // 捲動時讓「目前開著的選單」跟著按鈕一起移動，不用等使用者自己重新點開
     const mainAppEl = document.getElementById('main-app');
-    function closeAllKebabDropdowns() {
-      document.querySelectorAll('details.kebab-dropdown[open]').forEach(d => d.removeAttribute('open'));
+    function repositionOpenKebabMenus() {
+      document.querySelectorAll('details.kebab-dropdown[open]').forEach(function (d) {
+        const summary = d.querySelector('summary');
+        const menu = d._portalMenu;
+        if (summary && menu) positionKebabMenu(summary, menu);
+      });
     }
-    if (mainAppEl) mainAppEl.addEventListener('scroll', closeAllKebabDropdowns, { passive: true });
-    window.addEventListener('scroll', closeAllKebabDropdowns, { passive: true });
+    if (mainAppEl) mainAppEl.addEventListener('scroll', repositionOpenKebabMenus, { passive: true });
+    window.addEventListener('scroll', repositionOpenKebabMenus, { passive: true });
+    // 表格自己也有獨立的捲動（.table-container 的 overflow:auto），
+    // 這個現在只是「重新定位」不是「關掉」，掛上去很安全，不會重演
+    // 之前「一展開就被自己關掉」的問題。
+    document.querySelectorAll('.table-container').forEach(function (box) {
+      box.addEventListener('scroll', repositionOpenKebabMenus, { passive: true });
+    });
 
     window.switchView = function(viewId, element) {
       document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
