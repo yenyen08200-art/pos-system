@@ -2674,10 +2674,14 @@
       btn.innerText = "⏳ 產生中...";
 
       try {
-        // 先把這個活動已存在的券號抓回來，確保新號碼不會蓋到舊券。
-        // （亂碼撞號機率極低，但「覆蓋掉一張已發出去的券」的後果太嚴重，值得多花這一次查詢）
-        const existingSnap = await getDocs(collection(db, act));
-        const existing = new Set(existingSnap.docs.map(d => d.id));
+        // 查全部活動既有的券號，不是只查這一個活動：因為 test_index.html 核銷時
+        // 是「所有活動一起搜」（EVENT_ORDER.filter(a=>POS_CONFIG[a])），同一組號碼
+        // 萬一剛好也存在別的活動底下，掃描時會兩邊都命中、變成分不清是哪一張的
+        // 模糊比對。亂碼撞號機率極低，但這一步查詢成本不高，值得順手做對。
+        const actsToCheck = Array.from(new Set([...globalEventOrder, act]));
+        const existingSnaps = await Promise.all(actsToCheck.map(a => getDocs(collection(db, a))));
+        const existing = new Set();
+        existingSnaps.forEach(snap => snap.docs.forEach(d => existing.add(d.id)));
 
         const seen = new Set();
         const list = [];
@@ -2711,7 +2715,7 @@
         box.innerHTML = `
           <h3 style="margin-top:0; color:var(--green); font-size:17px;">✅ 已產生 ${list.length} 組券號（尚未寫入資料庫）</h3>
           <p style="font-size:13px; color:#5A6478; line-height:1.8;">
-            比對了資料庫既有的 ${existing.size} 筆紀錄，確認沒有重複。<br>
+            比對了全部 ${actsToCheck.length} 個活動、共 ${existing.size} 筆既有紀錄，確認沒有重複。<br>
             下面是前 12 組預覽，請先按「下載 CSV」留底給印刷廠，再按「寫入資料庫」。<br>
             <b style="color:#C0392B;">⚠️ 亂碼一旦重新產生就是全新的一組，沒有下載就寫入的話，你會不知道自己印了哪些號碼。</b>
           </p>
