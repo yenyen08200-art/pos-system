@@ -1071,7 +1071,7 @@
           <div class="form-group">
             <div class="field-block">
               <label>🎯 綁定實體券活動</label>
-              <select id="batch-act"></select>
+              <select id="batch-act" onchange="autofillActGift('batch-act','batch-gift')"></select>
             </div>
             <div class="field-block">
               <label>🎁 兌換品項設定</label>
@@ -1108,7 +1108,7 @@
           <div class="form-group">
             <div class="field-block">
               <label>🎯 綁定實體券活動</label>
-              <select id="gen-act"></select>
+              <select id="gen-act" onchange="autofillActGift('gen-act','gen-gift')"></select>
             </div>
             <div class="field-block">
               <label>🎁 兌換品項設定</label>
@@ -2360,6 +2360,19 @@
         display: (prefix ? prefix + "-" : "") + groups.join("-")
       };
     }
+
+    /* 選了活動之後，自動把圖一（行銷活動管理）設定的贈品帶進來，
+       不用兩邊各打一次。只有欄位還是空白／預設字樣時才帶入，
+       已經手動改過內容（例如這批要跟活動預設不同）就不覆蓋。 */
+    window.autofillActGift = function(actSelId, giftInputId) {
+      const act = document.getElementById(actSelId).value;
+      const giftEl = document.getElementById(giftInputId);
+      if (!giftEl) return;
+      const cur = giftEl.value.trim();
+      if (cur !== '' && cur !== '依實體券面標示發放') return;
+      const actGift = globalPosConfig[act]?.gift;
+      giftEl.value = (actGift && actGift !== '依實體券面標示發放') ? actGift : '依實體券面標示發放';
+    };
 
     let generatedSerials = [];   // 預覽產生的結果，按「確認寫入」時才真的送出
 
