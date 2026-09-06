@@ -1504,13 +1504,6 @@
       menu.style.left = Math.max(8, Math.min(rect.right - menuW, window.innerWidth - menuW - 8)) + 'px';
     }, true);   // toggle 事件不會冒泡，這裡用捕獲階段在 document 上統一攔
 
-    // 表格還能捲動時，選單的 fixed 座標會跟著跑掉，捲動時乾脆直接收合
-    document.querySelectorAll('.table-container').forEach(function (box) {
-      box.addEventListener('scroll', function () {
-        document.querySelectorAll('details.kebab-dropdown[open]').forEach(d => d.removeAttribute('open'));
-      });
-    });
-
     window.switchView = function(viewId, element) {
       document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
       document.getElementById('view-' + viewId).classList.add('active');
@@ -2156,17 +2149,23 @@
         
         let html = '';
         logs.forEach(d => {
+           // 店員在 POS 端按過「⚡ 撤銷 (5s)」的話，empName 會被改寫成帶「(已撤銷)」字樣，
+           // 庫存當下就已經用 transaction 加回去了——這裡如果還讓「退回」按鈕可以按，
+           // 等於同一筆庫存被加回兩次，數字會對不起來。這種紀錄改成顯示「已撤銷」灰字，
+           // 不給按鈕。
+           const alreadyUndone = String(d.empName || '').includes('已撤銷');
+           const actionCell = alreadyUndone
+             ? `<span style="color:var(--gray); font-size:12px; font-weight:700;"><i class="fa-solid fa-check"></i> 已撤銷</span>`
+             : `<button class="btn-table-del" onclick="deleteGiftLogRecord('${jsStr(d.id)}', '${jsStr(d.store)}', '${jsStr(d.act)}')">
+                  <i class="fa-solid fa-rotate-left"></i> 退回
+                </button>`;
            html += `
             <tr>
               <td style="font-size: 13px; color: var(--text-sub);">${esc(d.time)}</td>
               <td style="font-weight:bold;">${esc(d.store)}</td>
               <td style="font-weight:bold; color:#3FBF8F;">${esc(d.act)}</td>
               <td style="font-weight:bold;">${esc(d.empName)}</td>
-              <td style="width: 80px;">
-                <button class="btn-table-del" onclick="deleteGiftLogRecord('${jsStr(d.id)}', '${jsStr(d.store)}', '${jsStr(d.act)}')">
-                  <i class="fa-solid fa-rotate-left"></i> 退回
-                </button>
-              </td>
+              <td style="width: 80px;">${actionCell}</td>
             </tr>
            `;
         });
