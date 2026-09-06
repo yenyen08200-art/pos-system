@@ -241,35 +241,78 @@
     }
     .toggle-switch.active::after { transform: translateX(20px); }
 
-    /* ================= 手機版 RWD ================= */
+    /* ================= 📱 手機版頂部列 + 漢堡選單（抽屜） ================= */
+    .mobile-topbar { display: none; }
+    .sidebar-overlay { display: none; }
+
+    /* 漢堡 → X 的三線動畫按鈕：緩入緩出 + 透明度變化 */
+    .hamburger-btn { width: 34px; height: 34px; position: relative; background: none; border: none; cursor: pointer; padding: 0; flex-shrink: 0; }
+    .hamburger-btn span {
+      position: absolute; left: 6px; right: 6px; height: 2.5px; background: #fff; border-radius: 2px;
+      transition: transform .32s cubic-bezier(.4,0,.2,1), opacity .22s ease-in-out, top .32s cubic-bezier(.4,0,.2,1);
+    }
+    .hamburger-btn span:nth-child(1){ top: 10px; }
+    .hamburger-btn span:nth-child(2){ top: 16px; }
+    .hamburger-btn span:nth-child(3){ top: 22px; }
+    .hamburger-btn.open span:nth-child(1){ top: 16px; transform: rotate(45deg); }
+    .hamburger-btn.open span:nth-child(2){ opacity: 0; }
+    .hamburger-btn.open span:nth-child(3){ top: 16px; transform: rotate(-45deg); }
+
     @media (max-width:768px){
       body { flex-direction: column; }
-      .sidebar { width: 100%; flex: none; height: auto; position: relative; display: flex; flex-direction: column; padding: 16px; align-items: flex-start; z-index: 100; }
+      body.menu-open { overflow: hidden; }
+
+      /* 固定頂部列：品牌 + 漢堡鈕，登入後才顯示 */
+      body.is-authed .mobile-topbar {
+        display: flex; align-items: center; justify-content: space-between;
+        position: fixed; top: 0; left: 0; right: 0; height: 56px;
+        background: var(--sidebar-bg); color: #fff; padding: 0 16px; z-index: 300;
+        box-shadow: 0 2px 14px rgba(0,0,0,.18);
+      }
+      .mobile-topbar .mt-brand { font-size: 15px; font-weight: 800; letter-spacing: .3px; }
+
+      /* 側邊欄變成左側抽屜：預設收在畫面外，緩入緩出滑入並淡入 */
+      .sidebar {
+        width: 280px; max-width: 82vw; flex: none; height: 100vh;
+        position: fixed; top: 0; left: 0; display: flex; flex-direction: column;
+        padding: 20px 18px; align-items: flex-start; z-index: 400;
+        transform: translateX(-100%); opacity: 0;
+        transition: transform .34s cubic-bezier(.4,0,.2,1), opacity .3s ease-in-out;
+        box-shadow: 12px 0 40px rgba(0,0,0,.28);
+      }
+      body.menu-open .sidebar { transform: translateX(0); opacity: 1; }
+
       .sidebar-brand { display: flex; justify-content: space-between; width: 100%; align-items: center; }
       .sidebar-brand p { display: block; margin: 0; }
       .mobile-logout { display: block; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); color: #fff; border-radius: 8px; padding: 6px 12px; font-size: 13px; cursor: pointer; }
-      .sidebar-menu { display: flex; flex-direction: row; flex-wrap: wrap; width: 100%; justify-content: center; gap: 8px; margin-top: 16px; }
-      .sidebar-item { flex: 1 1 45%; text-align: center; justify-content: center; padding: 12px; font-size: 13px; }
-      /* 手機版選單是橫向 wrap，子選單要自己獨占一整列，
-         否則會被當成一般項目擠進那排裡，把版面撐歪。 */
-      .sub-menu { flex: 1 1 100%; }
-      .sub-menu .sidebar-item { flex: 1 1 100%; text-align: left; justify-content: flex-start; }
-      .sidebar-footer { display: none; }
-      
-      #main-app { padding: 16px; height: auto; }
+      .sidebar-menu { display: flex; flex-direction: column; width: 100%; gap: 6px; margin-top: 24px; overflow-y: auto; }
+      .sidebar-item { flex: none; text-align: left; justify-content: space-between; padding: 13px 14px; font-size: 14px; }
+      .sub-menu { flex: none; }
+      .sub-menu .sidebar-item { text-align: left; justify-content: flex-start; }
+      .sidebar-footer { display: block; margin-top: 14px; padding-top: 14px; }
+
+      /* 遮罩：淡入淡出，點一下收合抽屜 */
+      .sidebar-overlay {
+        display: block; position: fixed; inset: 0; background: rgba(15,17,23,.5);
+        opacity: 0; pointer-events: none; transition: opacity .3s ease-in-out; z-index: 350;
+      }
+      body.menu-open .sidebar-overlay { opacity: 1; pointer-events: auto; }
+
+      body.is-authed #main-app { padding: 16px; padding-top: 72px; height: auto; }
+      #main-app { height: auto; }
       .header { flex-direction: column; align-items: flex-start; gap: 16px; }
-      
+
       .toolbar-card { flex-direction: column; align-items: stretch; padding: 16px; }
       .toolbar-group { justify-content: stretch; width: 100%; }
       .toolbar-item { flex: 1; text-align: center; justify-content: center; }
       .toolbar-group .cs { min-width: 0; width: 100%; }   /* 桌機給的 200px 下限在窄螢幕會撐出橫向捲軸 */
       .date-filter-box { width: 100%; justify-content: space-between; }
       .date-filter-box input { width: 100%; }
-      
+
       .dashboard { grid-template-columns: repeat(2, 1fr); gap: 12px; }
       .stat-card { padding: 16px; }
       .stat-card.c-total { grid-column: span 2; padding: 24px; }
-      
+
       .charts-wrapper { flex-direction: column; }
       .table-toolbar { flex-direction: column; align-items: flex-start; gap: 10px; }
       .search-box { width: 100%; }
@@ -441,6 +484,17 @@
       <button id="google-btn" class="btn-google" onclick="loginWithGoogle()">🌐 使用 Google 帳號登入</button>
     </div>
   </div>
+
+  <!-- 手機版固定頂部列（漢堡選單開關） -->
+  <div class="mobile-topbar" id="mobile-topbar">
+    <div class="mt-brand">🏍️ 德州小騎士後台</div>
+    <button class="hamburger-btn" id="hamburger-btn" onclick="toggleMobileMenu()" aria-label="開啟選單">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+
+  <!-- 手機抽屜背後的遮罩，點一下收合 -->
+  <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeMobileMenu()"></div>
 
   <!-- 側邊選單 -->
   <aside class="sidebar" id="sidebar-nav" style="display:none;">
@@ -1349,6 +1403,21 @@
       if(icon) icon.style.transform = willOpen ? 'rotate(180deg)' : 'rotate(0deg)';
     };
 
+    /* 手機版漢堡選單：開/關抽屜，順便鎖住背景捲動 */
+    window.toggleMobileMenu = function() {
+      const willOpen = !document.body.classList.contains('menu-open');
+      document.body.classList.toggle('menu-open', willOpen);
+      document.getElementById('hamburger-btn').classList.toggle('open', willOpen);
+    };
+    window.closeMobileMenu = function() {
+      document.body.classList.remove('menu-open');
+      const btn = document.getElementById('hamburger-btn');
+      if (btn) btn.classList.remove('open');
+    };
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') closeMobileMenu();
+    });
+
     /* 「⋮」選單用的是原生 <details>，各自獨立、彼此不知道對方開著，
        所以連點兩個會同時展開兩張選單。這裡補上「開新的就收掉舊的」，
        順便讓點到選單外面、或按下選單裡任何一顆按鈕之後也會自動收合。 */
@@ -1373,7 +1442,10 @@
         element.parentElement.previousElementSibling.classList.add('active');
       }
       element.classList.add('active');
-      
+
+      // 手機版：選好頁面後自動收合抽屜選單，不用再手動點一次
+      closeMobileMenu();
+
       // 切到新頁面時重新掃描捲動進場的元素（原本 display:none 的沒被觀察過）
       if (window.rescanReveal) requestAnimationFrame(window.rescanReveal);
 
@@ -3328,6 +3400,7 @@
         }, 620);
         document.getElementById('sidebar-nav').style.display = 'flex';
         document.getElementById('main-app').style.display = 'block';
+        document.body.classList.add('is-authed');
         fetchSystemConfig();
         // 🔥 登入成功時，啟動全域的即時監控
         startRealtimeMonitors();
@@ -3339,6 +3412,7 @@
         document.getElementById('sidebar-nav').style.display = 'none';
         document.getElementById('main-app').style.display = 'none';
         document.getElementById('login-screen').style.display = 'flex';
+        document.body.classList.remove('is-authed', 'menu-open');
         if (unsubscribeSnapshot) unsubscribeSnapshot();
         if (unsubInventory) unsubInventory();
         if (unsubGiftLogs) unsubGiftLogs();
