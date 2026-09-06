@@ -1517,6 +1517,21 @@
       menu.style.left = Math.max(8, Math.min(rect.right - menuW, window.innerWidth - menuW - 8)) + 'px';
     }, true);   // toggle 事件不會冒泡，這裡用捕獲階段在 document 上統一攔
 
+    /* position:fixed 是釘在「視窗」上，不會跟著任何容器的捲動而移動。
+       電腦版真正在捲動的是 #main-app（它自己 overflow-y:auto），手機版
+       捲的是整個文件（window）——選單開著的時候，不管哪一種捲動，
+       選單都會停在原地、跟按鈕整個「脫鉤」。比照大部分下拉選單的慣例：
+       捲動時直接收合選單，而不是即時跟著重新定位（比較穩、不會抖動）。
+       這裡刻意不掛在 .table-container 上——之前掛在那裡出過 bug：
+       選單一展開，瀏覽器把剛展開的內容自動捲進可視範圍，會誤觸發它自己
+       把自己關掉。#main-app／window 的捲動不會有這個副作用。 */
+    const mainAppEl = document.getElementById('main-app');
+    function closeAllKebabDropdowns() {
+      document.querySelectorAll('details.kebab-dropdown[open]').forEach(d => d.removeAttribute('open'));
+    }
+    if (mainAppEl) mainAppEl.addEventListener('scroll', closeAllKebabDropdowns, { passive: true });
+    window.addEventListener('scroll', closeAllKebabDropdowns, { passive: true });
+
     window.switchView = function(viewId, element) {
       document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
       document.getElementById('view-' + viewId).classList.add('active');
