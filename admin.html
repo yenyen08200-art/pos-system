@@ -1481,11 +1481,14 @@
        整個「搬」到 <body> 最下面，變成跟任何表格、卡片、動畫元素都無關的獨立節點，
        用視窗座標定位，徹底排除掉任何祖先造成的裁切或定位干擾。收合時再搬回原位。
 
-       position:fixed 是釘在「視窗」上，不會跟著任何容器的捲動走：電腦版真正在
-       捲動的是 #main-app 自己的 overflow-y:auto，手機版是整個 window，選單開著時
-       不管哪一種捲動，都會讓選單「留在原地、跟按鈕分開」。與其把選單關掉，
-       這裡選擇更直覺的做法——捲動時即時重算按鈕的最新座標，讓選單跟著按鈕一起
-       移動，就像正常貼著按鈕的下拉選單一樣。 */
+       position:fixed 是釘在「視窗」上，不會跟著任何容器的捲動走，選單開著時
+       只要畫面一捲，就會變成「選單留在原地、跟按鈕分開」——要在捲動當下關掉它。
+       改用 scroll 事件監聽試過兩次都沒抓對是哪個容器在捲動（掛在 #main-app／
+       window／.table-container 上都沒有實際反應），與其繼續猜是哪個容器的
+       scroll 事件沒被抓到，改成用 requestAnimationFrame 每一影格主動去讀按鈕
+       目前的實際座標，只要跟選單剛展開時記下來的座標差超過一點點，就直接關掉
+       選單——不管是「哪個」容器讓畫面動了、也不管有沒有正確收到 scroll 事件，
+       只要按鈕位置真的變了，一定會被抓到。 */
     function positionKebabMenu(summary, menu) {
       const rect = summary.getBoundingClientRect();
       const gap = 8;
@@ -1523,25 +1526,35 @@
       menu.style.position = 'fixed';
       menu.style.right = 'auto';
       positionKebabMenu(summary, menu);
+
+      // 記下展開當下按鈕的座標，讓下面的監看迴圈知道要跟誰比對
+      d._kebabOpenTop = summary.getBoundingClientRect().top;
+      startKebabScrollWatch();
     }, true);   // toggle 事件不會冒泡，這裡用捕獲階段在 document 上統一攔
 
-    // 捲動時讓「目前開著的選單」跟著按鈕一起移動，不用等使用者自己重新點開
-    const mainAppEl = document.getElementById('main-app');
-    function repositionOpenKebabMenus() {
-      document.querySelectorAll('details.kebab-dropdown[open]').forEach(function (d) {
+    // 不管在哪裡（#main-app、window、.table-container…）發生捲動，
+    // 只要按鈕的實際座標跟展開當下不一樣了，就直接收合——用 rAF 主動輪詢，
+    // 不依賴猜對「這次是哪個容器的 scroll 事件」。選單全部關閉後自動停止輪詢，
+    // 不會平白耗電。
+    let kebabWatchRunning = false;
+    function kebabScrollWatchTick() {
+      const openDropdowns = document.querySelectorAll('details.kebab-dropdown[open]');
+      if (!openDropdowns.length) { kebabWatchRunning = false; return; }
+      openDropdowns.forEach(function (d) {
         const summary = d.querySelector('summary');
-        const menu = d._portalMenu;
-        if (summary && menu) positionKebabMenu(summary, menu);
+        if (!summary) { d.removeAttribute('open'); return; }
+        const top = summary.getBoundingClientRect().top;
+        if (Math.abs(top - (d._kebabOpenTop != null ? d._kebabOpenTop : top)) > 1) {
+          d.removeAttribute('open');   // 觸發上面的 toggle 監聽器：收合＋搬回原位
+        }
       });
+      requestAnimationFrame(kebabScrollWatchTick);
     }
-    if (mainAppEl) mainAppEl.addEventListener('scroll', repositionOpenKebabMenus, { passive: true });
-    window.addEventListener('scroll', repositionOpenKebabMenus, { passive: true });
-    // 表格自己也有獨立的捲動（.table-container 的 overflow:auto），
-    // 這個現在只是「重新定位」不是「關掉」，掛上去很安全，不會重演
-    // 之前「一展開就被自己關掉」的問題。
-    document.querySelectorAll('.table-container').forEach(function (box) {
-      box.addEventListener('scroll', repositionOpenKebabMenus, { passive: true });
-    });
+    function startKebabScrollWatch() {
+      if (kebabWatchRunning) return;
+      kebabWatchRunning = true;
+      requestAnimationFrame(kebabScrollWatchTick);
+    }
 
     window.switchView = function(viewId, element) {
       document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
