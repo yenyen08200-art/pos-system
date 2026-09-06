@@ -404,22 +404,6 @@
     tbody tr.row-in { animation: row-slide .42s cubic-bezier(.2,.8,.2,1) both; }
     @keyframes row-slide { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
 
-    /* ================= ✨ 卡片光暈跟隨滑鼠 =================
-       只在有滑鼠的裝置啟用；觸控螢幕沒有游標，加了也只是白白多算一輪。 */
-    @media (hover: hover) and (pointer: fine) {
-      .stat-card, .chart-box, .config-card { position: relative; overflow: hidden; }
-      .stat-card::after, .chart-box::after, .config-card::after {
-        content: ""; position: absolute; inset: 0; pointer-events: none; opacity: 0;
-        transition: opacity .35s ease;
-        background: radial-gradient(220px circle at var(--mx, 50%) var(--my, 50%), rgba(255,255,255,.55), transparent 60%);
-      }
-      .stat-card:hover::after, .chart-box:hover::after, .config-card:hover::after { opacity: 1; }
-      /* 深色的總計卡用白光會看不出來，改用暖色調 */
-      .stat-card.c-total::after {
-        background: radial-gradient(220px circle at var(--mx, 50%) var(--my, 50%), rgba(255,255,255,.28), transparent 60%);
-      }
-    }
-
     /* ================= 🔄 頁面切換轉場 =================
        後台切頁很頻繁，時間刻意壓在 0.26 秒——再長就會從「有質感」變成「擋路」。 */
     .view-section.active { display: block; animation: view-in .26s cubic-bezier(.2,.8,.2,1) both; }
@@ -3648,18 +3632,6 @@
     }
   };
 
-  /* ---------- 4. 卡片光暈跟隨滑鼠 ----------
-     用事件代理綁在 document 上，卡片是動態產生的也不用重綁。
-     只更新 CSS 變數，實際渲染交給 CSS，比用 JS 直接改樣式省。 */
-  if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
-    document.addEventListener('mousemove', function (e) {
-      var card = e.target.closest && e.target.closest('.stat-card, .chart-box, .config-card');
-      if (!card) return;
-      var r = card.getBoundingClientRect();
-      card.style.setProperty('--mx', (e.clientX - r.left) + 'px');
-      card.style.setProperty('--my', (e.clientY - r.top) + 'px');
-    }, { passive: true });
-  }
 })();
 </script>
 
