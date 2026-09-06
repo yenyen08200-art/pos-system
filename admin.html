@@ -316,9 +316,16 @@
 
       /* 日期篩選：input 用 flex:1 自己量寬度，不要用 width:100% 把「清除篩選」擠到換行，
          也不會因為擠太窄讓 iOS 把日期文字跟小日曆圖示都吃掉、顯示空白 */
-      .date-filter-box { width: 100%; }
-      .date-filter-box input[type="date"] { flex: 1 1 auto; width: auto; min-width: 128px; }
+      .date-filter-box { width: 100%; position: relative; }
+      .date-filter-box input[type="date"] { flex: 1 1 auto; width: auto; min-width: 128px; position: relative; z-index: 1; }
       .date-filter-box button { flex: 0 0 auto; white-space: nowrap; font-size: 13px; padding: 0 12px; }
+      /* iOS 的空日期欄位本身完全不會顯示文字或圖示，疊一個假提示字上去，
+         選了日期（.has-date）就讓開，不擋到瀏覽器原生顯示出來的日期文字 */
+      .date-ph {
+        position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+        font-size: 13.5px; font-weight: 600; color: var(--text-sub); pointer-events: none; z-index: 0;
+      }
+      .date-filter-box.has-date .date-ph { display: none; }
 
       /* 這兩顆是電腦後台在用的管理功能，手機現場不需要，收起來版面才不會爆版 */
       #btn-expire, #btn-export-excel { display: none; }
@@ -327,15 +334,35 @@
       .stat-card { padding: 16px; }
       .stat-card.c-total { grid-column: span 2; padding: 24px; }
 
+      /* 圖表區改成手風琴，預設收合，點標題才展開，畫面才不會被撐得太長 */
       .charts-wrapper { flex-direction: column; }
+      .chart-toggle {
+        cursor: pointer; display: flex; align-items: center; justify-content: space-between;
+        margin: 0; user-select: none;
+      }
+      .chart-chevron { font-size: 12px; color: var(--text-sub); transition: transform .3s cubic-bezier(.4,0,.2,1); }
+      .chart-toggle.open .chart-chevron { transform: rotate(180deg); }
+      .chart-content {
+        max-height: 0; opacity: 0; overflow: hidden;
+        transition: max-height .34s cubic-bezier(.4,0,.2,1), opacity .28s ease-in-out;
+      }
+      .chart-toggle.open + .chart-content { max-height: 320px; opacity: 1; margin-top: 14px; }
+
       .table-toolbar { flex-direction: column; align-items: flex-start; gap: 10px; }
       .search-box { width: 100%; }
       .kebab-menu { right: auto; left: 0; }
 
+      /* 其他沒有轉成卡片的表格（庫存明細、薪資表…）維持原本橫向表格，
+         但要把橫向捲動限制在卡片自己裡面，不能讓整個頁面被拖出去 */
+      .config-card:has(table) { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
       /* ============ 數據總覽表格 → 手機改成一筆一張卡片 ============
-         橫向表格在窄螢幕上要左右滑才看得完，改成直向卡片、
-         每個欄位前面帶標籤文字，只需要上下滑就能看完一筆資料。 */
-      .table-container { overflow: visible; max-height: none; padding: 0; }
+         原本用「標籤靠左、內容靠右」的一行式排法，遇到內容是好幾行文字時
+         (像顧客資訊有姓名/電話/社群三行) 每一行都會被拆成獨立的橫排項目、
+         整個擠出卡片外。改成「標籤在上、內容在下」都靠左對齊，
+         不管內容有幾行都會自然往下疊，不會再撐出畫面。 */
+      .table-container:not(#dashboard-table-wrap) { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+      #dashboard-table-wrap { overflow: visible; max-height: none; padding: 0; }
       #data-table, #data-table thead, #data-table tbody { display: block; width: 100%; }
       #data-table thead { display: none; }
       #data-table tr {
@@ -344,13 +371,12 @@
       }
       #data-table tr.empty-row { display: block; border: none; box-shadow: none; padding: 0; }
       #data-table td {
-        display: flex; justify-content: space-between; align-items: flex-start; gap: 14px;
-        padding: 10px 0; border: none; border-bottom: 1px dashed #EEF1F5; text-align: right;
+        display: block; padding: 10px 0; border: none; border-bottom: 1px dashed #EEF1F5; text-align: left;
       }
       #data-table td:last-child { border-bottom: none; }
       #data-table td::before {
-        content: attr(data-label); flex: 0 0 auto; text-align: left; font-size: 11.5px;
-        font-weight: 800; color: var(--text-sub); padding-top: 2px;
+        content: attr(data-label); display: block; font-size: 11.5px;
+        font-weight: 800; color: var(--text-sub); margin-bottom: 4px;
       }
       #data-table td[data-label=""] { order: -1; padding: 6px 0; }
       #data-table td[data-label=""]:empty { display: none; }
@@ -525,7 +551,7 @@
 
   <!-- 手機版固定頂部列（漢堡選單開關） -->
   <div class="mobile-topbar" id="mobile-topbar">
-    <div class="mt-brand">🏍️ 德州小騎士後台控制室</div>
+    <div class="mt-brand">德州小騎士後台控制室</div>
     <button class="hamburger-btn" id="hamburger-btn" onclick="toggleMobileMenu()" aria-label="開啟選單">
       <span></span><span></span><span></span>
     </button>
@@ -606,8 +632,9 @@
           <div class="toolbar-group">
             <select id="act-select" class="toolbar-item" onchange="fetchData()"></select>
             
-            <div class="date-filter-box">
-              <input type="date" id="date-filter" onchange="updateDashboardStats()" title="篩選特定日期的核銷紀錄">
+            <div class="date-filter-box" id="date-filter-box">
+              <input type="date" id="date-filter" onchange="updateDashboardStats()" oninput="toggleDatePlaceholder()" title="篩選特定日期的核銷紀錄">
+              <span class="date-ph" id="date-ph">📅 年/月/日</span>
               <button onclick="clearDateFilter()">✖ 清除篩選</button>
             </div>
           </div>
@@ -643,16 +670,16 @@
 
         <div class="charts-wrapper">
           <div class="chart-box">
-            <h3>🏆 各門市核銷分佈</h3>
-            <div class="chart-canvas"><canvas id="storeChart"></canvas></div>
+            <h3 class="chart-toggle" onclick="toggleChartBox(this)">🏆 各門市核銷分佈 <i class="fa-solid fa-chevron-down chart-chevron"></i></h3>
+            <div class="chart-content"><div class="chart-canvas"><canvas id="storeChart"></canvas></div></div>
           </div>
           <div class="chart-box">
-            <h3>⚡ 總體兌換狀態</h3>
-            <div class="chart-canvas"><canvas id="statusChart"></canvas></div>
+            <h3 class="chart-toggle" onclick="toggleChartBox(this)">⚡ 總體兌換狀態 <i class="fa-solid fa-chevron-down chart-chevron"></i></h3>
+            <div class="chart-content"><div class="chart-canvas"><canvas id="statusChart"></canvas></div></div>
           </div>
           <div class="chart-box">
-            <h3>⏰ 尖峰核銷時段</h3>
-            <div class="chart-canvas"><canvas id="timeChart"></canvas></div>
+            <h3 class="chart-toggle" onclick="toggleChartBox(this)">⏰ 尖峰核銷時段 <i class="fa-solid fa-chevron-down chart-chevron"></i></h3>
+            <div class="chart-content"><div class="chart-canvas"><canvas id="timeChart"></canvas></div></div>
           </div>
         </div>
 
@@ -663,7 +690,7 @@
           <input id="search-box" class="search-box" type="text" placeholder="🔍 搜尋號碼或姓名..." oninput="debounceRenderTable()">
         </div>
 
-        <div class="table-container">
+        <div class="table-container" id="dashboard-table-wrap">
           <table id="data-table">
             <thead>
               <tr>
@@ -910,7 +937,6 @@
 
         <div class="config-card" style="border: 2px solid var(--green); background: rgba(63, 191, 143, 0.05);">
           <h2>👑 會員與點數系統總開關</h2>
-          <p class="desc" style="color: var(--text-main);">此開關控制前台 (member.html) 及核銷端 (test_index.html) 是否顯示會員與點數相關功能。關閉時，系統將作為純粹的「電子票夾與核銷工具」運作。</p>
           <div style="display: flex; align-items: center; gap: 15px;">
             <span style="font-weight: bold; font-size: 16px;">系統狀態：</span>
             <div class="toggle-switch active" id="sys-member-toggle" onclick="toggleMemberSystem()"></div>
@@ -960,7 +986,7 @@
 
         <div class="config-card save-cloud-container">
           <h2>💾 同步至資料庫</h2>
-          <button class="btn-primary btn-save-cloud" style="width:100%; font-size:18px; padding: 16px;" onclick="saveConfigToCloud()">💾 儲存所有設定至雲端 (即時生效)</button>
+          <button class="btn-primary btn-save-cloud" style="width:100%; font-size:18px; padding: 16px;" onclick="saveConfigToCloud()">💾 儲存所有設定</button>
         </div>
       </div>
 
@@ -972,11 +998,6 @@
 
         <div class="config-card" style="border: 2px solid var(--green); background: rgba(63, 191, 143, 0.05);">
           <h2>🎁「活動贈品」按鈕總開關</h2>
-          <p class="desc" style="color: var(--text-main);">
-            此開關控制核銷端 (test_index.html) 要不要顯示「🎁 活動贈品」這個模式按鈕。
-            關閉時，店員畫面只會剩下「電子券」跟「實體券」兩個按鈕，更直覺好按——
-            適合沒有在跑活動贈品發放的門市。
-          </p>
           <div style="display: flex; align-items: center; gap: 15px;">
             <span style="font-weight: bold; font-size: 16px;">按鈕狀態：</span>
             <div class="toggle-switch active" id="sys-gift-counter-toggle" onclick="toggleGiftCounter()"></div>
@@ -1033,8 +1054,7 @@
 
         <div class="config-card save-cloud-container">
           <h2>💾 同步至資料庫</h2>
-          <p class="desc">在上方完成所有設定後，點擊下方按鈕，所有設定將立刻寫入 Firebase，全台門市瞬間生效！</p>
-          <button class="btn-primary btn-save-cloud" style="width:100%; font-size:18px; padding: 16px;" onclick="saveConfigToCloud()">💾 儲存所有設定至雲端 (即時生效)</button>
+          <button class="btn-primary btn-save-cloud" style="width:100%; font-size:18px; padding: 16px;" onclick="saveConfigToCloud()">💾 儲存所有設定</button>
         </div>
       </div>
 
@@ -1044,11 +1064,6 @@
         <div class="header">
           <h1>🎫 流水號登記與生成</h1>
         </div>
-        <p class="desc" style="margin:-8px 0 22px;">
-          不管是印刷廠交來的紙本券，還是要電子發送給合作單位（例如抽獎名額），都在這裡把號碼寫進資料庫。
-          <b>沒在這裡建檔過的號碼，門市 POS 一律不給核銷</b>，所以偽造的號碼刷不過。
-          連號適合方便對帳，亂碼＋檢查碼適合會流到店外、有價值的券。
-        </p>
         <div class="config-card">
           <h2>🎫 實體券批次建檔器</h2>
           <p class="desc">自動產生連續的流水號並寫入資料庫。門市 POS 將阻擋「未在此建檔過」的偽造實體券。</p>
@@ -1087,12 +1102,8 @@
 
         <!-- ================= 實體券亂碼流水號生成器 ================= -->
         <div class="config-card">
-          <h2>🔐 流水號生成器（防偽亂碼）</h2>
-          <p class="desc">
-            上面的「批次建檔器」產生的是 <b>A001、A002…</b> 這種連號，優點是方便對帳，缺點是<b>看到一張就能猜出其他張</b>。
-            這裡改用「亂碼 ＋ 檢查碼」：號碼無法推算，而且打錯一個字會被立刻擋下來，適合有價值、會流到店外的券——
-            紙本用「下載 CSV」交給印刷廠，要電子發送（LINE／私訊）給對方就用「顯示全部 QR Code」。
-          </p>
+          <h2>🔐 流水號生成器（防偽）</h2>
+          <p class="desc">亂碼＋檢查碼，猜不出下一組、打錯字會被立刻擋下。紙本用「下載 CSV」，電子發送用「顯示全部 QR Code」。</p>
 
           <div class="form-group">
             <div class="field-block">
@@ -1130,19 +1141,12 @@
 
           <div style="background:#F7F9FC; border:1px solid #E6EAF0; border-radius:12px; padding:14px 16px; margin-bottom:16px; font-size:13px; line-height:1.9; color:#5A6478;">
             <div><b>券號長這樣：</b><span id="gen-sample" class="mono" style="font-size:15px; color:#1A1C24; font-weight:700;">—</span></div>
-            <div style="margin-top:6px;">
-              最後一碼是<b>檢查碼</b>，由前面幾碼算出來。店員輸入時只要打錯一個字、或把相鄰兩碼打顛倒，
-              系統當場就知道是無效券號（實測攔截率 100% / 99.8%），連查資料庫都不用。
-            </div>
-            <div style="margin-top:6px;">
-              字母表刻意拿掉 <b>I、L、O、U</b>：I/L 會跟數字 1 搞混、O 會跟 0 搞混，
-              顧客唸電話報號碼時最容易錯的就是這幾個。店員若把 O 打成 0 系統也會自動修正。
-            </div>
+            <div style="margin-top:6px;">最後一碼是<b>檢查碼</b>，字母表有刻意拿掉 <b>I、L、O、U</b>，以免店員搞混。</div>
           </div>
 
           <div class="form-group" style="gap:10px;">
-            <button id="btn-gen-preview" class="btn-primary" style="flex:1; padding:14px; font-size:15px; background:#8A93A5;" onclick="previewSerials()">👁️ 先產生預覽（不寫入）</button>
-            <button id="btn-gen-run" class="btn-primary" style="flex:1; padding:14px; font-size:15px; background:var(--sidebar-bg);" onclick="runSerialGen()" disabled>🚀 確認寫入資料庫</button>
+            <button id="btn-gen-preview" class="btn-primary" style="flex:1; padding:14px; font-size:15px; background:#8A93A5;" onclick="previewSerials()">👁️ 產生預覽</button>
+            <button id="btn-gen-run" class="btn-primary" style="flex:1; padding:14px; font-size:15px; background:var(--sidebar-bg);" onclick="runSerialGen()" disabled>🚀 寫入資料庫</button>
           </div>
 
           <div id="gen-result" class="result-box" style="display:none;"></div>
@@ -1166,7 +1170,7 @@
 
         <div class="config-card save-cloud-container">
           <h2>💾 同步至資料庫</h2>
-          <button class="btn-primary btn-save-cloud" style="width:100%; font-size:18px; padding: 16px;" onclick="saveConfigToCloud()">💾 儲存所有設定至雲端 (即時生效)</button>
+          <button class="btn-primary btn-save-cloud" style="width:100%; font-size:18px; padding: 16px;" onclick="saveConfigToCloud()">💾 儲存所有設定</button>
         </div>
       </div>
 
@@ -1206,9 +1210,8 @@
             </div>
           </div>
           <p class="desc" style="margin-top:-8px; margin-bottom:20px;">
-            <b>名額上限</b>：抽獎類活動（例：一號餐抽 10 個）務必填寫。額滿後雲端會直接擋下領取，
-            就算通關密語外流也不會超發。贈品類活動可留空，改用門市配額控管。
-            <b style="color:#F0764E;">注意：調高名額可立即生效；若要「重新開放」同一個活動，需請工程師清掉計數。</b>
+            <b>名額上限</b>：抽獎類活動務必填寫，額滿雲端會直接擋下（密語外流也不會超發）。
+            <b style="color:#F0764E;">調高可立即生效，但要重新開放同一活動需請工程師清計數。</b>
           </p>
 
           <!-- 🔥 顧客自助線上領取總開關：跟活動名稱完全脫鉤，不用靠取名字（【實體】前綴）
@@ -1218,12 +1221,7 @@
           <div style="background:#F7F9FB; border:1px dashed #E6EAF0; border-radius:14px; padding:16px 18px; margin-bottom:20px; display:flex; align-items:center; gap:15px;">
             <div style="flex:1;">
               <div style="font-weight:800; font-size:15px;">📱 開放顧客自助線上領取</div>
-              <p class="desc" style="margin:4px 0 0;">
-                關閉後，這個活動<b>不會出現在顧客的 LINE 領券頁面</b>（test_register.html）——
-                適合「只透過後台生成 QR Code 發放、不開放自助領取」的活動，或是同一活動
-                <b>混合</b>「一部分自助領、一部分後台發 QR」的情況，關閉自助領取入口就不用
-                另外設通關密語防止陌生人自己跑來領。
-              </p>
+              <p class="desc" style="margin:4px 0 0;">關閉後不會出現在顧客的 LINE 領券頁面，適合只用後台發 QR Code、或自助＋後台混合發放的活動。</p>
             </div>
             <div class="toggle-switch active" id="new-act-selfclaim-toggle" onclick="toggleNewActSelfClaim()"></div>
           </div>
@@ -1231,10 +1229,7 @@
           <!-- 🔥 新增：活動自動上下架排程 -->
           <div style="background:#F7F9FB; border:1px dashed #E6EAF0; border-radius:14px; padding:16px 18px; margin-bottom:20px;">
             <div style="font-weight:800; font-size:15px; margin-bottom:6px;">🗓️ 自動上下架排程 (選填)</div>
-            <p class="desc" style="margin-bottom:14px;">
-              填了時間之後，這個活動的上架／下架就交給雲端排程接管（每小時整點檢查一次），前台也會自己判斷時間。
-              <b>兩格都留空 = 完全用手動開關控制。</b>
-            </p>
+            <p class="desc" style="margin-bottom:14px;">填了時間後由雲端自動上下架；<b>兩格都留空 = 完全用手動開關控制</b>。</p>
             <div class="form-group" style="margin-bottom:0; align-items:flex-end;">
               <div class="field-block">
                 <label>⬆️ 自動上架時間</label>
@@ -1257,7 +1252,7 @@
 
         <div class="config-card save-cloud-container">
           <h2>💾 同步至資料庫</h2>
-          <button class="btn-primary btn-save-cloud" style="width:100%; font-size:18px; padding: 16px;" onclick="saveConfigToCloud()">💾 儲存所有設定至雲端 (即時生效)</button>
+          <button class="btn-primary btn-save-cloud" style="width:100%; font-size:18px; padding: 16px;" onclick="saveConfigToCloud()">💾 儲存所有設定</button>
         </div>
       </div>
 
@@ -2062,7 +2057,7 @@
         alert("❌ 同步失敗，請檢查網路狀態。");
       } finally {
         saveBtns.forEach(btn => {
-          btn.innerText = "💾 儲存所有設定至雲端 (即時生效)";
+          btn.innerText = "💾 儲存所有設定";
           btn.disabled = false;
         });
       }
@@ -2427,7 +2422,7 @@
           <h3 style="margin-top:0; color:var(--green); font-size:17px;">✅ 已產生 ${list.length} 組券號（尚未寫入資料庫）</h3>
           <p style="font-size:13px; color:#5A6478; line-height:1.8;">
             比對了資料庫既有的 ${existing.size} 筆紀錄，確認沒有重複。<br>
-            下面是前 12 組預覽，請先按「下載 CSV」留底給印刷廠，再按「確認寫入資料庫」。<br>
+            下面是前 12 組預覽，請先按「下載 CSV」留底給印刷廠，再按「寫入資料庫」。<br>
             <b style="color:#C0392B;">⚠️ 亂碼一旦重新產生就是全新的一組，沒有下載就寫入的話，你會不知道自己印了哪些號碼。</b>
           </p>
           <div style="background:#fff; border:1px solid #E6EAF0; border-radius:10px; padding:12px 16px; font-size:14px; line-height:2; letter-spacing:.05em;">
@@ -2445,7 +2440,7 @@
         alert("❌ 產生券號時發生錯誤：" + (e.message || e));
       } finally {
         btn.disabled = false;
-        btn.innerText = "👁️ 先產生預覽（不寫入）";
+        btn.innerText = "👁️ 產生預覽";
       }
     };
 
@@ -2530,7 +2525,7 @@
           btn.innerText = `⏳ 寫入中... ${done}/${generatedSerials.length}`;
         }
 
-        alert(`✅ 完成！已寫入 ${done} 組券號。\n\n這些券要在 POS 端「實體券」模式輸入才能核銷。`);
+        alert(`✅ 完成！已寫入 ${done} 組券號。\n\n直接在 POS 端掃 QR Code 或手動輸入即可核銷。`);
         generatedSerials = [];
         document.getElementById('gen-result').style.display = 'none';
       } catch (e) {
@@ -2538,7 +2533,7 @@
         alert("❌ 寫入失敗：" + (e.message || e));
       } finally {
         btn.disabled = true;   // 寫完就鎖起來，避免同一批被重複寫入
-        btn.innerText = "🚀 確認寫入資料庫";
+        btn.innerText = "🚀 寫入資料庫";
       }
     };
 
@@ -2924,7 +2919,28 @@
 
     window.clearDateFilter = function() {
       document.getElementById('date-filter').value = '';
+      toggleDatePlaceholder();
       updateDashboardStats();
+    };
+
+    /* 手機版（尤其 iOS Safari）空的 type="date" 欄位本身不會顯示任何文字或圖示，
+       所以疊一個假的「📅 年/月/日」提示字上去，有選日期就自動讓開 */
+    window.toggleDatePlaceholder = function() {
+      const hasValue = !!document.getElementById('date-filter').value;
+      document.getElementById('date-filter-box').classList.toggle('has-date', hasValue);
+    };
+
+    /* 手機版圖表手風琴：桌機版 CSS 會強制展開，這裡只影響手機 */
+    window.toggleChartBox = function(el) {
+      const willOpen = !el.classList.contains('open');
+      el.classList.toggle('open', willOpen);
+      if (willOpen) {
+        setTimeout(function () {
+          if (storeChartInstance) storeChartInstance.resize();
+          if (statusChartInstance) statusChartInstance.resize();
+          if (timeChartInstance) timeChartInstance.resize();
+        }, 360);
+      }
     };
 
     let searchTimeout = null;
