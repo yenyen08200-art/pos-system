@@ -2400,38 +2400,196 @@
        這樣不管是複製這張圖傳 LINE、還是印出來，資訊都在同一張裡不會分開。
        QR 本體還是抓 api.qrserver.com 產生，這裡用 fetch 拿 blob 再用
        createImageBitmap 畫到 canvas 上（不會有 canvas 跨網域 taint 的問題）。 */
+    // ---- 畫圖卡用的小工具：圓角矩形／letter-spacing 文字／依寬度自動縮字級 ----
+    function qrCardRoundRect(ctx, x, y, w, h, r) {
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.arcTo(x + w, y, x + w, y + h, r);
+      ctx.arcTo(x + w, y + h, x, y + h, r);
+      ctx.arcTo(x, y + h, x, y, r);
+      ctx.arcTo(x, y, x + w, y, r);
+      ctx.closePath();
+    }
+    function qrCardSpacedWidth(ctx, text, spacing) {
+      return [...text].reduce((w, ch) => w + ctx.measureText(ch).width + spacing, -spacing);
+    }
+    function qrCardFillSpacedText(ctx, text, cx, y, spacing) {
+      const totalW = qrCardSpacedWidth(ctx, text, spacing);
+      let x = cx - totalW / 2;
+      const prevAlign = ctx.textAlign;
+      ctx.textAlign = 'left';
+      [...text].forEach(ch => { ctx.fillText(ch, x, y); x += ctx.measureText(ch).width + spacing; });
+      ctx.textAlign = prevAlign;
+    }
+    function qrCardFitFont(ctx, text, weight, family, maxSize, minSize, maxWidth) {
+      let size = maxSize;
+      ctx.font = `${weight} ${size}px ${family}`;
+      while (size > minSize && ctx.measureText(text).width > maxWidth) {
+        size -= 1;
+        ctx.font = `${weight} ${size}px ${family}`;
+      }
+      return size;
+    }
+
+    /* 比照 test_register.html 顧客實際看到的「電子領卷」票卡風格
+       （米金色系、brand 分隔線、印章徽章、白卡 QR 框、資訊列表），
+       讓這張圖跟顧客熟悉的兌換券長得像同一套系統出來的東西，
+       不是隨手產生的黑白條碼。 */
     async function buildQrCardBlob(s) {
       const qrResp = await fetch(serialQrUrl(s.plain));
       if (!qrResp.ok) throw new Error('QR 圖片下載失敗 HTTP ' + qrResp.status);
       const qrBitmap = await createImageBitmap(await qrResp.blob());
 
-      const W = 380, qrSize = 260, qrTop = 118;
-      const H = qrTop + qrSize + 96;
+      const FONT = '"Noto Sans TC","Microsoft JhengHei",sans-serif';
+      const INK = '#2c302c', INK_SOFT = '#6f766e', BRASS = '#b9915a', BRASS_DEEP = '#8d6c3c';
+
+      const W = 420, margin = 16;
+      const glassX = margin, glassW = W - margin * 2;
+      const padX = 30, innerX = glassX + padX, innerW = glassW - padX * 2, cx = W / 2;
+
+      const H = 840;
       const canvas = document.createElement('canvas');
       canvas.width = W; canvas.height = H;
       const ctx = canvas.getContext('2d');
 
-      ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, W, H);
+      // 底層米金＋淡藍的柔和漸層，跟 test_register.html 的頁面底色同一個調性
+      const bg = ctx.createLinearGradient(0, 0, W, H);
+      bg.addColorStop(0, '#dce7f3');
+      bg.addColorStop(1, '#fdf2dc');
+      ctx.fillStyle = bg;
+      ctx.fillRect(0, 0, W, H);
+
+      // 白色玻璃卡片本體（畫陰影＋卡片，再用裁切限制後續內容不會畫出圓角外）
+      ctx.save();
+      ctx.shadowColor = 'rgba(35,42,35,.28)';
+      ctx.shadowBlur = 36;
+      ctx.shadowOffsetY = 14;
+      ctx.fillStyle = 'rgba(255,255,255,.92)';
+      qrCardRoundRect(ctx, glassX, margin, glassW, H - margin * 2, 30);
+      ctx.fill();
+      ctx.restore();
+
+      ctx.save();
+      qrCardRoundRect(ctx, glassX, margin, glassW, H - margin * 2, 30);
+      ctx.clip();
       ctx.textAlign = 'center';
 
-      ctx.fillStyle = '#1A1C24';
-      ctx.font = 'bold 20px "Microsoft JhengHei", sans-serif';
-      ctx.fillText('德州小騎士 · ' + generatedMeta.actName, W / 2, 34);
+      let y = margin + 34;
 
-      ctx.font = '15px "Microsoft JhengHei", sans-serif';
-      ctx.fillStyle = '#5A6478';
-      ctx.fillText('兌換品項：' + generatedMeta.gift, W / 2, 62);
-      ctx.fillText('使用期限：' + generatedMeta.expire, W / 2, 84);
+      // 頂部提示條：解決「不知道去哪換」
+      const noticeH = 40;
+      ctx.fillStyle = 'rgba(185,145,90,.16)';
+      qrCardRoundRect(ctx, innerX, y - 26, innerW, noticeH, 14);
+      ctx.fill();
+      ctx.fillStyle = BRASS_DEEP;
+      ctx.font = `700 12.5px ${FONT}`;
+      ctx.fillText('📌 電子兌換券・請至德州小騎士門市出示', cx, y);
+      y += noticeH + 26;
 
-      ctx.drawImage(qrBitmap, (W - qrSize) / 2, qrTop, qrSize, qrSize);
+      // 品牌小標：── 德州小騎士 ──
+      ctx.font = `600 11px ${FONT}`;
+      ctx.fillStyle = BRASS_DEEP;
+      const markText = '德州小騎士';
+      const markSpacing = 3;
+      const markW = qrCardSpacedWidth(ctx, markText, markSpacing);
+      ctx.strokeStyle = BRASS; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(cx - markW / 2 - 36, y - 4); ctx.lineTo(cx - markW / 2 - 10, y - 4); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(cx + markW / 2 + 10, y - 4); ctx.lineTo(cx + markW / 2 + 36, y - 4); ctx.stroke();
+      qrCardFillSpacedText(ctx, markText, cx, y, markSpacing);
+      y += 40;
 
-      ctx.font = 'bold 20px monospace';
-      ctx.fillStyle = '#1A1C24';
-      ctx.fillText(s.display, W / 2, qrTop + qrSize + 34);
+      // 活動名稱：比照 h1 的金色漸層大標題，解決「不知道是什麼活動」
+      const titleSize = qrCardFitFont(ctx, generatedMeta.actName, '800', FONT, 25, 16, innerW - 10);
+      const titleGrad = ctx.createLinearGradient(cx - 80, 0, cx + 80, 0);
+      titleGrad.addColorStop(0, '#dcbb84');
+      titleGrad.addColorStop(1, BRASS_DEEP);
+      ctx.fillStyle = titleGrad;
+      ctx.font = `800 ${titleSize}px ${FONT}`;
+      ctx.fillText(generatedMeta.actName, cx, y);
+      y += 42;
 
-      ctx.font = '13px "Microsoft JhengHei", sans-serif';
-      ctx.fillStyle = '#8A93A5';
-      ctx.fillText('請至門市出示此圖兌換；掃描失敗請跟店員報上方序號', W / 2, qrTop + qrSize + 60);
+      // 印章徽章
+      ctx.font = `700 12px ${FONT}`;
+      const stampText = '【 專屬電子兌換券 】';
+      const stampW = ctx.measureText(stampText).width + 40;
+      ctx.strokeStyle = 'rgba(185,145,90,.55)'; ctx.lineWidth = 1;
+      ctx.fillStyle = 'rgba(255,255,255,.6)';
+      qrCardRoundRect(ctx, cx - stampW / 2, y - 20, stampW, 34, 17);
+      ctx.fill(); ctx.stroke();
+      ctx.fillStyle = BRASS_DEEP;
+      ctx.fillText(stampText, cx, y + 3);
+      y += 54;
+
+      // QR 白卡框（帶陰影，比照 .qr-box）
+      const qrSize = 220, qrPad = 18, qrBoxSize = qrSize + qrPad * 2;
+      ctx.save();
+      ctx.shadowColor = 'rgba(35,42,35,.35)';
+      ctx.shadowBlur = 26;
+      ctx.shadowOffsetY = 10;
+      ctx.fillStyle = '#ffffff';
+      qrCardRoundRect(ctx, cx - qrBoxSize / 2, y, qrBoxSize, qrBoxSize, 22);
+      ctx.fill();
+      ctx.restore();
+      ctx.drawImage(qrBitmap, cx - qrSize / 2, y + qrPad, qrSize, qrSize);
+      y += qrBoxSize + 28;
+
+      // 分隔提示文字（比照 .highlight-text，底下帶一條分隔線）
+      ctx.font = `700 14px ${FONT}`;
+      ctx.fillStyle = INK;
+      ctx.fillText('至德州小騎士門市出示兌換', cx, y);
+      y += 16;
+      ctx.strokeStyle = 'rgba(0,0,0,.08)'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(innerX, y); ctx.lineTo(innerX + innerW, y); ctx.stroke();
+      y += 34;
+
+      // 資訊列表（比照 .info-list / .info-row）：解決「掃不到要打哪裡」
+      const rows = [
+        ['🎁 兌換品項', generatedMeta.gift, BRASS_DEEP],
+        ['⏳ 使用期限', generatedMeta.expire, INK],
+        ['🔑 兌換序號', s.display, BRASS_DEEP]
+      ];
+      const rowH = 40;
+      const panelH = rows.length * rowH + 20;
+      ctx.fillStyle = 'rgba(255,255,255,.55)';
+      ctx.strokeStyle = 'rgba(0,0,0,.06)'; ctx.lineWidth = 1;
+      qrCardRoundRect(ctx, innerX, y, innerW, panelH, 18);
+      ctx.fill(); ctx.stroke();
+
+      let ry = y + 10;
+      rows.forEach(([label, val, color], i) => {
+        ctx.textAlign = 'left';
+        ctx.font = `600 10.5px ${FONT}`;
+        ctx.fillStyle = INK_SOFT;
+        ctx.fillText(label, innerX + 16, ry + rowH / 2 + 4);
+
+        ctx.textAlign = 'right';
+        const valMaxW = innerW - 32 - ctx.measureText(label).width - 20;
+        const valSize = qrCardFitFont(ctx, val, '700', label.includes('序號') ? 'monospace' : FONT, 14.5, 11, valMaxW);
+        ctx.font = `700 ${valSize}px ${label.includes('序號') ? 'monospace' : FONT}`;
+        ctx.fillStyle = color;
+        ctx.fillText(val, innerX + innerW - 16, ry + rowH / 2 + 5);
+
+        if (i < rows.length - 1) {
+          ctx.strokeStyle = 'rgba(0,0,0,.06)';
+          ctx.beginPath(); ctx.moveTo(innerX + 14, ry + rowH); ctx.lineTo(innerX + innerW - 14, ry + rowH); ctx.stroke();
+        }
+        ry += rowH;
+      });
+      y += panelH + 30;
+
+      // 掃描失敗的備援說明
+      ctx.textAlign = 'center';
+      ctx.font = `600 11.5px ${FONT}`;
+      ctx.fillStyle = INK_SOFT;
+      ctx.fillText('掃描失敗請跟店員報上方「兌換序號」即可核銷', cx, y);
+      y += 26;
+
+      // 品牌 footnote
+      ctx.font = `600 10px ${FONT}`;
+      ctx.fillStyle = 'rgba(111,118,110,.75)';
+      qrCardFillSpacedText(ctx, 'TEXAS CHICK · SINCE 1987', cx, y, 2);
+
+      ctx.restore(); // 結束裁切
 
       return new Promise((resolve, reject) => {
         canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error('圖卡產生失敗')), 'image/png');
@@ -2526,6 +2684,7 @@
             <button class="btn-primary" style="background:#3FBF8F;" onclick="downloadSerialCsv()">⬇️ 下載 CSV（給印刷廠）</button>
             <button class="btn-primary" style="background:#4A90D9;" onclick="showAllSerialQr()">📱 顯示全部 QR Code（電子發送用）</button>
             <button id="btn-zip-qr" class="btn-primary" style="background:#8E5AE2;" onclick="downloadSerialQrZip()">📦 打包下載全部 QR Code（ZIP）</button>
+            <button class="btn-primary" style="background:#8A93A5;" onclick="showAllSerialQrPlain()">🖨️ 顯示純 QR Code（無文字，供印刷用）</button>
           </div>
           <div id="serial-qr-area"></div>
         `;
@@ -2578,6 +2737,26 @@
         <p class="desc" style="margin-top:16px;">
           圖卡已經把活動名稱、兌換品項、序號都印在同一張圖上了。
           在圖片上「滑鼠右鍵 ➜ 複製圖片」，就能直接貼到 LINE／訊息傳給對方。
+        </p>
+        <div class="serial-qr-grid">${cards}</div>
+      `;
+    };
+
+    /* 保留純 QR Code（不帶文字圖卡）：以後如果要印在實體券紙本上，
+       印刷廠只需要乾淨的 QR 本體，不需要（也不該有）電子圖卡上那些文字排版。 */
+    window.showAllSerialQrPlain = function() {
+      if (!generatedSerials.length) return alert("⚠️ 尚未產生券號。");
+      const area = document.getElementById('serial-qr-area');
+      const cards = generatedSerials.map((s) => `
+        <div class="serial-qr-card">
+          <img src="${serialQrUrl(s.plain)}" alt="QR Code" loading="lazy">
+          <div class="mono">${esc(s.display)}</div>
+        </div>
+      `).join('');
+      area.innerHTML = `
+        <p class="desc" style="margin-top:16px;">
+          這是不帶文字排版的純 QR Code，供未來印在實體券紙本上使用。
+          在圖片上「滑鼠右鍵 ➜ 複製圖片」即可。
         </p>
         <div class="serial-qr-grid">${cards}</div>
       `;
