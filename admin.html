@@ -1493,9 +1493,13 @@
         let cleanHtml = actSelectHtml.replace(/<option value="ALL_OVERVIEW">🌐 總覽 \(所有活動\)<\/option>/g, '');
         if(document.getElementById('lottery-act')) document.getElementById('lottery-act').innerHTML = cleanHtml;
         if(document.getElementById('manual-act')) document.getElementById('manual-act').innerHTML = cleanHtml;
-        if(document.getElementById('batch-act')) document.getElementById('batch-act').innerHTML = cleanHtml;
+        if(document.getElementById('batch-act')) {
+          document.getElementById('batch-act').innerHTML = cleanHtml;
+          autofillActGift('batch-act', 'batch-gift');   // 換頁時選單預設選到第一項，不會觸發 onchange，這裡手動補一次
+        }
         if(document.getElementById('gen-act')) {
           document.getElementById('gen-act').innerHTML = cleanHtml;
+          autofillActGift('gen-act', 'gen-gift');
           updateSerialSample();          // 順便刷新券號範例
         }
       }
