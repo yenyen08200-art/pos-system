@@ -1718,11 +1718,23 @@ body.mode-physical-active .sc-tick { stroke: #FF6B35; filter: drop-shadow(0 0 10
     return sum % SERIAL_BASE === 0;
   }
 
+  /* admin.html 產生券號時，檢查碼只算「本體＋檢查碼」，不含前綴（見 makeSerial()），
+     但店員掃到／打進來的是「前綴＋本體＋檢查碼」的完整字串。前綴最長 4 碼（生成器欄位
+     maxlength="4"），所以驗證時要試著把前面 0~4 碼當前綴去掉，只要其中一種切法驗得過
+     就算合法——否則帶前綴的合法券每一張都會被誤判成格式錯誤。 */
+  function luhnLooksValidAnyPrefix(full) {
+    const maxPrefix = Math.min(4, full.length - 5);
+    for (let p = 0; p <= maxPrefix; p++) {
+      if (luhnLooksValid(full.slice(p))) return true;
+    }
+    return false;
+  }
+
   /** 純數字（手機號碼）或太短（舊式連號券常見長度）都不驗，避免誤判 */
   function maybeWarnBadSerial(input) {
     if (!input || /^[0-9]+$/.test(input)) return;   // 純數字：可能是手機號碼，不驗
     if (input.length < 7) return;                    // 太短：可能是舊式連號券，不驗
-    if (!luhnLooksValid(input)) {
+    if (!luhnLooksValidAnyPrefix(input)) {
       showToast("⚠️ 這組流水號格式看起來不太對，確認一下有沒有打錯字或看反？（仍會照樣查詢）", "error");
     }
   }
