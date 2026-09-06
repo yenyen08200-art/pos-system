@@ -1202,7 +1202,9 @@
             </div>
             <div class="field-block">
               <label>限定門市</label>
-              <input type="text" id="new-act-stores" placeholder="預設 ALL" value="ALL">
+              <select id="new-act-stores">
+                <option value="ALL">🌐 ALL（不限門市）</option>
+              </select>
             </div>
             <div class="field-block">
               <label>🎟️ 名額上限 (選填)</label>
@@ -1512,7 +1514,14 @@
 
       let storeHtml = globalStoreList.map(s => `<option value="${s}">${s}</option>`).join('');
       if(document.getElementById('inv-store')) document.getElementById('inv-store').innerHTML = storeHtml;
-      
+
+      const actStoresEl = document.getElementById('new-act-stores');
+      if (actStoresEl) {
+        const keepVal = actStoresEl.value || 'ALL';
+        actStoresEl.innerHTML = `<option value="ALL">🌐 ALL（不限門市）</option>` + storeHtml;
+        actStoresEl.value = (keepVal === 'ALL' || globalStoreList.includes(keepVal)) ? keepVal : 'ALL';
+      }
+
       let invActHtml = globalGiftList.map(g => `<option value="${g}">${g}</option>`).join('');
       if(document.getElementById('inv-act')) document.getElementById('inv-act').innerHTML = invActHtml;
       
@@ -1868,7 +1877,7 @@
       const cfg = globalPosConfig[actName] || {};
       document.getElementById('new-act-gift').value = cfg.gift === "依實體券面標示發放" ? "" : (cfg.gift || "");
       document.getElementById('new-act-expire').value = cfg.expireDate === "無特別限制" ? "" : (cfg.expireDate || "");
-      document.getElementById('new-act-stores').value = Array.isArray(cfg.stores) ? cfg.stores.join(', ') : (cfg.stores || "ALL");
+      document.getElementById('new-act-stores').value = Array.isArray(cfg.stores) ? (cfg.stores[0] || "ALL") : (cfg.stores || "ALL");
       document.getElementById('new-act-quota').value = Math.floor(Number(cfg.quota) || 0) > 0 ? Math.floor(Number(cfg.quota)) : "";
       document.getElementById('new-act-start').value = cfg.startAt || "";
       document.getElementById('new-act-end').value = cfg.endAt || "";
