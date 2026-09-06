@@ -8,6 +8,7 @@
   <!-- 引入套件 -->
   <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
   <style>
@@ -2462,6 +2463,7 @@
           <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:14px;">
             <button class="btn-primary" style="background:#3FBF8F;" onclick="downloadSerialCsv()">⬇️ 下載 CSV（給印刷廠）</button>
             <button class="btn-primary" style="background:#4A90D9;" onclick="showAllSerialQr()">📱 顯示全部 QR Code（電子發送用）</button>
+            <button id="btn-zip-qr" class="btn-primary" style="background:#8E5AE2;" onclick="downloadSerialQrZip()">📦 打包下載全部 QR Code（ZIP）</button>
           </div>
           <div id="serial-qr-area"></div>
         `;
@@ -2497,6 +2499,62 @@
         </p>
         <div class="serial-qr-grid">${cards}</div>
       `;
+    };
+
+    /* 一次要發幾十~上百組券號的電子 QR Code 時（例如交給合作單位自己去分發），
+       一張一張右鍵複製圖片太累人，改成把所有 QR 圖檔打包成一個 ZIP 直接下載，
+       檔名用券號命名，對方收到解壓縮就能對應「誰拿哪一組」。
+       用小批次併發抓圖（一次 6 張），避免一次發出上百個請求被伺服器擋掉。 */
+    window.downloadSerialQrZip = async function() {
+      if (!generatedSerials.length) return alert("⚠️ 尚未產生券號。");
+      const btn = document.getElementById('btn-zip-qr');
+      const total = generatedSerials.length;
+      const originalText = btn.innerText;
+      btn.disabled = true;
+      try {
+        const zip = new JSZip();
+        let done = 0, failed = 0;
+        let idx = 0;
+        async function worker() {
+          while (idx < generatedSerials.length) {
+            const s = generatedSerials[idx++];
+            try {
+              const res = await fetch(serialQrUrl(s.plain));
+              if (!res.ok) throw new Error('HTTP ' + res.status);
+              zip.file(`${s.plain}.png`, await res.blob());
+            } catch (e) {
+              console.error('QR 圖片下載失敗：' + s.plain, e);
+              failed++;
+            }
+            done++;
+            btn.innerText = `📦 打包中…（${done}/${total}）`;
+          }
+        }
+        await Promise.all(Array.from({ length: Math.min(6, total) }, worker));
+
+        if (done === failed) throw new Error('所有 QR 圖片都下載失敗，請檢查網路連線');
+
+        btn.innerText = '📦 正在壓縮成 ZIP…';
+        const zipBlob = await zip.generateAsync({ type: 'blob' });
+
+        const act = document.getElementById('gen-act').value || '券號';
+        const url = URL.createObjectURL(zipBlob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${act}_QRCode_共${total}張.zip`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+
+        if (failed > 0) alert(`⚠️ 已下載 ZIP，但有 ${failed} 張圖片抓取失敗，請檢查是否需要補發。`);
+      } catch (e) {
+        console.error(e);
+        alert("❌ 打包失敗：" + (e.message || e));
+      } finally {
+        btn.disabled = false;
+        btn.innerText = originalText;
+      }
     };
 
     window.downloadSerialCsv = function() {
