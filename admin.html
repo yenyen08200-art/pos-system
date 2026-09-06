@@ -1109,7 +1109,7 @@
           <div class="form-group">
             <div class="field-block">
               <label>🎯 綁定實體券活動</label>
-              <select id="gen-act" onchange="autofillActGift('gen-act','gen-gift')"></select>
+              <select id="gen-act" onchange="autofillActGift('gen-act','gen-gift','gen-expire')"></select>
             </div>
             <div class="field-block">
               <label>🎁 兌換品項設定</label>
@@ -1136,7 +1136,7 @@
             </div>
             <div class="field-block" style="flex:0.6;">
               <label>⏳ 使用期限</label>
-              <input type="text" id="gen-expire" value="依紙本券面為主" placeholder="例：2026/12/31">
+              <input type="text" id="gen-expire" value="依紙本券面為主" placeholder="例：2026/12/31" oninput="this.dataset.autofilled=''">
             </div>
           </div>
 
@@ -1500,7 +1500,7 @@
         }
         if(document.getElementById('gen-act')) {
           document.getElementById('gen-act').innerHTML = cleanHtml;
-          autofillActGift('gen-act', 'gen-gift');
+          autofillActGift('gen-act', 'gen-gift', 'gen-expire');
           updateSerialSample();          // 順便刷新券號範例
         }
       }
@@ -2366,21 +2366,29 @@
       };
     }
 
-    /* 選了活動之後，自動把圖一（行銷活動管理）設定的贈品帶進來，
-       不用兩邊各打一次。切換不同活動時要能跟著換贈品，所以用
-       data-autofilled 標記「這格目前的內容是自動帶的、不是手打的」——
-       只有空白／預設字樣／上次也是自動帶的情況才會覆蓋，
-       使用者自己打過字之後（oninput 會清掉這個標記）就不再覆蓋。 */
-    window.autofillActGift = function(actSelId, giftInputId) {
-      const act = document.getElementById(actSelId).value;
-      const giftEl = document.getElementById(giftInputId);
-      if (!giftEl) return;
-      const cur = giftEl.value.trim();
-      const wasAutofilled = giftEl.dataset.autofilled === '1';
-      if (cur !== '' && cur !== '依實體券面標示發放' && !wasAutofilled) return;
-      const actGift = globalPosConfig[act]?.gift;
-      giftEl.value = (actGift && actGift !== '依實體券面標示發放') ? actGift : '依實體券面標示發放';
-      giftEl.dataset.autofilled = '1';
+    /* 選了活動之後，自動把圖一（行銷活動管理）設定的贈品／使用期限帶進來，
+       不用兩邊各打一次。切換不同活動時要能跟著換，所以用 data-autofilled
+       標記「這格目前的內容是自動帶的、不是手打的」——只有空白／預設字樣／
+       上次也是自動帶的情況才會覆蓋，使用者自己打過字之後
+       （oninput 會清掉這個標記）就不再覆蓋。 */
+    function autofillOneField(inputId, newVal, sentinel) {
+      const el = document.getElementById(inputId);
+      if (!el) return;
+      const cur = el.value.trim();
+      const wasAutofilled = el.dataset.autofilled === '1';
+      if (cur !== '' && cur !== sentinel && !wasAutofilled) return;
+      el.value = (newVal && newVal !== sentinel) ? newVal : sentinel;
+      el.dataset.autofilled = '1';
+    }
+
+    window.autofillActGift = function(actSelId, giftInputId, expireInputId) {
+      const cfg = globalPosConfig[document.getElementById(actSelId).value] || {};
+      autofillOneField(giftInputId, cfg.gift, '依實體券面標示發放');
+      if (expireInputId) {
+        // 活動本身沒設期限（顯示「無特別限制」）時，維持券的預設字樣即可
+        const actExpire = (cfg.expireDate && cfg.expireDate !== '無特別限制') ? cfg.expireDate : null;
+        autofillOneField(expireInputId, actExpire, '依紙本券面為主');
+      }
     };
 
     let generatedSerials = [];   // 預覽產生的結果，按「確認寫入」時才真的送出
